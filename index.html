@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Calcio a Carte</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #0a0a15;
+    color: #eee;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    transition: all 0.4s ease;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 14px;
+    background: #16213e;
+    border-bottom: 2px solid #0f3460;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+    min-height: 44px;
+  }
+  .risultato-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .risultato {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    letter-spacing: 2px;
+  }
+  .risultato .tu { color: #4dabf7; }
+  .risultato .cpu { color: #ff6b6b; }
+  .risultato .sep { color: #fff; margin: 0 10px; }
+  .minuto {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffd700;
+    background: rgba(0,0,0,0.5);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,215,0,0.4);
+    min-width: 44px;
+    text-align: center;
+  }
+  .info-top {
+    position: absolute;
+    right: 84px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    text-align: right;
+    line-height: 1.3;
+    color: #aaa;
+  }
+  .info-top span { color: #ffd700; font-weight: bold; }
+  .topbar-buttons {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 4px;
+  }
+  .btn-icona {
+    width: 34px; height: 34px;
+    background: #0f3460;
+    color: #fff;
+    border: 2px solid #4dabf7;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
+  .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ============ CAMPO ============ */
+  .campo-wrapper {
+    flex: 0 0 40vh;
+    position: relative;
+    background: #1a5a28;
+    overflow: hidden;
+    transition: flex 0.4s ease;
+  }
+  .app.fase-animazione .campo-wrapper { flex: 1; }
+  .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
+
+  .campo {
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 60px,
+        rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 120px),
+      linear-gradient(180deg, #2d8a3e 0%, #3aa04a 50%, #2d8a3e 100%);
+    transform: rotateX(6deg);
+    transform-origin: center bottom;
+    border: 3px solid rgba(255,255,255,0.85);
+    margin: 10px 16px;
+    border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 0 80px rgba(0,0,0,0.3);
+  }
+
+  .righe-campo { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .linea-centrocampo {
+    position: absolute; left: 50%; top: 6%; bottom: 6%;
+    width: 2px; background: rgba(255,255,255,0.7);
+    transform: translateX(-50%);
+  }
+  .cerchio-centrocampo {
+    position: absolute; left: 50%; top: 50%;
+    width: 20%; aspect-ratio: 1;
+    border: 2px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .punto-centrocampo {
+    position: absolute; left: 50%; top: 50%;
+    width: 6px; height: 6px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .area-penale {
+    position: absolute; top: 50%;
+    width: 14%; height: 60%;
+    border: 2px solid rgba(255,255,255,0.7);
+    transform: translateY(-50%);
+  }
+  .area-penale.sinistra { left: 0; border-left: none; border-radius: 0 6px 6px 0; }
+  .area-penale.destra { right: 0; border-right: none; border-radius: 6px 0 0 6px; }
+  .area-piccola {
+    position: absolute; top: 50%;
+    width: 6%; height: 32%;
+    border: 2px solid rgba(255,255,255,0.6);
+    transform: translateY(-50%);
+  }
+  .area-piccola.sinistra { left: 0; border-left: none; border-radius: 0 4px 4px 0; }
+  .area-piccola.destra { right: 0; border-right: none; border-radius: 4px 0 0 4px; }
+  .porta {
+    position: absolute; top: 50%;
+    width: 2%; height: 14%;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid #fff;
+    transform: translateY(-50%);
+    box-shadow: 0 0 20px rgba(255,255,255,0.6);
+  }
+  .porta.sinistra { left: -4px; border-radius: 0 4px 4px 0; }
+  .porta.destra { right: -4px; border-radius: 4px 0 0 4px; }
+
+  .zone { display: flex; width: 100%; height: 100%; position: relative; z-index: 2; }
+  .zona {
+    flex: 1;
+    border-right: 1px dashed rgba(255,255,255,0.2);
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 2px;
+  }
+  .zona:last-child { border-right: none; }
+  .zona-portiere { flex: 0.5; }
+  .zona-label {
+    position: absolute;
+    bottom: 2px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: rgba(255,215,0,0.8);
+    font-weight: bold;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+  }
+
+  .lato-squadra {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    position: relative;
+  }
+  .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.2); padding-right: 4px; }
+  .lato-squadra.cpu { padding-left: 2px; }
+  .zona-portiere .lato-squadra.tu { border-right: none; padding-right: 0; }
+
+  .pedina-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    position: relative;
+  }
+  .info-laterale {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    line-height: 1.1;
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+  }
+  .info-laterale.tu { text-align: right; }
+  .info-laterale.cpu { text-align: left; }
+  .info-laterale .stamina-txt { color: #4ade80; }
+  .info-laterale .stamina-txt.medio { color: #fbbf24; }
+  .info-laterale .stamina-txt.basso { color: #ef4444; }
+  .info-laterale .falli-txt { color: #ff8a8a; }
+  .info-laterale .cartellini { font-size: 11px; }
+
+  /* ============ PEDINE con SPRITE ============ */
+  .pedina {
+    position: relative;
+    width: 36px;
+    height: 44px;
+    transition: transform 0.2s, filter 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Sprite: usa lo sprite sheet come background */
+  .sprite-giocatore {
+    width: 36px;
+    height: 44px;
+    background-image: url('sprite.png');
+    background-repeat: no-repeat;
+    /* Lo sprite è 800x800, con 6 righe. Ogni riga ~133px.
+       La prima colonna (IDLE frame 1) è a 0,0 con size ~80x80.
+       Adattiamo per mostrare solo il primo frame IDLE */
+    background-size: 800px 800px;
+    background-position: -4px -4px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transition: transform 0.2s;
+  }
+  
+  /* Fallback: se lo sprite non carica, mostra la pedina CSS */
+  .pedina-css {
+    position: absolute;
+    inset: 0;
+    display: none; /* mostrato via JS se sprite fallisce */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .pedina-css .testa {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+  }
+  .pedina-css .corpo {
+    width: 16px; height: 16px;
+    border-radius: 3px 3px 4px 4px;
+    border: 1.5px solid #fff;
+    margin-top: -1px;
+  }
+  .pedina-css .gambe { display: flex; gap: 2px; margin-top: -1px; }
+  .pedina-css .gamba {
+    width: 5px; height: 10px;
+    border-radius: 0 0 2px 2px;
+    border: 1.5px solid #fff;
+    border-top: none;
+  }
+  .pedina-css.tu .testa, .pedina-css.tu .corpo, .pedina-css.tu .gamba {
+    background: radial-gradient(circle at 30% 30%, #6bb6ff, #2563eb);
+  }
+  .pedina-css.cpu .testa, .pedina-css.cpu .corpo, .pedina-css.cpu .gamba {
+    background: radial-gradient(circle at 30% 30%, #ff8a8a, #dc2626);
+  }
+  .pedina-css.portiere .testa, .pedina-css.portiere .corpo, .pedina-css.portiere .gamba {
+    background: radial-gradient(circle at 30% 30%, #ffe066, #f59f00);
+  }
+
+  /* Filtri colore per le squadre (applicati allo sprite) */
+  .sprite-tu { filter: hue-rotate(0deg) saturate(1.2); } /* blu (default) */
+  .sprite-cpu { filter: hue-rotate(160deg) saturate(1.5); } /* rosso */
+  
+  /* Varianti colore */
+  .colore-blu { filter: hue-rotate(0deg) saturate(1.2); }
+  .colore-rosso { filter: hue-rotate(160deg) saturate(1.5); }
+  .colore-giallo { filter: hue-rotate(60deg) saturate(2) brightness(1.3); }
+  .colore-verde { filter: hue-rotate(90deg) saturate(1.3); }
+  .colore-arancio { filter: hue-rotate(30deg) saturate(1.8); }
+
+  .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
+  .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
+  .pedina.ammonito { 
+    box-shadow: 0 0 0 2px #ffd700;
+    border-radius: 4px;
+  }
+  .pedina.ammonito::after {
+    content: '🟨';
+    position: absolute;
+    top: -6px; right: -6px;
+    font-size: 12px;
+    z-index: 5;
+  }
+  .pedina.espulso {
+    filter: grayscale(1) brightness(0.4) !important;
+    opacity: 0.5;
+  }
+  .pedina.espulso::after {
+    content: '🟥';
+    position: absolute;
+    top: -6px; right: -6px;
+    font-size: 12px;
+  }
+
+  .pedina .stamina-bar {
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 100%; height: 3px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .pedina .stamina-fill {
+    height: 100%; background: #4ade80;
+    transition: width 0.3s;
+  }
+  .pedina .stamina-fill.medio { background: #fbbf24; }
+  .pedina .stamina-fill.basso { background: #ef4444; }
+
+  /* Palla attaccata ai piedi */
+  .pedina .palla-attaccata {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 16px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    border-radius: 50%;
+    border: 2px solid #222;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700;
+    z-index: 10;
+    pointer-events: none;
+    animation: pallaAttaccata 1.2s infinite;
+  }
+  .pedina .palla-attaccata::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: radial-gradient(circle at 30% 30%, #333, #000);
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+  @keyframes pallaAttaccata {
+    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700; }
+    50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 18px rgba(255,215,0,1), 0 0 8px #ffd700; }
+  }
+
+  .palla-animata {
+    position: absolute;
+    width: 20px; height: 20px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    border-radius: 50%;
+    border: 2px solid #222;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7), 0 0 6px #ffd700;
+    z-index: 60;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    will-change: left, top;
+    display: none;
+  }
+  .palla-animata::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: radial-gradient(circle at 30% 30%, #333, #000);
+    border-radius: 50%;
+    opacity: 0.6;
+  }
+
+  .flash-vincitore {
+    position: absolute;
+    inset: 0;
+    z-index: 55;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
+  .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
+  .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
+  @keyframes flash {
+    0% { opacity: 0.95; }
+    100% { opacity: 0; }
+  }
+
+  /* ============ PANCHINA ============ */
+  .panchina {
+    background: #1a1a2e;
+    border-top: 2px solid #0f3460;
+    border-bottom: 2px solid #0f3460;
+    padding: 3px 8px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    min-height: 52px;
+  }
+  .panchina-titolo {
+    font-size: 9px;
+    color: #ffd700;
+    font-weight: bold;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 2px;
+  }
+  .panchina-giocatore {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
+  .panchina-giocatore .pedina {
+    transform: scale(0.7);
+    transform-origin: center bottom;
+    height: 30px;
+    width: 26px;
+  }
+  .panchina-giocatore .sprite-giocatore {
+    width: 26px;
+    height: 32px;
+    background-size: 580px 580px;
+    background-position: -3px -3px;
+  }
+  .panchina-giocatore .panchina-nome {
+    font-size: 8px;
+    color: #ccc;
+    margin-top: 2px;
+    font-weight: bold;
+  }
+  .panchina-giocatore.tu .panchina-nome { color: #6bb6ff; }
+  .panchina-giocatore.cpu .panchina-nome { color: #ff8a8a; }
+
+  /* ============ PANNELLO CARTE ============ */
+  .carte-panel {
+    flex: 1;
+    background: #16213e;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow-y: auto;
+    transition: all 0.3s;
+  }
+  .app.fase-animazione .carte-panel { display: none; }
+  .carte-panel.nascosto { display: none; }
+
+  .info-mano {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .info-mano .titolo {
+    font-size: 11px;
+    color: #ffd700;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .info-mano .bersaglio {
+    font-size: 26px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 12px rgba(255,215,0,0.7);
+  }
+  .info-mano .turno-label { font-size: 12px; color: #aaa; }
+
+  .mano-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .carte {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .carta {
+    width: 48px; height: 66px;
+    background: #fff; color: #222;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 900;
+    font-family: 'Georgia', serif;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.15s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    line-height: 1;
+  }
+  .carta:hover { transform: translateY(-4px); }
+  .carta.selezionata {
+    border-color: #ffd700;
+    background: #fff9c4;
+    transform: translateY(-6px);
+    box-shadow: 0 0 16px #ffd700;
+  }
+  .carta.negativa {
+    background: linear-gradient(135deg, #fff5f5, #ffdddd);
+    color: #dc2626;
+    border: 3px solid #dc2626;
+    font-size: 30px;
+    box-shadow: 0 0 12px rgba(220,38,38,0.5), 0 3px 6px rgba(0,0,0,0.5);
+  }
+  .carta.negativa.selezionata {
+    background: #ffcccc;
+    box-shadow: 0 0 20px #dc2626, 0 0 30px #dc2626;
+    border-color: #ff0000;
+  }
+
+  /* Pile mazzo e scarto */
+  .pila-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .pila {
+    position: relative;
+    width: 36px;
+    height: 50px;
+    cursor: default;
+  }
+  .pila-titolo {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #ffd700;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  .pila-carte { position: relative; width: 100%; height: 100%; }
+  .pila-carta {
+    position: absolute;
+    width: 36px;
+    height: 50px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Georgia', serif;
+  }
+  .pila-carta.dietro {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    border: 2px solid #fff;
+    color: transparent;
+  }
+  .pila-carta.dietro::after {
+    content: '🂠';
+    color: #fff;
+    font-size: 20px;
+  }
+  .pila-carta.scarto {
+    background: #fff;
+    border: 2px solid #999;
+    color: #222;
+  }
+  .pila-carta.scarto.negativa {
+    background: #ffdddd;
+    color: #dc2626;
+    border-color: #dc2626;
+  }
+  .pila-count {
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #aaa;
+    white-space: nowrap;
+  }
+
+  button {
+    background: #0f3460;
+    color: #fff;
+    border: 2px solid #4dabf7;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin: 2px;
+  }
+  button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  button.primario:hover:not(:disabled) { background: #ffed4e; }
+
+  /* ============ DADI ============ */
+  .dado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px; height: 68px;
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    font-size: 42px;
+    font-weight: 900;
+    font-family: 'Georgia', serif;
+    margin: 4px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    animation: rollDado 0.6s ease;
+  }
+  @keyframes rollDado {
+    0% { transform: rotate(-720deg) scale(0.3); opacity: 0; }
+    60% { transform: rotate(0deg) scale(1.2); opacity: 1; }
+    100% { transform: rotate(0deg) scale(1); opacity: 1; }
+  }
+  .dadi-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 6px 0;
+    flex-wrap: wrap;
+  }
+  .dado.piccolo { width: 50px; height: 50px; font-size: 28px; }
+  .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
+  .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
+  .dado.giallo { background: linear-gradient(135deg, #ffe066, #f59f00); color: #222; border: 3px solid #fff; }
+
+  /* ============ OVERLAY ============ */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+    padding: 12px;
+    overflow-y: auto;
+  }
+  .overlay.nascosto { display: none; }
+  .overlay-box {
+    background: #16213e;
+    border: 3px solid #ffd700;
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+  .overlay-box h2 { color: #ffd700; margin-bottom: 10px; font-size: 17px; }
+  .esito-tiro { font-size: 22px; font-weight: bold; margin: 10px 0; text-align: center; }
+  .esito-tiro.goal { color: #4ade80; text-shadow: 0 0 14px #4ade80; }
+  .esito-tiro.parata { color: #ef4444; text-shadow: 0 0 14px #ef4444; }
+  .esito-tiro.palo { color: #f59f00; text-shadow: 0 0 14px #f59f00; }
+  .esito-tiro.angolo { color: #4dabf7; text-shadow: 0 0 14px #4dabf7; }
+  .fase-label { font-size: 10px; color: #ffd700; text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px; }
+
+  /* ============ GOAL OVERLAY ============ */
+  .goal-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .goal-overlay.attivo { opacity: 1; }
+  .goal-overlay.tu { background: radial-gradient(circle, rgba(77,171,247,0.6), rgba(0,0,0,0.85)); }
+  .goal-overlay.cpu { background: radial-gradient(circle, rgba(255,107,107,0.6), rgba(0,0,0,0.85)); }
+  .goal-text {
+    font-size: 96px;
+    font-weight: 900;
+    color: #ffd700;
+    text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 8px 20px rgba(0,0,0,0.9);
+    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 4px;
+  }
+  @keyframes goalZoom {
+    0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  /* ============ MODALE ============ */
+  .modale {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 12px;
+  }
+  .modale.nascosto { display: none; }
+  .modale-box {
+    background: #16213e;
+    border: 3px solid #ffd700;
+    border-radius: 14px;
+    padding: 22px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
+  .modale-box p { margin: 6px 0; line-height: 1.5; }
+
+  /* ============ SOSTITUZIONI ============ */
+  .sost-sezione {
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    padding: 10px;
+    margin: 12px 0;
+  }
+  .sost-sezione h3 { font-size: 13px; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .sost-lista { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .sost-card {
+    background: #0f3460;
+    border: 2px solid #4dabf7;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 70px;
+    text-align: center;
+  }
+  .sost-card:hover:not(.disabilitato) { background: #4dabf7; color: #0f3460; }
+  .sost-card.selezionato { background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 14px #ffd700; }
+  .sost-card.disabilitato { opacity: 0.35; cursor: not-allowed; }
+  .sost-card .ruolo { font-weight: bold; }
+  .sost-card .stamina { font-size: 9px; opacity: 0.8; }
+  .sost-card .falli { font-size: 9px; color: #ff8a8a; }
+
+  /* ============ LOG ============ */
+  .log-box {
+    background: #0a0a15;
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 60vh;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: left;
+    font-family: 'Courier New', monospace;
+  }
+  .log-box p { margin: 2px 0; }
+  .log-box .tu { color: #4dabf7; font-weight: bold; }
+  .log-box .cpu { color: #ff6b6b; font-weight: bold; }
+  .log-box .goal { color: #ffd700; font-weight: bold; }
+  .log-box .parata { color: #4ade80; font-weight: bold; }
+  .log-box .highlight { background: rgba(255,215,0,0.15); padding: 2px 4px; border-radius: 3px; }
+
+  /* ============ STATISTICHE ============ */
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  .stats-table th {
+    background: #0f3460;
+    color: #ffd700;
+    padding: 6px 4px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .stats-table td {
+    padding: 5px 4px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .stats-table td:first-child { text-align: left; color: #ccc; }
+  .stats-table .tu-val { color: #4dabf7; font-weight: bold; }
+  .stats-table .cpu-val { color: #ff6b6b; font-weight: bold; }
+
+  /* ============ MEDIA QUERY MOBILE ============ */
+  @media (max-height: 500px) {
+    .topbar { padding: 3px 8px; min-height: 34px; }
+    .risultato { font-size: 17px; }
+    .minuto { font-size: 13px; padding: 1px 6px; min-width: 36px; }
+    .info-top { font-size: 9px; right: 72px; }
+    .btn-icona { width: 28px; height: 28px; font-size: 13px; }
+    .campo-wrapper { flex: 0 0 45vh; }
+    .app.fase-combattimento .campo-wrapper { flex: 0 0 45vh; }
+    .pedina { width: 28px; height: 36px; }
+    .sprite-giocatore { width: 28px; height: 36px; background-size: 640px 640px; background-position: -3px -3px; }
+    .info-laterale { font-size: 8px; }
+    .panchina { min-height: 42px; padding: 2px 4px; }
+    .panchina-giocatore .pedina { transform: scale(0.6); height: 24px; width: 20px; }
+    .panchina-giocatore .sprite-giocatore { width: 20px; height: 26px; background-size: 460px 460px; background-position: -2px -2px; }
+    .panchina-giocatore .panchina-nome { font-size: 7px; }
+    .carta { width: 40px; height: 56px; font-size: 28px; }
+    .carta.negativa { font-size: 24px; }
+    .pila { width: 30px; height: 42px; }
+    .pila-carta { width: 30px; height: 42px; font-size: 15px; }
+    .info-mano .bersaglio { font-size: 20px; }
+    .goal-text { font-size: 60px; }
+    .dado { width: 52px; height: 52px; font-size: 32px; }
+    .dado.piccolo { width: 40px; height: 40px; font-size: 22px; }
+  }
+
+  .rotate-msg {
+    display: none;
+    position: fixed; inset: 0;
+    background: #0a0a15;
+    z-index: 999;
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    color: #ffd700;
+    font-size: 20px;
+    text-align: center;
+    padding: 20px;
+  }
+  @media (orientation: portrait) and (max-width: 900px) {
+    .rotate-msg { display: flex; }
+  }
+
+  .nascosto { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="rotate-msg">
+  <div style="font-size:60px;margin-bottom:16px">📱↔️</div>
+  <p>Ruota il telefono in <b>orizzontale</b> per giocare</p>
+</div>
+
+<div class="app fase-animazione" id="app">
+
+  <div class="topbar">
+    <div class="risultato-wrapper">
+      <div class="risultato">
+        <span class="tu">TU</span>
+        <span id="punteggio-tu">0</span>
+        <span class="sep">-</span>
+        <span id="punteggio-cpu">0</span>
+        <span class="cpu">CPU</span>
+      </div>
+      <div class="minuto" id="minuto">0'</div>
+    </div>
+    <div class="info-top">
+      Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/15<br>
+      Palla <span id="zona-palla">Z4</span>
+    </div>
+    <div class="topbar-buttons">
+      <button class="btn-icona" id="btn-sost" onclick="apriSostituzioni()" title="Sostituzioni">🔄</button>
+      <button class="btn-icona" onclick="apriLog()" title="Log">📋</button>
+    </div>
+  </div>
+
+  <div class="campo-wrapper" id="campo-wrapper">
+    <div class="campo" id="campo">
+      <div class="righe-campo">
+        <div class="linea-centrocampo"></div>
+        <div class="cerchio-centrocampo"></div>
+        <div class="punto-centrocampo"></div>
+        <div class="area-penale sinistra"></div>
+        <div class="area-penale destra"></div>
+        <div class="area-piccola sinistra"></div>
+        <div class="area-piccola destra"></div>
+        <div class="porta sinistra"></div>
+        <div class="porta destra"></div>
+      </div>
+      <div class="zone" id="zone"></div>
+      <div class="palla-animata" id="palla-animata"></div>
+    </div>
+    <div class="flash-vincitore" id="flash"></div>
+  </div>
+
+  <div class="panchina" id="panchina"></div>
+
+  <div class="carte-panel" id="carte-panel">
+    <div class="info-mano">
+      <div>
+        <div class="titolo" id="titolo-mano">Contrasto</div>
+        <div class="bersaglio" id="bersaglio-mano">-</div>
+      </div>
+      <div class="turno-label" id="turno-label"></div>
+    </div>
+    <div class="mano-wrapper" id="mano-wrapper">
+      <div class="carte" id="carte-container"></div>
+      <div class="pila-wrapper">
+        <div class="pila">
+          <div class="pila-titolo">MAZZO</div>
+          <div class="pila-carte" id="mazzo-pila"></div>
+          <div class="pila-count" id="mazzo-count">0</div>
+        </div>
+        <div class="pila">
+          <div class="pila-titolo">SCARTO</div>
+          <div class="pila-carte" id="scarto-pila"></div>
+          <div class="pila-count" id="scarto-count">0</div>
+        </div>
+      </div>
+    </div>
+    <div id="azioni-container"></div>
+  </div>
+
+</div>
+
+<div class="overlay nascosto" id="overlay">
+  <div class="overlay-box" id="overlay-box"></div>
+</div>
+
+<div class="goal-overlay" id="goal-overlay">
+  <div class="goal-text" id="goal-text">⚽ GOAL! ⚽</div>
+</div>
+
+<div class="modale nascosto" id="modale">
+  <div class="modale-box" id="modale-box"></div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIGURAZIONE
+   ========================================================= */
+const STAMINA_MAX = 45;
+
+const ZONE_CONFIG = [
+  { id: 0, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'tu' },
+  { id: 1, nome: 'Z1', ruolo: 'DIF', n: 1 },
+  { id: 2, nome: 'Z2', ruolo: 'DIF', n: 2 },
+  { id: 3, nome: 'Z3', ruolo: 'CEN', n: 2 },
+  { id: 4, nome: 'Z4', ruolo: 'CEN', n: 2 },
+  { id: 5, nome: 'Z5', ruolo: 'ATT', n: 2 },
+  { id: 6, nome: 'Z6', ruolo: 'ATT', n: 1 },
+  { id: 7, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'cpu' }
+];
+
+const PANCHINA_CONFIG = [
+  { ruolo: 'POR', n: 1 },
+  { ruolo: 'DIF', n: 2 },
+  { ruolo: 'CEN', n: 2 },
+  { ruolo: 'ATT', n: 2 }
+];
+
+let stato = {
+  modalita: '1P',
+  tempo: 1,
+  mano: 1,
+  maxMani: 15,
+  punteggio: { tu: 0, cpu: 0 },
+  zonaPalla: 4,
+  possessore: null,
+  giocatorePalla: null,
+  pallaInAnimazione: false,
+  mazzi: { tu: [], cpu: [] },
+  scarti: { tu: [], cpu: [] },
+  mani: { tu: [], cpu: [] },
+  giocatori: { tu: [], cpu: [] },
+  panchina: { tu: [], cpu: [] },
+  turno: 'tu',
+  monetaVinta: null,
+  partitaFinita: false,
+  sostBloccate: false,
+  statistiche: {
+    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
+    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
+  },
+  logCompleto: []
+};
+
+let selezione = [];
+let selezioneSost = { campo: null, panchina: null };
+
+/* =========================================================
+   MAZZO
+   ========================================================= */
+function creaMazzo() {
+  return mescola([0,1,2,3,4,5,6,7,8,9,'-1','-2']);
+}
+
+function mescola(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function resetMazzo(sq) {
+  stato.mazzi[sq] = creaMazzo();
+  stato.scarti[sq] = [];
+  stato.mani[sq] = [];
+}
+
+function distribuisciCarte(sq, n) {
+  stato.mani[sq] = [];
+  for (let i = 0; i < n && stato.mazzi[sq].length > 0; i++) {
+    stato.mani[sq].push(stato.mazzi[sq].pop());
+  }
+}
+
+function valoreCarta(carta) {
+  if (carta === '-1') return -1;
+  if (carta === '-2') return -2;
+  return carta;
+}
+
+function sommaCarte(carte) {
+  return carte.reduce((acc, c) => acc + valoreCarta(c), 0);
+}
+
+/* =========================================================
+   MINUTO
+   ========================================================= */
+function calcolaMinuto() {
+  const tempoOffset = (stato.tempo - 1) * 45;
+  const minuto = tempoOffset + stato.mano * 3;
+  return Math.min(minuto, 90);
+}
+
+/* =========================================================
+   LOG
+   ========================================================= */
+function log(msg, classe = '') {
+  stato.logCompleto.push({ msg, classe });
+  const logBox = document.getElementById('log-box');
+  if (logBox) {
+    const p = document.createElement('p');
+    if (classe) p.className = classe;
+    p.innerHTML = msg;
+    logBox.appendChild(p);
+    logBox.scrollTop = logBox.scrollHeight;
+  }
+}
+
+function apriLog() {
+  let html = `<h2>📋 Cronaca della partita</h2><div class="log-box" id="log-box">`;
+  stato.logCompleto.forEach(l => {
+    html += `<p class="${l.classe || ''}">${l.msg}</p>`;
+  });
+  html += `</div><button class="primario" onclick="chiudiModale()" style="margin-top:12px">CHIUDI</button>`;
+  document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale').classList.remove('nascosto');
+  setTimeout(() => {
+    const box = document.getElementById('log-box');
+    if (box) box.scrollTop = box.scrollHeight;
+  }, 50);
+}
+
+function chiudiModale() {
+  document.getElementById('modale').classList.add('nascosto');
+}
+
+/* =========================================================
+   CREAZIONE GIOCATORI
+   ========================================================= */
+function creaGiocatori(sq) {
+  const g = [];
+  let id = 0;
+  ZONE_CONFIG.forEach(z => {
+    if (z.portiere && z.proprietario !== sq) return;
+    for (let i = 0; i < z.n; i++) {
+      g.push({
+        id: sq + '_' + (id++),
+        squadra: sq,
+        zona: z.id,
+        ruolo: z.ruolo,
+        portiere: !!z.portiere,
+        stamina: STAMINA_MAX,
+        staminaMax: STAMINA_MAX,
+        falli: 0,
+        ammonito: false,
+        espulso: false,
+        nome: z.ruolo + (i + 1)
+      });
+    }
+  });
+  return g;
+}
+
+function creaPanchina(sq) {
+  const p = [];
+  let id = 100;
+  PANCHINA_CONFIG.forEach(cfg => {
+    for (let i = 0; i < cfg.n; i++) {
+      p.push({
+        id: sq + '_pan_' + (id++),
+        squadra: sq,
+        ruolo: cfg.ruolo,
+        portiere: cfg.ruolo === 'POR',
+        stamina: STAMINA_MAX,
+        staminaMax: STAMINA_MAX,
+        falli: 0,
+        ammonito: false,
+        espulso: false,
+        entrato: false,
+        nome: cfg.ruolo + (i + 3)
+      });
+    }
+  });
+  return p;
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+function initApp() {
+  renderCampo();
+  renderPanchina();
+  renderHeader();
+  document.getElementById('carte-panel').classList.add('nascosto');
+
+  document.getElementById('modale-box').innerHTML = `
+    <h2>⚽ Benvenuto!</h2>
+    <p style="margin-bottom:16px">Scegli la modalità:</p>
+    <div>
+      <button class="primario" onclick="avviaPartita('1P')">1 GIOCATORE vs CPU</button>
+      <button class="primario" onclick="avviaPartita('2P')">1 vs 2 GIOCATORI</button>
+    </div>
+  `;
+  document.getElementById('modale').classList.remove('nascosto');
+}
+
+function avviaPartita(modalita) {
+  stato.modalita = modalita;
+  stato.giocatori.tu = creaGiocatori('tu');
+  stato.giocatori.cpu = creaGiocatori('cpu');
+  stato.panchina.tu = creaPanchina('tu');
+  stato.panchina.cpu = creaPanchina('cpu');
+  
+  resetMazzo('tu');
+  resetMazzo('cpu');
+  distribuisciCarte('tu', 6);
+  distribuisciCarte('cpu', 6);
+  
+  stato.punteggio = { tu: 0, cpu: 0 };
+  stato.tempo = 1;
+  stato.mano = 1;
+  stato.statistiche = {
+    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
+    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
+  };
+  stato.logCompleto = [];
+
+  renderCampo();
+  renderPanchina();
+  renderHeader();
+  chiudiModale();
+
+  document.getElementById('modale-box').innerHTML = `
+    <h2>🪙 Lancio della moneta</h2>
+    <p style="font-size:13px;margin-bottom:12px">Modalità: <b>${modalita === '1P' ? '1 Giocatore vs CPU' : '1 vs 2 Giocatori'}</b></p>
+    <p style="margin-bottom:10px">Scegli:</p>
+    <div>
+      <button class="primario" onclick="lanciaMoneta('testa')">TESTA</button>
+      <button class="primario" onclick="lanciaMoneta('croce')">CROCE</button>
+    </div>
+  `;
+  document.getElementById('modale').classList.remove('nascosto');
+
+  log(`🎮 Modalità: ${modalita === '1P' ? '1 Giocatore vs CPU' : '1 vs 2 Giocatori'}`, 'highlight');
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+function renderHeader() {
+  document.getElementById('punteggio-tu').textContent = stato.punteggio.tu;
+  document.getElementById('punteggio-cpu').textContent = stato.punteggio.cpu;
+  document.getElementById('tempo').textContent = stato.tempo + '°';
+  document.getElementById('mano').textContent = stato.mano;
+  document.getElementById('minuto').textContent = calcolaMinuto() + "'";
+  const zn = (stato.zonaPalla === 0 || stato.zonaPalla === 7) ? 'POR' : 'Z' + stato.zonaPalla;
+  document.getElementById('zona-palla').textContent = zn;
+}
+
+/* =========================================================
+   RENDER CAMPO
+   ========================================================= */
+function renderCampo() {
+  const zone = document.getElementById('zone');
+  zone.innerHTML = '';
+
+  ZONE_CONFIG.forEach(z => {
+    const zona = document.createElement('div');
+    zona.className = 'zona' + (z.portiere ? ' zona-portiere' : '');
+    zona.dataset.zona = z.id;
+
+    const label = document.createElement('div');
+    label.className = 'zona-label';
+    label.textContent = z.nome;
+    zona.appendChild(label);
+
+    if (z.portiere) {
+      const sq = z.proprietario;
+      const portiere = stato.giocatori[sq].find(g => g.zona === z.id);
+      if (portiere) {
+        const lato = document.createElement('div');
+        lato.className = 'lato-squadra ' + sq;
+        lato.appendChild(creaPedinaWrapper(portiere));
+        zona.appendChild(lato);
+      }
+      zone.appendChild(zona);
+      return;
+    }
+
+    const latoTu = document.createElement('div');
+    latoTu.className = 'lato-squadra tu';
+    stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => latoTu.appendChild(creaPedinaWrapper(g)));
+    zona.appendChild(latoTu);
+
+    const latoCpu = document.createElement('div');
+    latoCpu.className = 'lato-squadra cpu';
+    stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => latoCpu.appendChild(creaPedinaWrapper(g)));
+    zona.appendChild(latoCpu);
+
+    zone.appendChild(zona);
+  });
+}
+
+function creaPedinaWrapper(g) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pedina-wrapper ' + g.squadra;
+  
+  const info = creaInfoLaterale(g);
+  const pedina = creaPedinaEl(g);
+  
+  if (g.squadra === 'tu') {
+    wrapper.appendChild(info);
+    wrapper.appendChild(pedina);
+  } else {
+    wrapper.appendChild(pedina);
+    wrapper.appendChild(info);
+  }
+  
+  return wrapper;
+}
+
+function creaInfoLaterale(g) {
+  const el = document.createElement('div');
+  el.className = 'info-laterale ' + g.squadra;
+  
+  const perc = (g.stamina / g.staminaMax) * 100;
+  let classeStam = '';
+  if (perc < 20) classeStam = 'basso';
+  else if (perc < 50) classeStam = 'medio';
+  
+  let html = `<div class="stamina-txt ${classeStam}">${g.stamina}</div>`;
+  html += `<div class="falli-txt">${g.falli > 0 ? '⚠' + g.falli : '--'}</div>`;
+  let cart = '--';
+  if (g.espulso) cart = '🟥';
+  else if (g.ammonito) cart = '🟨';
+  html += `<div class="cartellini">${cart}</div>`;
+  
+  el.innerHTML = html;
+  return el;
+}
+
+function creaPedinaEl(g) {
+  const el = document.createElement('div');
+  el.className = 'pedina ' + g.squadra + (g.portiere ? ' portiere' : '');
+  el.dataset.giocatoreId = g.id;
+  if (g.stamina <= 5 && g.stamina > 0) el.classList.add('stanco');
+  if (g.stamina === 0) el.classList.add('esaurito');
+  if (g.ammonito) el.classList.add('ammonito');
+  if (g.espulso) el.classList.add('espulso');
+  el.title = `${g.nome} - Stamina ${g.stamina}/${g.staminaMax} - Falli ${g.falli}`;
+  
+  // Sprite con filtro colore
+  const sprite = document.createElement('div');
+  sprite.className = 'sprite-giocatore colore-' + (g.squadra === 'tu' ? 'blu' : 'rosso');
+  
+  el.appendChild(sprite);
+  
+  if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
+    const palla = document.createElement('div');
+    palla.className = 'palla-attaccata';
+    el.appendChild(palla);
+  }
+  
+  const bar = document.createElement('div');
+  bar.className = 'stamina-bar';
+  const fill = document.createElement('div');
+  fill.className = 'stamina-fill';
+  const perc = (g.stamina / g.staminaMax) * 100;
+  fill.style.width = perc + '%';
+  if (perc < 20) fill.classList.add('basso');
+  else if (perc < 50) fill.classList.add('medio');
+  bar.appendChild(fill);
+  el.appendChild(bar);
+  return el;
+}
+
+/* =========================================================
+   PANCHINA
+   ========================================================= */
+function renderPanchina() {
+  const p = document.getElementById('panchina');
+  p.innerHTML = '';
+
+  const titoloTu = document.createElement('div');
+  titoloTu.className = 'panchina-titolo';
+  titoloTu.textContent = 'PANCHINA TU';
+  p.appendChild(titoloTu);
+
+  stato.panchina.tu.forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'panchina-giocatore tu';
+    if (g.entrato) el.classList.add('in-ombra');
+    el.innerHTML = `
+      <div class="pedina tu${g.portiere ? ' portiere' : ''}">
+        <div class="sprite-giocatore colore-blu"></div>
+      </div>
+      <div class="panchina-nome">${g.nome}</div>
+    `;
+    p.appendChild(el);
+  });
+
+  const titoloCpu = document.createElement('div');
+  titoloCpu.className = 'panchina-titolo';
+  titoloCpu.textContent = 'PANCHINA CPU';
+  p.appendChild(titoloCpu);
+
+  stato.panchina.cpu.forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'panchina-giocatore cpu';
+    if (g.entrato) el.classList.add('in-ombra');
+    el.innerHTML = `
+      <div class="pedina cpu${g.portiere ? ' portiere' : ''}">
+        <div class="sprite-giocatore colore-rosso"></div>
+      </div>
+      <div class="panchina-nome">${g.nome}</div>
+    `;
+    p.appendChild(el);
+  });
+}
+
+/* =========================================================
+   PALLA ANIMATA
+   ========================================================= */
+function staccaPalla(daGiocatoreId) {
+  stato.pallaInAnimazione = true;
+  
+  const pedina = document.querySelector(`[data-giocatore-id="${daGiocatoreId}"]`);
+  if (pedina) {
+    const pallaAttaccata = pedina.querySelector('.palla-attaccata');
+    if (pallaAttaccata) pallaAttaccata.remove();
+  }
+  
+  const palla = document.getElementById('palla-animata');
+  const campo = document.getElementById('campo');
+  const campoRect = campo.getBoundingClientRect();
+  
+  if (pedina) {
+    const pedRect = pedina.getBoundingClientRect();
+    const x = pedRect.left + pedRect.width / 2 - campoRect.left;
+    const y = pedRect.bottom - 6 - campoRect.top;
+    palla.style.transition = 'none';
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+    palla.style.display = 'block';
+    void palla.offsetWidth;
+  }
+}
+
+function attaccaPalla(aGiocatoreId) {
+  const palla = document.getElementById('palla-animata');
+  palla.style.display = 'none';
+  stato.giocatorePalla = aGiocatoreId;
+  stato.pallaInAnimazione = false;
+  renderCampo();
+}
+
+function animaPalla(daId, aId, callback) {
+  const a = document.querySelector(`[data-giocatore-id="${aId}"]`);
+  if (!a) { 
+    if (aId) attaccaPalla(aId);
+    if (callback) callback(); 
+    return; 
+  }
+
+  const palla = document.getElementById('palla-animata');
+  const campo = document.getElementById('campo');
+  const campoRect = campo.getBoundingClientRect();
+  const aRect = a.getBoundingClientRect();
+  const x2 = aRect.left + aRect.width / 2 - campoRect.left;
+  const y2 = aRect.bottom - 6 - campoRect.top;
+
+  const durata = 1200;
+  const easing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+  if (daId) {
+    staccaPalla(daId);
+    setTimeout(() => {
+      palla.style.transition = `left ${durata}ms ${easing}, top ${durata}ms ${easing}`;
+      palla.style.left = x2 + 'px';
+      palla.style.top = y2 + 'px';
+      setTimeout(() => {
+        attaccaPalla(aId);
+        if (callback) callback();
+      }, durata + 50);
+    }, 50);
+  } else {
+    attaccaPalla(aId);
+    if (callback) callback();
+  }
+}
+
+function nascondiPalla() {
+  document.getElementById('palla-animata').style.display = 'none';
+}
+
+/* =========================================================
+   FLASH
+   ========================================================= */
+function flashVincitore(squadra) {
+  const flash = document.getElementById('flash');
+  flash.classList.remove('tu', 'cpu', 'attivo');
+  void flash.offsetWidth;
+  flash.classList.add(squadra, 'attivo');
+  setTimeout(() => flash.classList.remove('attivo'), 600);
+}
+
+/* =========================================================
+   MONETA
+   ========================================================= */
+function lanciaMoneta(scelta) {
+  const esito = Math.random() < 0.5 ? 'testa' : 'croce';
+  const vince = esito === scelta ? 'tu' : 'cpu';
+  stato.monetaVinta = vince;
+  log(`🪙 Moneta: esce ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
+
+  stato.possessore = vince;
+  stato.zonaPalla = 4;
+  stato.turno = vince;
+
+  const candidati = stato.giocatori[vince].filter(g => g.zona === 4 && !g.portiere);
+  const scelto = candidati[Math.floor(Math.random() * candidati.length)];
+  stato.giocatorePalla = scelto.id;
+  log(`⚽ ${vince === 'tu' ? 'Tu' : 'CPU'} inizi con ${scelto.nome} in Zona 4`);
+
+  chiudiModale();
+  renderCampo();
+  renderHeader();
+  setTimeout(() => avviaContrasto(), 700);
+}
+
+/* =========================================================
+   SOSTITUZIONI
+   ========================================================= */
+function apriSostituzioni() {
+  if (stato.sostBloccate) {
+    alert('Sostituzioni bloccate: hai già confermato le carte. Potrai farle al prossimo contrasto.');
+    return;
+  }
+  if (stato.partitaFinita) return;
+  selezioneSost = { campo: null, panchina: null };
+  renderModaleSostituzioni();
+  document.getElementById('modale').classList.remove('nascosto');
+}
+
+function renderModaleSostituzioni() {
+  const sq = 'tu';
+  let html = `<h2>🔄 Sostituzioni</h2>`;
+  html += `<p style="font-size:11px;color:#aaa;margin-bottom:10px">Seleziona un giocatore in campo e uno in panchina, poi conferma.</p>`;
+
+  html += `<div class="sost-sezione"><h3>In campo</h3><div class="sost-lista">`;
+  stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
+    const sel = selezioneSost.campo === g.id ? ' selezionato' : '';
+    html += `<div class="sost-card${sel}" onclick="selezionaSostCampo('${g.id}')">
+      <div class="ruolo">${g.nome}</div>
+      <div class="stamina">⚡${g.stamina}/45</div>
+      <div class="falli">${g.falli > 0 ? '⚠' + g.falli : ''}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div class="sost-sezione"><h3>Panchina</h3><div class="sost-lista">`;
+  stato.panchina[sq].forEach(g => {
+    const sel = selezioneSost.panchina === g.id ? ' selezionato' : '';
+    const disab = g.entrato ? ' disabilitato' : '';
+    html += `<div class="sost-card${sel}${disab}" onclick="selezionaSostPanchina('${g.id}')">
+      <div class="ruolo">${g.nome}</div>
+      <div class="stamina">⚡${g.stamina}/45</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  html += `<div style="margin-top:14px">`;
+  if (selezioneSost.campo && selezioneSost.panchina) {
+    html += `<button class="primario" onclick="confermaSostituzione()">CONFERMA SOSTITUZIONE</button>`;
+  }
+  html += `<button onclick="chiudiModale()">CHIUDI</button></div>`;
+
+  document.getElementById('modale-box').innerHTML = html;
+}
+
+function selezionaSostCampo(id) {
+  selezioneSost.campo = id;
+  renderModaleSostituzioni();
+}
+
+function selezionaSostPanchina(id) {
+  const pan = stato.panchina.tu.find(g => g.id === id);
+  if (pan && pan.entrato) return;
+  selezioneSost.panchina = id;
+  renderModaleSostituzioni();
+}
+
+function confermaSostituzione() {
+  const sq = 'tu';
+  const campo = stato.giocatori[sq].find(g => g.id === selezioneSost.campo);
+  const pan = stato.panchina[sq].find(g => g.id === selezioneSost.panchina);
+
+  if (!campo || !pan || pan.entrato) return;
+
+  const nuovo = {
+    id: pan.id,
+    squadra: sq,
+    zona: campo.zona,
+    ruolo: pan.ruolo,
+    portiere: pan.portiere,
+    stamina: STAMINA_MAX,
+    staminaMax: STAMINA_MAX,
+    falli: 0,
+    ammonito: false,
+    espulso: false,
+    nome: pan.nome
+  };
+
+  const idx = stato.giocatori[sq].indexOf(campo);
+  stato.giocatori[sq][idx] = nuovo;
+  pan.entrato = true;
+
+  stato.statistiche[sq].sostituzioni++;
+  log(`🔄 Sostituzione: esce ${campo.nome}, entra ${pan.nome}`, 'highlight');
+
+  selezioneSost = { campo: null, panchina: null };
+  renderCampo();
+  renderPanchina();
+  renderModaleSostituzioni();
+}
+
+/* =========================================================
+   CONTRASTO - RESET MAZZO + DISTRIBUZIONE
+   ========================================================= */
+function avviaContrasto() {
+  document.getElementById('app').className = 'app fase-combattimento';
+  document.getElementById('carte-panel').classList.remove('nascosto');
+  document.getElementById('btn-sost').disabled = false;
+  stato.sostBloccate = false;
+  renderHeader();
+
+  const zona = stato.zonaPalla;
+  const attaccante = stato.possessore;
+  const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
+
+  const bersaglio = Math.floor(Math.random() * 9) + 1;
+
+  const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
+  const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
+
+  const nAtt = attaccantiZona.length;
+  const nDif = difensoriZona.length;
+
+  const giocatoreAtt = stato.giocatorePalla 
+    ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla)
+    : attaccantiZona[0];
+
+  let giocatoreDif = null;
+  if (difensoriZona.length > 0) {
+    const maxStamina = Math.max(...difensoriZona.map(g => g.stamina));
+    const candidati = difensoriZona.filter(g => g.stamina === maxStamina);
+    giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
+  }
+
+  // Reset mazzo + scarto ad ogni contrasto
+  resetMazzo(attaccante);
+  resetMazzo(difensore);
+
+  // Calcola carte
+  let carteAtt = 6;
+  if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
+  if (nAtt < nDif) carteAtt -= 1;
+
+  let carteDif = 6;
+  if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
+  if (nDif < nAtt) carteDif -= 1;
+
+  distribuisciCarte(attaccante, carteAtt);
+  distribuisciCarte(difensore, carteDif);
+
+  stato.contrasto = {
+    bersaglio, zona, attaccante, difensore,
+    mano: 1,
+    risultati: { tu: null, cpu: null },
+    giocatoreAtt: giocatoreAtt ? giocatoreAtt.id : null,
+    giocatoreDif: giocatoreDif ? giocatoreDif.id : null,
+    carteAtt, carteDif
+  };
+
+  stato.statistiche[attaccante].contese++;
+
+  log(`🎯 Contrasto Z${zona} — Bersaglio: ${bersaglio}`, 'highlight');
+  log(`   Carte: TU ${carteAtt} vs CPU ${carteDif}`);
+
+  stato.turno = 'tu';
+  selezione = [];
+  renderPannelloContrasto();
+}
+
+function renderPannelloContrasto() {
+  const c = stato.contrasto;
+  document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona} — Mano ${c.mano}`;
+  document.getElementById('bersaglio-mano').textContent = '🎯 ' + c.bersaglio;
+
+  const sq = stato.modalita === '2P' ? stato.turno : 'tu';
+  document.getElementById('turno-label').textContent = stato.modalita === '2P'
+    ? `Turno: ${stato.turno === 'tu' ? 'Giocatore 1 (blu)' : 'Giocatore 2 (rosso)'}`
+    : `Le tue carte (${stato.mani[sq].length})`;
+
+  const cont = document.getElementById('carte-container');
+  cont.innerHTML = '';
+  stato.mani[sq].forEach((carta, idx) => {
+    const el = document.createElement('div');
+    el.className = 'carta';
+    if (carta === '-1' || carta === '-2') el.classList.add('negativa');
+    el.dataset.idx = idx;
+    el.textContent = carta;
+    el.onclick = () => selezionaCarta(idx);
+    cont.appendChild(el);
+  });
+
+  renderPile(sq);
+
+  const az = document.getElementById('azioni-container');
+  az.innerHTML = `<button class="primario" id="btn-gioca" onclick="giocaCarte()" disabled>GIOCA 2 CARTE</button>`;
+}
+
+function renderPile(sq) {
+  const mazzoPila = document.getElementById('mazzo-pila');
+  const scartoPila = document.getElementById('scarto-pila');
+  const mazzoCount = document.getElementById('mazzo-count');
+  const scartoCount = document.getElementById('scarto-count');
+  
+  mazzoPila.innerHTML = '';
+  const numMazzo = Math.min(stato.mazzi[sq].length, 3);
+  for (let i = 0; i < numMazzo; i++) {
+    const el = document.createElement('div');
+    el.className = 'pila-carta dietro';
+    el.style.left = (i * 2) + 'px';
+    el.style.top = (i * 2) + 'px';
+    mazzoPila.appendChild(el);
+  }
+  mazzoCount.textContent = stato.mazzi[sq].length;
+  
+  scartoPila.innerHTML = '';
+  const scarto = stato.scarti[sq];
+  const numScarto = Math.min(scarto.length, 3);
+  for (let i = 0; i < numScarto; i++) {
+    const idx = scarto.length - 1 - i;
+    const carta = scarto[idx];
+    const el = document.createElement('div');
+    el.className = 'pila-carta scarto';
+    if (carta === '-1' || carta === '-2') el.classList.add('negativa');
+    el.textContent = carta;
+    el.style.left = (i * 2) + 'px';
+    el.style.top = (i * 2) + 'px';
+    el.style.zIndex = 10 - i;
+    scartoPila.appendChild(el);
+  }
+  scartoCount.textContent = stato.scarti[sq].length;
+}
+
+function selezionaCarta(idx) {
+  if (!stato.sostBloccate) {
+    stato.sostBloccate = true;
+    document.getElementById('btn-sost').disabled = true;
+  }
+  const sq = stato.modalita === '2P' ? stato.turno : 'tu';
+  const els = document.querySelectorAll('#carte-container .carta');
+  if (selezione.includes(idx)) {
+    selezione = selezione.filter(i => i !== idx);
+    els[idx].classList.remove('selezionata');
+  } else {
+    if (selezione.length >= 2) return;
+    selezione.push(idx);
+    els[idx].classList.add('selezionata');
+  }
+  document.getElementById('btn-gioca').disabled = selezione.length !== 2;
+}
+
+function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
+  if (!giocatore) return somma;
+  if (giocatore.stamina === 0) {
+    if (somma === bersaglio) return bersaglio - 1;
+  }
+  return somma;
+}
+
+function giocaCarte() {
+  const sq = stato.modalita === '2P' ? stato.turno : 'tu';
+  const c = stato.contrasto;
+  const carteGiocate = selezione.map(i => stato.mani[sq][i]);
+  let somma = sommaCarte(carteGiocate);
+  
+  const giocatore = sq === c.attaccante ? 
+    stato.giocatori[sq].find(g => g.id === c.giocatoreAtt) :
+    stato.giocatori[sq].find(g => g.id === c.giocatoreDif);
+  somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
+  
+  log(`${sq === 'tu' ? 'Tu' : 'CPU'} giochi: [${carteGiocate.join(', ')}] = ${somma}${giocatore && giocatore.stamina === 0 ? ' (stamina 0)' : ''}`);
+  c.risultati[sq] = { carte: carteGiocate, somma };
+  
+  const idxs = [...selezione].sort((a, b) => b - a);
+  const carteDaScartare = idxs.map(i => stato.mani[sq][i]);
+  stato.scarti[sq].push(...carteDaScartare);
+  idxs.forEach(i => stato.mani[sq].splice(i, 1));
+  selezione = [];
+
+  if (stato.modalita === '1P' && sq === 'tu') {
+    setTimeout(() => giocaCPU(), 500);
+    return;
+  }
+  if (stato.modalita === '2P' && sq === 'tu') {
+    stato.turno = 'cpu';
+    renderPannelloContrasto();
+    return;
+  }
+  valutaMano();
+}
+
+function giocaCPU() {
+  const c = stato.contrasto;
+  const carte = stato.mani.cpu;
+  let mig = null, mD = Infinity;
+  for (let i = 0; i < carte.length; i++) {
+    for (let j = i + 1; j < carte.length; j++) {
+      let somma = valoreCarta(carte[i]) + valoreCarta(carte[j]);
+      const giocatore = c.difensore === 'cpu' 
+        ? stato.giocatori.cpu.find(g => g.id === c.giocatoreDif)
+        : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
+      somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
+      const d = Math.abs(somma - c.bersaglio);
+      if (d < mD) { mD = d; mig = [i, j]; }
+    }
+  }
+  const cg = [carte[mig[0]], carte[mig[1]]];
+  let somma = sommaCarte(cg);
+  const giocatore = c.difensore === 'cpu' 
+    ? stato.giocatori.cpu.find(g => g.id === c.giocatoreDif)
+    : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
+  somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
+  
+  log(`CPU gioca: [${cg.join(', ')}] = ${somma}${giocatore && giocatore.stamina === 0 ? ' (stamina 0)' : ''}`);
+  c.risultati.cpu = { carte: cg, somma };
+  
+  const idxs = [...mig].sort((a, b) => b - a);
+  const carteDaScartare = idxs.map(i => stato.mani.cpu[i]);
+  stato.scarti.cpu.push(...carteDaScartare);
+  idxs.forEach(i => stato.mani.cpu.splice(i, 1));
+  
+  valutaMano();
+}
+
+function valutaMano() {
+  const c = stato.contrasto;
+  const att = c.attaccante, dif = c.difensore;
+  const rAtt = c.risultati[att], rDif = c.risultati[dif];
+  const dAtt = Math.abs(rAtt.somma - c.bersaglio);
+  const dDif = Math.abs(rDif.somma - c.bersaglio);
+
+  if (rAtt.somma === c.bersaglio && rDif.somma !== c.bersaglio) return vinciContrasto(att, 'numero esatto');
+  if (rDif.somma === c.bersaglio && rAtt.somma !== c.bersaglio) return vinciContrasto(dif, 'numero esatto');
+  if (rAtt.somma === c.bersaglio && rDif.somma === c.bersaglio) return spareggio();
+  if (dAtt < dDif) return vinciContrasto(att, 'più vicino');
+  if (dDif < dAtt) return vinciContrasto(dif, 'più vicino');
+  spareggio();
+}
+
+function spareggio() {
+  const c = stato.contrasto;
+  c.mano++;
+  log(`🔁 Pareggio! Si va alla mano ${c.mano}`);
+  c.risultati = { tu: null, cpu: null };
+  selezione = [];
+  stato.turno = 'tu';
+  
+  const att = c.attaccante;
+  const dif = c.difensore;
+  
+  // Se le carte in mano non bastano (meno di 2), rimescola tutto
+  if (stato.mani[att].length < 2 || stato.mani[dif].length < 2) {
+    log(`♻️ Carte esaurite! Rimescolo il mazzo e ridistribuisco.`);
+    
+    [att, dif].forEach(sq => {
+      stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq], ...stato.mani[sq]]);
+      stato.scarti[sq] = [];
+      stato.mani[sq] = [];
+    });
+    
+    // Ricalcola carte
+    let carteAtt = 6;
+    const giocatoreAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
+    if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
+    const nAtt = stato.giocatori[att].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
+    const nDif = stato.giocatori[dif].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
+    if (nAtt < nDif) carteAtt -= 1;
+    
+    let carteDif = 6;
+    const giocatoreDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
+    if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
+    if (nDif < nAtt) carteDif -= 1;
+    
+    distribuisciCarte(att, carteAtt);
+    distribuisciCarte(dif, carteDif);
+  } else {
+    // Pesca 2 carte per tornare al totale
+    while (stato.mani[att].length < c.carteAtt && stato.mazzi[att].length > 0) {
+      stato.mani[att].push(stato.mazzi[att].pop());
+    }
+    while (stato.mani[dif].length < c.carteDif && stato.mazzi[dif].length > 0) {
+      stato.mani[dif].push(stato.mazzi[dif].pop());
+    }
+  }
+  
+  renderPannelloContrasto();
+}
+
+/* =========================================================
+   VINCI CONTRASTO
+   ========================================================= */
+function vinciContrasto(vincente, motivo) {
+  const c = stato.contrasto;
+  log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince il contrasto (${motivo})`, 'highlight');
+  flashVincitore(vincente);
+
+  stato.statistiche[vincente].vinte++;
+  stato.statistiche[c.attaccante].passaggiTotali++;
+  if (vincente === c.attaccante) stato.statistiche[vincente].passaggiRiusciti++;
+
+  ['tu', 'cpu'].forEach(sq => {
+    stato.giocatori[sq].forEach(g => {
+      if (!g.portiere && !g.espulso) g.stamina = Math.max(0, g.stamina - 1);
+    });
+  });
+
+  const zona = c.zona;
+  const vecchioGiocatore = stato.giocatorePalla;
+
+  mostraRisultatoOverlay(vincente, motivo);
+
+  setTimeout(() => {
+    chiudiOverlay();
+    document.getElementById('app').className = 'app fase-animazione';
+    document.getElementById('carte-panel').classList.add('nascosto');
+
+    if (vincente === c.attaccante) {
+      eseguiDadoFallo(vincente, c, vecchioGiocatore);
+    } else {
+      stato.possessore = vincente;
+      stato.zonaPalla = zona;
+      
+      const nuovoGiocatoreId = c.giocatoreDif;
+      if (nuovoGiocatoreId) {
+        const g = stato.giocatori[vincente].find(x => x.id === nuovoGiocatoreId);
+        if (g && !g.espulso) {
+          stato.giocatorePalla = g.id;
+        } else {
+          const gz = stato.giocatori[vincente].filter(x => x.zona === zona && !x.portiere && !x.espulso);
+          stato.giocatorePalla = gz.length > 0 ? gz[0].id : null;
+        }
+      } else {
+        const gz = stato.giocatori[vincente].filter(x => x.zona === zona && !x.portiere && !x.espulso);
+        stato.giocatorePalla = gz.length > 0 ? gz[0].id : null;
+      }
+
+      log(`🔄 Cambio possesso: palla a ${vincente === 'tu' ? 'TE' : 'CPU'}`);
+
+      renderHeader();
+      setTimeout(() => {
+        if (vecchioGiocatore && stato.giocatorePalla) {
+          animaPalla(vecchioGiocatore, stato.giocatorePalla, () => {
+            setTimeout(() => avviaContrasto(), 1000);
+          });
+        } else {
+          renderCampo();
+          setTimeout(() => avviaContrasto(), 1000);
+        }
+      }, 200);
+    }
+  }, 1500);
+}
+
+/* =========================================================
+   DADO FALLO
+   ========================================================= */
+function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
+  apriOverlay(`
+    <h2>🎲 Dado fallo</h2>
+    <p style="font-size:12px;color:#aaa">Se esce 3 o 8 → fallo del difensore</p>
+    <div id="area-fallo" style="margin-top:12px"></div>
+  `);
+
+  setTimeout(() => {
+    const dado = Math.floor(Math.random() * 9) + 1;
+    document.getElementById('area-fallo').innerHTML = `<div class="dado giallo">${dado}</div>`;
+    log(`🎲 Dado fallo: ${dado}`);
+
+    setTimeout(() => {
+      if (dado === 3 || dado === 8) {
+        log(`⚠️ FALLO!`, 'parata');
+        eseguiFallo(vincente, c, vecchioGiocatore);
+      } else {
+        chiudiOverlay();
+        proseguiAzione(vincente, c, vecchioGiocatore);
+      }
+    }, 1200);
+  }, 400);
+}
+
+function eseguiFallo(vincente, c, vecchioGiocatore) {
+  const difensore = c.difensore;
+  const zona = c.zona;
+
+  const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
+  if (difensoriZona.length === 0) {
+    chiudiOverlay();
+    proseguiAzione(vincente, c, vecchioGiocatore);
+    return;
+  }
+  const falloso = difensoriZona[Math.floor(Math.random() * difensoriZona.length)];
+  falloso.falli++;
+  stato.statistiche[difensore].falli++;
+
+  log(`🟨 Fallo di ${falloso.nome} (${falloso.falli} falli totali)`);
+
+  if (falloso.falli === 3) {
+    falloso.ammonito = true;
+    stato.statistiche[difensore].ammonizioni++;
+    log(`🟨 AMMONIZIONE per ${falloso.nome}!`, 'parata');
+  }
+  if (falloso.falli >= 6) {
+    falloso.espulso = true;
+    stato.statistiche[difensore].espulsioni++;
+    log(`🟥 ESPULSIONE per ${falloso.nome}!`, 'parata');
+  }
+
+  const isRigore = (zona === 1 || zona === 6);
+  const squadraAttacca = vincente;
+
+  setTimeout(() => {
+    chiudiOverlay();
+    if (isRigore) {
+      log(`🎯 RIGORE per ${zona === 6 ? 'TU' : 'CPU'}!`, 'goal');
+      setTimeout(() => eseguiRigore(zona === 6 ? 'tu' : 'cpu'), 800);
+    } else {
+      log(`🚩 Punizione. Palla all'attaccante che avanza.`);
+      const nuovaZona = zona + (squadraAttacca === 'tu' ? +1 : -1);
+      if (nuovaZona === 7 || nuovaZona === 0) {
+        stato.zonaPalla = zona;
+        setTimeout(() => tiroInPorta(squadraAttacca), 800);
+      } else {
+        stato.zonaPalla = nuovaZona;
+        stato.possessore = squadraAttacca;
+        const gz = stato.giocatori[squadraAttacca].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+        if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+        renderHeader();
+        setTimeout(() => {
+          if (vecchioGiocatore && stato.giocatorePalla) {
+            animaPalla(vecchioGiocatore, stato.giocatorePalla, () => {
+              setTimeout(() => avviaContrasto(), 1000);
+            });
+          } else {
+            renderCampo();
+            setTimeout(() => avviaContrasto(), 1000);
+          }
+        }, 200);
+      }
+    }
+  }, 1800);
+}
+
+function proseguiAzione(vincente, c, vecchioGiocatore) {
+  const zona = c.zona;
+  const direzione = vincente === 'tu' ? +1 : -1;
+  const nuovaZona = zona + direzione;
+  const portaAvv = vincente === 'tu' ? 7 : 0;
+
+  if (nuovaZona === portaAvv) {
+    return tiroInPorta(vincente);
+  }
+
+  stato.zonaPalla = nuovaZona;
+  stato.possessore = vincente;
+  
+  const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+  let nuovo = null;
+  if (gz.length > 0) {
+    const conStamina = gz.filter(g => g.stamina > 0);
+    const scelto = conStamina.length > 0 
+      ? conStamina[Math.floor(Math.random() * conStamina.length)]
+      : gz[0];
+    nuovo = scelto.id;
+    stato.giocatorePalla = scelto.id;
+  } else {
+    stato.giocatorePalla = null;
+  }
+  log(`➡️ Palla avanza in Z${nuovaZona}`);
+
+  renderHeader();
+  setTimeout(() => {
+    if (vecchioGiocatore && nuovo) {
+      animaPalla(vecchioGiocatore, nuovo, () => {
+        setTimeout(() => avviaContrasto(), 1000);
+      });
+    } else {
+      renderCampo();
+      setTimeout(() => avviaContrasto(), 1000);
+    }
+  }, 200);
+}
+
+/* =========================================================
+   OVERLAY
+   ========================================================= */
+function apriOverlay(html) {
+  const ov = document.getElementById('overlay');
+  document.getElementById('overlay-box').innerHTML = html;
+  ov.classList.remove('nascosto');
+}
+
+function chiudiOverlay() {
+  document.getElementById('overlay').classList.add('nascosto');
+}
+
+function mostraRisultatoOverlay(vincente, motivo) {
+  const colore = vincente === 'tu' ? '#4dabf7' : '#ff6b6b';
+  apriOverlay(`
+    <h2 style="color:${colore};font-size:26px">🏆 ${vincente === 'tu' ? 'TU' : 'CPU'} VINCE!</h2>
+    <p style="font-size:14px;color:#aaa">${motivo}</p>
+    <div style="font-size:60px;margin-top:16px">⚽</div>
+  `);
+}
+
+function mostraGoal(vincente) {
+  const ov = document.getElementById('goal-overlay');
+  ov.classList.remove('tu', 'cpu');
+  ov.classList.add(vincente, 'attivo');
+  document.getElementById('goal-text').textContent = '⚽ GOAL! ⚽';
+  setTimeout(() => {
+    ov.classList.remove('attivo');
+  }, 3000);
+}
+
+/* =========================================================
+   TIRO IN PORTA (con animazione SHOOT)
+   ========================================================= */
+function animaShoot(giocatoreId, callback) {
+  // Trova il giocatore e cambia il background-position per mostrare l'animazione di tiro
+  const pedina = document.querySelector(`[data-giocatore-id="${giocatoreId}"]`);
+  if (!pedina) { if (callback) callback(); return; }
+  const sprite = pedina.querySelector('.sprite-giocatore');
+  if (!sprite) { if (callback) callback(); return; }
+  
+  // Riga SHOOT (4a riga): ~400px dall'alto (se sprite è 800x800, ogni riga = 133px, 4a riga = 400px)
+  // Frame 1, 2, 3 in sequenza
+  const frameShoot = [
+    { x: -4, y: -400 },
+    { x: -84, y: -400 },
+    { x: -164, y: -400 },
+    { x: -244, y: -400 },
+    { x: -324, y: -400 }
+  ];
+  
+  let idx = 0;
+  const intervallo = setInterval(() => {
+    sprite.style.backgroundPosition = `${frameShoot[idx].x}px ${frameShoot[idx].y}px`;
+    idx++;
+    if (idx >= frameShoot.length) {
+      clearInterval(intervallo);
+      // Torna a IDLE
+      setTimeout(() => {
+        sprite.style.backgroundPosition = '-4px -4px';
+        if (callback) callback();
+      }, 300);
+    }
+  }, 120);
+}
+
+function tiroInPorta(attaccante) {
+  const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
+  nascondiPalla();
+  stato.statistiche[attaccante].tiri++;
+  log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
+
+  // Animazione SHOOT
+  const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
+  if (giocatore) {
+    animaShoot(giocatore.id);
+  }
+
+  setTimeout(() => {
+    apriOverlay(`
+      <h2>🥅 TIRO IN PORTA</h2>
+      <div class="fase-label">FASE 1 — Tiro attaccante</div>
+      <div id="area-tiro" style="margin-top:10px"></div>
+    `);
+
+    setTimeout(() => {
+      const dado = Math.floor(Math.random() * 9) + 1;
+      document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
+      log(`🎲 ${attaccante === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
+
+      setTimeout(() => {
+        if (dado === 5 || dado === 8) {
+          log(`🧤 ${dado} = PARATA DIRETTA!`, 'parata');
+          eseguiEsitoTiro('parata', attaccante, difensore);
+          return;
+        }
+        fase2Tiro(attaccante, difensore, dado);
+      }, 1200);
+    }, 400);
+  }, 800);
+}
+
+function fase2Tiro(attaccante, difensore, numAtt) {
+  const box = document.getElementById('overlay-box');
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9, no 5 no 8)</div><div id="area-portiere"></div>`);
+  const disponibili = [1,2,3,4,6,7,9];
+  const dadi = mescola(disponibili).slice(0, 3);
+  document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
+  log(`🧤 Portiere tira: [${dadi.join(', ')}]`);
+
+  setTimeout(() => {
+    if (dadi.includes(numAtt)) {
+      log(`⚠️ Il portiere ha preso il ${numAtt}!`);
+      fase3Tiro(attaccante, difensore);
+    } else {
+      log(`⚽ GOAL! Il portiere non ha preso il ${numAtt}!`, 'goal');
+      eseguiEsitoTiro('goal', attaccante, difensore);
+    }
+  }, 1500);
+}
+
+function fase3Tiro(attaccante, difensore) {
+  const box = document.getElementById('overlay-box');
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito finale (1d9)</div><div id="area-esito"></div>`);
+  const dado = Math.floor(Math.random() * 9) + 1;
+  document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
+  log(`🎲 Esito: ${dado}`);
+
+  let esito;
+  if (dado === 1) esito = 'palo';
+  else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
+  else esito = 'parata';
+
+  setTimeout(() => eseguiEsitoTiro(esito, attaccante, difensore), 1000);
+}
+
+function eseguiEsitoTiro(esito, attaccante, difensore) {
+  const box = document.getElementById('overlay-box');
+  let msg, colore;
+  if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
+  else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
+  else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
+  else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
+  box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
+
+  if (esito === 'parata') stato.statistiche[difensore].parate++;
+  if (esito === 'palo') stato.statistiche[attaccante].pali++;
+  if (esito === 'angolo') stato.statistiche[attaccante].angoli++;
+
+  setTimeout(() => {
+    chiudiOverlay();
+    if (esito === 'goal') gestisciGoal(attaccante);
+    else if (esito === 'parata') gestisciParata(attaccante, difensore);
+    else if (esito === 'palo') gestisciPalo(attaccante, difensore);
+    else if (esito === 'angolo') gestisciAngolo(attaccante, difensore);
+  }, 2200);
+}
+
+function gestisciGoal(attaccante) {
+  stato.punteggio[attaccante]++;
+  stato.statistiche[attaccante].gol++;
+  log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
+  mostraGoal(attaccante);
+
+  setTimeout(() => {
+    const subito = attaccante === 'tu' ? 'cpu' : 'tu';
+    stato.possessore = subito;
+    stato.zonaPalla = 3;
+    const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+    if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+    renderCampo(); renderHeader();
+    setTimeout(() => avanzaMano(), 800);
+  }, 3000);
+}
+
+function gestisciParata(attaccante, difensore) {
+  log(`🧤 Portiere rinvia al centro. Palla contesa!`);
+  stato.zonaPalla = 4;
+  stato.possessore = Math.random() < 0.5 ? 'tu' : 'cpu';
+  const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 4 && !g.portiere && !g.espulso);
+  if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+  renderCampo(); renderHeader();
+  setTimeout(() => avviaContrasto(), 1000);
+}
+
+function gestisciPalo(attaccante, difensore) {
+  log(`🥅 Palo! Ricontesa palla...`);
+  const zona = attaccante === 'tu' ? 6 : 1;
+  stato.zonaPalla = zona;
+  stato.possessore = attaccante;
+  renderCampo(); renderHeader();
+  setTimeout(() => avviaContrasto(), 1000);
+}
+
+function gestisciAngolo(attaccante, difensore) {
+  log(`🚩 Calcio d'angolo per ${attaccante === 'tu' ? 'TE' : 'CPU'}!`);
+  const zona = attaccante === 'tu' ? 6 : 1;
+  stato.zonaPalla = zona;
+  stato.possessore = attaccante;
+  const gz = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
+  if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+  renderCampo(); renderHeader();
+  setTimeout(() => avviaContrasto(), 1000);
+}
+
+/* =========================================================
+   RIGORE
+   ========================================================= */
+function eseguiRigore(squadra) {
+  const difensore = squadra === 'tu' ? 'cpu' : 'tu';
+  nascondiPalla();
+  stato.statistiche[squadra].tiri++;
+  log(`🎯 RIGORE per ${squadra === 'tu' ? 'TU' : 'CPU'}!`, 'highlight');
+
+  apriOverlay(`
+    <h2>🎯 RIGORE</h2>
+    <div class="fase-label">FASE 1 — Tiro</div>
+    <div id="area-tiro" style="margin-top:10px"></div>
+  `);
+
+  setTimeout(() => {
+    const dado = Math.floor(Math.random() * 9) + 1;
+    document.getElementById('area-tiro').innerHTML = `<div class="dado ${squadra === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
+    log(`🎲 ${squadra === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
+
+    setTimeout(() => {
+      if (dado === 5 || dado === 8) {
+        log(`🧤 ${dado} = PARATA!`, 'parata');
+        stato.statistiche[difensore].parate++;
+        eseguiEsitoRigore('parata', squadra, difensore);
+        return;
+      }
+      fase2Rigore(squadra, difensore, dado);
+    }, 1200);
+  }, 400);
+}
+
+function fase2Rigore(squadra, difensore, numAtt) {
+  const box = document.getElementById('overlay-box');
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9)</div><div id="area-portiere"></div>`);
+  const disponibili = [1,2,3,4,6,7,9];
+  const dadi = mescola(disponibili).slice(0, 3);
+  document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
+  log(`🧤 Portiere tira: [${dadi.join(', ')}]`);
+
+  setTimeout(() => {
+    if (dadi.includes(numAtt)) {
+      fase3Rigore(squadra, difensore);
+    } else {
+      log(`⚽ GOAL!`, 'goal');
+      stato.statistiche[squadra].gol++;
+      eseguiEsitoRigore('goal', squadra, difensore);
+    }
+  }, 1500);
+}
+
+function fase3Rigore(squadra, difensore) {
+  const box = document.getElementById('overlay-box');
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
+  const dado = Math.floor(Math.random() * 9) + 1;
+  document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
+  log(`🎲 Esito: ${dado}`);
+
+  let esito;
+  if (dado === 1) esito = 'palo';
+  else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
+  else esito = 'parata';
+
+  setTimeout(() => {
+    if (esito === 'parata') stato.statistiche[difensore].parate++;
+    if (esito === 'palo') stato.statistiche[squadra].pali++;
+    if (esito === 'angolo') stato.statistiche[squadra].angoli++;
+    eseguiEsitoRigore(esito, squadra, difensore);
+  }, 1000);
+}
+
+function eseguiEsitoRigore(esito, squadra, difensore) {
+  const box = document.getElementById('overlay-box');
+  let msg, colore;
+  if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
+  else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
+  else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
+  else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
+  box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
+
+  setTimeout(() => {
+    chiudiOverlay();
+    if (esito === 'goal') gestisciGoal(squadra);
+    else if (esito === 'parata') gestisciParata(squadra, difensore);
+    else if (esito === 'palo') gestisciPalo(squadra, difensore);
+    else if (esito === 'angolo') gestisciAngolo(squadra, difensore);
+  }, 2200);
+}
+
+/* =========================================================
+   AVANZAMENTO MANO
+   ========================================================= */
+function avanzaMano() {
+  stato.mano++;
+  if (stato.mano > stato.maxMani) {
+    if (stato.tempo === 1) {
+      stato.tempo = 2;
+      stato.mano = 1;
+      log(`⏸️ FINE PRIMO TEMPO. Punteggio: ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
+      ['tu', 'cpu'].forEach(sq => {
+        stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
+      });
+      log(`💚 Recupero stamina completo: tutti a ${STAMINA_MAX}`);
+      const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
+      stato.possessore = perdente;
+      stato.zonaPalla = 3;
+      const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+      if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+      renderCampo(); renderHeader();
+      setTimeout(() => avviaContrasto(), 1000);
+      return;
+    } else {
+      return finePartita();
+    }
+  }
+  renderHeader();
+  renderCampo();
+  setTimeout(() => avviaContrasto(), 800);
+}
+
+/* =========================================================
+   FINE PARTITA
+   ========================================================= */
+function finePartita() {
+  stato.partitaFinita = true;
+  const s = stato.statistiche;
+  let msg = '';
+  if (stato.punteggio.tu > stato.punteggio.cpu) msg = '🏆 HAI VINTO!';
+  else if (stato.punteggio.cpu > stato.punteggio.tu) msg = '😢 CPU vince';
+  else msg = '🤝 Pareggio';
+
+  const possesoTu = s.tu.vinte + s.cpu.vinte > 0 ? Math.round(s.tu.vinte / (s.tu.vinte + s.cpu.vinte) * 100) : 50;
+  const possessoCpu = 100 - possesoTu;
+  const passTu = s.tu.passaggiTotali > 0 ? Math.round(s.tu.passaggiRiusciti / s.tu.passaggiTotali * 100) : 0;
+  const passCpu = s.cpu.passaggiTotali > 0 ? Math.round(s.cpu.passaggiRiusciti / s.cpu.passaggiTotali * 100) : 0;
+
+  document.getElementById('modale-box').innerHTML = `
+    <h2>FINE PARTITA</h2>
+    <p style="font-size:32px;font-weight:bold">
+      <span style="color:#4dabf7">${stato.punteggio.tu}</span>
+      <span style="color:#fff"> - </span>
+      <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
+    </p>
+    <p style="font-size:18px;color:#ffd700;margin:12px 0">${msg}</p>
+    <table class="stats-table">
+      <tr><th>Statistica</th><th>TU</th><th>CPU</th></tr>
+      <tr><td>Gol</td><td class="tu-val">${s.tu.gol}</td><td class="cpu-val">${s.cpu.gol}</td></tr>
+      <tr><td>Tiri in porta</td><td class="tu-val">${s.tu.tiri}</td><td class="cpu-val">${s.cpu.tiri}</td></tr>
+      <tr><td>Parate</td><td class="tu-val">${s.tu.parate}</td><td class="cpu-val">${s.cpu.parate}</td></tr>
+      <tr><td>Calci d'angolo</td><td class="tu-val">${s.tu.angoli}</td><td class="cpu-val">${s.cpu.angoli}</td></tr>
+      <tr><td>Pali</td><td class="tu-val">${s.tu.pali}</td><td class="cpu-val">${s.cpu.pali}</td></tr>
+      <tr><td>Palle contese</td><td class="tu-val">${s.tu.contese}</td><td class="cpu-val">${s.cpu.contese}</td></tr>
+      <tr><td>Contrasti vinti</td><td class="tu-val">${s.tu.vinte}</td><td class="cpu-val">${s.cpu.vinte}</td></tr>
+      <tr><td>Falli commessi</td><td class="tu-val">${s.tu.falli}</td><td class="cpu-val">${s.cpu.falli}</td></tr>
+      <tr><td>Ammonizioni</td><td class="tu-val">${s.tu.ammonizioni}</td><td class="cpu-val">${s.cpu.ammonizioni}</td></tr>
+      <tr><td>Espulsioni</td><td class="tu-val">${s.tu.espulsioni}</td><td class="cpu-val">${s.cpu.espulsioni}</td></tr>
+      <tr><td>Sostituzioni</td><td class="tu-val">${s.tu.sostituzioni}</td><td class="cpu-val">${s.cpu.sostituzioni}</td></tr>
+      <tr><td>% Passaggi riusciti</td><td class="tu-val">${passTu}%</td><td class="cpu-val">${passCpu}%</td></tr>
+      <tr><td>Possesso palla</td><td class="tu-val">${possesoTu}%</td><td class="cpu-val">${possessoCpu}%</td></tr>
+    </table>
+    <button class="primario" onclick="location.reload()" style="margin-top:16px">NUOVA PARTITA</button>
+    <p style="font-size:10px;color:#666;margin-top:16px">Sprite credit: Easy-Peasy.AI (free to use with backlink)</p>
+  `;
+  document.getElementById('modale').classList.remove('nascosto');
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+initApp();
+</script>
+</body>
+</html>
