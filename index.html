@@ -254,12 +254,43 @@
     pointer-events: none;
   }
   
-  /* Filtri colore per le squadre */
-  .pedina.tu .sprite-img { filter: hue-rotate(0deg) saturate(1.2); }
-  .pedina.cpu .sprite-img { filter: hue-rotate(160deg) saturate(1.6); }
-  .pedina.colore-giallo .sprite-img { filter: hue-rotate(60deg) saturate(2) brightness(1.2); }
-  .pedina.colore-verde .sprite-img { filter: hue-rotate(90deg) saturate(1.4); }
-  .pedina.colore-arancio .sprite-img { filter: hue-rotate(30deg) saturate(1.8); }
+  /* ============ FILTRI SQUADRA ============ */
+  
+  /* CPU: specchiata, nessun filtro colore (o filtro della sua squadra) */
+  .pedina.cpu .sprite-img {
+    transform: scaleX(-1);
+  }
+  
+  /* Squadra TU (Italia - blu originale, nessun filtro) */
+  .pedina.tu.squadra-italia .sprite-img { filter: none; }
+  
+  /* Squadra CPU (varie) */
+  .pedina.cpu.squadra-brasile .sprite-img {
+    filter: hue-rotate(60deg) saturate(3) brightness(1.3);
+  }
+  .pedina.cpu.squadra-senegal .sprite-img {
+    filter: hue-rotate(120deg) saturate(1.5) brightness(0.9);
+  }
+  .pedina.cpu.squadra-giappone .sprite-img {
+    filter: hue-rotate(-30deg) saturate(1.5) brightness(0.8);
+  }
+  .pedina.cpu.squadra-italia .sprite-img {
+    filter: none;
+  }
+
+  /* Panchina: specchiatura CPU */
+  .panchina-giocatore.cpu .sprite-img {
+    transform: scaleX(-1);
+  }
+  .panchina-giocatore.cpu.squadra-brasile .sprite-img {
+    filter: hue-rotate(60deg) saturate(3) brightness(1.3);
+  }
+  .panchina-giocatore.cpu.squadra-senegal .sprite-img {
+    filter: hue-rotate(120deg) saturate(1.5) brightness(0.9);
+  }
+  .panchina-giocatore.cpu.squadra-giappone .sprite-img {
+    filter: hue-rotate(-30deg) saturate(1.5) brightness(0.8);
+  }
 
   .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
@@ -692,6 +723,49 @@
   .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
   .modale-box p { margin: 6px 0; line-height: 1.5; }
 
+  /* ============ SELEZIONE SQUADRA ============ */
+  .squadre-griglia {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .squadra-btn {
+    background: #0f3460;
+    border: 3px solid #4dabf7;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;
+  }
+  .squadra-btn:hover {
+    background: #4dabf7;
+    color: #16213e;
+    transform: scale(1.05);
+  }
+  .squadra-btn.selezionata {
+    background: #ffd700;
+    color: #16213e;
+    border-color: #ffd700;
+    box-shadow: 0 0 20px #ffd700;
+  }
+  .squadra-btn .nome {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .squadra-btn .maglia {
+    width: 60px;
+    height: 70px;
+    margin: 0 auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    image-rendering: pixelated;
+  }
+
   /* ============ SOSTITUZIONI ============ */
   .sost-sezione {
     background: rgba(0,0,0,0.3);
@@ -816,11 +890,11 @@
   <div class="topbar">
     <div class="risultato-wrapper">
       <div class="risultato">
-        <span class="tu">TU</span>
+        <span class="tu" id="nome-tu">TU</span>
         <span id="punteggio-tu">0</span>
         <span class="sep">-</span>
         <span id="punteggio-cpu">0</span>
-        <span class="cpu">CPU</span>
+        <span class="cpu" id="nome-cpu">CPU</span>
       </div>
       <div class="minuto" id="minuto">0'</div>
     </div>
@@ -919,9 +993,6 @@ const PANCHINA_CONFIG = [
   { ruolo: 'ATT', n: 2 }
 ];
 
-/* =========================================================
-   ANIMAZIONI - Nomi cartelle e numero frame
-   ========================================================= */
 const ANIMAZIONI = {
   'Fermo':      { cartella: 'Fermo',      frame: 16, velocita: 180, loop: true },
   'Tiro':       { cartella: 'Tiro',       frame: 16, velocita: 100, loop: false },
@@ -931,14 +1002,25 @@ const ANIMAZIONI = {
   'Esultanza3': { cartella: 'Esultanza3', frame: 10, velocita: 150, loop: false }
 };
 
-// Genera il percorso di un frame (con spazio + parentesi codificati)
 function pathFrame(animazione, numero) {
   const cartella = ANIMAZIONI[animazione].cartella;
   return encodeURI(`${cartella}/${animazione} (${numero}).png`);
 }
 
+/* =========================================================
+   SQUADRE DISPONIBILI
+   ========================================================= */
+const SQUADRE = [
+  { id: 'italia',   nome: 'ITALIA',   classe: 'squadra-italia' },
+  { id: 'brasile',  nome: 'BRASILE',  classe: 'squadra-brasile' },
+  { id: 'senegal',  nome: 'SENEGAL',  classe: 'squadra-senegal' },
+  { id: 'giappone', nome: 'GIAPPONE', classe: 'squadra-giappone' }
+];
+
 let stato = {
   modalita: '1P',
+  squadraTU: 'italia',
+  squadraCPU: 'brasile',
   tempo: 1,
   mano: 1,
   maxMani: 15,
@@ -966,7 +1048,6 @@ let stato = {
 let selezione = [];
 let selezioneSost = { campo: null, panchina: null };
 
-// Traccia animazioni in corso per ogni giocatore
 const animazioniInCorso = {};
 
 /* =========================================================
@@ -1009,11 +1090,11 @@ function sommaCarte(carte) {
 }
 
 /* =========================================================
-   MINUTO
+   MINUTO (FIX: parte da 0)
    ========================================================= */
 function calcolaMinuto() {
   const tempoOffset = (stato.tempo - 1) * 45;
-  const minuto = tempoOffset + stato.mano * 3;
+  const minuto = tempoOffset + (stato.mano - 1) * 3;
   return Math.min(minuto, 90);
 }
 
@@ -1051,10 +1132,9 @@ function chiudiModale() {
 }
 
 /* =========================================================
-   ANIMAZIONE GIOCATORE
+   ANIMAZIONE
    ========================================================= */
 function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
-  // Ferma animazione precedente
   fermaAnimazione(giocatoreId);
   
   const config = ANIMAZIONI[nomeAnimazione];
@@ -1077,10 +1157,8 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
         frame = 1;
         setTimeout(tick, config.velocita);
       } else {
-        // Animazione finita, torna a Fermo
         animazioniInCorso[giocatoreId] = false;
         if (callback) callback();
-        // Torna a Fermo (loop)
         setTimeout(() => {
           if (!animazioniInCorso[giocatoreId]) {
             avviaAnimazione(giocatoreId, 'Fermo');
@@ -1100,7 +1178,7 @@ function fermaAnimazione(giocatoreId) {
 }
 
 /* =========================================================
-   CREAZIONE GIOCATORI
+   GIOCATORI
    ========================================================= */
 function creaGiocatori(sq) {
   const g = [];
@@ -1158,15 +1236,51 @@ function initApp() {
   renderHeader();
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  document.getElementById('modale-box').innerHTML = `
-    <h2>⚽ Benvenuto!</h2>
-    <p style="margin-bottom:16px">Scegli la modalità:</p>
-    <div>
-      <button class="primario" onclick="avviaPartita('1P')">1 GIOCATORE vs CPU</button>
-      <button class="primario" onclick="avviaPartita('2P')">1 vs 2 GIOCATORI</button>
-    </div>
-  `;
+  // Selezione squadra
+  let html = `<h2>⚽ Scegli la tua squadra</h2>`;
+  html += `<div class="squadre-griglia">`;
+  SQUADRE.forEach(s => {
+    html += `
+      <div class="squadra-btn ${s.id === stato.squadraTU ? 'selezionata' : ''}" 
+           data-squadra="${s.id}"
+           onclick="selezionaSquadraTU('${s.id}')">
+        <div class="nome">${s.nome}</div>
+        <div class="maglia" style="background-image: url('${pathFrame('Fermo', 1)}'); filter: ${s.id === 'italia' ? 'none' : s.id === 'brasile' ? 'hue-rotate(60deg) saturate(3) brightness(1.3)' : s.id === 'senegal' ? 'hue-rotate(120deg) saturate(1.5) brightness(0.9)' : 'hue-rotate(-30deg) saturate(1.5) brightness(0.8)'};"></div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  
+  html += `<h2 style="margin-top:20px">🖥️ Squadra CPU</h2>`;
+  html += `<div class="squadre-griglia">`;
+  SQUADRE.forEach(s => {
+    html += `
+      <div class="squadra-btn ${s.id === stato.squadraCPU ? 'selezionata' : ''}" 
+           data-squadra="${s.id}"
+           onclick="selezionaSquadraCPU('${s.id}')">
+        <div class="nome">${s.nome}</div>
+        <div class="maglia" style="background-image: url('${pathFrame('Fermo', 1)}'); filter: ${s.id === 'italia' ? 'none' : s.id === 'brasile' ? 'hue-rotate(60deg) saturate(3) brightness(1.3)' : s.id === 'senegal' ? 'hue-rotate(120deg) saturate(1.5) brightness(0.9)' : 'hue-rotate(-30deg) saturate(1.5) brightness(0.8)'};"></div>
+      </div>
+    `;
+  });
+  html += `</div>`;
+  
+  html += `<div style="margin-top:16px">
+    <button class="primario" onclick="avviaPartita('1P')">INIZIA PARTITA (1P vs CPU)</button>
+  </div>`;
+
+  document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
+}
+
+function selezionaSquadraTU(id) {
+  stato.squadraTU = id;
+  initApp();
+}
+
+function selezionaSquadraCPU(id) {
+  stato.squadraCPU = id;
+  initApp();
 }
 
 function avviaPartita(modalita) {
@@ -1190,6 +1304,12 @@ function avviaPartita(modalita) {
   };
   stato.logCompleto = [];
 
+  // Aggiorna nomi squadre in top bar
+  const sTU = SQUADRE.find(s => s.id === stato.squadraTU);
+  const sCPU = SQUADRE.find(s => s.id === stato.squadraCPU);
+  document.getElementById('nome-tu').textContent = sTU ? sTU.nome : 'TU';
+  document.getElementById('nome-cpu').textContent = sCPU ? sCPU.nome : 'CPU';
+
   renderCampo();
   renderPanchina();
   renderHeader();
@@ -1197,7 +1317,6 @@ function avviaPartita(modalita) {
 
   document.getElementById('modale-box').innerHTML = `
     <h2>🪙 Lancio della moneta</h2>
-    <p style="font-size:13px;margin-bottom:12px">Modalità: <b>${modalita === '1P' ? '1 Giocatore vs CPU' : '1 vs 2 Giocatori'}</b></p>
     <p style="margin-bottom:10px">Scegli:</p>
     <div>
       <button class="primario" onclick="lanciaMoneta('testa')">TESTA</button>
@@ -1206,7 +1325,7 @@ function avviaPartita(modalita) {
   `;
   document.getElementById('modale').classList.remove('nascosto');
 
-  log(`🎮 Modalità: ${modalita === '1P' ? '1 Giocatore vs CPU' : '1 vs 2 Giocatori'}`, 'highlight');
+  log(`🎮 Inizio partita: ${sTU.nome} vs ${sCPU.nome}`, 'highlight');
 }
 
 /* =========================================================
@@ -1265,7 +1384,6 @@ function renderCampo() {
     zone.appendChild(zona);
   });
 
-  // Avvia animazioni Fermo per tutti i giocatori
   setTimeout(() => {
     ['tu', 'cpu'].forEach(sq => {
       stato.giocatori[sq].forEach(g => {
@@ -1317,7 +1435,11 @@ function creaInfoLaterale(g) {
 
 function creaPedinaEl(g) {
   const el = document.createElement('div');
-  el.className = 'pedina ' + g.squadra + (g.portiere ? ' portiere' : '');
+  const squadraId = g.squadra === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const squadraObj = SQUADRE.find(s => s.id === squadraId);
+  const classeSquadra = squadraObj ? squadraObj.classe : 'squadra-italia';
+  
+  el.className = 'pedina ' + g.squadra + ' ' + classeSquadra + (g.portiere ? ' portiere' : '');
   el.dataset.giocatoreId = g.id;
   if (g.stamina <= 5 && g.stamina > 0) el.classList.add('stanco');
   if (g.stamina === 0) el.classList.add('esaurito');
@@ -1357,9 +1479,12 @@ function renderPanchina() {
   const p = document.getElementById('panchina');
   p.innerHTML = '';
 
+  const sTU = SQUADRE.find(s => s.id === stato.squadraTU);
+  const sCPU = SQUADRE.find(s => s.id === stato.squadraCPU);
+
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
-  titoloTu.textContent = 'PANCHINA TU';
+  titoloTu.textContent = 'PANCHINA ' + (sTU ? sTU.nome : 'TU');
   p.appendChild(titoloTu);
 
   stato.panchina.tu.forEach(g => {
@@ -1377,7 +1502,7 @@ function renderPanchina() {
 
   const titoloCpu = document.createElement('div');
   titoloCpu.className = 'panchina-titolo';
-  titoloCpu.textContent = 'PANCHINA CPU';
+  titoloCpu.textContent = 'PANCHINA ' + (sCPU ? sCPU.nome : 'CPU');
   p.appendChild(titoloCpu);
 
   stato.panchina.cpu.forEach(g => {
@@ -1395,7 +1520,7 @@ function renderPanchina() {
 }
 
 /* =========================================================
-   PALLA ANIMATA
+   PALLA
    ========================================================= */
 function staccaPalla(daGiocatoreId) {
   stato.pallaInAnimazione = true;
@@ -1661,7 +1786,6 @@ function avviaContrasto() {
   stato.statistiche[attaccante].contese++;
 
   log(`🎯 Contrasto Z${zona} — Bersaglio: ${bersaglio}`, 'highlight');
-  log(`   Carte: TU ${carteAtt} vs CPU ${carteDif}`);
 
   stato.turno = 'tu';
   selezione = [];
@@ -1675,7 +1799,7 @@ function renderPannelloContrasto() {
 
   const sq = stato.modalita === '2P' ? stato.turno : 'tu';
   document.getElementById('turno-label').textContent = stato.modalita === '2P'
-    ? `Turno: ${stato.turno === 'tu' ? 'Giocatore 1 (blu)' : 'Giocatore 2 (rosso)'}`
+    ? `Turno: ${stato.turno === 'tu' ? 'Giocatore 1' : 'Giocatore 2'}`
     : `Le tue carte (${stato.mani[sq].length})`;
 
   const cont = document.getElementById('carte-container');
@@ -1768,7 +1892,7 @@ function giocaCarte() {
     stato.giocatori[sq].find(g => g.id === c.giocatoreDif);
   somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
   
-  log(`${sq === 'tu' ? 'Tu' : 'CPU'} giochi: [${carteGiocate.join(', ')}] = ${somma}${giocatore && giocatore.stamina === 0 ? ' (stamina 0)' : ''}`);
+  log(`${sq === 'tu' ? 'Tu' : 'CPU'} giochi: [${carteGiocate.join(', ')}] = ${somma}`);
   c.risultati[sq] = { carte: carteGiocate, somma };
   
   const idxs = [...selezione].sort((a, b) => b - a);
@@ -1811,7 +1935,7 @@ function giocaCPU() {
     : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
   somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
   
-  log(`CPU gioca: [${cg.join(', ')}] = ${somma}${giocatore && giocatore.stamina === 0 ? ' (stamina 0)' : ''}`);
+  log(`CPU gioca: [${cg.join(', ')}] = ${somma}`);
   c.risultati.cpu = { carte: cg, somma };
   
   const idxs = [...mig].sort((a, b) => b - a);
@@ -1840,7 +1964,7 @@ function valutaMano() {
 function spareggio() {
   const c = stato.contrasto;
   c.mano++;
-  log(`🔁 Pareggio! Si va alla mano ${c.mano}`);
+  log(`🔁 Pareggio! Mano ${c.mano}`);
   c.risultati = { tu: null, cpu: null };
   selezione = [];
   stato.turno = 'tu';
@@ -1849,8 +1973,7 @@ function spareggio() {
   const dif = c.difensore;
   
   if (stato.mani[att].length < 2 || stato.mani[dif].length < 2) {
-    log(`♻️ Carte esaurite! Rimescolo il mazzo e ridistribuisco.`);
-    
+    log(`♻️ Carte esaurite! Rimescolo.`);
     [att, dif].forEach(sq => {
       stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq], ...stato.mani[sq]]);
       stato.scarti[sq] = [];
@@ -1858,15 +1981,15 @@ function spareggio() {
     });
     
     let carteAtt = 6;
-    const giocatoreAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
-    if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
+    const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
+    if (gAtt && gAtt.stamina === 0) carteAtt -= 1;
     const nAtt = stato.giocatori[att].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
     const nDif = stato.giocatori[dif].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
     if (nAtt < nDif) carteAtt -= 1;
     
     let carteDif = 6;
-    const giocatoreDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
-    if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
+    const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
+    if (gDif && gDif.stamina === 0) carteDif -= 1;
     if (nDif < nAtt) carteDif -= 1;
     
     distribuisciCarte(att, carteAtt);
@@ -1884,11 +2007,11 @@ function spareggio() {
 }
 
 /* =========================================================
-   VINCI CONTRASTO
+   VINCI
    ========================================================= */
 function vinciContrasto(vincente, motivo) {
   const c = stato.contrasto;
-  log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince il contrasto (${motivo})`, 'highlight');
+  log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince (${motivo})`, 'highlight');
   flashVincitore(vincente);
 
   stato.statistiche[vincente].vinte++;
@@ -1989,7 +2112,7 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   falloso.falli++;
   stato.statistiche[difensore].falli++;
 
-  log(`🟨 Fallo di ${falloso.nome} (${falloso.falli} falli totali)`);
+  log(`🟨 Fallo di ${falloso.nome} (${falloso.falli} falli)`);
 
   if (falloso.falli === 3) {
     falloso.ammonito = true;
@@ -2111,7 +2234,7 @@ function mostraGoal(vincente) {
 }
 
 /* =========================================================
-   TIRO IN PORTA (con animazione Tiro + Esultanza)
+   TIRO IN PORTA
    ========================================================= */
 function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
@@ -2119,7 +2242,6 @@ function tiroInPorta(attaccante) {
   stato.statistiche[attaccante].tiri++;
   log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
 
-  // Animazione Tiro sul giocatore
   const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
   if (giocatore) {
     avviaAnimazione(giocatore.id, 'Tiro');
@@ -2139,7 +2261,7 @@ function tiroInPorta(attaccante) {
 
       setTimeout(() => {
         if (dado === 5 || dado === 8) {
-          log(`🧤 ${dado} = PARATA DIRETTA!`, 'parata');
+          log(`🧤 PARATA DIRETTA!`, 'parata');
           eseguiEsitoTiro('parata', attaccante, difensore);
           return;
         }
@@ -2151,7 +2273,7 @@ function tiroInPorta(attaccante) {
 
 function fase2Tiro(attaccante, difensore, numAtt) {
   const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9, no 5 no 8)</div><div id="area-portiere"></div>`);
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9)</div><div id="area-portiere"></div>`);
   const disponibili = [1,2,3,4,6,7,9];
   const dadi = mescola(disponibili).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
@@ -2159,10 +2281,10 @@ function fase2Tiro(attaccante, difensore, numAtt) {
 
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
-      log(`⚠️ Il portiere ha preso il ${numAtt}!`);
+      log(`⚠️ Portiere ha preso il ${numAtt}!`);
       fase3Tiro(attaccante, difensore);
     } else {
-      log(`⚽ GOAL! Il portiere non ha preso il ${numAtt}!`, 'goal');
+      log(`⚽ GOAL!`, 'goal');
       eseguiEsitoTiro('goal', attaccante, difensore);
     }
   }, 1500);
@@ -2170,7 +2292,7 @@ function fase2Tiro(attaccante, difensore, numAtt) {
 
 function fase3Tiro(attaccante, difensore) {
   const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito finale (1d9)</div><div id="area-esito"></div>`);
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
   const dado = Math.floor(Math.random() * 9) + 1;
   document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
   log(`🎲 Esito: ${dado}`);
@@ -2211,7 +2333,6 @@ function gestisciGoal(attaccante) {
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
   mostraGoal(attaccante);
 
-  // Animazione Esultanza su un giocatore a caso della squadra
   const giocatoriSquadra = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
   if (giocatoriSquadra.length > 0) {
     const esultante = giocatoriSquadra[Math.floor(Math.random() * giocatoriSquadra.length)];
@@ -2231,7 +2352,7 @@ function gestisciGoal(attaccante) {
 }
 
 function gestisciParata(attaccante, difensore) {
-  log(`🧤 Portiere rinvia al centro. Palla contesa!`);
+  log(`🧤 Portiere rinvia al centro.`);
   stato.zonaPalla = 4;
   stato.possessore = Math.random() < 0.5 ? 'tu' : 'cpu';
   const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 4 && !g.portiere && !g.espulso);
@@ -2241,7 +2362,7 @@ function gestisciParata(attaccante, difensore) {
 }
 
 function gestisciPalo(attaccante, difensore) {
-  log(`🥅 Palo! Ricontesa palla...`);
+  log(`🥅 Palo! Ricontesa.`);
   const zona = attaccante === 'tu' ? 6 : 1;
   stato.zonaPalla = zona;
   stato.possessore = attaccante;
@@ -2250,7 +2371,7 @@ function gestisciPalo(attaccante, difensore) {
 }
 
 function gestisciAngolo(attaccante, difensore) {
-  log(`🚩 Calcio d'angolo per ${attaccante === 'tu' ? 'TE' : 'CPU'}!`);
+  log(`🚩 Calcio d'angolo!`);
   const zona = attaccante === 'tu' ? 6 : 1;
   stato.zonaPalla = zona;
   stato.possessore = attaccante;
@@ -2278,11 +2399,11 @@ function eseguiRigore(squadra) {
   setTimeout(() => {
     const dado = Math.floor(Math.random() * 9) + 1;
     document.getElementById('area-tiro').innerHTML = `<div class="dado ${squadra === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
-    log(`🎲 ${squadra === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
+    log(`🎲 Tira: ${dado}`);
 
     setTimeout(() => {
       if (dado === 5 || dado === 8) {
-        log(`🧤 ${dado} = PARATA!`, 'parata');
+        log(`🧤 PARATA!`, 'parata');
         stato.statistiche[difensore].parate++;
         eseguiEsitoRigore('parata', squadra, difensore);
         return;
@@ -2294,11 +2415,10 @@ function eseguiRigore(squadra) {
 
 function fase2Rigore(squadra, difensore, numAtt) {
   const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9)</div><div id="area-portiere"></div>`);
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere</div><div id="area-portiere"></div>`);
   const disponibili = [1,2,3,4,6,7,9];
   const dadi = mescola(disponibili).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
-  log(`🧤 Portiere tira: [${dadi.join(', ')}]`);
 
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
@@ -2316,7 +2436,6 @@ function fase3Rigore(squadra, difensore) {
   box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
   const dado = Math.floor(Math.random() * 9) + 1;
   document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
-  log(`🎲 Esito: ${dado}`);
 
   let esito;
   if (dado === 1) esito = 'palo';
@@ -2350,7 +2469,7 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
 }
 
 /* =========================================================
-   AVANZAMENTO MANO
+   AVANZAMENTO
    ========================================================= */
 function avanzaMano() {
   stato.mano++;
@@ -2358,11 +2477,11 @@ function avanzaMano() {
     if (stato.tempo === 1) {
       stato.tempo = 2;
       stato.mano = 1;
-      log(`⏸️ FINE PRIMO TEMPO. Punteggio: ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
+      log(`⏸️ FINE PRIMO TEMPO. ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
-      log(`💚 Recupero stamina completo: tutti a ${STAMINA_MAX}`);
+      log(`💚 Recupero stamina completo`);
       const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
       stato.possessore = perdente;
       stato.zonaPalla = 3;
@@ -2417,8 +2536,8 @@ function finePartita() {
       <tr><td>Ammonizioni</td><td class="tu-val">${s.tu.ammonizioni}</td><td class="cpu-val">${s.cpu.ammonizioni}</td></tr>
       <tr><td>Espulsioni</td><td class="tu-val">${s.tu.espulsioni}</td><td class="cpu-val">${s.cpu.espulsioni}</td></tr>
       <tr><td>Sostituzioni</td><td class="tu-val">${s.tu.sostituzioni}</td><td class="cpu-val">${s.cpu.sostituzioni}</td></tr>
-      <tr><td>% Passaggi riusciti</td><td class="tu-val">${passTu}%</td><td class="cpu-val">${passCpu}%</td></tr>
-      <tr><td>Possesso palla</td><td class="tu-val">${possesoTu}%</td><td class="cpu-val">${possessoCpu}%</td></tr>
+      <tr><td>% Passaggi</td><td class="tu-val">${passTu}%</td><td class="cpu-val">${passCpu}%</td></tr>
+      <tr><td>Possesso</td><td class="tu-val">${possesoTu}%</td><td class="cpu-val">${possessoCpu}%</td></tr>
     </table>
     <button class="primario" onclick="location.reload()" style="margin-top:16px">NUOVA PARTITA</button>
   `;
