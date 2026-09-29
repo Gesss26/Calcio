@@ -232,84 +232,38 @@
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 11px; }
 
-  /* ============ PEDINE con SPRITE ============ */
+  /* ============ PEDINE con immagini ============ */
   .pedina {
     position: relative;
-    width: 36px;
-    height: 44px;
+    width: 40px;
+    height: 47px;
     transition: transform 0.2s, filter 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   
-  /* Sprite: usa lo sprite sheet come background */
-  .sprite-giocatore {
-    width: 36px;
-    height: 44px;
-    background-image: url('sprite.png');
-    background-repeat: no-repeat;
-    /* Lo sprite è 800x800, con 6 righe. Ogni riga ~133px.
-       La prima colonna (IDLE frame 1) è a 0,0 con size ~80x80.
-       Adattiamo per mostrare solo il primo frame IDLE */
-    background-size: 800px 800px;
-    background-position: -4px -4px;
+  .pedina .sprite-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
-    transition: transform 0.2s;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
   }
   
-  /* Fallback: se lo sprite non carica, mostra la pedina CSS */
-  .pedina-css {
-    position: absolute;
-    inset: 0;
-    display: none; /* mostrato via JS se sprite fallisce */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .pedina-css .testa {
-    width: 14px; height: 14px;
-    border-radius: 50%;
-    border: 1.5px solid #fff;
-  }
-  .pedina-css .corpo {
-    width: 16px; height: 16px;
-    border-radius: 3px 3px 4px 4px;
-    border: 1.5px solid #fff;
-    margin-top: -1px;
-  }
-  .pedina-css .gambe { display: flex; gap: 2px; margin-top: -1px; }
-  .pedina-css .gamba {
-    width: 5px; height: 10px;
-    border-radius: 0 0 2px 2px;
-    border: 1.5px solid #fff;
-    border-top: none;
-  }
-  .pedina-css.tu .testa, .pedina-css.tu .corpo, .pedina-css.tu .gamba {
-    background: radial-gradient(circle at 30% 30%, #6bb6ff, #2563eb);
-  }
-  .pedina-css.cpu .testa, .pedina-css.cpu .corpo, .pedina-css.cpu .gamba {
-    background: radial-gradient(circle at 30% 30%, #ff8a8a, #dc2626);
-  }
-  .pedina-css.portiere .testa, .pedina-css.portiere .corpo, .pedina-css.portiere .gamba {
-    background: radial-gradient(circle at 30% 30%, #ffe066, #f59f00);
-  }
-
-  /* Filtri colore per le squadre (applicati allo sprite) */
-  .sprite-tu { filter: hue-rotate(0deg) saturate(1.2); } /* blu (default) */
-  .sprite-cpu { filter: hue-rotate(160deg) saturate(1.5); } /* rosso */
-  
-  /* Varianti colore */
-  .colore-blu { filter: hue-rotate(0deg) saturate(1.2); }
-  .colore-rosso { filter: hue-rotate(160deg) saturate(1.5); }
-  .colore-giallo { filter: hue-rotate(60deg) saturate(2) brightness(1.3); }
-  .colore-verde { filter: hue-rotate(90deg) saturate(1.3); }
-  .colore-arancio { filter: hue-rotate(30deg) saturate(1.8); }
+  /* Filtri colore per le squadre */
+  .pedina.tu .sprite-img { filter: hue-rotate(0deg) saturate(1.2); }
+  .pedina.cpu .sprite-img { filter: hue-rotate(160deg) saturate(1.6); }
+  .pedina.colore-giallo .sprite-img { filter: hue-rotate(60deg) saturate(2) brightness(1.2); }
+  .pedina.colore-verde .sprite-img { filter: hue-rotate(90deg) saturate(1.4); }
+  .pedina.colore-arancio .sprite-img { filter: hue-rotate(30deg) saturate(1.8); }
 
   .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
-  .pedina.ammonito { 
+  .pedina.ammonito {
     box-shadow: 0 0 0 2px #ffd700;
     border-radius: 4px;
   }
@@ -444,16 +398,10 @@
   }
   .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
   .panchina-giocatore .pedina {
-    transform: scale(0.7);
+    transform: scale(0.65);
     transform-origin: center bottom;
-    height: 30px;
-    width: 26px;
-  }
-  .panchina-giocatore .sprite-giocatore {
-    width: 26px;
-    height: 32px;
-    background-size: 580px 580px;
-    background-position: -3px -3px;
+    width: 30px;
+    height: 36px;
   }
   .panchina-giocatore .panchina-nome {
     font-size: 8px;
@@ -546,7 +494,6 @@
     border-color: #ff0000;
   }
 
-  /* Pile mazzo e scarto */
   .pila-wrapper {
     display: flex;
     gap: 8px;
@@ -823,12 +770,10 @@
     .btn-icona { width: 28px; height: 28px; font-size: 13px; }
     .campo-wrapper { flex: 0 0 45vh; }
     .app.fase-combattimento .campo-wrapper { flex: 0 0 45vh; }
-    .pedina { width: 28px; height: 36px; }
-    .sprite-giocatore { width: 28px; height: 36px; background-size: 640px 640px; background-position: -3px -3px; }
+    .pedina { width: 30px; height: 36px; }
     .info-laterale { font-size: 8px; }
     .panchina { min-height: 42px; padding: 2px 4px; }
-    .panchina-giocatore .pedina { transform: scale(0.6); height: 24px; width: 20px; }
-    .panchina-giocatore .sprite-giocatore { width: 20px; height: 26px; background-size: 460px 460px; background-position: -2px -2px; }
+    .panchina-giocatore .pedina { transform: scale(0.55); width: 24px; height: 28px; }
     .panchina-giocatore .panchina-nome { font-size: 7px; }
     .carta { width: 40px; height: 56px; font-size: 28px; }
     .carta.negativa { font-size: 24px; }
@@ -974,6 +919,24 @@ const PANCHINA_CONFIG = [
   { ruolo: 'ATT', n: 2 }
 ];
 
+/* =========================================================
+   ANIMAZIONI - Nomi cartelle e numero frame
+   ========================================================= */
+const ANIMAZIONI = {
+  'Fermo':      { cartella: 'Fermo',      frame: 16, velocita: 180, loop: true },
+  'Tiro':       { cartella: 'Tiro',       frame: 16, velocita: 100, loop: false },
+  'Scivolata':  { cartella: 'Scivolata',  frame: 12, velocita: 100, loop: false },
+  'Esultanza1': { cartella: 'Esultanza1', frame: 10, velocita: 150, loop: false },
+  'Esultanza2': { cartella: 'Esultanza2', frame: 10, velocita: 150, loop: false },
+  'Esultanza3': { cartella: 'Esultanza3', frame: 10, velocita: 150, loop: false }
+};
+
+// Genera il percorso di un frame (con spazio + parentesi codificati)
+function pathFrame(animazione, numero) {
+  const cartella = ANIMAZIONI[animazione].cartella;
+  return encodeURI(`${cartella}/${animazione} (${numero}).png`);
+}
+
 let stato = {
   modalita: '1P',
   tempo: 1,
@@ -1002,6 +965,9 @@ let stato = {
 
 let selezione = [];
 let selezioneSost = { campo: null, panchina: null };
+
+// Traccia animazioni in corso per ogni giocatore
+const animazioniInCorso = {};
 
 /* =========================================================
    MAZZO
@@ -1082,6 +1048,55 @@ function apriLog() {
 
 function chiudiModale() {
   document.getElementById('modale').classList.add('nascosto');
+}
+
+/* =========================================================
+   ANIMAZIONE GIOCATORE
+   ========================================================= */
+function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
+  // Ferma animazione precedente
+  fermaAnimazione(giocatoreId);
+  
+  const config = ANIMAZIONI[nomeAnimazione];
+  if (!config) { if (callback) callback(); return; }
+  
+  const img = document.querySelector(`[data-giocatore-id="${giocatoreId}"] .sprite-img`);
+  if (!img) { if (callback) callback(); return; }
+  
+  let frame = 1;
+  animazioniInCorso[giocatoreId] = true;
+  
+  const tick = () => {
+    if (!animazioniInCorso[giocatoreId]) return;
+    
+    img.src = pathFrame(nomeAnimazione, frame);
+    frame++;
+    
+    if (frame > config.frame) {
+      if (config.loop) {
+        frame = 1;
+        setTimeout(tick, config.velocita);
+      } else {
+        // Animazione finita, torna a Fermo
+        animazioniInCorso[giocatoreId] = false;
+        if (callback) callback();
+        // Torna a Fermo (loop)
+        setTimeout(() => {
+          if (!animazioniInCorso[giocatoreId]) {
+            avviaAnimazione(giocatoreId, 'Fermo');
+          }
+        }, 100);
+      }
+    } else {
+      setTimeout(tick, config.velocita);
+    }
+  };
+  
+  tick();
+}
+
+function fermaAnimazione(giocatoreId) {
+  animazioniInCorso[giocatoreId] = false;
 }
 
 /* =========================================================
@@ -1249,6 +1264,17 @@ function renderCampo() {
 
     zone.appendChild(zona);
   });
+
+  // Avvia animazioni Fermo per tutti i giocatori
+  setTimeout(() => {
+    ['tu', 'cpu'].forEach(sq => {
+      stato.giocatori[sq].forEach(g => {
+        if (!g.espulso && !animazioniInCorso[g.id]) {
+          avviaAnimazione(g.id, 'Fermo');
+        }
+      });
+    });
+  }, 50);
 }
 
 function creaPedinaWrapper(g) {
@@ -1299,11 +1325,11 @@ function creaPedinaEl(g) {
   if (g.espulso) el.classList.add('espulso');
   el.title = `${g.nome} - Stamina ${g.stamina}/${g.staminaMax} - Falli ${g.falli}`;
   
-  // Sprite con filtro colore
-  const sprite = document.createElement('div');
-  sprite.className = 'sprite-giocatore colore-' + (g.squadra === 'tu' ? 'blu' : 'rosso');
-  
-  el.appendChild(sprite);
+  const img = document.createElement('img');
+  img.className = 'sprite-img';
+  img.src = pathFrame('Fermo', 1);
+  img.alt = g.nome;
+  el.appendChild(img);
   
   if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
     const palla = document.createElement('div');
@@ -1341,8 +1367,8 @@ function renderPanchina() {
     el.className = 'panchina-giocatore tu';
     if (g.entrato) el.classList.add('in-ombra');
     el.innerHTML = `
-      <div class="pedina tu${g.portiere ? ' portiere' : ''}">
-        <div class="sprite-giocatore colore-blu"></div>
+      <div class="pedina tu">
+        <img class="sprite-img" src="${pathFrame('Fermo', 1)}" alt="${g.nome}">
       </div>
       <div class="panchina-nome">${g.nome}</div>
     `;
@@ -1359,8 +1385,8 @@ function renderPanchina() {
     el.className = 'panchina-giocatore cpu';
     if (g.entrato) el.classList.add('in-ombra');
     el.innerHTML = `
-      <div class="pedina cpu${g.portiere ? ' portiere' : ''}">
-        <div class="sprite-giocatore colore-rosso"></div>
+      <div class="pedina cpu">
+        <img class="sprite-img" src="${pathFrame('Fermo', 1)}" alt="${g.nome}">
       </div>
       <div class="panchina-nome">${g.nome}</div>
     `;
@@ -1547,6 +1573,8 @@ function confermaSostituzione() {
 
   if (!campo || !pan || pan.entrato) return;
 
+  fermaAnimazione(campo.id);
+  
   const nuovo = {
     id: pan.id,
     squadra: sq,
@@ -1575,7 +1603,7 @@ function confermaSostituzione() {
 }
 
 /* =========================================================
-   CONTRASTO - RESET MAZZO + DISTRIBUZIONE
+   CONTRASTO
    ========================================================= */
 function avviaContrasto() {
   document.getElementById('app').className = 'app fase-combattimento';
@@ -1607,11 +1635,9 @@ function avviaContrasto() {
     giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
   }
 
-  // Reset mazzo + scarto ad ogni contrasto
   resetMazzo(attaccante);
   resetMazzo(difensore);
 
-  // Calcola carte
   let carteAtt = 6;
   if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
   if (nAtt < nDif) carteAtt -= 1;
@@ -1822,7 +1848,6 @@ function spareggio() {
   const att = c.attaccante;
   const dif = c.difensore;
   
-  // Se le carte in mano non bastano (meno di 2), rimescola tutto
   if (stato.mani[att].length < 2 || stato.mani[dif].length < 2) {
     log(`♻️ Carte esaurite! Rimescolo il mazzo e ridistribuisco.`);
     
@@ -1832,7 +1857,6 @@ function spareggio() {
       stato.mani[sq] = [];
     });
     
-    // Ricalcola carte
     let carteAtt = 6;
     const giocatoreAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
     if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
@@ -1848,7 +1872,6 @@ function spareggio() {
     distribuisciCarte(att, carteAtt);
     distribuisciCarte(dif, carteDif);
   } else {
-    // Pesca 2 carte per tornare al totale
     while (stato.mani[att].length < c.carteAtt && stato.mazzi[att].length > 0) {
       stato.mani[att].push(stato.mazzi[att].pop());
     }
@@ -1975,6 +1998,7 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   }
   if (falloso.falli >= 6) {
     falloso.espulso = true;
+    fermaAnimazione(falloso.id);
     stato.statistiche[difensore].espulsioni++;
     log(`🟥 ESPULSIONE per ${falloso.nome}!`, 'parata');
   }
@@ -2087,50 +2111,18 @@ function mostraGoal(vincente) {
 }
 
 /* =========================================================
-   TIRO IN PORTA (con animazione SHOOT)
+   TIRO IN PORTA (con animazione Tiro + Esultanza)
    ========================================================= */
-function animaShoot(giocatoreId, callback) {
-  // Trova il giocatore e cambia il background-position per mostrare l'animazione di tiro
-  const pedina = document.querySelector(`[data-giocatore-id="${giocatoreId}"]`);
-  if (!pedina) { if (callback) callback(); return; }
-  const sprite = pedina.querySelector('.sprite-giocatore');
-  if (!sprite) { if (callback) callback(); return; }
-  
-  // Riga SHOOT (4a riga): ~400px dall'alto (se sprite è 800x800, ogni riga = 133px, 4a riga = 400px)
-  // Frame 1, 2, 3 in sequenza
-  const frameShoot = [
-    { x: -4, y: -400 },
-    { x: -84, y: -400 },
-    { x: -164, y: -400 },
-    { x: -244, y: -400 },
-    { x: -324, y: -400 }
-  ];
-  
-  let idx = 0;
-  const intervallo = setInterval(() => {
-    sprite.style.backgroundPosition = `${frameShoot[idx].x}px ${frameShoot[idx].y}px`;
-    idx++;
-    if (idx >= frameShoot.length) {
-      clearInterval(intervallo);
-      // Torna a IDLE
-      setTimeout(() => {
-        sprite.style.backgroundPosition = '-4px -4px';
-        if (callback) callback();
-      }, 300);
-    }
-  }, 120);
-}
-
 function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   nascondiPalla();
   stato.statistiche[attaccante].tiri++;
   log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
 
-  // Animazione SHOOT
+  // Animazione Tiro sul giocatore
   const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
   if (giocatore) {
-    animaShoot(giocatore.id);
+    avviaAnimazione(giocatore.id, 'Tiro');
   }
 
   setTimeout(() => {
@@ -2154,7 +2146,7 @@ function tiroInPorta(attaccante) {
         fase2Tiro(attaccante, difensore, dado);
       }, 1200);
     }, 400);
-  }, 800);
+  }, 1500);
 }
 
 function fase2Tiro(attaccante, difensore, numAtt) {
@@ -2218,6 +2210,14 @@ function gestisciGoal(attaccante) {
   stato.statistiche[attaccante].gol++;
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
   mostraGoal(attaccante);
+
+  // Animazione Esultanza su un giocatore a caso della squadra
+  const giocatoriSquadra = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
+  if (giocatoriSquadra.length > 0) {
+    const esultante = giocatoriSquadra[Math.floor(Math.random() * giocatoriSquadra.length)];
+    const esultanza = 'Esultanza' + (Math.floor(Math.random() * 3) + 1);
+    avviaAnimazione(esultante.id, esultanza);
+  }
 
   setTimeout(() => {
     const subito = attaccante === 'tu' ? 'cpu' : 'tu';
@@ -2421,7 +2421,6 @@ function finePartita() {
       <tr><td>Possesso palla</td><td class="tu-val">${possesoTu}%</td><td class="cpu-val">${possessoCpu}%</td></tr>
     </table>
     <button class="primario" onclick="location.reload()" style="margin-top:16px">NUOVA PARTITA</button>
-    <p style="font-size:10px;color:#666;margin-top:16px">Sprite credit: Easy-Peasy.AI (free to use with backlink)</p>
   `;
   document.getElementById('modale').classList.remove('nascosto');
 }
