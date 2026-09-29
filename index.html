@@ -14,81 +14,40 @@
     overflow: hidden;
     user-select: none;
   }
-
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    transition: all 0.4s ease;
-  }
+  .app { display: flex; flex-direction: column; height: 100vh; transition: all 0.4s ease; }
 
   /* ============ TOP BAR ============ */
   .topbar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 6px 14px;
-    background: #16213e;
-    border-bottom: 2px solid #0f3460;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 10;
-    min-height: 44px;
+    display: flex; justify-content: center; align-items: center;
+    padding: 6px 14px; background: #16213e; border-bottom: 2px solid #0f3460;
+    flex-shrink: 0; position: relative; z-index: 10; min-height: 44px;
   }
-  .risultato-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
+  .risultato-wrapper { display: flex; align-items: center; gap: 14px; }
   .risultato {
-    font-size: 22px;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
-    letter-spacing: 2px;
+    font-size: 22px; font-weight: bold; color: #ffd700;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8); letter-spacing: 2px;
   }
   .risultato .tu { color: #4dabf7; }
   .risultato .cpu { color: #ff6b6b; }
   .risultato .sep { color: #fff; margin: 0 10px; }
   .minuto {
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffd700;
-    background: rgba(0,0,0,0.5);
-    padding: 2px 8px;
-    border-radius: 6px;
-    border: 1px solid rgba(255,215,0,0.4);
-    min-width: 44px;
-    text-align: center;
+    font-size: 16px; font-weight: bold; color: #ffd700;
+    background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 6px;
+    border: 1px solid rgba(255,215,0,0.4); min-width: 44px; text-align: center;
   }
   .info-top {
-    position: absolute;
-    right: 84px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    text-align: right;
-    line-height: 1.3;
-    color: #aaa;
+    position: absolute; right: 84px; top: 50%; transform: translateY(-50%);
+    font-size: 11px; text-align: right; line-height: 1.3; color: #aaa;
   }
   .info-top span { color: #ffd700; font-weight: bold; }
   .topbar-buttons {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    gap: 4px;
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    display: flex; gap: 4px;
   }
   .btn-icona {
-    width: 34px; height: 34px;
-    background: #0f3460;
-    color: #fff;
-    border: 2px solid #4dabf7;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; background: #0f3460; color: #fff;
+    border: 2px solid #4dabf7; border-radius: 8px; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
     transition: all 0.15s;
   }
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
@@ -96,133 +55,83 @@
 
   /* ============ CAMPO ============ */
   .campo-wrapper {
-    flex: 0 0 40vh;
-    position: relative;
-    background: #1a5a28;
-    overflow: hidden;
-    transition: flex 0.4s ease;
+    flex: 0 0 40vh; position: relative; background: #1a5a28;
+    overflow: hidden; transition: flex 0.4s ease;
   }
   .app.fase-animazione .campo-wrapper { flex: 1; }
   .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
 
   .campo {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background:
-      repeating-linear-gradient(90deg,
-        rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 60px,
-        rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 120px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 60px, rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 120px),
       linear-gradient(180deg, #2d8a3e 0%, #3aa04a 50%, #2d8a3e 100%);
-    transform: rotateX(6deg);
-    transform-origin: center bottom;
+    transform: rotateX(6deg); transform-origin: center bottom;
     border: 3px solid rgba(255,255,255,0.85);
-    margin: 10px 16px;
-    border-radius: 6px;
+    margin: 10px 16px; border-radius: 6px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 0 80px rgba(0,0,0,0.3);
   }
-
   .righe-campo { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
   .linea-centrocampo {
     position: absolute; left: 50%; top: 6%; bottom: 6%;
-    width: 2px; background: rgba(255,255,255,0.7);
-    transform: translateX(-50%);
+    width: 2px; background: rgba(255,255,255,0.7); transform: translateX(-50%);
   }
   .cerchio-centrocampo {
-    position: absolute; left: 50%; top: 50%;
-    width: 20%; aspect-ratio: 1;
-    border: 2px solid rgba(255,255,255,0.7);
-    border-radius: 50%;
+    position: absolute; left: 50%; top: 50%; width: 20%; aspect-ratio: 1;
+    border: 2px solid rgba(255,255,255,0.7); border-radius: 50%;
     transform: translate(-50%, -50%);
   }
   .punto-centrocampo {
-    position: absolute; left: 50%; top: 50%;
-    width: 6px; height: 6px;
-    background: rgba(255,255,255,0.9);
-    border-radius: 50%;
+    position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
+    background: rgba(255,255,255,0.9); border-radius: 50%;
     transform: translate(-50%, -50%);
   }
   .area-penale {
-    position: absolute; top: 50%;
-    width: 14%; height: 60%;
-    border: 2px solid rgba(255,255,255,0.7);
-    transform: translateY(-50%);
+    position: absolute; top: 50%; width: 14%; height: 60%;
+    border: 2px solid rgba(255,255,255,0.7); transform: translateY(-50%);
   }
   .area-penale.sinistra { left: 0; border-left: none; border-radius: 0 6px 6px 0; }
   .area-penale.destra { right: 0; border-right: none; border-radius: 6px 0 0 6px; }
   .area-piccola {
-    position: absolute; top: 50%;
-    width: 6%; height: 32%;
-    border: 2px solid rgba(255,255,255,0.6);
-    transform: translateY(-50%);
+    position: absolute; top: 50%; width: 6%; height: 32%;
+    border: 2px solid rgba(255,255,255,0.6); transform: translateY(-50%);
   }
   .area-piccola.sinistra { left: 0; border-left: none; border-radius: 0 4px 4px 0; }
   .area-piccola.destra { right: 0; border-right: none; border-radius: 4px 0 0 4px; }
   .porta {
-    position: absolute; top: 50%;
-    width: 2%; height: 14%;
-    background: rgba(255,255,255,0.15);
-    border: 3px solid #fff;
-    transform: translateY(-50%);
-    box-shadow: 0 0 20px rgba(255,255,255,0.6);
+    position: absolute; top: 50%; width: 2%; height: 14%;
+    background: rgba(255,255,255,0.15); border: 3px solid #fff;
+    transform: translateY(-50%); box-shadow: 0 0 20px rgba(255,255,255,0.6);
   }
   .porta.sinistra { left: -4px; border-radius: 0 4px 4px 0; }
   .porta.destra { right: -4px; border-radius: 4px 0 0 4px; }
 
   .zone { display: flex; width: 100%; height: 100%; position: relative; z-index: 2; }
   .zona {
-    flex: 1;
-    border-right: 1px dashed rgba(255,255,255,0.2);
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 2px;
+    flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);
+    position: relative; display: flex; flex-direction: row;
+    justify-content: center; align-items: center; gap: 4px; padding: 4px 2px;
   }
   .zona:last-child { border-right: none; }
   .zona-portiere { flex: 0.5; }
   .zona-label {
-    position: absolute;
-    bottom: 2px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    color: rgba(255,215,0,0.8);
-    font-weight: bold;
-    text-shadow: 0 1px 2px #000;
-    pointer-events: none;
+    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: rgba(255,215,0,0.8); font-weight: bold;
+    text-shadow: 0 1px 2px #000; pointer-events: none;
   }
-
   .lato-squadra {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    align-items: center;
-    justify-content: center;
-    min-width: 24px;
-    position: relative;
+    display: flex; flex-direction: column; gap: 3px; align-items: center;
+    justify-content: center; min-width: 24px; position: relative;
   }
   .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.2); padding-right: 4px; }
   .lato-squadra.cpu { padding-left: 2px; }
   .zona-portiere .lato-squadra.tu { border-right: none; padding-right: 0; }
 
-  .pedina-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    position: relative;
-  }
+  .pedina-wrapper { display: flex; align-items: center; gap: 3px; position: relative; }
   .info-laterale {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 10px;
-    line-height: 1.1;
-    color: #fff;
-    text-shadow: 0 1px 2px #000;
-    pointer-events: none;
-    font-weight: bold;
-    font-family: 'Courier New', monospace;
+    display: flex; flex-direction: column; gap: 2px; font-size: 10px;
+    line-height: 1.1; color: #fff; text-shadow: 0 1px 2px #000;
+    pointer-events: none; font-weight: bold; font-family: 'Courier New', monospace;
   }
   .info-laterale.tu { text-align: right; }
   .info-laterale.cpu { text-align: left; }
@@ -232,128 +141,51 @@
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 11px; }
 
-  /* ============ PEDINE con immagini ============ */
+  /* ============ PEDINE ============ */
   .pedina {
-    position: relative;
-    width: 40px;
-    height: 47px;
+    position: relative; width: 40px; height: 47px;
     transition: transform 0.2s, filter 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
   }
-  
   .pedina .sprite-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    user-select: none;
-    -webkit-user-drag: none;
-    pointer-events: none;
+    width: 100%; height: 100%; object-fit: contain;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    user-select: none; -webkit-user-drag: none; pointer-events: none;
   }
-  
-  /* ============ FILTRI SQUADRA ============ */
-  
-  /* CPU: specchiata, nessun filtro colore (o filtro della sua squadra) */
-  .pedina.cpu .sprite-img {
-    transform: scaleX(-1);
-  }
-  
-  /* Squadra TU (Italia - blu originale, nessun filtro) */
-  .pedina.tu.squadra-italia .sprite-img { filter: none; }
-  
-  /* Squadra CPU (varie) */
-  .pedina.cpu.squadra-brasile .sprite-img {
-    filter: hue-rotate(60deg) saturate(3) brightness(1.3);
-  }
-  .pedina.cpu.squadra-senegal .sprite-img {
-    filter: hue-rotate(120deg) saturate(1.5) brightness(0.9);
-  }
-  .pedina.cpu.squadra-giappone .sprite-img {
-    filter: hue-rotate(-30deg) saturate(1.5) brightness(0.8);
-  }
-  .pedina.cpu.squadra-italia .sprite-img {
-    filter: none;
-  }
-
-  /* Panchina: specchiatura CPU */
-  .panchina-giocatore.cpu .sprite-img {
-    transform: scaleX(-1);
-  }
-  .panchina-giocatore.cpu.squadra-brasile .sprite-img {
-    filter: hue-rotate(60deg) saturate(3) brightness(1.3);
-  }
-  .panchina-giocatore.cpu.squadra-senegal .sprite-img {
-    filter: hue-rotate(120deg) saturate(1.5) brightness(0.9);
-  }
-  .panchina-giocatore.cpu.squadra-giappone .sprite-img {
-    filter: hue-rotate(-30deg) saturate(1.5) brightness(0.8);
-  }
+  .pedina.cpu .sprite-img { transform: scaleX(-1); }
 
   .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
-  .pedina.ammonito {
-    box-shadow: 0 0 0 2px #ffd700;
-    border-radius: 4px;
-  }
+  .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
   .pedina.ammonito::after {
-    content: '🟨';
-    position: absolute;
-    top: -6px; right: -6px;
-    font-size: 12px;
-    z-index: 5;
+    content: '🟨'; position: absolute; top: -6px; right: -6px;
+    font-size: 12px; z-index: 5;
   }
-  .pedina.espulso {
-    filter: grayscale(1) brightness(0.4) !important;
-    opacity: 0.5;
-  }
+  .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
   .pedina.espulso::after {
-    content: '🟥';
-    position: absolute;
-    top: -6px; right: -6px;
-    font-size: 12px;
+    content: '🟥'; position: absolute; top: -6px; right: -6px; font-size: 12px;
   }
 
   .pedina .stamina-bar {
-    position: absolute;
-    bottom: -4px; left: 0;
-    width: 100%; height: 3px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 2px;
-    overflow: hidden;
+    position: absolute; bottom: -4px; left: 0; width: 100%; height: 3px;
+    background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
   }
-  .pedina .stamina-fill {
-    height: 100%; background: #4ade80;
-    transition: width 0.3s;
-  }
+  .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
 
-  /* Palla attaccata ai piedi */
   .pedina .palla-attaccata {
-    position: absolute;
-    bottom: -6px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 16px;
-    height: 16px;
+    position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+    width: 16px; height: 16px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%;
-    border: 2px solid #222;
+    border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700;
-    z-index: 10;
-    pointer-events: none;
-    animation: pallaAttaccata 1.2s infinite;
+    z-index: 10; pointer-events: none; animation: pallaAttaccata 1.2s infinite;
   }
   .pedina .palla-attaccata::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
+    content: ''; position: absolute; inset: 3px;
     background: radial-gradient(circle at 30% 30%, #333, #000);
-    border-radius: 50%;
-    opacity: 0.6;
+    border-radius: 50%; opacity: 0.6;
   }
   @keyframes pallaAttaccata {
     0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700; }
@@ -361,246 +193,127 @@
   }
 
   .palla-animata {
-    position: absolute;
-    width: 20px; height: 20px;
+    position: absolute; width: 20px; height: 20px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%;
-    border: 2px solid #222;
+    border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7), 0 0 6px #ffd700;
-    z-index: 60;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    will-change: left, top;
-    display: none;
+    z-index: 60; pointer-events: none; transform: translate(-50%, -50%);
+    will-change: left, top; display: none;
   }
   .palla-animata::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
+    content: ''; position: absolute; inset: 4px;
     background: radial-gradient(circle at 30% 30%, #333, #000);
-    border-radius: 50%;
-    opacity: 0.6;
+    border-radius: 50%; opacity: 0.6;
   }
 
   .flash-vincitore {
-    position: absolute;
-    inset: 0;
-    z-index: 55;
-    pointer-events: none;
-    opacity: 0;
+    position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
   }
   .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
   .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
-  @keyframes flash {
-    0% { opacity: 0.95; }
-    100% { opacity: 0; }
-  }
+  @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
   /* ============ PANCHINA ============ */
   .panchina {
-    background: #1a1a2e;
-    border-top: 2px solid #0f3460;
-    border-bottom: 2px solid #0f3460;
-    padding: 3px 8px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 4px;
-    flex-shrink: 0;
-    min-height: 52px;
+    background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
+    padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
+    gap: 4px; flex-shrink: 0; min-height: 52px;
   }
   .panchina-titolo {
-    font-size: 9px;
-    color: #ffd700;
-    font-weight: bold;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    letter-spacing: 2px;
+    font-size: 9px; color: #ffd700; font-weight: bold;
+    writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px;
   }
   .panchina-giocatore {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2px;
-    border-radius: 4px;
-    transition: all 0.2s;
+    position: relative; display: flex; flex-direction: column; align-items: center;
+    padding: 2px; border-radius: 4px; transition: all 0.2s;
   }
   .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
   .panchina-giocatore .pedina {
-    transform: scale(0.65);
-    transform-origin: center bottom;
-    width: 30px;
-    height: 36px;
+    transform: scale(0.65); transform-origin: center bottom; width: 30px; height: 36px;
   }
   .panchina-giocatore .panchina-nome {
-    font-size: 8px;
-    color: #ccc;
-    margin-top: 2px;
-    font-weight: bold;
+    font-size: 8px; color: #ccc; margin-top: 2px; font-weight: bold;
   }
   .panchina-giocatore.tu .panchina-nome { color: #6bb6ff; }
   .panchina-giocatore.cpu .panchina-nome { color: #ff8a8a; }
 
   /* ============ PANNELLO CARTE ============ */
   .carte-panel {
-    flex: 1;
-    background: #16213e;
-    padding: 8px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    overflow-y: auto;
-    transition: all 0.3s;
+    flex: 1; background: #16213e; padding: 8px 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 6px; overflow-y: auto; transition: all 0.3s;
   }
   .app.fase-animazione .carte-panel { display: none; }
   .carte-panel.nascosto { display: none; }
 
   .info-mano {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;
   }
   .info-mano .titolo {
-    font-size: 11px;
-    color: #ffd700;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 11px; color: #ffd700; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 1px;
   }
   .info-mano .bersaglio {
-    font-size: 26px;
-    font-weight: bold;
-    color: #ffd700;
+    font-size: 26px; font-weight: bold; color: #ffd700;
     text-shadow: 0 0 12px rgba(255,215,0,0.7);
   }
   .info-mano .turno-label { font-size: 12px; color: #aaa; }
 
   .mano-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center;
   }
-  .carte {
-    display: flex; gap: 6px; flex-wrap: wrap;
-    justify-content: center;
-  }
+  .carte { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
   .carta {
-    width: 48px; height: 66px;
-    background: #fff; color: #222;
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 34px; font-weight: 900;
-    font-family: 'Georgia', serif;
-    cursor: pointer;
-    border: 3px solid transparent;
-    transition: all 0.15s;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-    line-height: 1;
+    width: 48px; height: 66px; background: #fff; color: #222;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 900; font-family: 'Georgia', serif;
+    cursor: pointer; border: 3px solid transparent; transition: all 0.15s;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5); line-height: 1;
   }
   .carta:hover { transform: translateY(-4px); }
   .carta.selezionata {
-    border-color: #ffd700;
-    background: #fff9c4;
-    transform: translateY(-6px);
-    box-shadow: 0 0 16px #ffd700;
+    border-color: #ffd700; background: #fff9c4;
+    transform: translateY(-6px); box-shadow: 0 0 16px #ffd700;
   }
   .carta.negativa {
     background: linear-gradient(135deg, #fff5f5, #ffdddd);
-    color: #dc2626;
-    border: 3px solid #dc2626;
-    font-size: 30px;
+    color: #dc2626; border: 3px solid #dc2626; font-size: 30px;
     box-shadow: 0 0 12px rgba(220,38,38,0.5), 0 3px 6px rgba(0,0,0,0.5);
   }
   .carta.negativa.selezionata {
-    background: #ffcccc;
-    box-shadow: 0 0 20px #dc2626, 0 0 30px #dc2626;
-    border-color: #ff0000;
+    background: #ffcccc; box-shadow: 0 0 20px #dc2626, 0 0 30px #dc2626; border-color: #ff0000;
   }
 
-  .pila-wrapper {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .pila {
-    position: relative;
-    width: 36px;
-    height: 50px;
-    cursor: default;
-  }
+  .pila-wrapper { display: flex; gap: 8px; align-items: center; }
+  .pila { position: relative; width: 36px; height: 50px; cursor: default; }
   .pila-titolo {
-    position: absolute;
-    top: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    color: #ffd700;
-    font-weight: bold;
-    white-space: nowrap;
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
-    position: absolute;
-    width: 36px;
-    height: 50px;
-    border-radius: 4px;
+    position: absolute; width: 36px; height: 50px; border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    font-family: 'Georgia', serif;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: bold; font-family: 'Georgia', serif;
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
-    border: 2px solid #fff;
-    color: transparent;
+    border: 2px solid #fff; color: transparent;
   }
-  .pila-carta.dietro::after {
-    content: '🂠';
-    color: #fff;
-    font-size: 20px;
-  }
-  .pila-carta.scarto {
-    background: #fff;
-    border: 2px solid #999;
-    color: #222;
-  }
-  .pila-carta.scarto.negativa {
-    background: #ffdddd;
-    color: #dc2626;
-    border-color: #dc2626;
-  }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 20px; }
+  .pila-carta.scarto { background: #fff; border: 2px solid #999; color: #222; }
+  .pila-carta.scarto.negativa { background: #ffdddd; color: #dc2626; border-color: #dc2626; }
   .pila-count {
-    position: absolute;
-    bottom: -14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    color: #aaa;
-    white-space: nowrap;
+    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #aaa; white-space: nowrap;
   }
 
   button {
-    background: #0f3460;
-    color: #fff;
-    border: 2px solid #4dabf7;
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin: 2px;
+    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
+    cursor: pointer; transition: all 0.15s; margin: 2px;
   }
   button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -609,32 +322,18 @@
 
   /* ============ DADI ============ */
   .dado {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 68px; height: 68px;
-    background: #fff;
-    color: #222;
-    border-radius: 12px;
-    font-size: 42px;
-    font-weight: 900;
-    font-family: 'Georgia', serif;
-    margin: 4px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.7);
-    animation: rollDado 0.6s ease;
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 68px; height: 68px; background: #fff; color: #222;
+    border-radius: 12px; font-size: 42px; font-weight: 900;
+    font-family: 'Georgia', serif; margin: 4px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.7); animation: rollDado 0.6s ease;
   }
   @keyframes rollDado {
     0% { transform: rotate(-720deg) scale(0.3); opacity: 0; }
     60% { transform: rotate(0deg) scale(1.2); opacity: 1; }
     100% { transform: rotate(0deg) scale(1); opacity: 1; }
   }
-  .dadi-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin: 6px 0;
-    flex-wrap: wrap;
-  }
+  .dadi-row { display: flex; justify-content: center; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
   .dado.piccolo { width: 50px; height: 50px; font-size: 28px; }
   .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
   .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
@@ -642,27 +341,15 @@
 
   /* ============ OVERLAY ============ */
   .overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.78);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 40;
-    padding: 12px;
-    overflow-y: auto;
+    position: absolute; inset: 0; background: rgba(0,0,0,0.78);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 40; padding: 12px; overflow-y: auto;
   }
   .overlay.nascosto { display: none; }
   .overlay-box {
-    background: #16213e;
-    border: 3px solid #ffd700;
-    border-radius: 12px;
-    padding: 16px;
-    max-width: 560px;
-    width: 100%;
-    text-align: center;
-    max-height: 100%;
-    overflow-y: auto;
+    background: #16213e; border: 3px solid #ffd700; border-radius: 12px;
+    padding: 16px; max-width: 560px; width: 100%; text-align: center;
+    max-height: 100%; overflow-y: auto;
   }
   .overlay-box h2 { color: #ffd700; margin-bottom: 10px; font-size: 17px; }
   .esito-tiro { font-size: 22px; font-weight: bold; margin: 10px 0; text-align: center; }
@@ -670,30 +357,23 @@
   .esito-tiro.parata { color: #ef4444; text-shadow: 0 0 14px #ef4444; }
   .esito-tiro.palo { color: #f59f00; text-shadow: 0 0 14px #f59f00; }
   .esito-tiro.angolo { color: #4dabf7; text-shadow: 0 0 14px #4dabf7; }
-  .fase-label { font-size: 10px; color: #ffd700; text-transform: uppercase; letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px; }
+  .fase-label {
+    font-size: 10px; color: #ffd700; text-transform: uppercase;
+    letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px;
+  }
 
   /* ============ GOAL OVERLAY ============ */
   .goal-overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 90;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s;
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.3s;
   }
   .goal-overlay.attivo { opacity: 1; }
   .goal-overlay.tu { background: radial-gradient(circle, rgba(77,171,247,0.6), rgba(0,0,0,0.85)); }
   .goal-overlay.cpu { background: radial-gradient(circle, rgba(255,107,107,0.6), rgba(0,0,0,0.85)); }
   .goal-text {
-    font-size: 96px;
-    font-weight: 900;
-    color: #ffd700;
+    font-size: 96px; font-weight: 900; color: #ffd700;
     text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 8px 20px rgba(0,0,0,0.9);
-    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    letter-spacing: 4px;
+    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); letter-spacing: 4px;
   }
   @keyframes goalZoom {
     0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
@@ -702,92 +382,57 @@
 
   /* ============ MODALE ============ */
   .modale {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.92);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    padding: 12px;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 12px;
   }
   .modale.nascosto { display: none; }
   .modale-box {
-    background: #16213e;
-    border: 3px solid #ffd700;
-    border-radius: 14px;
-    padding: 22px;
-    max-width: 600px;
-    width: 100%;
-    max-height: 92vh;
-    overflow-y: auto;
-    text-align: center;
+    background: #16213e; border: 3px solid #ffd700; border-radius: 14px;
+    padding: 22px; max-width: 600px; width: 100%; max-height: 92vh;
+    overflow-y: auto; text-align: center;
   }
   .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
   .modale-box p { margin: 6px 0; line-height: 1.5; }
 
   /* ============ SELEZIONE SQUADRA ============ */
   .squadre-griglia {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 16px 0;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 10px; margin: 16px 0;
   }
   .squadra-btn {
-    background: #0f3460;
-    border: 3px solid #4dabf7;
-    border-radius: 10px;
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: center;
-    color: #fff;
-    font-weight: bold;
+    background: #0f3460; border: 3px solid #4dabf7; border-radius: 10px;
+    padding: 12px; cursor: pointer; transition: all 0.15s;
+    text-align: center; color: #fff; font-weight: bold;
   }
-  .squadra-btn:hover {
-    background: #4dabf7;
-    color: #16213e;
-    transform: scale(1.05);
-  }
+  .squadra-btn:hover { background: #4dabf7; color: #16213e; transform: scale(1.05); }
   .squadra-btn.selezionata {
-    background: #ffd700;
-    color: #16213e;
-    border-color: #ffd700;
-    box-shadow: 0 0 20px #ffd700;
+    background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 20px #ffd700;
   }
-  .squadra-btn .nome {
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
+  .squadra-btn .nome { font-size: 14px; margin-bottom: 6px; }
   .squadra-btn .maglia {
-    width: 60px;
-    height: 70px;
-    margin: 0 auto;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    width: 50px; height: 60px; margin: 0 auto;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
     image-rendering: pixelated;
   }
 
   /* ============ SOSTITUZIONI ============ */
   .sost-sezione {
-    background: rgba(0,0,0,0.3);
-    border-radius: 8px;
-    padding: 10px;
-    margin: 12px 0;
+    background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin: 12px 0;
   }
-  .sost-sezione h3 { font-size: 13px; color: #ffd700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .sost-sezione h3 {
+    font-size: 13px; color: #ffd700; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
   .sost-lista { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
   .sost-card {
-    background: #0f3460;
-    border: 2px solid #4dabf7;
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all 0.15s;
-    min-width: 70px;
-    text-align: center;
+    background: #0f3460; border: 2px solid #4dabf7; border-radius: 6px;
+    padding: 6px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s;
+    min-width: 70px; text-align: center;
   }
   .sost-card:hover:not(.disabilitato) { background: #4dabf7; color: #0f3460; }
-  .sost-card.selezionato { background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 14px #ffd700; }
+  .sost-card.selezionato {
+    background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 14px #ffd700;
+  }
   .sost-card.disabilitato { opacity: 0.35; cursor: not-allowed; }
   .sost-card .ruolo { font-weight: bold; }
   .sost-card .stamina { font-size: 9px; opacity: 0.8; }
@@ -795,15 +440,9 @@
 
   /* ============ LOG ============ */
   .log-box {
-    background: #0a0a15;
-    border-radius: 8px;
-    padding: 12px;
-    max-height: 60vh;
-    overflow-y: auto;
-    font-size: 12px;
-    line-height: 1.6;
-    text-align: left;
-    font-family: 'Courier New', monospace;
+    background: #0a0a15; border-radius: 8px; padding: 12px;
+    max-height: 60vh; overflow-y: auto; font-size: 12px;
+    line-height: 1.6; text-align: left; font-family: 'Courier New', monospace;
   }
   .log-box p { margin: 2px 0; }
   .log-box .tu { color: #4dabf7; font-weight: bold; }
@@ -813,23 +452,13 @@
   .log-box .highlight { background: rgba(255,215,0,0.15); padding: 2px 4px; border-radius: 3px; }
 
   /* ============ STATISTICHE ============ */
-  .stats-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    margin-top: 10px;
-  }
+  .stats-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
   .stats-table th {
-    background: #0f3460;
-    color: #ffd700;
-    padding: 6px 4px;
-    text-align: center;
-    font-size: 11px;
+    background: #0f3460; color: #ffd700; padding: 6px 4px;
+    text-align: center; font-size: 11px;
   }
   .stats-table td {
-    padding: 5px 4px;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 5px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);
   }
   .stats-table td:first-child { text-align: left; color: #ccc; }
   .stats-table .tu-val { color: #4dabf7; font-weight: bold; }
@@ -860,16 +489,10 @@
   }
 
   .rotate-msg {
-    display: none;
-    position: fixed; inset: 0;
-    background: #0a0a15;
-    z-index: 999;
-    align-items: center; justify-content: center;
-    flex-direction: column;
-    color: #ffd700;
-    font-size: 20px;
-    text-align: center;
-    padding: 20px;
+    display: none; position: fixed; inset: 0; background: #0a0a15;
+    z-index: 999; align-items: center; justify-content: center;
+    flex-direction: column; color: #ffd700; font-size: 20px;
+    text-align: center; padding: 20px;
   }
   @media (orientation: portrait) and (max-width: 900px) {
     .rotate-msg { display: flex; }
@@ -987,10 +610,8 @@ const ZONE_CONFIG = [
 ];
 
 const PANCHINA_CONFIG = [
-  { ruolo: 'POR', n: 1 },
-  { ruolo: 'DIF', n: 2 },
-  { ruolo: 'CEN', n: 2 },
-  { ruolo: 'ATT', n: 2 }
+  { ruolo: 'POR', n: 1 }, { ruolo: 'DIF', n: 2 },
+  { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
 
 const ANIMAZIONI = {
@@ -1002,42 +623,182 @@ const ANIMAZIONI = {
   'Esultanza3': { cartella: 'Esultanza3', frame: 10, velocita: 150, loop: false }
 };
 
+/* =========================================================
+   SQUADRE (con colori maglia/pelle/capelli)
+   ========================================================= */
+const SQUADRE = {
+  italia: {
+    nome: 'ITALIA',
+    maglia: '#0066CC',
+    pelle: '#D8A786',
+    capelli: '#4B351F'
+  },
+  brasile: {
+    nome: 'BRASILE',
+    maglia: '#FFD700',
+    pelle: '#8B5A2B',
+    capelli: '#1A1A1A'
+  },
+  senegal: {
+    nome: 'SENEGAL',
+    maglia: '#00853F',
+    pelle: '#5C3317',
+    capelli: '#000000'
+  },
+  giappone: {
+    nome: 'GIAPPONE',
+    maglia: '#000080',
+    pelle: '#F4C9A0',
+    capelli: '#000000'
+  }
+};
+
+// Colori originali degli sprite
+const COLORE_ORIG_MAGLIA = { r: 0x32, g: 0x50, b: 0x98 }; // #325098
+const COLORE_ORIG_PELLE = { r: 0xD8, g: 0xA7, b: 0x86 };  // #D8A786
+const COLORE_ORIG_CAPELLI = { r: 0x4B, g: 0x35, b: 0x1F }; // #4B351F
+
+// Tolleranza per la sostituzione colori
+const TOLLERANZA = 40;
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.substring(0, 2), 16),
+    g: parseInt(h.substring(2, 4), 16),
+    b: parseInt(h.substring(4, 6), 16)
+  };
+}
+
+function coloreSimile(r1, g1, b1, r2, g2, b2, tolleranza) {
+  return Math.abs(r1 - r2) <= tolleranza &&
+         Math.abs(g1 - g2) <= tolleranza &&
+         Math.abs(b1 - b2) <= tolleranza;
+}
+
+/* =========================================================
+   CANVAS COLORAZIONE - Cache immagini ricolorate
+   ========================================================= */
+const cacheImmagini = {}; // chiave: "squadra|animazione|frame" -> dataURL
+
+function caricaImmagineColorata(squadra, animazione, numeroFrame) {
+  return new Promise((resolve) => {
+    const chiave = `${squadra}|${animazione}|${numeroFrame}`;
+    if (cacheImmagini[chiave]) {
+      resolve(cacheImmagini[chiave]);
+      return;
+    }
+
+    const config = ANIMAZIONI[animazione];
+    if (!config) { resolve(''); return; }
+
+    const cartella = config.cartella;
+    const percorso = encodeURI(`${cartella}/${animazione} (${numeroFrame}).png`);
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        // Crea canvas della stessa dimensione
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        // Leggi pixel
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Colori target per questa squadra
+        const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
+        const targetPelle = hexToRgb(SQUADRE[squadra].pelle);
+        const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
+
+        // Sostituisci pixel per pixel
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          const a = data[i + 3];
+
+          // Salta pixel trasparenti
+          if (a < 10) continue;
+
+          // Maglia (blu originale)
+          if (coloreSimile(r, g, b, COLORE_ORIG_MAGLIA.r, COLORE_ORIG_MAGLIA.g, COLORE_ORIG_MAGLIA.b, TOLLERANZA)) {
+            data[i] = targetMaglia.r;
+            data[i + 1] = targetMaglia.g;
+            data[i + 2] = targetMaglia.b;
+            continue;
+          }
+
+          // Pelle (beige originale)
+          if (coloreSimile(r, g, b, COLORE_ORIG_PELLE.r, COLORE_ORIG_PELLE.g, COLORE_ORIG_PELLE.b, TOLLERANZA)) {
+            data[i] = targetPelle.r;
+            data[i + 1] = targetPelle.g;
+            data[i + 2] = targetPelle.b;
+            continue;
+          }
+
+          // Capelli (castano originale)
+          if (coloreSimile(r, g, b, COLORE_ORIG_CAPELLI.r, COLORE_ORIG_CAPELLI.g, COLORE_ORIG_CAPELLI.b, TOLLERANZA)) {
+            data[i] = targetCapelli.r;
+            data[i + 1] = targetCapelli.g;
+            data[i + 2] = targetCapelli.b;
+            continue;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        const dataURL = canvas.toDataURL();
+        cacheImmagini[chiave] = dataURL;
+        resolve(dataURL);
+      } catch (e) {
+        console.error('Errore Canvas:', e);
+        resolve(percorso); // fallback: immagine originale
+      }
+    };
+    img.onerror = () => {
+      resolve(percorso);
+    };
+    img.src = percorso;
+  });
+}
+
+// Precarica le immagini comuni (Fermo frame 1 per selezione squadra)
+function precaricaImmagini() {
+  Object.keys(SQUADRE).forEach(squadra => {
+    caricaImmagineColorata(squadra, 'Fermo', 1);
+  });
+}
+
+/* =========================================================
+   PATH FRAME
+   ========================================================= */
 function pathFrame(animazione, numero) {
   const cartella = ANIMAZIONI[animazione].cartella;
   return encodeURI(`${cartella}/${animazione} (${numero}).png`);
 }
 
 /* =========================================================
-   SQUADRE DISPONIBILI
+   STATO
    ========================================================= */
-const SQUADRE = [
-  { id: 'italia',   nome: 'ITALIA',   classe: 'squadra-italia' },
-  { id: 'brasile',  nome: 'BRASILE',  classe: 'squadra-brasile' },
-  { id: 'senegal',  nome: 'SENEGAL',  classe: 'squadra-senegal' },
-  { id: 'giappone', nome: 'GIAPPONE', classe: 'squadra-giappone' }
-];
-
 let stato = {
   modalita: '1P',
   squadraTU: 'italia',
   squadraCPU: 'brasile',
-  tempo: 1,
-  mano: 1,
-  maxMani: 15,
+  tempo: 1, mano: 1, maxMani: 15,
   punteggio: { tu: 0, cpu: 0 },
-  zonaPalla: 4,
-  possessore: null,
-  giocatorePalla: null,
+  zonaPalla: 4, possessore: null, giocatorePalla: null,
   pallaInAnimazione: false,
   mazzi: { tu: [], cpu: [] },
   scarti: { tu: [], cpu: [] },
   mani: { tu: [], cpu: [] },
   giocatori: { tu: [], cpu: [] },
   panchina: { tu: [], cpu: [] },
-  turno: 'tu',
-  monetaVinta: null,
-  partitaFinita: false,
-  sostBloccate: false,
+  turno: 'tu', monetaVinta: null,
+  partitaFinita: false, sostBloccate: false,
   statistiche: {
     tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
     cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
@@ -1047,16 +808,12 @@ let stato = {
 
 let selezione = [];
 let selezioneSost = { campo: null, panchina: null };
-
 const animazioniInCorso = {};
 
 /* =========================================================
    MAZZO
    ========================================================= */
-function creaMazzo() {
-  return mescola([0,1,2,3,4,5,6,7,8,9,'-1','-2']);
-}
-
+function creaMazzo() { return mescola([0,1,2,3,4,5,6,7,8,9,'-1','-2']); }
 function mescola(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -1065,32 +822,28 @@ function mescola(arr) {
   }
   return a;
 }
-
 function resetMazzo(sq) {
   stato.mazzi[sq] = creaMazzo();
   stato.scarti[sq] = [];
   stato.mani[sq] = [];
 }
-
 function distribuisciCarte(sq, n) {
   stato.mani[sq] = [];
   for (let i = 0; i < n && stato.mazzi[sq].length > 0; i++) {
     stato.mani[sq].push(stato.mazzi[sq].pop());
   }
 }
-
 function valoreCarta(carta) {
   if (carta === '-1') return -1;
   if (carta === '-2') return -2;
   return carta;
 }
-
 function sommaCarte(carte) {
   return carte.reduce((acc, c) => acc + valoreCarta(c), 0);
 }
 
 /* =========================================================
-   MINUTO (FIX: parte da 0)
+   MINUTO (0 all'inizio)
    ========================================================= */
 function calcolaMinuto() {
   const tempoOffset = (stato.tempo - 1) * 45;
@@ -1112,7 +865,6 @@ function log(msg, classe = '') {
     logBox.scrollTop = logBox.scrollHeight;
   }
 }
-
 function apriLog() {
   let html = `<h2>📋 Cronaca della partita</h2><div class="log-box" id="log-box">`;
   stato.logCompleto.forEach(l => {
@@ -1126,32 +878,40 @@ function apriLog() {
     if (box) box.scrollTop = box.scrollHeight;
   }, 50);
 }
-
 function chiudiModale() {
   document.getElementById('modale').classList.add('nascosto');
 }
 
 /* =========================================================
-   ANIMAZIONE
+   ANIMAZIONE (con Canvas colorato)
    ========================================================= */
 function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
   fermaAnimazione(giocatoreId);
-  
+
   const config = ANIMAZIONI[nomeAnimazione];
   if (!config) { if (callback) callback(); return; }
-  
+
   const img = document.querySelector(`[data-giocatore-id="${giocatoreId}"] .sprite-img`);
   if (!img) { if (callback) callback(); return; }
-  
+
+  // Determina squadra
+  const squadra = giocatoreId.startsWith('tu') ? stato.squadraTU : stato.squadraCPU;
+
   let frame = 1;
   animazioniInCorso[giocatoreId] = true;
-  
+
   const tick = () => {
     if (!animazioniInCorso[giocatoreId]) return;
-    
-    img.src = pathFrame(nomeAnimazione, frame);
+
+    // Carica frame colorato via Canvas
+    caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
+      if (animazioniInCorso[giocatoreId]) {
+        img.src = dataURL;
+      }
+    });
+
     frame++;
-    
+
     if (frame > config.frame) {
       if (config.loop) {
         frame = 1;
@@ -1169,7 +929,7 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
       setTimeout(tick, config.velocita);
     }
   };
-  
+
   tick();
 }
 
@@ -1188,15 +948,10 @@ function creaGiocatori(sq) {
     for (let i = 0; i < z.n; i++) {
       g.push({
         id: sq + '_' + (id++),
-        squadra: sq,
-        zona: z.id,
-        ruolo: z.ruolo,
+        squadra: sq, zona: z.id, ruolo: z.ruolo,
         portiere: !!z.portiere,
-        stamina: STAMINA_MAX,
-        staminaMax: STAMINA_MAX,
-        falli: 0,
-        ammonito: false,
-        espulso: false,
+        stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+        falli: 0, ammonito: false, espulso: false,
         nome: z.ruolo + (i + 1)
       });
     }
@@ -1211,15 +966,10 @@ function creaPanchina(sq) {
     for (let i = 0; i < cfg.n; i++) {
       p.push({
         id: sq + '_pan_' + (id++),
-        squadra: sq,
-        ruolo: cfg.ruolo,
+        squadra: sq, ruolo: cfg.ruolo,
         portiere: cfg.ruolo === 'POR',
-        stamina: STAMINA_MAX,
-        staminaMax: STAMINA_MAX,
-        falli: 0,
-        ammonito: false,
-        espulso: false,
-        entrato: false,
+        stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+        falli: 0, ammonito: false, espulso: false, entrato: false,
         nome: cfg.ruolo + (i + 3)
       });
     }
@@ -1230,41 +980,50 @@ function creaPanchina(sq) {
 /* =========================================================
    INIT
    ========================================================= */
-function initApp() {
+async function initApp() {
+  precaricaImmagini();
+
+  // Attendi il caricamento dei frame per la selezione squadra
+  await new Promise(r => setTimeout(r, 500));
+
   renderCampo();
   renderPanchina();
   renderHeader();
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // Selezione squadra
+  // Prepara immagini per i bottoni squadra
+  const imgItalia = await caricaImmagineColorata('italia', 'Fermo', 1);
+  const imgBrasile = await caricaImmagineColorata('brasile', 'Fermo', 1);
+  const imgSenegal = await caricaImmagineColorata('senegal', 'Fermo', 1);
+  const imgGiappone = await caricaImmagineColorata('giappone', 'Fermo', 1);
+  const imgSquadre = { italia: imgItalia, brasile: imgBrasile, senegal: imgSenegal, giappone: imgGiappone };
+
   let html = `<h2>⚽ Scegli la tua squadra</h2>`;
   html += `<div class="squadre-griglia">`;
-  SQUADRE.forEach(s => {
+  Object.keys(SQUADRE).forEach(id => {
+    const s = SQUADRE[id];
     html += `
-      <div class="squadra-btn ${s.id === stato.squadraTU ? 'selezionata' : ''}" 
-           data-squadra="${s.id}"
-           onclick="selezionaSquadraTU('${s.id}')">
+      <div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaSquadraTU('${id}')">
         <div class="nome">${s.nome}</div>
-        <div class="maglia" style="background-image: url('${pathFrame('Fermo', 1)}'); filter: ${s.id === 'italia' ? 'none' : s.id === 'brasile' ? 'hue-rotate(60deg) saturate(3) brightness(1.3)' : s.id === 'senegal' ? 'hue-rotate(120deg) saturate(1.5) brightness(0.9)' : 'hue-rotate(-30deg) saturate(1.5) brightness(0.8)'};"></div>
+        <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
       </div>
     `;
   });
   html += `</div>`;
-  
+
   html += `<h2 style="margin-top:20px">🖥️ Squadra CPU</h2>`;
   html += `<div class="squadre-griglia">`;
-  SQUADRE.forEach(s => {
+  Object.keys(SQUADRE).forEach(id => {
+    const s = SQUADRE[id];
     html += `
-      <div class="squadra-btn ${s.id === stato.squadraCPU ? 'selezionata' : ''}" 
-           data-squadra="${s.id}"
-           onclick="selezionaSquadraCPU('${s.id}')">
+      <div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaSquadraCPU('${id}')">
         <div class="nome">${s.nome}</div>
-        <div class="maglia" style="background-image: url('${pathFrame('Fermo', 1)}'); filter: ${s.id === 'italia' ? 'none' : s.id === 'brasile' ? 'hue-rotate(60deg) saturate(3) brightness(1.3)' : s.id === 'senegal' ? 'hue-rotate(120deg) saturate(1.5) brightness(0.9)' : 'hue-rotate(-30deg) saturate(1.5) brightness(0.8)'};"></div>
+        <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
       </div>
     `;
   });
   html += `</div>`;
-  
+
   html += `<div style="margin-top:16px">
     <button class="primario" onclick="avviaPartita('1P')">INIZIA PARTITA (1P vs CPU)</button>
   </div>`;
@@ -1273,15 +1032,8 @@ function initApp() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-function selezionaSquadraTU(id) {
-  stato.squadraTU = id;
-  initApp();
-}
-
-function selezionaSquadraCPU(id) {
-  stato.squadraCPU = id;
-  initApp();
-}
+function selezionaSquadraTU(id) { stato.squadraTU = id; initApp(); }
+function selezionaSquadraCPU(id) { stato.squadraCPU = id; initApp(); }
 
 function avviaPartita(modalita) {
   stato.modalita = modalita;
@@ -1289,30 +1041,20 @@ function avviaPartita(modalita) {
   stato.giocatori.cpu = creaGiocatori('cpu');
   stato.panchina.tu = creaPanchina('tu');
   stato.panchina.cpu = creaPanchina('cpu');
-  
-  resetMazzo('tu');
-  resetMazzo('cpu');
-  distribuisciCarte('tu', 6);
-  distribuisciCarte('cpu', 6);
-  
+  resetMazzo('tu'); resetMazzo('cpu');
+  distribuisciCarte('tu', 6); distribuisciCarte('cpu', 6);
   stato.punteggio = { tu: 0, cpu: 0 };
-  stato.tempo = 1;
-  stato.mano = 1;
+  stato.tempo = 1; stato.mano = 1;
   stato.statistiche = {
     tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
     cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
   };
   stato.logCompleto = [];
 
-  // Aggiorna nomi squadre in top bar
-  const sTU = SQUADRE.find(s => s.id === stato.squadraTU);
-  const sCPU = SQUADRE.find(s => s.id === stato.squadraCPU);
-  document.getElementById('nome-tu').textContent = sTU ? sTU.nome : 'TU';
-  document.getElementById('nome-cpu').textContent = sCPU ? sCPU.nome : 'CPU';
+  document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
+  document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
 
-  renderCampo();
-  renderPanchina();
-  renderHeader();
+  renderCampo(); renderPanchina(); renderHeader();
   chiudiModale();
 
   document.getElementById('modale-box').innerHTML = `
@@ -1325,7 +1067,7 @@ function avviaPartita(modalita) {
   `;
   document.getElementById('modale').classList.remove('nascosto');
 
-  log(`🎮 Inizio partita: ${sTU.nome} vs ${sCPU.nome}`, 'highlight');
+  log(`🎮 Inizio partita: ${SQUADRE[stato.squadraTU].nome} vs ${SQUADRE[stato.squadraCPU].nome}`, 'highlight');
 }
 
 /* =========================================================
@@ -1344,9 +1086,13 @@ function renderHeader() {
 /* =========================================================
    RENDER CAMPO
    ========================================================= */
-function renderCampo() {
+async function renderCampo() {
   const zone = document.getElementById('zone');
   zone.innerHTML = '';
+
+  // Prepara tutte le immagini necessarie (frame 1 di Fermo)
+  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
 
   ZONE_CONFIG.forEach(z => {
     const zona = document.createElement('div');
@@ -1364,7 +1110,7 @@ function renderCampo() {
       if (portiere) {
         const lato = document.createElement('div');
         lato.className = 'lato-squadra ' + sq;
-        lato.appendChild(creaPedinaWrapper(portiere));
+        lato.appendChild(creaPedinaWrapper(portiere, sq === 'tu' ? imgTU : imgCPU));
         zona.appendChild(lato);
       }
       zone.appendChild(zona);
@@ -1373,12 +1119,12 @@ function renderCampo() {
 
     const latoTu = document.createElement('div');
     latoTu.className = 'lato-squadra tu';
-    stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => latoTu.appendChild(creaPedinaWrapper(g)));
+    stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => latoTu.appendChild(creaPedinaWrapper(g, imgTU)));
     zona.appendChild(latoTu);
 
     const latoCpu = document.createElement('div');
     latoCpu.className = 'lato-squadra cpu';
-    stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => latoCpu.appendChild(creaPedinaWrapper(g)));
+    stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => latoCpu.appendChild(creaPedinaWrapper(g, imgCPU)));
     zona.appendChild(latoCpu);
 
     zone.appendChild(zona);
@@ -1395,12 +1141,12 @@ function renderCampo() {
   }, 50);
 }
 
-function creaPedinaWrapper(g) {
+function creaPedinaWrapper(g, imgSrc) {
   const wrapper = document.createElement('div');
   wrapper.className = 'pedina-wrapper ' + g.squadra;
   
   const info = creaInfoLaterale(g);
-  const pedina = creaPedinaEl(g);
+  const pedina = creaPedinaEl(g, imgSrc);
   
   if (g.squadra === 'tu') {
     wrapper.appendChild(info);
@@ -1409,14 +1155,12 @@ function creaPedinaWrapper(g) {
     wrapper.appendChild(pedina);
     wrapper.appendChild(info);
   }
-  
   return wrapper;
 }
 
 function creaInfoLaterale(g) {
   const el = document.createElement('div');
   el.className = 'info-laterale ' + g.squadra;
-  
   const perc = (g.stamina / g.staminaMax) * 100;
   let classeStam = '';
   if (perc < 20) classeStam = 'basso';
@@ -1428,18 +1172,13 @@ function creaInfoLaterale(g) {
   if (g.espulso) cart = '🟥';
   else if (g.ammonito) cart = '🟨';
   html += `<div class="cartellini">${cart}</div>`;
-  
   el.innerHTML = html;
   return el;
 }
 
-function creaPedinaEl(g) {
+function creaPedinaEl(g, imgSrc) {
   const el = document.createElement('div');
-  const squadraId = g.squadra === 'tu' ? stato.squadraTU : stato.squadraCPU;
-  const squadraObj = SQUADRE.find(s => s.id === squadraId);
-  const classeSquadra = squadraObj ? squadraObj.classe : 'squadra-italia';
-  
-  el.className = 'pedina ' + g.squadra + ' ' + classeSquadra + (g.portiere ? ' portiere' : '');
+  el.className = 'pedina ' + g.squadra + (g.portiere ? ' portiere' : '');
   el.dataset.giocatoreId = g.id;
   if (g.stamina <= 5 && g.stamina > 0) el.classList.add('stanco');
   if (g.stamina === 0) el.classList.add('esaurito');
@@ -1449,7 +1188,7 @@ function creaPedinaEl(g) {
   
   const img = document.createElement('img');
   img.className = 'sprite-img';
-  img.src = pathFrame('Fermo', 1);
+  img.src = imgSrc;
   img.alt = g.nome;
   el.appendChild(img);
   
@@ -1475,16 +1214,16 @@ function creaPedinaEl(g) {
 /* =========================================================
    PANCHINA
    ========================================================= */
-function renderPanchina() {
+async function renderPanchina() {
   const p = document.getElementById('panchina');
   p.innerHTML = '';
 
-  const sTU = SQUADRE.find(s => s.id === stato.squadraTU);
-  const sCPU = SQUADRE.find(s => s.id === stato.squadraCPU);
+  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
 
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
-  titoloTu.textContent = 'PANCHINA ' + (sTU ? sTU.nome : 'TU');
+  titoloTu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraTU].nome;
   p.appendChild(titoloTu);
 
   stato.panchina.tu.forEach(g => {
@@ -1493,7 +1232,7 @@ function renderPanchina() {
     if (g.entrato) el.classList.add('in-ombra');
     el.innerHTML = `
       <div class="pedina tu">
-        <img class="sprite-img" src="${pathFrame('Fermo', 1)}" alt="${g.nome}">
+        <img class="sprite-img" src="${imgTU}" alt="${g.nome}">
       </div>
       <div class="panchina-nome">${g.nome}</div>
     `;
@@ -1502,7 +1241,7 @@ function renderPanchina() {
 
   const titoloCpu = document.createElement('div');
   titoloCpu.className = 'panchina-titolo';
-  titoloCpu.textContent = 'PANCHINA ' + (sCPU ? sCPU.nome : 'CPU');
+  titoloCpu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraCPU].nome;
   p.appendChild(titoloCpu);
 
   stato.panchina.cpu.forEach(g => {
@@ -1511,7 +1250,7 @@ function renderPanchina() {
     if (g.entrato) el.classList.add('in-ombra');
     el.innerHTML = `
       <div class="pedina cpu">
-        <img class="sprite-img" src="${pathFrame('Fermo', 1)}" alt="${g.nome}">
+        <img class="sprite-img" src="${imgCPU}" alt="${g.nome}">
       </div>
       <div class="panchina-nome">${g.nome}</div>
     `;
@@ -1524,17 +1263,14 @@ function renderPanchina() {
    ========================================================= */
 function staccaPalla(daGiocatoreId) {
   stato.pallaInAnimazione = true;
-  
   const pedina = document.querySelector(`[data-giocatore-id="${daGiocatoreId}"]`);
   if (pedina) {
     const pallaAttaccata = pedina.querySelector('.palla-attaccata');
     if (pallaAttaccata) pallaAttaccata.remove();
   }
-  
   const palla = document.getElementById('palla-animata');
   const campo = document.getElementById('campo');
   const campoRect = campo.getBoundingClientRect();
-  
   if (pedina) {
     const pedRect = pedina.getBoundingClientRect();
     const x = pedRect.left + pedRect.width / 2 - campoRect.left;
@@ -1562,17 +1298,14 @@ function animaPalla(daId, aId, callback) {
     if (callback) callback(); 
     return; 
   }
-
   const palla = document.getElementById('palla-animata');
   const campo = document.getElementById('campo');
   const campoRect = campo.getBoundingClientRect();
   const aRect = a.getBoundingClientRect();
   const x2 = aRect.left + aRect.width / 2 - campoRect.left;
   const y2 = aRect.bottom - 6 - campoRect.top;
-
   const durata = 1200;
   const easing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-
   if (daId) {
     staccaPalla(daId);
     setTimeout(() => {
@@ -1613,19 +1346,15 @@ function lanciaMoneta(scelta) {
   const vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
   log(`🪙 Moneta: esce ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
-
   stato.possessore = vince;
   stato.zonaPalla = 4;
   stato.turno = vince;
-
   const candidati = stato.giocatori[vince].filter(g => g.zona === 4 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
   log(`⚽ ${vince === 'tu' ? 'Tu' : 'CPU'} inizi con ${scelto.nome} in Zona 4`);
-
   chiudiModale();
-  renderCampo();
-  renderHeader();
+  renderCampo(); renderHeader();
   setTimeout(() => avviaContrasto(), 700);
 }
 
@@ -1647,7 +1376,6 @@ function renderModaleSostituzioni() {
   const sq = 'tu';
   let html = `<h2>🔄 Sostituzioni</h2>`;
   html += `<p style="font-size:11px;color:#aaa;margin-bottom:10px">Seleziona un giocatore in campo e uno in panchina, poi conferma.</p>`;
-
   html += `<div class="sost-sezione"><h3>In campo</h3><div class="sost-lista">`;
   stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
     const sel = selezioneSost.campo === g.id ? ' selezionato' : '';
@@ -1658,7 +1386,6 @@ function renderModaleSostituzioni() {
     </div>`;
   });
   html += `</div></div>`;
-
   html += `<div class="sost-sezione"><h3>Panchina</h3><div class="sost-lista">`;
   stato.panchina[sq].forEach(g => {
     const sel = selezioneSost.panchina === g.id ? ' selezionato' : '';
@@ -1669,21 +1396,15 @@ function renderModaleSostituzioni() {
     </div>`;
   });
   html += `</div></div>`;
-
   html += `<div style="margin-top:14px">`;
   if (selezioneSost.campo && selezioneSost.panchina) {
     html += `<button class="primario" onclick="confermaSostituzione()">CONFERMA SOSTITUZIONE</button>`;
   }
   html += `<button onclick="chiudiModale()">CHIUDI</button></div>`;
-
   document.getElementById('modale-box').innerHTML = html;
 }
 
-function selezionaSostCampo(id) {
-  selezioneSost.campo = id;
-  renderModaleSostituzioni();
-}
-
+function selezionaSostCampo(id) { selezioneSost.campo = id; renderModaleSostituzioni(); }
 function selezionaSostPanchina(id) {
   const pan = stato.panchina.tu.find(g => g.id === id);
   if (pan && pan.entrato) return;
@@ -1695,35 +1416,20 @@ function confermaSostituzione() {
   const sq = 'tu';
   const campo = stato.giocatori[sq].find(g => g.id === selezioneSost.campo);
   const pan = stato.panchina[sq].find(g => g.id === selezioneSost.panchina);
-
   if (!campo || !pan || pan.entrato) return;
-
   fermaAnimazione(campo.id);
-  
   const nuovo = {
-    id: pan.id,
-    squadra: sq,
-    zona: campo.zona,
-    ruolo: pan.ruolo,
-    portiere: pan.portiere,
-    stamina: STAMINA_MAX,
-    staminaMax: STAMINA_MAX,
-    falli: 0,
-    ammonito: false,
-    espulso: false,
-    nome: pan.nome
+    id: pan.id, squadra: sq, zona: campo.zona, ruolo: pan.ruolo,
+    portiere: pan.portiere, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+    falli: 0, ammonito: false, espulso: false, nome: pan.nome
   };
-
   const idx = stato.giocatori[sq].indexOf(campo);
   stato.giocatori[sq][idx] = nuovo;
   pan.entrato = true;
-
   stato.statistiche[sq].sostituzioni++;
   log(`🔄 Sostituzione: esce ${campo.nome}, entra ${pan.nome}`, 'highlight');
-
   selezioneSost = { campo: null, panchina: null };
-  renderCampo();
-  renderPanchina();
+  renderCampo(); renderPanchina();
   renderModaleSostituzioni();
 }
 
@@ -1740,12 +1446,10 @@ function avviaContrasto() {
   const zona = stato.zonaPalla;
   const attaccante = stato.possessore;
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
-
   const bersaglio = Math.floor(Math.random() * 9) + 1;
 
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
-
   const nAtt = attaccantiZona.length;
   const nDif = difensoriZona.length;
 
@@ -1760,13 +1464,11 @@ function avviaContrasto() {
     giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
   }
 
-  resetMazzo(attaccante);
-  resetMazzo(difensore);
+  resetMazzo(attaccante); resetMazzo(difensore);
 
   let carteAtt = 6;
   if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
   if (nAtt < nDif) carteAtt -= 1;
-
   let carteDif = 6;
   if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
   if (nDif < nAtt) carteDif -= 1;
@@ -1775,8 +1477,7 @@ function avviaContrasto() {
   distribuisciCarte(difensore, carteDif);
 
   stato.contrasto = {
-    bersaglio, zona, attaccante, difensore,
-    mano: 1,
+    bersaglio, zona, attaccante, difensore, mano: 1,
     risultati: { tu: null, cpu: null },
     giocatoreAtt: giocatoreAtt ? giocatoreAtt.id : null,
     giocatoreDif: giocatoreDif ? giocatoreDif.id : null,
@@ -1784,9 +1485,7 @@ function avviaContrasto() {
   };
 
   stato.statistiche[attaccante].contese++;
-
   log(`🎯 Contrasto Z${zona} — Bersaglio: ${bersaglio}`, 'highlight');
-
   stato.turno = 'tu';
   selezione = [];
   renderPannelloContrasto();
@@ -1796,12 +1495,8 @@ function renderPannelloContrasto() {
   const c = stato.contrasto;
   document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona} — Mano ${c.mano}`;
   document.getElementById('bersaglio-mano').textContent = '🎯 ' + c.bersaglio;
-
   const sq = stato.modalita === '2P' ? stato.turno : 'tu';
-  document.getElementById('turno-label').textContent = stato.modalita === '2P'
-    ? `Turno: ${stato.turno === 'tu' ? 'Giocatore 1' : 'Giocatore 2'}`
-    : `Le tue carte (${stato.mani[sq].length})`;
-
+  document.getElementById('turno-label').textContent = `Le tue carte (${stato.mani[sq].length})`;
   const cont = document.getElementById('carte-container');
   cont.innerHTML = '';
   stato.mani[sq].forEach((carta, idx) => {
@@ -1813,9 +1508,7 @@ function renderPannelloContrasto() {
     el.onclick = () => selezionaCarta(idx);
     cont.appendChild(el);
   });
-
   renderPile(sq);
-
   const az = document.getElementById('azioni-container');
   az.innerHTML = `<button class="primario" id="btn-gioca" onclick="giocaCarte()" disabled>GIOCA 2 CARTE</button>`;
 }
@@ -1825,18 +1518,15 @@ function renderPile(sq) {
   const scartoPila = document.getElementById('scarto-pila');
   const mazzoCount = document.getElementById('mazzo-count');
   const scartoCount = document.getElementById('scarto-count');
-  
   mazzoPila.innerHTML = '';
   const numMazzo = Math.min(stato.mazzi[sq].length, 3);
   for (let i = 0; i < numMazzo; i++) {
     const el = document.createElement('div');
     el.className = 'pila-carta dietro';
-    el.style.left = (i * 2) + 'px';
-    el.style.top = (i * 2) + 'px';
+    el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px';
     mazzoPila.appendChild(el);
   }
   mazzoCount.textContent = stato.mazzi[sq].length;
-  
   scartoPila.innerHTML = '';
   const scarto = stato.scarti[sq];
   const numScarto = Math.min(scarto.length, 3);
@@ -1847,9 +1537,7 @@ function renderPile(sq) {
     el.className = 'pila-carta scarto';
     if (carta === '-1' || carta === '-2') el.classList.add('negativa');
     el.textContent = carta;
-    el.style.left = (i * 2) + 'px';
-    el.style.top = (i * 2) + 'px';
-    el.style.zIndex = 10 - i;
+    el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px'; el.style.zIndex = 10 - i;
     scartoPila.appendChild(el);
   }
   scartoCount.textContent = stato.scarti[sq].length;
@@ -1860,7 +1548,7 @@ function selezionaCarta(idx) {
     stato.sostBloccate = true;
     document.getElementById('btn-sost').disabled = true;
   }
-  const sq = stato.modalita === '2P' ? stato.turno : 'tu';
+  const sq = 'tu';
   const els = document.querySelectorAll('#carte-container .carta');
   if (selezione.includes(idx)) {
     selezione = selezione.filter(i => i !== idx);
@@ -1882,35 +1570,22 @@ function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
 }
 
 function giocaCarte() {
-  const sq = stato.modalita === '2P' ? stato.turno : 'tu';
+  const sq = 'tu';
   const c = stato.contrasto;
   const carteGiocate = selezione.map(i => stato.mani[sq][i]);
   let somma = sommaCarte(carteGiocate);
-  
   const giocatore = sq === c.attaccante ? 
     stato.giocatori[sq].find(g => g.id === c.giocatoreAtt) :
     stato.giocatori[sq].find(g => g.id === c.giocatoreDif);
   somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
-  
   log(`${sq === 'tu' ? 'Tu' : 'CPU'} giochi: [${carteGiocate.join(', ')}] = ${somma}`);
   c.risultati[sq] = { carte: carteGiocate, somma };
-  
   const idxs = [...selezione].sort((a, b) => b - a);
   const carteDaScartare = idxs.map(i => stato.mani[sq][i]);
   stato.scarti[sq].push(...carteDaScartare);
   idxs.forEach(i => stato.mani[sq].splice(i, 1));
   selezione = [];
-
-  if (stato.modalita === '1P' && sq === 'tu') {
-    setTimeout(() => giocaCPU(), 500);
-    return;
-  }
-  if (stato.modalita === '2P' && sq === 'tu') {
-    stato.turno = 'cpu';
-    renderPannelloContrasto();
-    return;
-  }
-  valutaMano();
+  setTimeout(() => giocaCPU(), 500);
 }
 
 function giocaCPU() {
@@ -1934,15 +1609,12 @@ function giocaCPU() {
     ? stato.giocatori.cpu.find(g => g.id === c.giocatoreDif)
     : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
   somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
-  
   log(`CPU gioca: [${cg.join(', ')}] = ${somma}`);
   c.risultati.cpu = { carte: cg, somma };
-  
   const idxs = [...mig].sort((a, b) => b - a);
   const carteDaScartare = idxs.map(i => stato.mani.cpu[i]);
   stato.scarti.cpu.push(...carteDaScartare);
   idxs.forEach(i => stato.mani.cpu.splice(i, 1));
-  
   valutaMano();
 }
 
@@ -1952,7 +1624,6 @@ function valutaMano() {
   const rAtt = c.risultati[att], rDif = c.risultati[dif];
   const dAtt = Math.abs(rAtt.somma - c.bersaglio);
   const dDif = Math.abs(rDif.somma - c.bersaglio);
-
   if (rAtt.somma === c.bersaglio && rDif.somma !== c.bersaglio) return vinciContrasto(att, 'numero esatto');
   if (rDif.somma === c.bersaglio && rAtt.somma !== c.bersaglio) return vinciContrasto(dif, 'numero esatto');
   if (rAtt.somma === c.bersaglio && rDif.somma === c.bersaglio) return spareggio();
@@ -1968,10 +1639,7 @@ function spareggio() {
   c.risultati = { tu: null, cpu: null };
   selezione = [];
   stato.turno = 'tu';
-  
-  const att = c.attaccante;
-  const dif = c.difensore;
-  
+  const att = c.attaccante, dif = c.difensore;
   if (stato.mani[att].length < 2 || stato.mani[dif].length < 2) {
     log(`♻️ Carte esaurite! Rimescolo.`);
     [att, dif].forEach(sq => {
@@ -1979,19 +1647,16 @@ function spareggio() {
       stato.scarti[sq] = [];
       stato.mani[sq] = [];
     });
-    
     let carteAtt = 6;
     const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
     if (gAtt && gAtt.stamina === 0) carteAtt -= 1;
     const nAtt = stato.giocatori[att].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
     const nDif = stato.giocatori[dif].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
     if (nAtt < nDif) carteAtt -= 1;
-    
     let carteDif = 6;
     const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
     if (gDif && gDif.stamina === 0) carteDif -= 1;
     if (nDif < nAtt) carteDif -= 1;
-    
     distribuisciCarte(att, carteAtt);
     distribuisciCarte(dif, carteDif);
   } else {
@@ -2002,7 +1667,6 @@ function spareggio() {
       stato.mani[dif].push(stato.mazzi[dif].pop());
     }
   }
-  
   renderPannelloContrasto();
 }
 
@@ -2013,49 +1677,36 @@ function vinciContrasto(vincente, motivo) {
   const c = stato.contrasto;
   log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince (${motivo})`, 'highlight');
   flashVincitore(vincente);
-
   stato.statistiche[vincente].vinte++;
   stato.statistiche[c.attaccante].passaggiTotali++;
   if (vincente === c.attaccante) stato.statistiche[vincente].passaggiRiusciti++;
-
   ['tu', 'cpu'].forEach(sq => {
     stato.giocatori[sq].forEach(g => {
       if (!g.portiere && !g.espulso) g.stamina = Math.max(0, g.stamina - 1);
     });
   });
-
   const zona = c.zona;
   const vecchioGiocatore = stato.giocatorePalla;
-
   mostraRisultatoOverlay(vincente, motivo);
-
   setTimeout(() => {
     chiudiOverlay();
     document.getElementById('app').className = 'app fase-animazione';
     document.getElementById('carte-panel').classList.add('nascosto');
-
     if (vincente === c.attaccante) {
       eseguiDadoFallo(vincente, c, vecchioGiocatore);
     } else {
       stato.possessore = vincente;
       stato.zonaPalla = zona;
-      
       const nuovoGiocatoreId = c.giocatoreDif;
       if (nuovoGiocatoreId) {
         const g = stato.giocatori[vincente].find(x => x.id === nuovoGiocatoreId);
-        if (g && !g.espulso) {
-          stato.giocatorePalla = g.id;
-        } else {
+        if (g && !g.espulso) stato.giocatorePalla = g.id;
+        else {
           const gz = stato.giocatori[vincente].filter(x => x.zona === zona && !x.portiere && !x.espulso);
           stato.giocatorePalla = gz.length > 0 ? gz[0].id : null;
         }
-      } else {
-        const gz = stato.giocatori[vincente].filter(x => x.zona === zona && !x.portiere && !x.espulso);
-        stato.giocatorePalla = gz.length > 0 ? gz[0].id : null;
       }
-
       log(`🔄 Cambio possesso: palla a ${vincente === 'tu' ? 'TE' : 'CPU'}`);
-
       renderHeader();
       setTimeout(() => {
         if (vecchioGiocatore && stato.giocatorePalla) {
@@ -2080,12 +1731,10 @@ function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
     <p style="font-size:12px;color:#aaa">Se esce 3 o 8 → fallo del difensore</p>
     <div id="area-fallo" style="margin-top:12px"></div>
   `);
-
   setTimeout(() => {
     const dado = Math.floor(Math.random() * 9) + 1;
     document.getElementById('area-fallo').innerHTML = `<div class="dado giallo">${dado}</div>`;
     log(`🎲 Dado fallo: ${dado}`);
-
     setTimeout(() => {
       if (dado === 3 || dado === 8) {
         log(`⚠️ FALLO!`, 'parata');
@@ -2101,7 +1750,6 @@ function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
 function eseguiFallo(vincente, c, vecchioGiocatore) {
   const difensore = c.difensore;
   const zona = c.zona;
-
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   if (difensoriZona.length === 0) {
     chiudiOverlay();
@@ -2111,9 +1759,7 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   const falloso = difensoriZona[Math.floor(Math.random() * difensoriZona.length)];
   falloso.falli++;
   stato.statistiche[difensore].falli++;
-
   log(`🟨 Fallo di ${falloso.nome} (${falloso.falli} falli)`);
-
   if (falloso.falli === 3) {
     falloso.ammonito = true;
     stato.statistiche[difensore].ammonizioni++;
@@ -2125,10 +1771,8 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
     stato.statistiche[difensore].espulsioni++;
     log(`🟥 ESPULSIONE per ${falloso.nome}!`, 'parata');
   }
-
   const isRigore = (zona === 1 || zona === 6);
   const squadraAttacca = vincente;
-
   setTimeout(() => {
     chiudiOverlay();
     if (isRigore) {
@@ -2166,14 +1810,11 @@ function proseguiAzione(vincente, c, vecchioGiocatore) {
   const direzione = vincente === 'tu' ? +1 : -1;
   const nuovaZona = zona + direzione;
   const portaAvv = vincente === 'tu' ? 7 : 0;
-
   if (nuovaZona === portaAvv) {
     return tiroInPorta(vincente);
   }
-
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
-  
   const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
   let nuovo = null;
   if (gz.length > 0) {
@@ -2187,7 +1828,6 @@ function proseguiAzione(vincente, c, vecchioGiocatore) {
     stato.giocatorePalla = null;
   }
   log(`➡️ Palla avanza in Z${nuovaZona}`);
-
   renderHeader();
   setTimeout(() => {
     if (vecchioGiocatore && nuovo) {
@@ -2209,11 +1849,9 @@ function apriOverlay(html) {
   document.getElementById('overlay-box').innerHTML = html;
   ov.classList.remove('nascosto');
 }
-
 function chiudiOverlay() {
   document.getElementById('overlay').classList.add('nascosto');
 }
-
 function mostraRisultatoOverlay(vincente, motivo) {
   const colore = vincente === 'tu' ? '#4dabf7' : '#ff6b6b';
   apriOverlay(`
@@ -2222,43 +1860,34 @@ function mostraRisultatoOverlay(vincente, motivo) {
     <div style="font-size:60px;margin-top:16px">⚽</div>
   `);
 }
-
 function mostraGoal(vincente) {
   const ov = document.getElementById('goal-overlay');
   ov.classList.remove('tu', 'cpu');
   ov.classList.add(vincente, 'attivo');
   document.getElementById('goal-text').textContent = '⚽ GOAL! ⚽';
-  setTimeout(() => {
-    ov.classList.remove('attivo');
-  }, 3000);
+  setTimeout(() => { ov.classList.remove('attivo'); }, 3000);
 }
 
 /* =========================================================
-   TIRO IN PORTA
+   TIRO
    ========================================================= */
 function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   nascondiPalla();
   stato.statistiche[attaccante].tiri++;
   log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
-
   const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
-  if (giocatore) {
-    avviaAnimazione(giocatore.id, 'Tiro');
-  }
-
+  if (giocatore) avviaAnimazione(giocatore.id, 'Tiro');
   setTimeout(() => {
     apriOverlay(`
       <h2>🥅 TIRO IN PORTA</h2>
       <div class="fase-label">FASE 1 — Tiro attaccante</div>
       <div id="area-tiro" style="margin-top:10px"></div>
     `);
-
     setTimeout(() => {
       const dado = Math.floor(Math.random() * 9) + 1;
       document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
       log(`🎲 ${attaccante === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
-
       setTimeout(() => {
         if (dado === 5 || dado === 8) {
           log(`🧤 PARATA DIRETTA!`, 'parata');
@@ -2278,7 +1907,6 @@ function fase2Tiro(attaccante, difensore, numAtt) {
   const dadi = mescola(disponibili).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
   log(`🧤 Portiere tira: [${dadi.join(', ')}]`);
-
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
       log(`⚠️ Portiere ha preso il ${numAtt}!`);
@@ -2296,12 +1924,10 @@ function fase3Tiro(attaccante, difensore) {
   const dado = Math.floor(Math.random() * 9) + 1;
   document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
   log(`🎲 Esito: ${dado}`);
-
   let esito;
   if (dado === 1) esito = 'palo';
   else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
   else esito = 'parata';
-
   setTimeout(() => eseguiEsitoTiro(esito, attaccante, difensore), 1000);
 }
 
@@ -2313,11 +1939,9 @@ function eseguiEsitoTiro(esito, attaccante, difensore) {
   else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
   else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
   box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
-
   if (esito === 'parata') stato.statistiche[difensore].parate++;
   if (esito === 'palo') stato.statistiche[attaccante].pali++;
   if (esito === 'angolo') stato.statistiche[attaccante].angoli++;
-
   setTimeout(() => {
     chiudiOverlay();
     if (esito === 'goal') gestisciGoal(attaccante);
@@ -2332,14 +1956,12 @@ function gestisciGoal(attaccante) {
   stato.statistiche[attaccante].gol++;
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
   mostraGoal(attaccante);
-
   const giocatoriSquadra = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
   if (giocatoriSquadra.length > 0) {
     const esultante = giocatoriSquadra[Math.floor(Math.random() * giocatoriSquadra.length)];
     const esultanza = 'Esultanza' + (Math.floor(Math.random() * 3) + 1);
     avviaAnimazione(esultante.id, esultanza);
   }
-
   setTimeout(() => {
     const subito = attaccante === 'tu' ? 'cpu' : 'tu';
     stato.possessore = subito;
@@ -2389,18 +2011,14 @@ function eseguiRigore(squadra) {
   nascondiPalla();
   stato.statistiche[squadra].tiri++;
   log(`🎯 RIGORE per ${squadra === 'tu' ? 'TU' : 'CPU'}!`, 'highlight');
-
   apriOverlay(`
     <h2>🎯 RIGORE</h2>
     <div class="fase-label">FASE 1 — Tiro</div>
     <div id="area-tiro" style="margin-top:10px"></div>
   `);
-
   setTimeout(() => {
     const dado = Math.floor(Math.random() * 9) + 1;
     document.getElementById('area-tiro').innerHTML = `<div class="dado ${squadra === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
-    log(`🎲 Tira: ${dado}`);
-
     setTimeout(() => {
       if (dado === 5 || dado === 8) {
         log(`🧤 PARATA!`, 'parata');
@@ -2419,7 +2037,6 @@ function fase2Rigore(squadra, difensore, numAtt) {
   const disponibili = [1,2,3,4,6,7,9];
   const dadi = mescola(disponibili).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
-
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
       fase3Rigore(squadra, difensore);
@@ -2436,12 +2053,10 @@ function fase3Rigore(squadra, difensore) {
   box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
   const dado = Math.floor(Math.random() * 9) + 1;
   document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
-
   let esito;
   if (dado === 1) esito = 'palo';
   else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
   else esito = 'parata';
-
   setTimeout(() => {
     if (esito === 'parata') stato.statistiche[difensore].parate++;
     if (esito === 'palo') stato.statistiche[squadra].pali++;
@@ -2458,7 +2073,6 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
   else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
   else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
   box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
-
   setTimeout(() => {
     chiudiOverlay();
     if (esito === 'goal') gestisciGoal(squadra);
@@ -2532,7 +2146,7 @@ function finePartita() {
       <tr><td>Pali</td><td class="tu-val">${s.tu.pali}</td><td class="cpu-val">${s.cpu.pali}</td></tr>
       <tr><td>Palle contese</td><td class="tu-val">${s.tu.contese}</td><td class="cpu-val">${s.cpu.contese}</td></tr>
       <tr><td>Contrasti vinti</td><td class="tu-val">${s.tu.vinte}</td><td class="cpu-val">${s.cpu.vinte}</td></tr>
-      <tr><td>Falli commessi</td><td class="tu-val">${s.tu.falli}</td><td class="cpu-val">${s.cpu.falli}</td></tr>
+      <tr><td>Falli</td><td class="tu-val">${s.tu.falli}</td><td class="cpu-val">${s.cpu.falli}</td></tr>
       <tr><td>Ammonizioni</td><td class="tu-val">${s.tu.ammonizioni}</td><td class="cpu-val">${s.cpu.ammonizioni}</td></tr>
       <tr><td>Espulsioni</td><td class="tu-val">${s.tu.espulsioni}</td><td class="cpu-val">${s.cpu.espulsioni}</td></tr>
       <tr><td>Sostituzioni</td><td class="tu-val">${s.tu.sostituzioni}</td><td class="cpu-val">${s.cpu.sostituzioni}</td></tr>
