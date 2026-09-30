@@ -16,7 +16,7 @@
   }
   .app { display: flex; flex-direction: column; height: 100vh; transition: all 0.4s ease; }
 
-  /* ============ TOP BAR ============ */
+  /* TOP BAR */
   .topbar {
     display: flex; justify-content: center; align-items: center;
     padding: 6px 14px; background: #16213e; border-bottom: 2px solid #0f3460;
@@ -53,14 +53,13 @@
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* ============ CAMPO ============ */
+  /* CAMPO */
   .campo-wrapper {
     flex: 0 0 40vh; position: relative; background: #1a5a28;
     overflow: hidden; transition: flex 0.4s ease;
   }
   .app.fase-animazione .campo-wrapper { flex: 1; }
   .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
-
   .campo {
     position: absolute; inset: 0;
     background:
@@ -97,7 +96,7 @@
     border: 2px solid rgba(255,255,255,0.6); transform: translateY(-50%);
   }
   .area-piccola.sinistra { left: 0; border-left: none; border-radius: 0 4px 4px 0; }
-  .area-piccola.destra { right: 0; border-right: none; border-radius: 4px 0 0 4px; }
+  .area-piccola.destra { right: 0; border-right: none; border-radius: 0 4px 4px 0; }
   .porta {
     position: absolute; top: 50%; width: 2%; height: 14%;
     background: rgba(255,255,255,0.15); border: 3px solid #fff;
@@ -141,7 +140,7 @@
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 11px; }
 
-  /* ============ PEDINE ============ */
+  /* PEDINE */
   .pedina {
     position: relative; width: 40px; height: 47px;
     transition: transform 0.2s, filter 0.2s;
@@ -153,7 +152,6 @@
     user-select: none; -webkit-user-drag: none; pointer-events: none;
   }
   .pedina.cpu .sprite-img { transform: scaleX(-1); }
-
   .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
   .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
@@ -165,7 +163,6 @@
   .pedina.espulso::after {
     content: '🟥'; position: absolute; top: -6px; right: -6px; font-size: 12px;
   }
-
   .pedina .stamina-bar {
     position: absolute; bottom: -4px; left: 0; width: 100%; height: 3px;
     background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
@@ -191,7 +188,6 @@
     0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700; }
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 18px rgba(255,215,0,1), 0 0 8px #ffd700; }
   }
-
   .palla-animata {
     position: absolute; width: 20px; height: 20px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
@@ -205,7 +201,6 @@
     background: radial-gradient(circle at 30% 30%, #333, #000);
     border-radius: 50%; opacity: 0.6;
   }
-
   .flash-vincitore {
     position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
   }
@@ -214,7 +209,7 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ============ PANCHINA ============ */
+  /* PANCHINA */
   .panchina {
     background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
     padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
@@ -238,7 +233,7 @@
   .panchina-giocatore.tu .panchina-nome { color: #6bb6ff; }
   .panchina-giocatore.cpu .panchina-nome { color: #ff8a8a; }
 
-  /* ============ PANNELLO CARTE ============ */
+  /* PANNELLO CARTE */
   .carte-panel {
     flex: 1; background: #16213e; padding: 8px 12px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -320,7 +315,7 @@
   button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
   button.primario:hover:not(:disabled) { background: #ffed4e; }
 
-  /* ============ DADI ============ */
+  /* DADI */
   .dado {
     display: inline-flex; align-items: center; justify-content: center;
     width: 68px; height: 68px; background: #fff; color: #222;
@@ -339,7 +334,7 @@
   .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
   .dado.giallo { background: linear-gradient(135deg, #ffe066, #f59f00); color: #222; border: 3px solid #fff; }
 
-  /* ============ OVERLAY ============ */
+  /* OVERLAY */
   .overlay {
     position: absolute; inset: 0; background: rgba(0,0,0,0.78);
     display: flex; align-items: center; justify-content: center;
@@ -362,7 +357,7 @@
     letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px;
   }
 
-  /* ============ GOAL OVERLAY ============ */
+  /* GOAL OVERLAY */
   .goal-overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -380,7 +375,7 @@
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
-  /* ============ MODALE ============ */
+  /* MODALE */
   .modale {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: flex; align-items: center; justify-content: center; z-index: 100; padding: 12px;
@@ -394,7 +389,7 @@
   .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
   .modale-box p { margin: 6px 0; line-height: 1.5; }
 
-  /* ============ SELEZIONE SQUADRA ============ */
+  /* SELEZIONE SQUADRA */
   .squadre-griglia {
     display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 10px; margin: 16px 0;
@@ -415,7 +410,7 @@
     image-rendering: pixelated;
   }
 
-  /* ============ SOSTITUZIONI ============ */
+  /* SOSTITUZIONI */
   .sost-sezione {
     background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin: 12px 0;
   }
@@ -438,7 +433,7 @@
   .sost-card .stamina { font-size: 9px; opacity: 0.8; }
   .sost-card .falli { font-size: 9px; color: #ff8a8a; }
 
-  /* ============ LOG ============ */
+  /* LOG */
   .log-box {
     background: #0a0a15; border-radius: 8px; padding: 12px;
     max-height: 60vh; overflow-y: auto; font-size: 12px;
@@ -451,7 +446,7 @@
   .log-box .parata { color: #4ade80; font-weight: bold; }
   .log-box .highlight { background: rgba(255,215,0,0.15); padding: 2px 4px; border-radius: 3px; }
 
-  /* ============ STATISTICHE ============ */
+  /* STATISTICHE */
   .stats-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
   .stats-table th {
     background: #0f3460; color: #ffd700; padding: 6px 4px;
@@ -464,7 +459,6 @@
   .stats-table .tu-val { color: #4dabf7; font-weight: bold; }
   .stats-table .cpu-val { color: #ff6b6b; font-weight: bold; }
 
-  /* ============ MEDIA QUERY MOBILE ============ */
   @media (max-height: 500px) {
     .topbar { padding: 3px 8px; min-height: 34px; }
     .risultato { font-size: 17px; }
@@ -497,7 +491,6 @@
   @media (orientation: portrait) and (max-width: 900px) {
     .rotate-msg { display: flex; }
   }
-
   .nascosto { display: none !important; }
 </style>
 </head>
@@ -509,7 +502,6 @@
 </div>
 
 <div class="app fase-animazione" id="app">
-
   <div class="topbar">
     <div class="risultato-wrapper">
       <div class="risultato">
@@ -526,8 +518,8 @@
       Palla <span id="zona-palla">Z4</span>
     </div>
     <div class="topbar-buttons">
-      <button class="btn-icona" id="btn-sost" onclick="apriSostituzioni()" title="Sostituzioni">🔄</button>
-      <button class="btn-icona" onclick="apriLog()" title="Log">📋</button>
+      <button class="btn-icona" id="btn-sost" onclick="apriSostituzioni()">🔄</button>
+      <button class="btn-icona" onclick="apriLog()">📋</button>
     </div>
   </div>
 
@@ -577,17 +569,14 @@
     </div>
     <div id="azioni-container"></div>
   </div>
-
 </div>
 
 <div class="overlay nascosto" id="overlay">
   <div class="overlay-box" id="overlay-box"></div>
 </div>
-
 <div class="goal-overlay" id="goal-overlay">
   <div class="goal-text" id="goal-text">⚽ GOAL! ⚽</div>
 </div>
-
 <div class="modale nascosto" id="modale">
   <div class="modale-box" id="modale-box"></div>
 </div>
@@ -608,12 +597,10 @@ const ZONE_CONFIG = [
   { id: 6, nome: 'Z6', ruolo: 'ATT', n: 1 },
   { id: 7, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'cpu' }
 ];
-
 const PANCHINA_CONFIG = [
   { ruolo: 'POR', n: 1 }, { ruolo: 'DIF', n: 2 },
   { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
-
 const ANIMAZIONI = {
   'Fermo':      { cartella: 'Fermo',      frame: 16, velocita: 180, loop: true },
   'Tiro':       { cartella: 'Tiro',       frame: 16, velocita: 100, loop: false },
@@ -623,67 +610,25 @@ const ANIMAZIONI = {
   'Esultanza3': { cartella: 'Esultanza3', frame: 10, velocita: 150, loop: false }
 };
 
-/* =========================================================
-   SQUADRE (con colori COMPLETI: maglia, pantaloncini, calzettoni, pelle, capelli)
-   ========================================================= */
 const SQUADRE = {
-  francia: {
-    nome: 'FRANCIA',
-    maglia: '#0066CC',
-    pantaloncini: '#FFFFFF',
-    calzettoni: '#CC0000',
-    pelle: '#D8A786',
-    capelli: '#4B351F'
-  },
-  italia: {
-    nome: 'ITALIA',
-    maglia: '#0066CC',
-    pantaloncini: '#FFFFFF',
-    calzettoni: '#0066CC',
-    pelle: '#D8A786',
-    capelli: '#4B351F'
-  },
-  germania: {
-    nome: 'GERMANIA',
-    maglia: '#FFFFFF',
-    pantaloncini: '#000000',
-    calzettoni: '#FFFFFF',
-    pelle: '#F4C9A0',
-    capelli: '#D4A55C'
-  },
-  spagna: {
-    nome: 'SPAGNA',
-    maglia: '#CC0000',
-    pantaloncini: '#000080',
-    calzettoni: '#000000',
-    pelle: '#D8A786',
-    capelli: '#3A2A1A'
-  },
-  portogallo: {
-    nome: 'PORTOGALLO',
-    maglia: '#CC0000',
-    pantaloncini: '#006600',
-    calzettoni: '#CC0000',
-    pelle: '#D8A786',
-    capelli: '#3A2A1A'
-  }
+  francia:    { nome: 'FRANCIA',    maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#D8A786', capelli: '#4B351F' },
+  italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#D8A786', capelli: '#4B351F' },
+  germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  spagna:     { nome: 'SPAGNA',     maglia: '#CC0000', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#D8A786', capelli: '#3A2A1A' },
+  portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#D8A786', capelli: '#3A2A1A' }
 };
 
-// Colori originali degli sprite (dal PNG base)
-const COLORE_ORIG_MAGLIA = { r: 0x32, g: 0x50, b: 0x98 };    // blu scuro
-const COLORE_ORIG_PANTALONCINI = { r: 0xFF, g: 0xFF, b: 0xFF }; // bianco
-const COLORE_ORIG_CALZETTONI = { r: 0x8B, g: 0x20, b: 0x20 };  // rosso scuro
-const COLORE_ORIG_PELLE = { r: 0xD8, g: 0xA7, b: 0x86 };      // beige
-const COLORE_ORIG_CAPELLI = { r: 0x4B, g: 0x35, b: 0x1F };    // castano
+const COLORE_ORIG_MAGLIA = { r: 0x32, g: 0x50, b: 0x98 };
+const COLORE_ORIG_PANTALONCINI = { r: 0xFF, g: 0xFF, b: 0xFF };
+const COLORE_ORIG_CALZETTONI = { r: 0x8B, g: 0x20, b: 0x20 };
+const COLORE_ORIG_PELLE = { r: 0xD8, g: 0xA7, b: 0x86 };
+const COLORE_ORIG_CAPELLI = { r: 0x4B, g: 0x35, b: 0x1F };
 
-// Tolleranza
-const TOLLERANZA = 25;
+const TOLLERANZA = 60;
 
-// Zone verticali (in percentuale dell'altezza totale)
-// Utili per limitare la sostituzione del bianco solo ai pantaloncini
-const ZONA_PANTALONCINI_INIZIO = 0.55; // dal 55% in giù
-const ZONA_PANTALONCINI_FINE = 0.78;   // fino al 78%
-const ZONA_CALZETTONI_INIZIO = 0.78;   // dal 78% in giù
+const ZONA_PANTALONCINI_INIZIO = 0.55;
+const ZONA_PANTALONCINI_FINE = 0.78;
+const ZONA_CALZETTONI_INIZIO = 0.78;
 const ZONA_CALZETTONI_FINE = 1.00;
 
 function hexToRgb(hex) {
@@ -694,7 +639,6 @@ function hexToRgb(hex) {
     b: parseInt(h.substring(4, 6), 16)
   };
 }
-
 function coloreSimile(r1, g1, b1, r2, g2, b2, tolleranza) {
   return Math.abs(r1 - r2) <= tolleranza &&
          Math.abs(g1 - g2) <= tolleranza &&
@@ -702,24 +646,18 @@ function coloreSimile(r1, g1, b1, r2, g2, b2, tolleranza) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE - Cache
+   CANVAS COLORAZIONE
    ========================================================= */
 const cacheImmagini = {};
 
 function caricaImmagineColorata(squadra, animazione, numeroFrame) {
   return new Promise((resolve) => {
     const chiave = `${squadra}|${animazione}|${numeroFrame}`;
-    if (cacheImmagini[chiave]) {
-      resolve(cacheImmagini[chiave]);
-      return;
-    }
-
+    if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
     const config = ANIMAZIONI[animazione];
     if (!config) { resolve(''); return; }
-
     const cartella = config.cartella;
     const percorso = encodeURI(`${cartella}/${animazione} (${numeroFrame}).png`);
-
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
@@ -729,11 +667,9 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
         const H = canvas.height;
-
         const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
         const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
         const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
@@ -741,63 +677,48 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
 
         for (let i = 0; i < data.length; i += 4) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const a = data[i + 3];
+          const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
           if (a < 10) continue;
-
-          // Calcola Y del pixel
           const pixelIndex = i / 4;
-          const x = pixelIndex % canvas.width;
           const y = Math.floor(pixelIndex / canvas.width);
           const yPerc = y / H;
 
-          // Priorità 1: MAGLIA (blu originale) - in qualsiasi zona
+          // Maglia
           if (coloreSimile(r, g, b, COLORE_ORIG_MAGLIA.r, COLORE_ORIG_MAGLIA.g, COLORE_ORIG_MAGLIA.b, TOLLERANZA)) {
-            data[i] = targetMaglia.r;
-            data[i + 1] = targetMaglia.g;
-            data[i + 2] = targetMaglia.b;
+            data[i] = targetMaglia.r; data[i+1] = targetMaglia.g; data[i+2] = targetMaglia.b;
             continue;
           }
-
-          // Priorità 2: PELLE (beige originale) - solo parte alta (testa/braccia)
+          // Pelle
           if (yPerc < 0.55 && coloreSimile(r, g, b, COLORE_ORIG_PELLE.r, COLORE_ORIG_PELLE.g, COLORE_ORIG_PELLE.b, TOLLERANZA)) {
-            data[i] = targetPelle.r;
-            data[i + 1] = targetPelle.g;
-            data[i + 2] = targetPelle.b;
+            data[i] = targetPelle.r; data[i+1] = targetPelle.g; data[i+2] = targetPelle.b;
             continue;
           }
-
-          // Priorità 3: CAPELLI (castano) - solo parte alta (testa)
+          // Capelli
           if (yPerc < 0.35 && coloreSimile(r, g, b, COLORE_ORIG_CAPELLI.r, COLORE_ORIG_CAPELLI.g, COLORE_ORIG_CAPELLI.b, TOLLERANZA)) {
-            data[i] = targetCapelli.r;
-            data[i + 1] = targetCapelli.g;
-            data[i + 2] = targetCapelli.b;
+            data[i] = targetCapelli.r; data[i+1] = targetCapelli.g; data[i+2] = targetCapelli.b;
             continue;
           }
-
-          // Priorità 4: PANTALONCINI (bianco) - SOLO nella zona pantaloncini
+          // Pantaloncini (bianco + grigio chiaro)
           if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
-            if (coloreSimile(r, g, b, COLORE_ORIG_PANTALONCINI.r, COLORE_ORIG_PANTALONCINI.g, COLORE_ORIG_PANTALONCINI.b, TOLLERANZA)) {
-              data[i] = targetPantaloncini.r;
-              data[i + 1] = targetPantaloncini.g;
-              data[i + 2] = targetPantaloncini.b;
+            if (coloreSimile(r, g, b, 255, 255, 255, 40)) {
+              data[i] = targetPantaloncini.r; data[i+1] = targetPantaloncini.g; data[i+2] = targetPantaloncini.b;
+              continue;
+            }
+            if (r > 180 && g > 180 && b > 180 && Math.abs(r - g) < 20 && Math.abs(g - b) < 20) {
+              data[i] = Math.round(targetPantaloncini.r * 0.85);
+              data[i+1] = Math.round(targetPantaloncini.g * 0.85);
+              data[i+2] = Math.round(targetPantaloncini.b * 0.85);
               continue;
             }
           }
-
-          // Priorità 5: CALZETTONI (rosso scuro) - SOLO nella zona calzettoni
+          // Calzettoni
           if (yPerc >= ZONA_CALZETTONI_INIZIO) {
-            if (coloreSimile(r, g, b, COLORE_ORIG_CALZETTONI.r, COLORE_ORIG_CALZETTONI.g, COLORE_ORIG_CALZETTONI.b, TOLLERANZA * 1.5)) {
-              data[i] = targetCalzettoni.r;
-              data[i + 1] = targetCalzettoni.g;
-              data[i + 2] = targetCalzettoni.b;
+            if (coloreSimile(r, g, b, COLORE_ORIG_CALZETTONI.r, COLORE_ORIG_CALZETTONI.g, COLORE_ORIG_CALZETTONI.b, TOLLERANZA * 2)) {
+              data[i] = targetCalzettoni.r; data[i+1] = targetCalzettoni.g; data[i+2] = targetCalzettoni.b;
               continue;
             }
           }
         }
-
         ctx.putImageData(imageData, 0, 0);
         const dataURL = canvas.toDataURL();
         cacheImmagini[chiave] = dataURL;
@@ -807,17 +728,13 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         resolve(percorso);
       }
     };
-    img.onerror = () => { resolve(percorso); };
+    img.onerror = () => resolve(percorso);
     img.src = percorso;
   });
 }
-
 function precaricaImmagini() {
-  Object.keys(SQUADRE).forEach(squadra => {
-    caricaImmagineColorata(squadra, 'Fermo', 1);
-  });
+  Object.keys(SQUADRE).forEach(squadra => caricaImmagineColorata(squadra, 'Fermo', 1));
 }
-
 function pathFrame(animazione, numero) {
   const cartella = ANIMAZIONI[animazione].cartella;
   return encodeURI(`${cartella}/${animazione} (${numero}).png`);
@@ -847,7 +764,6 @@ let stato = {
   },
   logCompleto: []
 };
-
 let selezione = [];
 let selezioneSost = { campo: null, panchina: null };
 const animazioniInCorso = {};
@@ -872,6 +788,19 @@ function resetMazzo(sq) {
 function distribuisciCarte(sq, n) {
   stato.mani[sq] = [];
   for (let i = 0; i < n && stato.mazzi[sq].length > 0; i++) {
+    stato.mani[sq].push(stato.mazzi[sq].pop());
+  }
+}
+function pescaCarte(sq, n) {
+  // Se mazzo vuoto, rimescola con scarto
+  if (stato.mazzi[sq].length < n && stato.scarti[sq].length > 0) {
+    stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq]]);
+    stato.scarti[sq] = [];
+  }
+  for (let i = 0; i < n; i++) {
+    if (stato.mazzi[sq].length === 0) {
+      stato.mazzi[sq] = creaMazzo();
+    }
     stato.mani[sq].push(stato.mazzi[sq].pop());
   }
 }
@@ -920,9 +849,7 @@ function apriLog() {
     if (box) box.scrollTop = box.scrollHeight;
   }, 50);
 }
-function chiudiModale() {
-  document.getElementById('modale').classList.add('nascosto');
-}
+function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
 /* =========================================================
    ANIMAZIONE
@@ -933,11 +860,9 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
   if (!config) { if (callback) callback(); return; }
   const img = document.querySelector(`[data-giocatore-id="${giocatoreId}"] .sprite-img`);
   if (!img) { if (callback) callback(); return; }
-
   const squadra = giocatoreId.startsWith('tu') ? stato.squadraTU : stato.squadraCPU;
   let frame = 1;
   animazioniInCorso[giocatoreId] = true;
-
   const tick = () => {
     if (!animazioniInCorso[giocatoreId]) return;
     caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
@@ -961,9 +886,7 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
   };
   tick();
 }
-function fermaAnimazione(giocatoreId) {
-  animazioniInCorso[giocatoreId] = false;
-}
+function fermaAnimazione(giocatoreId) { animazioniInCorso[giocatoreId] = false; }
 
 /* =========================================================
    GIOCATORI
@@ -975,8 +898,7 @@ function creaGiocatori(sq) {
     if (z.portiere && z.proprietario !== sq) return;
     for (let i = 0; i < z.n; i++) {
       g.push({
-        id: sq + '_' + (id++),
-        squadra: sq, zona: z.id, ruolo: z.ruolo,
+        id: sq + '_' + (id++), squadra: sq, zona: z.id, ruolo: z.ruolo,
         portiere: !!z.portiere,
         stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
         falli: 0, ammonito: false, espulso: false,
@@ -992,8 +914,7 @@ function creaPanchina(sq) {
   PANCHINA_CONFIG.forEach(cfg => {
     for (let i = 0; i < cfg.n; i++) {
       p.push({
-        id: sq + '_pan_' + (id++),
-        squadra: sq, ruolo: cfg.ruolo,
+        id: sq + '_pan_' + (id++), squadra: sq, ruolo: cfg.ruolo,
         portiere: cfg.ruolo === 'POR',
         stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
         falli: 0, ammonito: false, espulso: false, entrato: false,
@@ -1012,44 +933,30 @@ async function initApp() {
   await new Promise(r => setTimeout(r, 300));
   renderCampo(); renderPanchina(); renderHeader();
   document.getElementById('carte-panel').classList.add('nascosto');
-
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
     imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
   }
-
-  let html = `<h2>⚽ Scegli la tua squadra</h2>`;
-  html += `<div class="squadre-griglia">`;
+  let html = `<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    const s = SQUADRE[id];
-    html += `
-      <div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaSquadraTU('${id}')">
-        <div class="nome">${s.nome}</div>
-        <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
-      </div>`;
+    html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaSquadraTU('${id}')">
+      <div class="nome">${SQUADRE[id].nome}</div>
+      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
+    </div>`;
   });
-  html += `</div>`;
-
-  html += `<h2 style="margin-top:20px">🖥️ Squadra CPU</h2>`;
-  html += `<div class="squadre-griglia">`;
+  html += `</div><h2 style="margin-top:20px">🖥️ Squadra CPU</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    const s = SQUADRE[id];
-    html += `
-      <div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaSquadraCPU('${id}')">
-        <div class="nome">${s.nome}</div>
-        <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
-      </div>`;
+    html += `<div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaSquadraCPU('${id}')">
+      <div class="nome">${SQUADRE[id].nome}</div>
+      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
+    </div>`;
   });
-  html += `</div>`;
-
-  html += `<div style="margin-top:16px">
+  html += `</div><div style="margin-top:16px">
     <button class="primario" onclick="avviaPartita('1P')">INIZIA PARTITA</button>
   </div>`;
-
   document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
 }
-
 function selezionaSquadraTU(id) { stato.squadraTU = id; initApp(); }
 function selezionaSquadraCPU(id) { stato.squadraCPU = id; initApp(); }
 
@@ -1070,13 +977,10 @@ function avviaPartita(modalita) {
   stato.logCompleto = [];
   document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
-
   renderCampo(); renderPanchina(); renderHeader();
   chiudiModale();
-
   document.getElementById('modale-box').innerHTML = `
-    <h2>🪙 Lancio della moneta</h2>
-    <p style="margin-bottom:10px">Scegli:</p>
+    <h2>🪙 Lancio della moneta</h2><p style="margin-bottom:10px">Scegli:</p>
     <div>
       <button class="primario" onclick="lanciaMoneta('testa')">TESTA</button>
       <button class="primario" onclick="lanciaMoneta('croce')">CROCE</button>
@@ -1103,7 +1007,6 @@ async function renderCampo() {
   zone.innerHTML = '';
   const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
   const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
-
   ZONE_CONFIG.forEach(z => {
     const zona = document.createElement('div');
     zona.className = 'zona' + (z.portiere ? ' zona-portiere' : '');
@@ -1112,7 +1015,6 @@ async function renderCampo() {
     label.className = 'zona-label';
     label.textContent = z.nome;
     zona.appendChild(label);
-
     if (z.portiere) {
       const sq = z.proprietario;
       const portiere = stato.giocatori[sq].find(g => g.zona === z.id);
@@ -1122,22 +1024,18 @@ async function renderCampo() {
         lato.appendChild(creaPedinaWrapper(portiere, sq === 'tu' ? imgTU : imgCPU));
         zona.appendChild(lato);
       }
-      zone.appendChild(zona);
-      return;
+      zone.appendChild(zona); return;
     }
-
     const latoTu = document.createElement('div');
     latoTu.className = 'lato-squadra tu';
     stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => latoTu.appendChild(creaPedinaWrapper(g, imgTU)));
     zona.appendChild(latoTu);
-
     const latoCpu = document.createElement('div');
     latoCpu.className = 'lato-squadra cpu';
     stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => latoCpu.appendChild(creaPedinaWrapper(g, imgCPU)));
     zona.appendChild(latoCpu);
     zone.appendChild(zona);
   });
-
   setTimeout(() => {
     ['tu', 'cpu'].forEach(sq => {
       stato.giocatori[sq].forEach(g => {
@@ -1146,20 +1044,15 @@ async function renderCampo() {
     });
   }, 50);
 }
-
 function creaPedinaWrapper(g, imgSrc) {
   const wrapper = document.createElement('div');
   wrapper.className = 'pedina-wrapper ' + g.squadra;
   const info = creaInfoLaterale(g);
   const pedina = creaPedinaEl(g, imgSrc);
-  if (g.squadra === 'tu') {
-    wrapper.appendChild(info); wrapper.appendChild(pedina);
-  } else {
-    wrapper.appendChild(pedina); wrapper.appendChild(info);
-  }
+  if (g.squadra === 'tu') { wrapper.appendChild(info); wrapper.appendChild(pedina); }
+  else { wrapper.appendChild(pedina); wrapper.appendChild(info); }
   return wrapper;
 }
-
 function creaInfoLaterale(g) {
   const el = document.createElement('div');
   el.className = 'info-laterale ' + g.squadra;
@@ -1176,7 +1069,6 @@ function creaInfoLaterale(g) {
   el.innerHTML = html;
   return el;
 }
-
 function creaPedinaEl(g, imgSrc) {
   const el = document.createElement('div');
   el.className = 'pedina ' + g.squadra + (g.portiere ? ' portiere' : '');
@@ -1217,33 +1109,27 @@ async function renderPanchina() {
   p.innerHTML = '';
   const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
   const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
-
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
   titoloTu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraTU].nome;
   p.appendChild(titoloTu);
-
   stato.panchina.tu.forEach(g => {
     const el = document.createElement('div');
     el.className = 'panchina-giocatore tu';
     if (g.entrato) el.classList.add('in-ombra');
-    el.innerHTML = `
-      <div class="pedina tu"><img class="sprite-img" src="${imgTU}" alt="${g.nome}"></div>
+    el.innerHTML = `<div class="pedina tu"><img class="sprite-img" src="${imgTU}" alt="${g.nome}"></div>
       <div class="panchina-nome">${g.nome}</div>`;
     p.appendChild(el);
   });
-
   const titoloCpu = document.createElement('div');
   titoloCpu.className = 'panchina-titolo';
   titoloCpu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraCPU].nome;
   p.appendChild(titoloCpu);
-
   stato.panchina.cpu.forEach(g => {
     const el = document.createElement('div');
     el.className = 'panchina-giocatore cpu';
     if (g.entrato) el.classList.add('in-ombra');
-    el.innerHTML = `
-      <div class="pedina cpu"><img class="sprite-img" src="${imgCPU}" alt="${g.nome}"></div>
+    el.innerHTML = `<div class="pedina cpu"><img class="sprite-img" src="${imgCPU}" alt="${g.nome}"></div>
       <div class="panchina-nome">${g.nome}</div>`;
     p.appendChild(el);
   });
@@ -1296,12 +1182,9 @@ function animaPalla(daId, aId, callback) {
       palla.style.left = x2 + 'px'; palla.style.top = y2 + 'px';
       setTimeout(() => { attaccaPalla(aId); if (callback) callback(); }, durata + 50);
     }, 50);
-  } else {
-    attaccaPalla(aId); if (callback) callback();
-  }
+  } else { attaccaPalla(aId); if (callback) callback(); }
 }
 function nascondiPalla() { document.getElementById('palla-animata').style.display = 'none'; }
-
 function flashVincitore(squadra) {
   const flash = document.getElementById('flash');
   flash.classList.remove('tu', 'cpu', 'attivo');
@@ -1332,10 +1215,7 @@ function lanciaMoneta(scelta) {
    SOSTITUZIONI
    ========================================================= */
 function apriSostituzioni() {
-  if (stato.sostBloccate) {
-    alert('Sostituzioni bloccate. Potrai farle al prossimo contrasto.');
-    return;
-  }
+  if (stato.sostBloccate) { alert('Sostituzioni bloccate. Potrai farle al prossimo contrasto.'); return; }
   if (stato.partitaFinita) return;
   selezioneSost = { campo: null, panchina: null };
   renderModaleSostituzioni();
@@ -1405,40 +1285,32 @@ function avviaContrasto() {
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
   renderHeader();
-
   const zona = stato.zonaPalla;
   const attaccante = stato.possessore;
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   const bersaglio = Math.floor(Math.random() * 9) + 1;
-
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const nAtt = attaccantiZona.length;
   const nDif = difensoriZona.length;
-
   const giocatoreAtt = stato.giocatorePalla 
     ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla)
     : attaccantiZona[0];
-
   let giocatoreDif = null;
   if (difensoriZona.length > 0) {
     const maxStamina = Math.max(...difensoriZona.map(g => g.stamina));
     const candidati = difensoriZona.filter(g => g.stamina === maxStamina);
     giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
   }
-
   resetMazzo(attaccante); resetMazzo(difensore);
-
   let carteAtt = 6;
   if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
   if (nAtt < nDif) carteAtt -= 1;
   let carteDif = 6;
   if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
   if (nDif < nAtt) carteDif -= 1;
-
   distribuisciCarte(attaccante, carteAtt);
   distribuisciCarte(difensore, carteDif);
-
   stato.contrasto = {
     bersaglio, zona, attaccante, difensore, mano: 1,
     risultati: { tu: null, cpu: null },
@@ -1446,7 +1318,6 @@ function avviaContrasto() {
     giocatoreDif: giocatoreDif ? giocatoreDif.id : null,
     carteAtt, carteDif
   };
-
   stato.statistiche[attaccante].contese++;
   log(`🎯 Contrasto Z${zona} — Bersaglio: ${bersaglio}`, 'highlight');
   stato.turno = 'tu'; selezione = [];
@@ -1474,7 +1345,6 @@ function renderPannelloContrasto() {
   document.getElementById('azioni-container').innerHTML =
     `<button class="primario" id="btn-gioca" onclick="giocaCarte()" disabled>GIOCA 2 CARTE</button>`;
 }
-
 function renderPile(sq) {
   const mazzoPila = document.getElementById('mazzo-pila');
   const scartoPila = document.getElementById('scarto-pila');
@@ -1504,7 +1374,6 @@ function renderPile(sq) {
   }
   scartoCount.textContent = stato.scarti[sq].length;
 }
-
 function selezionaCarta(idx) {
   if (!stato.sostBloccate) {
     stato.sostBloccate = true;
@@ -1521,7 +1390,6 @@ function selezionaCarta(idx) {
   }
   document.getElementById('btn-gioca').disabled = selezione.length !== 2;
 }
-
 function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
   if (!giocatore) return somma;
   if (giocatore.stamina === 0) {
@@ -1529,7 +1397,6 @@ function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
   }
   return somma;
 }
-
 function giocaCarte() {
   const sq = 'tu';
   const c = stato.contrasto;
@@ -1548,7 +1415,6 @@ function giocaCarte() {
   selezione = [];
   setTimeout(() => giocaCPU(), 500);
 }
-
 function giocaCPU() {
   const c = stato.contrasto;
   const carte = stato.mani.cpu;
@@ -1593,43 +1459,46 @@ function valutaMano() {
   spareggio();
 }
 
+/* =========================================================
+   SPAREGGIO - NUOVA MECCANICA
+   ========================================================= */
 function spareggio() {
   const c = stato.contrasto;
   c.mano++;
-  log(`🔁 Pareggio! Mano ${c.mano}`);
+  log(`🔁 Pareggio! Mano ${c.mano} — si pescano 2 carte ciascuno`);
   c.risultati = { tu: null, cpu: null };
   selezione = []; stato.turno = 'tu';
   const att = c.attaccante, dif = c.difensore;
-  if (stato.mani[att].length < 2 || stato.mani[dif].length < 2) {
-    log(`♻️ Carte esaurite! Rimescolo.`);
-    [att, dif].forEach(sq => {
-      stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq], ...stato.mani[sq]]);
-      stato.scarti[sq] = []; stato.mani[sq] = [];
-    });
-    let carteAtt = 6;
-    const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
-    if (gAtt && gAtt.stamina === 0) carteAtt -= 1;
-    const nAtt = stato.giocatori[att].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
-    const nDif = stato.giocatori[dif].filter(g => g.zona === c.zona && !g.portiere && !g.espulso).length;
-    if (nAtt < nDif) carteAtt -= 1;
-    let carteDif = 6;
-    const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
-    if (gDif && gDif.stamina === 0) carteDif -= 1;
-    if (nDif < nAtt) carteDif -= 1;
-    distribuisciCarte(att, carteAtt); distribuisciCarte(dif, carteDif);
-  } else {
-    while (stato.mani[att].length < c.carteAtt && stato.mazzi[att].length > 0) {
-      stato.mani[att].push(stato.mazzi[att].pop());
+
+  // Pesca 2 carte ciascuno dal mazzo (o rimescola se finito)
+  for (const sq of [att, dif]) {
+    if (stato.mazzi[sq].length < 2) {
+      // Rimescola scarto + mazzo
+      if (stato.scarti[sq].length > 0) {
+        stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq]]);
+        stato.scarti[sq] = [];
+        log(`♻️ Rimescolo mazzo ${sq === 'tu' ? 'TU' : 'CPU'}`);
+      }
+      // Se ancora vuoto, nuovo mazzo
+      if (stato.mazzi[sq].length < 2) {
+        stato.mazzi[sq] = creaMazzo();
+      }
     }
-    while (stato.mani[dif].length < c.carteDif && stato.mazzi[dif].length > 0) {
-      stato.mani[dif].push(stato.mazzi[dif].pop());
-    }
+    // Pesca 2 carte
+    pescaCarte(sq, 2);
   }
+
+  // ✅ Stamina -1 ad ogni mano per i 2 giocatori
+  const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
+  const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
+  if (gAtt && !gAtt.portiere) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
+  if (gDif && !gDif.portiere) gDif.stamina = Math.max(0, gDif.stamina - 1);
+
   renderPannelloContrasto();
 }
 
 /* =========================================================
-   VINCI CONTRASTO
+   VINCI
    ========================================================= */
 function vinciContrasto(vincente, motivo) {
   const c = stato.contrasto;
@@ -1639,7 +1508,7 @@ function vinciContrasto(vincente, motivo) {
   stato.statistiche[c.attaccante].passaggiTotali++;
   if (vincente === c.attaccante) stato.statistiche[vincente].passaggiRiusciti++;
 
-  // ✅ FIX: stamina solo ai 2 giocatori che combattono
+  // ✅ Stamina -1 SOLO ai 2 giocatori che combattono (fine contrasto)
   const gAtt = stato.giocatori[c.attaccante].find(g => g.id === c.giocatoreAtt);
   const gDif = stato.giocatori[c.difensore].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
@@ -1706,7 +1575,6 @@ function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
     }, 1200);
   }, 400);
 }
-
 function eseguiFallo(vincente, c, vecchioGiocatore) {
   const difensore = c.difensore;
   const zona = c.zona;
@@ -1764,7 +1632,6 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
     }
   }, 1800);
 }
-
 function proseguiAzione(vincente, c, vecchioGiocatore) {
   const zona = c.zona;
   const direzione = vincente === 'tu' ? +1 : -1;
@@ -1804,9 +1671,7 @@ function apriOverlay(html) {
   document.getElementById('overlay-box').innerHTML = html;
   document.getElementById('overlay').classList.remove('nascosto');
 }
-function chiudiOverlay() {
-  document.getElementById('overlay').classList.add('nascosto');
-}
+function chiudiOverlay() { document.getElementById('overlay').classList.add('nascosto'); }
 function mostraRisultatoOverlay(vincente, motivo) {
   const colore = vincente === 'tu' ? '#4dabf7' : '#ff6b6b';
   apriOverlay(`
@@ -2062,12 +1927,10 @@ function finePartita() {
   if (stato.punteggio.tu > stato.punteggio.cpu) msg = '🏆 HAI VINTO!';
   else if (stato.punteggio.cpu > stato.punteggio.tu) msg = '😢 CPU vince';
   else msg = '🤝 Pareggio';
-
   const possesoTu = s.tu.vinte + s.cpu.vinte > 0 ? Math.round(s.tu.vinte / (s.tu.vinte + s.cpu.vinte) * 100) : 50;
   const possessoCpu = 100 - possesoTu;
   const passTu = s.tu.passaggiTotali > 0 ? Math.round(s.tu.passaggiRiusciti / s.tu.passaggiTotali * 100) : 0;
   const passCpu = s.cpu.passaggiTotali > 0 ? Math.round(s.cpu.passaggiRiusciti / s.cpu.passaggiTotali * 100) : 0;
-
   document.getElementById('modale-box').innerHTML = `
     <h2>FINE PARTITA</h2>
     <p style="font-size:32px;font-weight:bold">
