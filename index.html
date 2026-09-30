@@ -528,7 +528,7 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE con FLOOD FILL + OMBRE + LIMITI VERTICALI
+   CANVAS COLORAZIONE - Proporzioni CHIBI corrette
    ========================================================= */
 const cacheImmagini = {};
 
@@ -556,7 +556,6 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
         const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
 
-        // Funzione ombra (colore scurito del 40%)
         function ombra(c) {
           return { r: Math.round(c.r * 0.6), g: Math.round(c.g * 0.6), b: Math.round(c.b * 0.6) };
         }
@@ -564,47 +563,45 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const W = canvas.width;
         const H = canvas.height;
 
-        // 1. Trova bounding box del giocatore
         const bbox = trovaBoundingBox(ctx, W, H);
         if (!bbox) { resolve(percorso); return; }
 
         const altezza = bbox.y2 - bbox.y1;
         const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
 
-        // 2. Confini verticali (in pixel) tra le zone
-        // Proporzioni chibi: testa grande (30%), maglia (25%), pantaloncini (17%), calzettoni (28%)
+        // ✅ PROPORZIONI CHIBI (testa grande ~40% dell'altezza)
+        // Capelli: 0-18%
+        // Maglia: 42-58% (busto, sotto la testa)
+        // Pantaloncini: 58-72%
+        // Calzettoni: 72-100%
         const yCapelliInizio = bbox.y1;
-        const yCapelliFine = bbox.y1 + Math.floor(altezza * 0.30);
-        const yMagliaInizio = bbox.y1 + Math.floor(altezza * 0.30);
-        const yMagliaFine = bbox.y1 + Math.floor(altezza * 0.55);
-        const yPantalonciniInizio = bbox.y1 + Math.floor(altezza * 0.55);
+        const yCapelliFine = bbox.y1 + Math.floor(altezza * 0.18);
+        const yMagliaInizio = bbox.y1 + Math.floor(altezza * 0.42);
+        const yMagliaFine = bbox.y1 + Math.floor(altezza * 0.60);
+        const yPantalonciniInizio = bbox.y1 + Math.floor(altezza * 0.58);
         const yPantalonciniFine = bbox.y1 + Math.floor(altezza * 0.72);
         const yCalzettoniInizio = bbox.y1 + Math.floor(altezza * 0.72);
         const yCalzettoniFine = bbox.y2;
 
-        // 3. Trova i punti di partenza (bianchi) per ogni zona
-        const pCapelli = trovaPuntoBianco(ctx, W, H, centroX, yCapelliInizio + 3, yCapelliFine - 3);
-        const pMaglia = trovaPuntoBianco(ctx, W, H, centroX, yMagliaInizio + 3, yMagliaFine - 3);
-        const pPantaloncini = trovaPuntoBianco(ctx, W, H, centroX, yPantalonciniInizio + 3, yPantalonciniFine - 3);
-        const pCalzettoni = trovaPuntoBianco(ctx, W, H, centroX, yCalzettoniInizio + 3, yCalzettoniFine - 3);
+        // Trova i punti di partenza
+        const pCapelli = trovaPuntoBianco(ctx, W, H, centroX, yCapelliInizio + 2, yCapelliFine - 2);
+        const pMaglia = trovaPuntoBianco(ctx, W, H, centroX, yMagliaInizio + 2, yMagliaFine - 2);
+        const pPantaloncini = trovaPuntoBianco(ctx, W, H, centroX, yPantalonciniInizio + 2, yPantalonciniFine - 2);
+        const pCalzettoni = trovaPuntoBianco(ctx, W, H, centroX, yCalzettoniInizio + 2, yCalzettoniFine - 2);
 
-        // 4. Per ogni zona: flood fill bianco + flood fill grigio (ombra)
-        // Capelli
+        // Flood fill bianco + ombra per ogni zona
         if (pCapelli) {
           floodFillLimitato(ctx, pCapelli.x, pCapelli.y, targetCapelli, yCapelliInizio, yCapelliFine, true);
           floodFillLimitato(ctx, pCapelli.x, pCapelli.y, ombra(targetCapelli), yCapelliInizio, yCapelliFine, false);
         }
-        // Maglia
         if (pMaglia) {
           floodFillLimitato(ctx, pMaglia.x, pMaglia.y, targetMaglia, yMagliaInizio, yMagliaFine, true);
           floodFillLimitato(ctx, pMaglia.x, pMaglia.y, ombra(targetMaglia), yMagliaInizio, yMagliaFine, false);
         }
-        // Pantaloncini
         if (pPantaloncini) {
           floodFillLimitato(ctx, pPantaloncini.x, pPantaloncini.y, targetPantaloncini, yPantalonciniInizio, yPantalonciniFine, true);
           floodFillLimitato(ctx, pPantaloncini.x, pPantaloncini.y, ombra(targetPantaloncini), yPantalonciniInizio, yPantalonciniFine, false);
         }
-        // Calzettoni
         if (pCalzettoni) {
           floodFillLimitato(ctx, pCalzettoni.x, pCalzettoni.y, targetCalzettoni, yCalzettoniInizio, yCalzettoniFine, true);
           floodFillLimitato(ctx, pCalzettoni.x, pCalzettoni.y, ombra(targetCalzettoni), yCalzettoniInizio, yCalzettoniFine, false);
@@ -662,7 +659,6 @@ function trovaPuntoBianco(ctx, w, h, centroX, yStart, yEnd) {
   return null;
 }
 
-/* Flood fill con limiti verticali + tipo (bianco o grigio) */
 function floodFillLimitato(ctx, startX, startY, colore, minY, maxY, cercaBianco) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
