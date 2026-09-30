@@ -477,50 +477,23 @@
    ========================================================= */
 const STAMINA_MAX = 45;
 
-// ✅ SPRITE SHEET - Coordinate corrette
-// Immagine: 1408 x 768
-// 11 colonne totali (1 etichette + 10 frame)
-// 6 righe
-const SPRITE_SHEET = {
-  file: 'sprite-sheet.png',
-  larghezza: 1408,
-  altezza: 768,
-  colonneFrame: 10,       // 10 frame di gioco
-  colonneTotali: 11,      // 1 etichette + 10 frame
-  righe: 6,
-  cellaWidth: 128,        // 1408 / 11 = 128
-  cellaHeight: 128,       // 768 / 6 = 128
-  offsetX: 128,           // Salta la colonna etichette
-  offsetY: 0
-};
-
-// Righe dello sprite sheet (1-based)
-const RIGHE_ANIMAZIONI = {
-  'Fermo': 1,          // INATTIVO
-  'Tiro': 2,           // CALCIA LA PALLA
-  'Scivolata': 3,      // TACKLE
-  'Esultanza1': 4,     // CELEBRAZIONE 1
-  'Esultanza2': 5,     // CELEBRAZIONE 2
-  'Esultanza3': 6      // CELEBRAZIONE 3
-};
-
-// Frame per ogni animazione
+// ⚠️ FRAME PER ANIMAZIONE
 const FRAME_ANIMAZIONI = {
-  'Fermo': 10,
-  'Tiro': 10,
-  'Scivolata': 9,
-  'Esultanza1': 9,
-  'Esultanza2': 9,
-  'Esultanza3': 9
+  'Fermo': 6,
+  'Tiro': 5,
+  'Scivolata': 5,
+  'Esultanza1': 7,
+  'Esultanza2': 6,   // ⚠️ DA CONFERMARE
+  'Esultanza3': 6    // ⚠️ DA CONFERMARE
 };
 
 const VELOCITA_ANIMAZIONI = {
   'Fermo': 180,
-  'Tiro': 100,
-  'Scivolata': 100,
-  'Esultanza1': 150,
-  'Esultanza2': 150,
-  'Esultanza3': 150
+  'Tiro': 120,
+  'Scivolata': 120,
+  'Esultanza1': 180,
+  'Esultanza2': 180,
+  'Esultanza3': 180
 };
 
 const ZONE_CONFIG = [
@@ -546,14 +519,14 @@ const SQUADRE = {
   portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' }
 };
 
-// Colori originali dello sprite sheet
+// Colori originali (da non toccare)
 const COLORE_PELLE = { r: 0xF4, g: 0xC9, b: 0xA0 };
 const COLORE_SCARPE = { r: 0x2A, g: 0x2A, b: 0x2A };
 
-// Zone verticali (in percentuale) per capire cosa colorare
+// Zone verticali (in percentuale)
 const ZONA_CAPELLI_INIZIO = 0.00;
-const ZONA_CAPELLI_FINE = 0.22;
-const ZONA_MAGLIA_INIZIO = 0.35;
+const ZONA_CAPELLI_FINE = 0.25;
+const ZONA_MAGLIA_INIZIO = 0.30;
 const ZONA_MAGLIA_FINE = 0.60;
 const ZONA_PANTALONCINI_INIZIO = 0.60;
 const ZONA_PANTALONCINI_FINE = 0.78;
@@ -570,119 +543,75 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS — Carica sprite sheet e ritaglia/colora al volo
+   CANVAS COLORAZIONE
    ========================================================= */
-let spriteSheetImg = null;
 const cacheImmagini = {};
 
-function caricaSpriteSheet() {
+function pathFrame(animazione, numero) {
+  return encodeURI(`${animazione}/${animazione} (${numero}).png`);
+}
+
+function caricaImmagineColorata(squadra, animazione, numeroFrame) {
   return new Promise((resolve) => {
-    if (spriteSheetImg) { resolve(spriteSheetImg); return; }
+    const chiave = `${squadra}|${animazione}|${numeroFrame}`;
+    if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
+    const percorso = pathFrame(animazione, numeroFrame);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      spriteSheetImg = img;
-      console.log('✅ Sprite sheet caricato:', img.width, 'x', img.height);
-      console.log('   Cella:', SPRITE_SHEET.cellaWidth, 'x', SPRITE_SHEET.cellaHeight);
-      console.log('   Offset X:', SPRITE_SHEET.offsetX);
-      resolve(img);
-    };
-    img.onerror = () => { console.error('❌ Sprite sheet non trovato'); resolve(null); };
-    img.src = SPRITE_SHEET.file;
-  });
-}
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const H = canvas.height;
+        const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
+        const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
+        const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
+        const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
 
-async function caricaFrameColorato(squadra, animazione, numeroFrame) {
-  const chiave = `${squadra}|${animazione}|${numeroFrame}`;
-  if (cacheImmagini[chiave]) return cacheImmagini[chiave];
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+          if (a < 10) continue;
+          const y = Math.floor((i / 4) / canvas.width);
+          const yPerc = y / H;
 
-  if (!spriteSheetImg) {
-    await caricaSpriteSheet();
-    if (!spriteSheetImg) return '';
-  }
+          // Salta pelle
+          const distPelle = Math.abs(r - COLORE_PELLE.r) + Math.abs(g - COLORE_PELLE.g) + Math.abs(b - COLORE_PELLE.b);
+          if (distPelle < 80) continue;
 
-  return new Promise((resolve) => {
-    try {
-      const riga = RIGHE_ANIMAZIONI[animazione]; // 1-based
-      const frame = numeroFrame; // 1-based
-      const sx = SPRITE_SHEET.offsetX + (frame - 1) * SPRITE_SHEET.cellaWidth;
-      const sy = SPRITE_SHEET.offsetY + (riga - 1) * SPRITE_SHEET.cellaHeight;
-      const sw = SPRITE_SHEET.cellaWidth;
-      const sh = SPRITE_SHEET.cellaHeight;
+          // Salta scarpe
+          const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
+          if (distScarpe < 100) continue;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = sw;
-      canvas.height = sh;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(spriteSheetImg, sx, sy, sw, sh, 0, 0, sw, sh);
+          // Considera solo pixel bianchi
+          if (r < 200 || g < 200 || b < 200) continue;
 
-      const imageData = ctx.getImageData(0, 0, sw, sh);
-      const data = imageData.data;
-
-      const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
-      const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
-      const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
-      const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
-
-      for (let i = 0; i < data.length; i += 4) {
-        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-        if (a < 10) continue;
-
-        const pixelIndex = i / 4;
-        const y = Math.floor(pixelIndex / sw);
-        const yPerc = y / sh;
-
-        // Salta pelle e scarpe
-        const distPelle = Math.abs(r - COLORE_PELLE.r) + Math.abs(g - COLORE_PELLE.g) + Math.abs(b - COLORE_PELLE.b);
-        if (distPelle < 80) continue;
-
-        const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
-        if (distScarpe < 100) continue;
-
-        // Considera solo pixel "bianchi o quasi" (da colorare)
-        if (r < 200 || g < 200 || b < 200) continue;
-
-        // Zona capelli (parte alta)
-        if (yPerc >= ZONA_CAPELLI_INIZIO && yPerc < ZONA_CAPELLI_FINE) {
-          data[i] = targetCapelli.r;
-          data[i+1] = targetCapelli.g;
-          data[i+2] = targetCapelli.b;
-          continue;
+          // Zone
+          if (yPerc < ZONA_CAPELLI_FINE) {
+            data[i] = targetCapelli.r; data[i+1] = targetCapelli.g; data[i+2] = targetCapelli.b;
+          } else if (yPerc >= ZONA_MAGLIA_INIZIO && yPerc < ZONA_MAGLIA_FINE) {
+            data[i] = targetMaglia.r; data[i+1] = targetMaglia.g; data[i+2] = targetMaglia.b;
+          } else if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
+            data[i] = targetPantaloncini.r; data[i+1] = targetPantaloncini.g; data[i+2] = targetPantaloncini.b;
+          } else if (yPerc >= ZONA_CALZETTONI_INIZIO && yPerc < ZONA_CALZETTONI_FINE) {
+            data[i] = targetCalzettoni.r; data[i+1] = targetCalzettoni.g; data[i+2] = targetCalzettoni.b;
+          }
         }
-
-        // Zona maglia
-        if (yPerc >= ZONA_MAGLIA_INIZIO && yPerc < ZONA_MAGLIA_FINE) {
-          data[i] = targetMaglia.r;
-          data[i+1] = targetMaglia.g;
-          data[i+2] = targetMaglia.b;
-          continue;
-        }
-
-        // Zona pantaloncini
-        if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
-          data[i] = targetPantaloncini.r;
-          data[i+1] = targetPantaloncini.g;
-          data[i+2] = targetPantaloncini.b;
-          continue;
-        }
-
-        // Zona calzettoni
-        if (yPerc >= ZONA_CALZETTONI_INIZIO && yPerc < ZONA_CALZETTONI_FINE) {
-          data[i] = targetCalzettoni.r;
-          data[i+1] = targetCalzettoni.g;
-          data[i+2] = targetCalzettoni.b;
-          continue;
-        }
+        ctx.putImageData(imageData, 0, 0);
+        const dataURL = canvas.toDataURL();
+        cacheImmagini[chiave] = dataURL;
+        resolve(dataURL);
+      } catch (e) {
+        console.error('Errore Canvas:', e);
+        resolve(percorso);
       }
-
-      ctx.putImageData(imageData, 0, 0);
-      const dataURL = canvas.toDataURL();
-      cacheImmagini[chiave] = dataURL;
-      resolve(dataURL);
-    } catch (e) {
-      console.error('Errore Canvas:', e);
-      resolve('');
-    }
+    };
+    img.onerror = () => resolve(percorso);
+    img.src = percorso;
   });
 }
 
@@ -796,7 +725,7 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
 
   const tick = () => {
     if (!animazioniInCorso[giocatoreId]) return;
-    caricaFrameColorato(squadra, nomeAnimazione, frame).then(dataURL => {
+    caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
       if (animazioniInCorso[giocatoreId] && dataURL) img.src = dataURL;
     });
     frame++;
@@ -856,13 +785,12 @@ function creaPanchina(sq) {
 
 /* INIT */
 async function initApp() {
-  await caricaSpriteSheet();
   renderCampo(); renderPanchina(); renderHeader();
   document.getElementById('carte-panel').classList.add('nascosto');
 
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
-    imgSquadre[id] = await caricaFrameColorato(id, 'Fermo', 1);
+    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
   }
 
   let html = `<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">`;
@@ -898,10 +826,6 @@ function avviaPartita(modalita) {
   distribuisciCarte('tu', 6); distribuisciCarte('cpu', 6);
   stato.punteggio = { tu: 0, cpu: 0 };
   stato.tempo = 1; stato.mano = 1;
-  stato.statistiche = {
-    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
-    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
-  };
   stato.logCompleto = [];
   document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
@@ -930,8 +854,8 @@ function renderHeader() {
 async function renderCampo() {
   const zone = document.getElementById('zone');
   zone.innerHTML = '';
-  const imgTU = await caricaFrameColorato(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaFrameColorato(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
   ZONE_CONFIG.forEach(z => {
     const zona = document.createElement('div');
     zona.className = 'zona' + (z.portiere ? ' zona-portiere' : '');
@@ -1028,8 +952,8 @@ function creaPedinaEl(g, imgSrc) {
 async function renderPanchina() {
   const p = document.getElementById('panchina');
   p.innerHTML = '';
-  const imgTU = await caricaFrameColorato(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaFrameColorato(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
   titoloTu.textContent = SQUADRE[stato.squadraTU].nome;
@@ -1303,9 +1227,7 @@ function spareggio() {
   c.risultati = { tu: null, cpu: null };
   selezione = []; stato.turno = 'tu';
   const att = c.attaccante, dif = c.difensore;
-  for (const sq of [att, dif]) {
-    pescaCarte(sq, 2);
-  }
+  for (const sq of [att, dif]) pescaCarte(sq, 2);
   const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
   const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
