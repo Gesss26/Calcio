@@ -15,8 +15,6 @@
     user-select: none;
   }
   .app { display: flex; flex-direction: column; height: 100vh; transition: all 0.4s ease; }
-
-  /* TOP BAR */
   .topbar {
     display: flex; justify-content: center; align-items: center;
     padding: 6px 14px; background: #16213e; border-bottom: 2px solid #0f3460;
@@ -48,12 +46,9 @@
     width: 34px; height: 34px; background: #0f3460; color: #fff;
     border: 2px solid #4dabf7; border-radius: 8px; font-size: 16px;
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s;
   }
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
-
-  /* CAMPO */
   .campo-wrapper {
     flex: 0 0 40vh; position: relative; background: #1a5a28;
     overflow: hidden; transition: flex 0.4s ease;
@@ -96,7 +91,7 @@
     border: 2px solid rgba(255,255,255,0.6); transform: translateY(-50%);
   }
   .area-piccola.sinistra { left: 0; border-left: none; border-radius: 0 4px 4px 0; }
-  .area-piccola.destra { right: 0; border-right: none; border-radius: 0 4px 4px 0; }
+  .area-piccola.destra { right: 0; border-right: none; border-radius: 4px 0 0 4px; }
   .porta {
     position: absolute; top: 50%; width: 2%; height: 14%;
     background: rgba(255,255,255,0.15); border: 3px solid #fff;
@@ -104,7 +99,6 @@
   }
   .porta.sinistra { left: -4px; border-radius: 0 4px 4px 0; }
   .porta.destra { right: -4px; border-radius: 4px 0 0 4px; }
-
   .zone { display: flex; width: 100%; height: 100%; position: relative; z-index: 2; }
   .zona {
     flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);
@@ -125,7 +119,6 @@
   .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.2); padding-right: 4px; }
   .lato-squadra.cpu { padding-left: 2px; }
   .zona-portiere .lato-squadra.tu { border-right: none; padding-right: 0; }
-
   .pedina-wrapper { display: flex; align-items: center; gap: 3px; position: relative; }
   .info-laterale {
     display: flex; flex-direction: column; gap: 2px; font-size: 10px;
@@ -139,25 +132,21 @@
   .info-laterale .stamina-txt.basso { color: #ef4444; }
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 11px; }
-
-  /* PEDINE */
   .pedina {
     position: relative; width: 40px; height: 47px;
-    transition: transform 0.2s, filter 0.2s;
     display: flex; align-items: center; justify-content: center;
   }
   .pedina .sprite-img {
     width: 100%; height: 100%; object-fit: contain;
     image-rendering: pixelated; image-rendering: crisp-edges;
-    user-select: none; -webkit-user-drag: none; pointer-events: none;
+    pointer-events: none;
   }
   .pedina.cpu .sprite-img { transform: scaleX(-1); }
   .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
   .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
   .pedina.ammonito::after {
-    content: '🟨'; position: absolute; top: -6px; right: -6px;
-    font-size: 12px; z-index: 5;
+    content: '🟨'; position: absolute; top: -6px; right: -6px; font-size: 12px;
   }
   .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
   .pedina.espulso::after {
@@ -170,14 +159,13 @@
   .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
-
   .pedina .palla-attaccata {
     position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
     width: 16px; height: 16px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700;
-    z-index: 10; pointer-events: none; animation: pallaAttaccata 1.2s infinite;
+    z-index: 10; animation: pallaAttaccata 1.2s infinite;
   }
   .pedina .palla-attaccata::after {
     content: ''; position: absolute; inset: 3px;
@@ -192,14 +180,8 @@
     position: absolute; width: 20px; height: 20px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7), 0 0 6px #ffd700;
-    z-index: 60; pointer-events: none; transform: translate(-50%, -50%);
-    will-change: left, top; display: none;
-  }
-  .palla-animata::after {
-    content: ''; position: absolute; inset: 4px;
-    background: radial-gradient(circle at 30% 30%, #333, #000);
-    border-radius: 50%; opacity: 0.6;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
+    z-index: 60; transform: translate(-50%, -50%); display: none;
   }
   .flash-vincitore {
     position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
@@ -208,8 +190,6 @@
   .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
-
-  /* PANCHINA */
   .panchina {
     background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
     padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
@@ -217,44 +197,36 @@
   }
   .panchina-titolo {
     font-size: 9px; color: #ffd700; font-weight: bold;
-    writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: 2px;
+    writing-mode: vertical-rl; letter-spacing: 2px;
   }
   .panchina-giocatore {
-    position: relative; display: flex; flex-direction: column; align-items: center;
-    padding: 2px; border-radius: 4px; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; padding: 2px;
   }
   .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
   .panchina-giocatore .pedina {
-    transform: scale(0.65); transform-origin: center bottom; width: 30px; height: 36px;
+    transform: scale(0.65); width: 30px; height: 36px;
   }
   .panchina-giocatore .panchina-nome {
     font-size: 8px; color: #ccc; margin-top: 2px; font-weight: bold;
   }
-  .panchina-giocatore.tu .panchina-nome { color: #6bb6ff; }
-  .panchina-giocatore.cpu .panchina-nome { color: #ff8a8a; }
-
-  /* PANNELLO CARTE */
   .carte-panel {
     flex: 1; background: #16213e; padding: 8px 12px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 6px; overflow-y: auto; transition: all 0.3s;
+    gap: 6px; overflow-y: auto;
   }
   .app.fase-animazione .carte-panel { display: none; }
   .carte-panel.nascosto { display: none; }
-
   .info-mano {
     display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;
   }
   .info-mano .titolo {
-    font-size: 11px; color: #ffd700; font-weight: bold;
-    text-transform: uppercase; letter-spacing: 1px;
+    font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase;
   }
   .info-mano .bersaglio {
     font-size: 26px; font-weight: bold; color: #ffd700;
     text-shadow: 0 0 12px rgba(255,215,0,0.7);
   }
   .info-mano .turno-label { font-size: 12px; color: #aaa; }
-
   .mano-wrapper {
     display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center;
   }
@@ -263,82 +235,69 @@
     width: 48px; height: 66px; background: #fff; color: #222;
     border-radius: 6px; display: flex; align-items: center; justify-content: center;
     font-size: 34px; font-weight: 900; font-family: 'Georgia', serif;
-    cursor: pointer; border: 3px solid transparent; transition: all 0.15s;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.5); line-height: 1;
+    cursor: pointer; border: 3px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
   }
-  .carta:hover { transform: translateY(-4px); }
   .carta.selezionata {
-    border-color: #ffd700; background: #fff9c4;
-    transform: translateY(-6px); box-shadow: 0 0 16px #ffd700;
+    border-color: #ffd700; background: #fff9c4; transform: translateY(-6px);
+    box-shadow: 0 0 16px #ffd700;
   }
   .carta.negativa {
     background: linear-gradient(135deg, #fff5f5, #ffdddd);
     color: #dc2626; border: 3px solid #dc2626; font-size: 30px;
-    box-shadow: 0 0 12px rgba(220,38,38,0.5), 0 3px 6px rgba(0,0,0,0.5);
   }
-  .carta.negativa.selezionata {
-    background: #ffcccc; box-shadow: 0 0 20px #dc2626, 0 0 30px #dc2626; border-color: #ff0000;
-  }
-
   .pila-wrapper { display: flex; gap: 8px; align-items: center; }
-  .pila { position: relative; width: 36px; height: 50px; cursor: default; }
+  .pila { position: relative; width: 36px; height: 50px; }
   .pila-titolo {
     position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
+    font-size: 9px; color: #ffd700; font-weight: bold;
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
     position: absolute; width: 36px; height: 50px; border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: bold; font-family: 'Georgia', serif;
+    font-size: 18px; font-weight: bold;
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
-    border: 2px solid #fff; color: transparent;
+    border: 2px solid #fff;
   }
   .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 20px; }
   .pila-carta.scarto { background: #fff; border: 2px solid #999; color: #222; }
   .pila-carta.scarto.negativa { background: #ffdddd; color: #dc2626; border-color: #dc2626; }
   .pila-count {
     position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #aaa; white-space: nowrap;
+    font-size: 9px; color: #aaa;
   }
-
   button {
     background: #0f3460; color: #fff; border: 2px solid #4dabf7;
     padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
-    cursor: pointer; transition: all 0.15s; margin: 2px;
+    cursor: pointer; margin: 2px;
   }
   button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
   button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
-  button.primario:hover:not(:disabled) { background: #ffed4e; }
-
-  /* DADI */
   .dado {
     display: inline-flex; align-items: center; justify-content: center;
     width: 68px; height: 68px; background: #fff; color: #222;
     border-radius: 12px; font-size: 42px; font-weight: 900;
-    font-family: 'Georgia', serif; margin: 4px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.7); animation: rollDado 0.6s ease;
+    margin: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    animation: rollDado 0.6s ease;
   }
   @keyframes rollDado {
     0% { transform: rotate(-720deg) scale(0.3); opacity: 0; }
     60% { transform: rotate(0deg) scale(1.2); opacity: 1; }
     100% { transform: rotate(0deg) scale(1); opacity: 1; }
   }
-  .dadi-row { display: flex; justify-content: center; gap: 8px; margin: 6px 0; flex-wrap: wrap; }
+  .dadi-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
   .dado.piccolo { width: 50px; height: 50px; font-size: 28px; }
   .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
   .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
   .dado.giallo { background: linear-gradient(135deg, #ffe066, #f59f00); color: #222; border: 3px solid #fff; }
-
-  /* OVERLAY */
   .overlay {
     position: absolute; inset: 0; background: rgba(0,0,0,0.78);
     display: flex; align-items: center; justify-content: center;
-    z-index: 40; padding: 12px; overflow-y: auto;
+    z-index: 40; padding: 12px;
   }
   .overlay.nascosto { display: none; }
   .overlay-box {
@@ -347,17 +306,15 @@
     max-height: 100%; overflow-y: auto;
   }
   .overlay-box h2 { color: #ffd700; margin-bottom: 10px; font-size: 17px; }
-  .esito-tiro { font-size: 22px; font-weight: bold; margin: 10px 0; text-align: center; }
-  .esito-tiro.goal { color: #4ade80; text-shadow: 0 0 14px #4ade80; }
-  .esito-tiro.parata { color: #ef4444; text-shadow: 0 0 14px #ef4444; }
-  .esito-tiro.palo { color: #f59f00; text-shadow: 0 0 14px #f59f00; }
-  .esito-tiro.angolo { color: #4dabf7; text-shadow: 0 0 14px #4dabf7; }
+  .esito-tiro { font-size: 22px; font-weight: bold; margin: 10px 0; }
+  .esito-tiro.goal { color: #4ade80; }
+  .esito-tiro.parata { color: #ef4444; }
+  .esito-tiro.palo { color: #f59f00; }
+  .esito-tiro.angolo { color: #4dabf7; }
   .fase-label {
     font-size: 10px; color: #ffd700; text-transform: uppercase;
-    letter-spacing: 2px; margin-top: 8px; margin-bottom: 2px;
+    letter-spacing: 2px; margin-top: 8px;
   }
-
-  /* GOAL OVERLAY */
   .goal-overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -367,18 +324,17 @@
   .goal-overlay.cpu { background: radial-gradient(circle, rgba(255,107,107,0.6), rgba(0,0,0,0.85)); }
   .goal-text {
     font-size: 96px; font-weight: 900; color: #ffd700;
-    text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 8px 20px rgba(0,0,0,0.9);
-    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); letter-spacing: 4px;
+    text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700;
+    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: 4px;
   }
   @keyframes goalZoom {
     0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-
-  /* MODALE */
   .modale {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
-    display: flex; align-items: center; justify-content: center; z-index: 100; padding: 12px;
+    display: flex; align-items: center; justify-content: center; z-index: 100;
   }
   .modale.nascosto { display: none; }
   .modale-box {
@@ -387,21 +343,15 @@
     overflow-y: auto; text-align: center;
   }
   .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
-  .modale-box p { margin: 6px 0; line-height: 1.5; }
-
-  /* SELEZIONE SQUADRA */
   .squadre-griglia {
-    display: grid; grid-template-columns: repeat(2, 1fr);
-    gap: 10px; margin: 16px 0;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0;
   }
   .squadra-btn {
     background: #0f3460; border: 3px solid #4dabf7; border-radius: 10px;
-    padding: 12px; cursor: pointer; transition: all 0.15s;
-    text-align: center; color: #fff; font-weight: bold;
+    padding: 12px; cursor: pointer; text-align: center; color: #fff; font-weight: bold;
   }
-  .squadra-btn:hover { background: #4dabf7; color: #16213e; transform: scale(1.05); }
   .squadra-btn.selezionata {
-    background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 20px #ffd700;
+    background: #ffd700; color: #16213e; border-color: #ffd700;
   }
   .squadra-btn .nome { font-size: 14px; margin-bottom: 6px; }
   .squadra-btn .maglia {
@@ -409,98 +359,42 @@
     background-size: contain; background-repeat: no-repeat; background-position: center;
     image-rendering: pixelated;
   }
-
-  /* SOSTITUZIONI */
   .sost-sezione {
     background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin: 12px 0;
   }
-  .sost-sezione h3 {
-    font-size: 13px; color: #ffd700; margin-bottom: 8px;
-    text-transform: uppercase; letter-spacing: 1px;
-  }
+  .sost-sezione h3 { font-size: 13px; color: #ffd700; margin-bottom: 8px; }
   .sost-lista { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
   .sost-card {
     background: #0f3460; border: 2px solid #4dabf7; border-radius: 6px;
-    padding: 6px 10px; font-size: 11px; cursor: pointer; transition: all 0.15s;
-    min-width: 70px; text-align: center;
+    padding: 6px 10px; font-size: 11px; cursor: pointer; min-width: 70px;
   }
-  .sost-card:hover:not(.disabilitato) { background: #4dabf7; color: #0f3460; }
-  .sost-card.selezionato {
-    background: #ffd700; color: #16213e; border-color: #ffd700; box-shadow: 0 0 14px #ffd700;
-  }
+  .sost-card.selezionato { background: #ffd700; color: #16213e; }
   .sost-card.disabilitato { opacity: 0.35; cursor: not-allowed; }
-  .sost-card .ruolo { font-weight: bold; }
-  .sost-card .stamina { font-size: 9px; opacity: 0.8; }
-  .sost-card .falli { font-size: 9px; color: #ff8a8a; }
-
-  /* LOG */
   .log-box {
     background: #0a0a15; border-radius: 8px; padding: 12px;
     max-height: 60vh; overflow-y: auto; font-size: 12px;
-    line-height: 1.6; text-align: left; font-family: 'Courier New', monospace;
+    text-align: left; font-family: 'Courier New', monospace;
   }
   .log-box p { margin: 2px 0; }
   .log-box .tu { color: #4dabf7; font-weight: bold; }
   .log-box .cpu { color: #ff6b6b; font-weight: bold; }
   .log-box .goal { color: #ffd700; font-weight: bold; }
-  .log-box .parata { color: #4ade80; font-weight: bold; }
-  .log-box .highlight { background: rgba(255,215,0,0.15); padding: 2px 4px; border-radius: 3px; }
-
-  /* STATISTICHE */
   .stats-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-  .stats-table th {
-    background: #0f3460; color: #ffd700; padding: 6px 4px;
-    text-align: center; font-size: 11px;
-  }
-  .stats-table td {
-    padding: 5px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);
-  }
+  .stats-table th { background: #0f3460; color: #ffd700; padding: 6px 4px; font-size: 11px; }
+  .stats-table td { padding: 5px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .stats-table td:first-child { text-align: left; color: #ccc; }
   .stats-table .tu-val { color: #4dabf7; font-weight: bold; }
   .stats-table .cpu-val { color: #ff6b6b; font-weight: bold; }
-
   @media (max-height: 500px) {
-    .topbar { padding: 3px 8px; min-height: 34px; }
-    .risultato { font-size: 17px; }
-    .minuto { font-size: 13px; padding: 1px 6px; min-width: 36px; }
-    .info-top { font-size: 9px; right: 72px; }
-    .btn-icona { width: 28px; height: 28px; font-size: 13px; }
+    .pedina { width: 30px; height: 36px; }
+    .carta { width: 40px; height: 56px; font-size: 28px; }
     .campo-wrapper { flex: 0 0 45vh; }
     .app.fase-combattimento .campo-wrapper { flex: 0 0 45vh; }
-    .pedina { width: 30px; height: 36px; }
-    .info-laterale { font-size: 8px; }
-    .panchina { min-height: 42px; padding: 2px 4px; }
-    .panchina-giocatore .pedina { transform: scale(0.55); width: 24px; height: 28px; }
-    .panchina-giocatore .panchina-nome { font-size: 7px; }
-    .carta { width: 40px; height: 56px; font-size: 28px; }
-    .carta.negativa { font-size: 24px; }
-    .pila { width: 30px; height: 42px; }
-    .pila-carta { width: 30px; height: 42px; font-size: 15px; }
-    .info-mano .bersaglio { font-size: 20px; }
-    .goal-text { font-size: 60px; }
-    .dado { width: 52px; height: 52px; font-size: 32px; }
-    .dado.piccolo { width: 40px; height: 40px; font-size: 22px; }
-  }
-
-  .rotate-msg {
-    display: none; position: fixed; inset: 0; background: #0a0a15;
-    z-index: 999; align-items: center; justify-content: center;
-    flex-direction: column; color: #ffd700; font-size: 20px;
-    text-align: center; padding: 20px;
-  }
-  @media (orientation: portrait) and (max-width: 900px) {
-    .rotate-msg { display: flex; }
   }
   .nascosto { display: none !important; }
 </style>
 </head>
 <body>
-
-<div class="rotate-msg">
-  <div style="font-size:60px;margin-bottom:16px">📱↔️</div>
-  <p>Ruota il telefono in <b>orizzontale</b> per giocare</p>
-</div>
-
 <div class="app fase-animazione" id="app">
   <div class="topbar">
     <div class="risultato-wrapper">
@@ -522,7 +416,6 @@
       <button class="btn-icona" onclick="apriLog()">📋</button>
     </div>
   </div>
-
   <div class="campo-wrapper" id="campo-wrapper">
     <div class="campo" id="campo">
       <div class="righe-campo">
@@ -541,9 +434,7 @@
     </div>
     <div class="flash-vincitore" id="flash"></div>
   </div>
-
   <div class="panchina" id="panchina"></div>
-
   <div class="carte-panel" id="carte-panel">
     <div class="info-mano">
       <div>
@@ -552,7 +443,7 @@
       </div>
       <div class="turno-label" id="turno-label"></div>
     </div>
-    <div class="mano-wrapper" id="mano-wrapper">
+    <div class="mano-wrapper">
       <div class="carte" id="carte-container"></div>
       <div class="pila-wrapper">
         <div class="pila">
@@ -570,7 +461,6 @@
     <div id="azioni-container"></div>
   </div>
 </div>
-
 <div class="overlay nascosto" id="overlay">
   <div class="overlay-box" id="overlay-box"></div>
 </div>
@@ -587,6 +477,51 @@
    ========================================================= */
 const STAMINA_MAX = 45;
 
+// ⚠️ COORDINATE SPRITE SHEET (DA MODIFICARE CON I VALORI ESATTI)
+// Stimati dall'immagine: 1400x780, 10 colonne, 6 righe
+const SPRITE_SHEET = {
+  file: 'sprite-sheet.png',
+  larghezza: 1400,  // ⚠️ DA VERIFICARE
+  altezza: 780,     // ⚠️ DA VERIFICARE
+  colonne: 10,
+  righe: 6,
+  // Larghezza/altezza di ogni cella (calcolata)
+  cellaWidth: 140,  // 1400/10
+  cellaHeight: 130, // 780/6
+  // Offset per la colonna delle etichette (se presente)
+  offsetX: 0,       // ⚠️ DA VERIFICARE (forse ~110 se c'è la colonna etichette)
+  offsetY: 0
+};
+
+// Righe dello sprite sheet (1-based)
+const RIGHE_ANIMAZIONI = {
+  'Fermo': 1,
+  'Tiro': 2,
+  'Scivolata': 3,
+  'Esultanza1': 4,
+  'Esultanza2': 5,
+  'Esultanza3': 6
+};
+
+// Frame per ogni animazione (dall'immagine)
+const FRAME_ANIMAZIONI = {
+  'Fermo': 10,
+  'Tiro': 10,
+  'Scivolata': 9,
+  'Esultanza1': 9,
+  'Esultanza2': 9,
+  'Esultanza3': 9
+};
+
+const VELOCITA_ANIMAZIONI = {
+  'Fermo': 180,
+  'Tiro': 100,
+  'Scivolata': 100,
+  'Esultanza1': 150,
+  'Esultanza2': 150,
+  'Esultanza3': 150
+};
+
 const ZONE_CONFIG = [
   { id: 0, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'tu' },
   { id: 1, nome: 'Z1', ruolo: 'DIF', n: 1 },
@@ -601,35 +536,29 @@ const PANCHINA_CONFIG = [
   { ruolo: 'POR', n: 1 }, { ruolo: 'DIF', n: 2 },
   { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
-const ANIMAZIONI = {
-  'Fermo':      { cartella: 'Fermo',      frame: 16, velocita: 180, loop: true },
-  'Tiro':       { cartella: 'Tiro',       frame: 16, velocita: 100, loop: false },
-  'Scivolata':  { cartella: 'Scivolata',  frame: 12, velocita: 100, loop: false },
-  'Esultanza1': { cartella: 'Esultanza1', frame: 10, velocita: 150, loop: false },
-  'Esultanza2': { cartella: 'Esultanza2', frame: 10, velocita: 150, loop: false },
-  'Esultanza3': { cartella: 'Esultanza3', frame: 10, velocita: 150, loop: false }
-};
 
 const SQUADRE = {
-  francia:    { nome: 'FRANCIA',    maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#D8A786', capelli: '#4B351F' },
-  italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#D8A786', capelli: '#4B351F' },
+  francia:    { nome: 'FRANCIA',    maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#4B351F' },
+  italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#F4C9A0', capelli: '#4B351F' },
   germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
-  spagna:     { nome: 'SPAGNA',     maglia: '#CC0000', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#D8A786', capelli: '#3A2A1A' },
-  portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#D8A786', capelli: '#3A2A1A' }
+  spagna:     { nome: 'SPAGNA',     maglia: '#CC0000', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' }
 };
 
-const COLORE_ORIG_MAGLIA = { r: 0x32, g: 0x50, b: 0x98 };
-const COLORE_ORIG_PANTALONCINI = { r: 0xFF, g: 0xFF, b: 0xFF };
-const COLORE_ORIG_CALZETTONI = { r: 0x8B, g: 0x20, b: 0x20 };
-const COLORE_ORIG_PELLE = { r: 0xD8, g: 0xA7, b: 0x86 };
-const COLORE_ORIG_CAPELLI = { r: 0x4B, g: 0x35, b: 0x1F };
+// Colori originali dello sprite sheet "tutto bianco"
+// Lo sprite è TUTTO bianco tranne pelle e scarpe nere
+const COLORE_PELLE = { r: 0xF4, g: 0xC9, b: 0xA0 }; // pelle (da NON toccare)
+const COLORE_SCARPE = { r: 0x2A, g: 0x2A, b: 0x2A }; // scarpe nere (da NON toccare)
 
-const TOLLERANZA = 60;
-
-const ZONA_PANTALONCINI_INIZIO = 0.55;
+// Zone verticali (in percentuale) per capire cosa colorare
+const ZONA_CAPELLI_INIZIO = 0.00;
+const ZONA_CAPELLI_FINE = 0.20;
+const ZONA_MAGLIA_INIZIO = 0.35;
+const ZONA_MAGLIA_FINE = 0.60;
+const ZONA_PANTALONCINI_INIZIO = 0.60;
 const ZONA_PANTALONCINI_FINE = 0.78;
 const ZONA_CALZETTONI_INIZIO = 0.78;
-const ZONA_CALZETTONI_FINE = 1.00;
+const ZONA_CALZETTONI_FINE = 0.95;
 
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
@@ -639,105 +568,128 @@ function hexToRgb(hex) {
     b: parseInt(h.substring(4, 6), 16)
   };
 }
-function coloreSimile(r1, g1, b1, r2, g2, b2, tolleranza) {
-  return Math.abs(r1 - r2) <= tolleranza &&
-         Math.abs(g1 - g2) <= tolleranza &&
-         Math.abs(b1 - b2) <= tolleranza;
-}
 
 /* =========================================================
-   CANVAS COLORAZIONE
+   CANVAS — Carica sprite sheet e ritaglia/colora al volo
    ========================================================= */
+let spriteSheetImg = null;
 const cacheImmagini = {};
 
-function caricaImmagineColorata(squadra, animazione, numeroFrame) {
+function caricaSpriteSheet() {
   return new Promise((resolve) => {
-    const chiave = `${squadra}|${animazione}|${numeroFrame}`;
-    if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
-    const config = ANIMAZIONI[animazione];
-    if (!config) { resolve(''); return; }
-    const cartella = config.cartella;
-    const percorso = encodeURI(`${cartella}/${animazione} (${numeroFrame}).png`);
+    if (spriteSheetImg) { resolve(spriteSheetImg); return; }
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        const H = canvas.height;
-        const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
-        const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
-        const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
-        const targetPelle = hexToRgb(SQUADRE[squadra].pelle);
-        const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
-
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-          if (a < 10) continue;
-          const pixelIndex = i / 4;
-          const y = Math.floor(pixelIndex / canvas.width);
-          const yPerc = y / H;
-
-          // Maglia
-          if (coloreSimile(r, g, b, COLORE_ORIG_MAGLIA.r, COLORE_ORIG_MAGLIA.g, COLORE_ORIG_MAGLIA.b, TOLLERANZA)) {
-            data[i] = targetMaglia.r; data[i+1] = targetMaglia.g; data[i+2] = targetMaglia.b;
-            continue;
-          }
-          // Pelle
-          if (yPerc < 0.55 && coloreSimile(r, g, b, COLORE_ORIG_PELLE.r, COLORE_ORIG_PELLE.g, COLORE_ORIG_PELLE.b, TOLLERANZA)) {
-            data[i] = targetPelle.r; data[i+1] = targetPelle.g; data[i+2] = targetPelle.b;
-            continue;
-          }
-          // Capelli
-          if (yPerc < 0.35 && coloreSimile(r, g, b, COLORE_ORIG_CAPELLI.r, COLORE_ORIG_CAPELLI.g, COLORE_ORIG_CAPELLI.b, TOLLERANZA)) {
-            data[i] = targetCapelli.r; data[i+1] = targetCapelli.g; data[i+2] = targetCapelli.b;
-            continue;
-          }
-          // Pantaloncini (bianco + grigio chiaro)
-          if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
-            if (coloreSimile(r, g, b, 255, 255, 255, 40)) {
-              data[i] = targetPantaloncini.r; data[i+1] = targetPantaloncini.g; data[i+2] = targetPantaloncini.b;
-              continue;
-            }
-            if (r > 180 && g > 180 && b > 180 && Math.abs(r - g) < 20 && Math.abs(g - b) < 20) {
-              data[i] = Math.round(targetPantaloncini.r * 0.85);
-              data[i+1] = Math.round(targetPantaloncini.g * 0.85);
-              data[i+2] = Math.round(targetPantaloncini.b * 0.85);
-              continue;
-            }
-          }
-          // Calzettoni
-          if (yPerc >= ZONA_CALZETTONI_INIZIO) {
-            if (coloreSimile(r, g, b, COLORE_ORIG_CALZETTONI.r, COLORE_ORIG_CALZETTONI.g, COLORE_ORIG_CALZETTONI.b, TOLLERANZA * 2)) {
-              data[i] = targetCalzettoni.r; data[i+1] = targetCalzettoni.g; data[i+2] = targetCalzettoni.b;
-              continue;
-            }
-          }
-        }
-        ctx.putImageData(imageData, 0, 0);
-        const dataURL = canvas.toDataURL();
-        cacheImmagini[chiave] = dataURL;
-        resolve(dataURL);
-      } catch (e) {
-        console.error('Errore Canvas:', e);
-        resolve(percorso);
-      }
+      spriteSheetImg = img;
+      // Aggiorna dimensioni in base all'immagine reale
+      SPRITE_SHEET.larghezza = img.width;
+      SPRITE_SHEET.altezza = img.height;
+      SPRITE_SHEET.cellaWidth = Math.round(img.width / SPRITE_SHEET.colonne);
+      SPRITE_SHEET.cellaHeight = Math.round(img.height / SPRITE_SHEET.righe);
+      console.log('✅ Sprite sheet caricato:', img.width, 'x', img.height);
+      console.log('   Cella:', SPRITE_SHEET.cellaWidth, 'x', SPRITE_SHEET.cellaHeight);
+      resolve(img);
     };
-    img.onerror = () => resolve(percorso);
-    img.src = percorso;
+    img.onerror = () => { console.error('❌ Sprite sheet non trovato'); resolve(null); };
+    img.src = SPRITE_SHEET.file;
   });
 }
-function precaricaImmagini() {
-  Object.keys(SQUADRE).forEach(squadra => caricaImmagineColorata(squadra, 'Fermo', 1));
-}
-function pathFrame(animazione, numero) {
-  const cartella = ANIMAZIONI[animazione].cartella;
-  return encodeURI(`${cartella}/${animazione} (${numero}).png`);
+
+async function caricaFrameColorato(squadra, animazione, numeroFrame) {
+  const chiave = `${squadra}|${animazione}|${numeroFrame}`;
+  if (cacheImmagini[chiave]) return cacheImmagini[chiave];
+
+  if (!spriteSheetImg) {
+    await caricaSpriteSheet();
+    if (!spriteSheetImg) return '';
+  }
+
+  return new Promise((resolve) => {
+    try {
+      const riga = RIGHE_ANIMAZIONI[animazione]; // 1-based
+      const frame = numeroFrame; // 1-based
+      const sx = (frame - 1) * SPRITE_SHEET.cellaWidth + SPRITE_SHEET.offsetX;
+      const sy = (riga - 1) * SPRITE_SHEET.cellaHeight + SPRITE_SHEET.offsetY;
+      const sw = SPRITE_SHEET.cellaWidth;
+      const sh = SPRITE_SHEET.cellaHeight;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = sw;
+      canvas.height = sh;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(spriteSheetImg, sx, sy, sw, sh, 0, 0, sw, sh);
+
+      const imageData = ctx.getImageData(0, 0, sw, sh);
+      const data = imageData.data;
+
+      const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
+      const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
+      const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
+      const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+        if (a < 10) continue;
+
+        const pixelIndex = i / 4;
+        const y = Math.floor(pixelIndex / sw);
+        const yPerc = y / sh;
+
+        // Salta pelle e scarpe
+        const distPelle = Math.abs(r - COLORE_PELLE.r) + Math.abs(g - COLORE_PELLE.g) + Math.abs(b - COLORE_PELLE.b);
+        if (distPelle < 60) continue;
+
+        const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
+        if (distScarpe < 90) continue;
+
+        // Considera solo pixel "bianchi o quasi"
+        if (r < 200 || g < 200 || b < 200) continue;
+
+        // Zona capelli (parte alta)
+        if (yPerc >= ZONA_CAPELLI_INIZIO && yPerc < ZONA_CAPELLI_FINE) {
+          // I capelli sono sopra la testa, ma anche la pelle è lì...
+          // Sostituiamo solo se il pixel è bianco (capelli)
+          data[i] = targetCapelli.r;
+          data[i+1] = targetCapelli.g;
+          data[i+2] = targetCapelli.b;
+          continue;
+        }
+
+        // Zona maglia
+        if (yPerc >= ZONA_MAGLIA_INIZIO && yPerc < ZONA_MAGLIA_FINE) {
+          data[i] = targetMaglia.r;
+          data[i+1] = targetMaglia.g;
+          data[i+2] = targetMaglia.b;
+          continue;
+        }
+
+        // Zona pantaloncini
+        if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
+          data[i] = targetPantaloncini.r;
+          data[i+1] = targetPantaloncini.g;
+          data[i+2] = targetPantaloncini.b;
+          continue;
+        }
+
+        // Zona calzettoni
+        if (yPerc >= ZONA_CALZETTONI_INIZIO && yPerc < ZONA_CALZETTONI_FINE) {
+          data[i] = targetCalzettoni.r;
+          data[i+1] = targetCalzettoni.g;
+          data[i+2] = targetCalzettoni.b;
+          continue;
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      const dataURL = canvas.toDataURL();
+      cacheImmagini[chiave] = dataURL;
+      resolve(dataURL);
+    } catch (e) {
+      console.error('Errore Canvas:', e);
+      resolve('');
+    }
+  });
 }
 
 /* =========================================================
@@ -768,9 +720,7 @@ let selezione = [];
 let selezioneSost = { campo: null, panchina: null };
 const animazioniInCorso = {};
 
-/* =========================================================
-   MAZZO
-   ========================================================= */
+/* MAZZO */
 function creaMazzo() { return mescola([0,1,2,3,4,5,6,7,8,9,'-1','-2']); }
 function mescola(arr) {
   const a = [...arr];
@@ -792,15 +742,12 @@ function distribuisciCarte(sq, n) {
   }
 }
 function pescaCarte(sq, n) {
-  // Se mazzo vuoto, rimescola con scarto
   if (stato.mazzi[sq].length < n && stato.scarti[sq].length > 0) {
     stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq]]);
     stato.scarti[sq] = [];
   }
   for (let i = 0; i < n; i++) {
-    if (stato.mazzi[sq].length === 0) {
-      stato.mazzi[sq] = creaMazzo();
-    }
+    if (stato.mazzi[sq].length === 0) stato.mazzi[sq] = creaMazzo();
     stato.mani[sq].push(stato.mazzi[sq].pop());
   }
 }
@@ -813,18 +760,14 @@ function sommaCarte(carte) {
   return carte.reduce((acc, c) => acc + valoreCarta(c), 0);
 }
 
-/* =========================================================
-   MINUTO
-   ========================================================= */
+/* MINUTO */
 function calcolaMinuto() {
   const tempoOffset = (stato.tempo - 1) * 45;
   const minuto = tempoOffset + (stato.mano - 1) * 3;
   return Math.min(minuto, 90);
 }
 
-/* =========================================================
-   LOG
-   ========================================================= */
+/* LOG */
 function log(msg, classe = '') {
   stato.logCompleto.push({ msg, classe });
   const logBox = document.getElementById('log-box');
@@ -837,42 +780,36 @@ function log(msg, classe = '') {
   }
 }
 function apriLog() {
-  let html = `<h2>📋 Cronaca della partita</h2><div class="log-box" id="log-box">`;
-  stato.logCompleto.forEach(l => {
-    html += `<p class="${l.classe || ''}">${l.msg}</p>`;
-  });
+  let html = `<h2>📋 Cronaca</h2><div class="log-box" id="log-box">`;
+  stato.logCompleto.forEach(l => html += `<p class="${l.classe || ''}">${l.msg}</p>`);
   html += `</div><button class="primario" onclick="chiudiModale()" style="margin-top:12px">CHIUDI</button>`;
   document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
-  setTimeout(() => {
-    const box = document.getElementById('log-box');
-    if (box) box.scrollTop = box.scrollHeight;
-  }, 50);
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
-/* =========================================================
-   ANIMAZIONE
-   ========================================================= */
+/* ANIMAZIONE */
 function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
   fermaAnimazione(giocatoreId);
-  const config = ANIMAZIONI[nomeAnimazione];
-  if (!config) { if (callback) callback(); return; }
+  if (!FRAME_ANIMAZIONI[nomeAnimazione]) { if (callback) callback(); return; }
   const img = document.querySelector(`[data-giocatore-id="${giocatoreId}"] .sprite-img`);
   if (!img) { if (callback) callback(); return; }
   const squadra = giocatoreId.startsWith('tu') ? stato.squadraTU : stato.squadraCPU;
   let frame = 1;
   animazioniInCorso[giocatoreId] = true;
+  const velocita = VELOCITA_ANIMAZIONI[nomeAnimazione] || 150;
+  const totaleFrame = FRAME_ANIMAZIONI[nomeAnimazione];
+
   const tick = () => {
     if (!animazioniInCorso[giocatoreId]) return;
-    caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
-      if (animazioniInCorso[giocatoreId]) img.src = dataURL;
+    caricaFrameColorato(squadra, nomeAnimazione, frame).then(dataURL => {
+      if (animazioniInCorso[giocatoreId] && dataURL) img.src = dataURL;
     });
     frame++;
-    if (frame > config.frame) {
-      if (config.loop) {
+    if (frame > totaleFrame) {
+      if (nomeAnimazione === 'Fermo' || nomeAnimazione === 'Esultanza1' || nomeAnimazione === 'Esultanza2' || nomeAnimazione === 'Esultanza3') {
         frame = 1;
-        setTimeout(tick, config.velocita);
+        setTimeout(tick, velocita);
       } else {
         animazioniInCorso[giocatoreId] = false;
         if (callback) callback();
@@ -881,16 +818,14 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
         }, 100);
       }
     } else {
-      setTimeout(tick, config.velocita);
+      setTimeout(tick, velocita);
     }
   };
   tick();
 }
 function fermaAnimazione(giocatoreId) { animazioniInCorso[giocatoreId] = false; }
 
-/* =========================================================
-   GIOCATORI
-   ========================================================= */
+/* GIOCATORI */
 function creaGiocatori(sq) {
   const g = [];
   let id = 0;
@@ -925,18 +860,17 @@ function creaPanchina(sq) {
   return p;
 }
 
-/* =========================================================
-   INIT
-   ========================================================= */
+/* INIT */
 async function initApp() {
-  precaricaImmagini();
-  await new Promise(r => setTimeout(r, 300));
+  await caricaSpriteSheet();
   renderCampo(); renderPanchina(); renderHeader();
   document.getElementById('carte-panel').classList.add('nascosto');
+
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
-    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
+    imgSquadre[id] = await caricaFrameColorato(id, 'Fermo', 1);
   }
+
   let html = `<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
     html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaSquadraTU('${id}')">
@@ -970,23 +904,19 @@ function avviaPartita(modalita) {
   distribuisciCarte('tu', 6); distribuisciCarte('cpu', 6);
   stato.punteggio = { tu: 0, cpu: 0 };
   stato.tempo = 1; stato.mano = 1;
-  stato.statistiche = {
-    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
-    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
-  };
   stato.logCompleto = [];
   document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
   renderCampo(); renderPanchina(); renderHeader();
   chiudiModale();
   document.getElementById('modale-box').innerHTML = `
-    <h2>🪙 Lancio della moneta</h2><p style="margin-bottom:10px">Scegli:</p>
+    <h2>🪙 Lancio della moneta</h2>
     <div>
       <button class="primario" onclick="lanciaMoneta('testa')">TESTA</button>
       <button class="primario" onclick="lanciaMoneta('croce')">CROCE</button>
     </div>`;
   document.getElementById('modale').classList.remove('nascosto');
-  log(`🎮 Inizio: ${SQUADRE[stato.squadraTU].nome} vs ${SQUADRE[stato.squadraCPU].nome}`, 'highlight');
+  log(`🎮 ${SQUADRE[stato.squadraTU].nome} vs ${SQUADRE[stato.squadraCPU].nome}`, 'highlight');
 }
 
 function renderHeader() {
@@ -999,14 +929,11 @@ function renderHeader() {
   document.getElementById('zona-palla').textContent = zn;
 }
 
-/* =========================================================
-   RENDER CAMPO
-   ========================================================= */
 async function renderCampo() {
   const zone = document.getElementById('zone');
   zone.innerHTML = '';
-  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaFrameColorato(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaFrameColorato(stato.squadraCPU, 'Fermo', 1);
   ZONE_CONFIG.forEach(z => {
     const zona = document.createElement('div');
     zona.className = 'zona' + (z.portiere ? ' zona-portiere' : '');
@@ -1077,11 +1004,10 @@ function creaPedinaEl(g, imgSrc) {
   if (g.stamina === 0) el.classList.add('esaurito');
   if (g.ammonito) el.classList.add('ammonito');
   if (g.espulso) el.classList.add('espulso');
-  el.title = `${g.nome} - Stamina ${g.stamina}/${g.staminaMax} - Falli ${g.falli}`;
+  el.title = `${g.nome} - Stamina ${g.stamina}/${g.staminaMax}`;
   const img = document.createElement('img');
   img.className = 'sprite-img';
   img.src = imgSrc;
-  img.alt = g.nome;
   el.appendChild(img);
   if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
     const palla = document.createElement('div');
@@ -1101,43 +1027,37 @@ function creaPedinaEl(g, imgSrc) {
   return el;
 }
 
-/* =========================================================
-   PANCHINA
-   ========================================================= */
 async function renderPanchina() {
   const p = document.getElementById('panchina');
   p.innerHTML = '';
-  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaFrameColorato(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaFrameColorato(stato.squadraCPU, 'Fermo', 1);
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
-  titoloTu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraTU].nome;
+  titoloTu.textContent = SQUADRE[stato.squadraTU].nome;
   p.appendChild(titoloTu);
   stato.panchina.tu.forEach(g => {
     const el = document.createElement('div');
     el.className = 'panchina-giocatore tu';
     if (g.entrato) el.classList.add('in-ombra');
-    el.innerHTML = `<div class="pedina tu"><img class="sprite-img" src="${imgTU}" alt="${g.nome}"></div>
+    el.innerHTML = `<div class="pedina tu"><img class="sprite-img" src="${imgTU}"></div>
       <div class="panchina-nome">${g.nome}</div>`;
     p.appendChild(el);
   });
   const titoloCpu = document.createElement('div');
   titoloCpu.className = 'panchina-titolo';
-  titoloCpu.textContent = 'PANCHINA ' + SQUADRE[stato.squadraCPU].nome;
+  titoloCpu.textContent = SQUADRE[stato.squadraCPU].nome;
   p.appendChild(titoloCpu);
   stato.panchina.cpu.forEach(g => {
     const el = document.createElement('div');
     el.className = 'panchina-giocatore cpu';
     if (g.entrato) el.classList.add('in-ombra');
-    el.innerHTML = `<div class="pedina cpu"><img class="sprite-img" src="${imgCPU}" alt="${g.nome}"></div>
+    el.innerHTML = `<div class="pedina cpu"><img class="sprite-img" src="${imgCPU}"></div>
       <div class="panchina-nome">${g.nome}</div>`;
     p.appendChild(el);
   });
 }
 
-/* =========================================================
-   PALLA
-   ========================================================= */
 function staccaPalla(daGiocatoreId) {
   stato.pallaInAnimazione = true;
   const pedina = document.querySelector(`[data-giocatore-id="${daGiocatoreId}"]`);
@@ -1193,92 +1113,21 @@ function flashVincitore(squadra) {
   setTimeout(() => flash.classList.remove('attivo'), 600);
 }
 
-/* =========================================================
-   MONETA
-   ========================================================= */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
-  log(`🪙 Moneta: esce ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
+  log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
   stato.possessore = vince; stato.zonaPalla = 4; stato.turno = vince;
   const candidati = stato.giocatori[vince].filter(g => g.zona === 4 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
-  log(`⚽ ${vince === 'tu' ? 'Tu' : 'CPU'} inizi con ${scelto.nome} in Zona 4`);
   chiudiModale();
   renderCampo(); renderHeader();
   setTimeout(() => avviaContrasto(), 700);
 }
 
-/* =========================================================
-   SOSTITUZIONI
-   ========================================================= */
-function apriSostituzioni() {
-  if (stato.sostBloccate) { alert('Sostituzioni bloccate. Potrai farle al prossimo contrasto.'); return; }
-  if (stato.partitaFinita) return;
-  selezioneSost = { campo: null, panchina: null };
-  renderModaleSostituzioni();
-  document.getElementById('modale').classList.remove('nascosto');
-}
-function renderModaleSostituzioni() {
-  const sq = 'tu';
-  let html = `<h2>🔄 Sostituzioni</h2>`;
-  html += `<div class="sost-sezione"><h3>In campo</h3><div class="sost-lista">`;
-  stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
-    const sel = selezioneSost.campo === g.id ? ' selezionato' : '';
-    html += `<div class="sost-card${sel}" onclick="selezionaSostCampo('${g.id}')">
-      <div class="ruolo">${g.nome}</div>
-      <div class="stamina">⚡${g.stamina}/45</div>
-      <div class="falli">${g.falli > 0 ? '⚠' + g.falli : ''}</div></div>`;
-  });
-  html += `</div></div>`;
-  html += `<div class="sost-sezione"><h3>Panchina</h3><div class="sost-lista">`;
-  stato.panchina[sq].forEach(g => {
-    const sel = selezioneSost.panchina === g.id ? ' selezionato' : '';
-    const disab = g.entrato ? ' disabilitato' : '';
-    html += `<div class="sost-card${sel}${disab}" onclick="selezionaSostPanchina('${g.id}')">
-      <div class="ruolo">${g.nome}</div>
-      <div class="stamina">⚡${g.stamina}/45</div></div>`;
-  });
-  html += `</div></div>`;
-  html += `<div style="margin-top:14px">`;
-  if (selezioneSost.campo && selezioneSost.panchina) {
-    html += `<button class="primario" onclick="confermaSostituzione()">CONFERMA</button>`;
-  }
-  html += `<button onclick="chiudiModale()">CHIUDI</button></div>`;
-  document.getElementById('modale-box').innerHTML = html;
-}
-function selezionaSostCampo(id) { selezioneSost.campo = id; renderModaleSostituzioni(); }
-function selezionaSostPanchina(id) {
-  const pan = stato.panchina.tu.find(g => g.id === id);
-  if (pan && pan.entrato) return;
-  selezioneSost.panchina = id;
-  renderModaleSostituzioni();
-}
-function confermaSostituzione() {
-  const sq = 'tu';
-  const campo = stato.giocatori[sq].find(g => g.id === selezioneSost.campo);
-  const pan = stato.panchina[sq].find(g => g.id === selezioneSost.panchina);
-  if (!campo || !pan || pan.entrato) return;
-  fermaAnimazione(campo.id);
-  const nuovo = {
-    id: pan.id, squadra: sq, zona: campo.zona, ruolo: pan.ruolo,
-    portiere: pan.portiere, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
-    falli: 0, ammonito: false, espulso: false, nome: pan.nome
-  };
-  const idx = stato.giocatori[sq].indexOf(campo);
-  stato.giocatori[sq][idx] = nuovo;
-  pan.entrato = true;
-  stato.statistiche[sq].sostituzioni++;
-  log(`🔄 Sostituzione: esce ${campo.nome}, entra ${pan.nome}`, 'highlight');
-  selezioneSost = { campo: null, panchina: null };
-  renderCampo(); renderPanchina(); renderModaleSostituzioni();
-}
-
-/* =========================================================
-   CONTRASTO
-   ========================================================= */
+/* CONTRASTO */
 function avviaContrasto() {
   document.getElementById('app').className = 'app fase-combattimento';
   document.getElementById('carte-panel').classList.remove('nascosto');
@@ -1323,34 +1172,29 @@ function avviaContrasto() {
   stato.turno = 'tu'; selezione = [];
   renderPannelloContrasto();
 }
-
 function renderPannelloContrasto() {
   const c = stato.contrasto;
   document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona} — Mano ${c.mano}`;
   document.getElementById('bersaglio-mano').textContent = '🎯 ' + c.bersaglio;
-  const sq = 'tu';
-  document.getElementById('turno-label').textContent = `Le tue carte (${stato.mani[sq].length})`;
+  document.getElementById('turno-label').textContent = `Le tue carte (${stato.mani.tu.length})`;
   const cont = document.getElementById('carte-container');
   cont.innerHTML = '';
-  stato.mani[sq].forEach((carta, idx) => {
+  stato.mani.tu.forEach((carta, idx) => {
     const el = document.createElement('div');
     el.className = 'carta';
     if (carta === '-1' || carta === '-2') el.classList.add('negativa');
-    el.dataset.idx = idx;
     el.textContent = carta;
     el.onclick = () => selezionaCarta(idx);
     cont.appendChild(el);
   });
-  renderPile(sq);
+  renderPile('tu');
   document.getElementById('azioni-container').innerHTML =
     `<button class="primario" id="btn-gioca" onclick="giocaCarte()" disabled>GIOCA 2 CARTE</button>`;
 }
 function renderPile(sq) {
   const mazzoPila = document.getElementById('mazzo-pila');
   const scartoPila = document.getElementById('scarto-pila');
-  const mazzoCount = document.getElementById('mazzo-count');
-  const scartoCount = document.getElementById('scarto-count');
-  mazzoPila.innerHTML = '';
+  mazzoPila.innerHTML = ''; scartoPila.innerHTML = '';
   const numMazzo = Math.min(stato.mazzi[sq].length, 3);
   for (let i = 0; i < numMazzo; i++) {
     const el = document.createElement('div');
@@ -1358,21 +1202,19 @@ function renderPile(sq) {
     el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px';
     mazzoPila.appendChild(el);
   }
-  mazzoCount.textContent = stato.mazzi[sq].length;
-  scartoPila.innerHTML = '';
+  document.getElementById('mazzo-count').textContent = stato.mazzi[sq].length;
   const scarto = stato.scarti[sq];
   const numScarto = Math.min(scarto.length, 3);
   for (let i = 0; i < numScarto; i++) {
     const idx = scarto.length - 1 - i;
-    const carta = scarto[idx];
     const el = document.createElement('div');
     el.className = 'pila-carta scarto';
-    if (carta === '-1' || carta === '-2') el.classList.add('negativa');
-    el.textContent = carta;
+    if (scarto[idx] === '-1' || scarto[idx] === '-2') el.classList.add('negativa');
+    el.textContent = scarto[idx];
     el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px'; el.style.zIndex = 10 - i;
     scartoPila.appendChild(el);
   }
-  scartoCount.textContent = stato.scarti[sq].length;
+  document.getElementById('scarto-count').textContent = stato.scarti[sq].length;
 }
 function selezionaCarta(idx) {
   if (!stato.sostBloccate) {
@@ -1392,26 +1234,24 @@ function selezionaCarta(idx) {
 }
 function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
   if (!giocatore) return somma;
-  if (giocatore.stamina === 0) {
-    if (somma === bersaglio) return bersaglio - 1;
-  }
+  if (giocatore.stamina === 0 && somma === bersaglio) return bersaglio - 1;
   return somma;
 }
 function giocaCarte() {
-  const sq = 'tu';
   const c = stato.contrasto;
-  const carteGiocate = selezione.map(i => stato.mani[sq][i]);
+  const carteGiocate = selezione.map(i => stato.mani.tu[i]);
   let somma = sommaCarte(carteGiocate);
-  const giocatore = sq === c.attaccante 
-    ? stato.giocatori[sq].find(g => g.id === c.giocatoreAtt)
-    : stato.giocatori[sq].find(g => g.id === c.giocatoreDif);
+  const giocatore = c.attaccante === 'tu' 
+    ? stato.giocatori.tu.find(g => g.id === c.giocatoreAtt)
+    : stato.giocatori.tu.find(g => g.id === c.giocatoreDif);
   somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
   log(`Tu giochi: [${carteGiocate.join(', ')}] = ${somma}`);
-  c.risultati[sq] = { carte: carteGiocate, somma };
+  c.risultati.tu = { carte: carteGiocate, somma };
   const idxs = [...selezione].sort((a, b) => b - a);
-  const carteDaScartare = idxs.map(i => stato.mani[sq][i]);
-  stato.scarti[sq].push(...carteDaScartare);
-  idxs.forEach(i => stato.mani[sq].splice(i, 1));
+  idxs.forEach(i => {
+    stato.scarti.tu.push(stato.mani.tu[i]);
+    stato.mani.tu.splice(i, 1);
+  });
   selezione = [];
   setTimeout(() => giocaCPU(), 500);
 }
@@ -1439,85 +1279,53 @@ function giocaCPU() {
   log(`CPU gioca: [${cg.join(', ')}] = ${somma}`);
   c.risultati.cpu = { carte: cg, somma };
   const idxs = [...mig].sort((a, b) => b - a);
-  const carteDaScartare = idxs.map(i => stato.mani.cpu[i]);
-  stato.scarti.cpu.push(...carteDaScartare);
-  idxs.forEach(i => stato.mani.cpu.splice(i, 1));
+  idxs.forEach(i => {
+    stato.scarti.cpu.push(stato.mani.cpu[i]);
+    stato.mani.cpu.splice(i, 1);
+  });
   valutaMano();
 }
-
 function valutaMano() {
   const c = stato.contrasto;
   const att = c.attaccante, dif = c.difensore;
   const rAtt = c.risultati[att], rDif = c.risultati[dif];
   const dAtt = Math.abs(rAtt.somma - c.bersaglio);
   const dDif = Math.abs(rDif.somma - c.bersaglio);
-  if (rAtt.somma === c.bersaglio && rDif.somma !== c.bersaglio) return vinciContrasto(att, 'numero esatto');
-  if (rDif.somma === c.bersaglio && rAtt.somma !== c.bersaglio) return vinciContrasto(dif, 'numero esatto');
+  if (rAtt.somma === c.bersaglio && rDif.somma !== c.bersaglio) return vinciContrasto(att, 'esatto');
+  if (rDif.somma === c.bersaglio && rAtt.somma !== c.bersaglio) return vinciContrasto(dif, 'esatto');
   if (rAtt.somma === c.bersaglio && rDif.somma === c.bersaglio) return spareggio();
   if (dAtt < dDif) return vinciContrasto(att, 'più vicino');
   if (dDif < dAtt) return vinciContrasto(dif, 'più vicino');
   spareggio();
 }
-
-/* =========================================================
-   SPAREGGIO - NUOVA MECCANICA
-   ========================================================= */
 function spareggio() {
   const c = stato.contrasto;
   c.mano++;
-  log(`🔁 Pareggio! Mano ${c.mano} — si pescano 2 carte ciascuno`);
+  log(`🔁 Pareggio! Mano ${c.mano} — si pescano 2 carte`);
   c.risultati = { tu: null, cpu: null };
   selezione = []; stato.turno = 'tu';
   const att = c.attaccante, dif = c.difensore;
-
-  // Pesca 2 carte ciascuno dal mazzo (o rimescola se finito)
   for (const sq of [att, dif]) {
-    if (stato.mazzi[sq].length < 2) {
-      // Rimescola scarto + mazzo
-      if (stato.scarti[sq].length > 0) {
-        stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq]]);
-        stato.scarti[sq] = [];
-        log(`♻️ Rimescolo mazzo ${sq === 'tu' ? 'TU' : 'CPU'}`);
-      }
-      // Se ancora vuoto, nuovo mazzo
-      if (stato.mazzi[sq].length < 2) {
-        stato.mazzi[sq] = creaMazzo();
-      }
-    }
-    // Pesca 2 carte
     pescaCarte(sq, 2);
   }
-
-  // ✅ Stamina -1 ad ogni mano per i 2 giocatori
   const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
   const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere) gDif.stamina = Math.max(0, gDif.stamina - 1);
-
   renderPannelloContrasto();
 }
-
-/* =========================================================
-   VINCI
-   ========================================================= */
 function vinciContrasto(vincente, motivo) {
   const c = stato.contrasto;
   log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince (${motivo})`, 'highlight');
   flashVincitore(vincente);
   stato.statistiche[vincente].vinte++;
-  stato.statistiche[c.attaccante].passaggiTotali++;
-  if (vincente === c.attaccante) stato.statistiche[vincente].passaggiRiusciti++;
-
-  // ✅ Stamina -1 SOLO ai 2 giocatori che combattono (fine contrasto)
   const gAtt = stato.giocatori[c.attaccante].find(g => g.id === c.giocatoreAtt);
   const gDif = stato.giocatori[c.difensore].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere && !gDif.espulso) gDif.stamina = Math.max(0, gDif.stamina - 1);
-
   const zona = c.zona;
   const vecchioGiocatore = stato.giocatorePalla;
   mostraRisultatoOverlay(vincente, motivo);
-
   setTimeout(() => {
     chiudiOverlay();
     document.getElementById('app').className = 'app fase-animazione';
@@ -1531,18 +1339,11 @@ function vinciContrasto(vincente, motivo) {
       if (nuovoGiocatoreId) {
         const g = stato.giocatori[vincente].find(x => x.id === nuovoGiocatoreId);
         if (g && !g.espulso) stato.giocatorePalla = g.id;
-        else {
-          const gz = stato.giocatori[vincente].filter(x => x.zona === zona && !x.portiere && !x.espulso);
-          stato.giocatorePalla = gz.length > 0 ? gz[0].id : null;
-        }
       }
-      log(`🔄 Cambio possesso: palla a ${vincente === 'tu' ? 'TE' : 'CPU'}`);
       renderHeader();
       setTimeout(() => {
         if (vecchioGiocatore && stato.giocatorePalla) {
-          animaPalla(vecchioGiocatore, stato.giocatorePalla, () => {
-            setTimeout(() => avviaContrasto(), 1000);
-          });
+          animaPalla(vecchioGiocatore, stato.giocatorePalla, () => setTimeout(() => avviaContrasto(), 1000));
         } else {
           renderCampo();
           setTimeout(() => avviaContrasto(), 1000);
@@ -1551,15 +1352,8 @@ function vinciContrasto(vincente, motivo) {
     }
   }, 1500);
 }
-
-/* =========================================================
-   DADO FALLO
-   ========================================================= */
 function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
-  apriOverlay(`
-    <h2>🎲 Dado fallo</h2>
-    <p style="font-size:12px;color:#aaa">Se esce 3 o 8 → fallo del difensore</p>
-    <div id="area-fallo" style="margin-top:12px"></div>`);
+  apriOverlay(`<h2>🎲 Dado fallo</h2><p style="font-size:12px;color:#aaa">Se 3 o 8 → fallo</p><div id="area-fallo" style="margin-top:12px"></div>`);
   setTimeout(() => {
     const dado = Math.floor(Math.random() * 9) + 1;
     document.getElementById('area-fallo').innerHTML = `<div class="dado giallo">${dado}</div>`;
@@ -1579,50 +1373,41 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   const difensore = c.difensore;
   const zona = c.zona;
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
-  if (difensoriZona.length === 0) {
-    chiudiOverlay();
-    proseguiAzione(vincente, c, vecchioGiocatore);
-    return;
-  }
+  if (difensoriZona.length === 0) { chiudiOverlay(); proseguiAzione(vincente, c, vecchioGiocatore); return; }
   const falloso = difensoriZona[Math.floor(Math.random() * difensoriZona.length)];
   falloso.falli++;
   stato.statistiche[difensore].falli++;
-  log(`🟨 Fallo di ${falloso.nome} (${falloso.falli} falli)`);
+  log(`🟨 Fallo di ${falloso.nome}`);
   if (falloso.falli === 3) {
     falloso.ammonito = true;
     stato.statistiche[difensore].ammonizioni++;
-    log(`🟨 AMMONIZIONE per ${falloso.nome}!`, 'parata');
+    log(`🟨 AMMONIZIONE!`, 'parata');
   }
   if (falloso.falli >= 6) {
     falloso.espulso = true;
     fermaAnimazione(falloso.id);
     stato.statistiche[difensore].espulsioni++;
-    log(`🟥 ESPULSIONE per ${falloso.nome}!`, 'parata');
+    log(`🟥 ESPULSIONE!`, 'parata');
   }
   const isRigore = (zona === 1 || zona === 6);
-  const squadraAttacca = vincente;
   setTimeout(() => {
     chiudiOverlay();
     if (isRigore) {
-      log(`🎯 RIGORE per ${zona === 6 ? 'TU' : 'CPU'}!`, 'goal');
       setTimeout(() => eseguiRigore(zona === 6 ? 'tu' : 'cpu'), 800);
     } else {
-      log(`🚩 Punizione.`);
-      const nuovaZona = zona + (squadraAttacca === 'tu' ? +1 : -1);
+      const nuovaZona = zona + (vincente === 'tu' ? +1 : -1);
       if (nuovaZona === 7 || nuovaZona === 0) {
         stato.zonaPalla = zona;
-        setTimeout(() => tiroInPorta(squadraAttacca), 800);
+        setTimeout(() => tiroInPorta(vincente), 800);
       } else {
         stato.zonaPalla = nuovaZona;
-        stato.possessore = squadraAttacca;
-        const gz = stato.giocatori[squadraAttacca].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+        stato.possessore = vincente;
+        const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
         if (gz.length > 0) stato.giocatorePalla = gz[0].id;
         renderHeader();
         setTimeout(() => {
           if (vecchioGiocatore && stato.giocatorePalla) {
-            animaPalla(vecchioGiocatore, stato.giocatorePalla, () => {
-              setTimeout(() => avviaContrasto(), 1000);
-            });
+            animaPalla(vecchioGiocatore, stato.giocatorePalla, () => setTimeout(() => avviaContrasto(), 1000));
           } else {
             renderCampo();
             setTimeout(() => avviaContrasto(), 1000);
@@ -1634,39 +1419,27 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
 }
 function proseguiAzione(vincente, c, vecchioGiocatore) {
   const zona = c.zona;
-  const direzione = vincente === 'tu' ? +1 : -1;
-  const nuovaZona = zona + direzione;
-  const portaAvv = vincente === 'tu' ? 7 : 0;
-  if (nuovaZona === portaAvv) return tiroInPorta(vincente);
+  const nuovaZona = zona + (vincente === 'tu' ? +1 : -1);
+  if (nuovaZona === 7 || nuovaZona === 0) return tiroInPorta(vincente);
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
   let nuovo = null;
   if (gz.length > 0) {
-    const conStamina = gz.filter(g => g.stamina > 0);
-    const scelto = conStamina.length > 0 
-      ? conStamina[Math.floor(Math.random() * conStamina.length)]
-      : gz[0];
+    const scelto = gz[Math.floor(Math.random() * gz.length)];
     nuovo = scelto.id;
     stato.giocatorePalla = scelto.id;
   }
-  log(`➡️ Palla avanza in Z${nuovaZona}`);
   renderHeader();
   setTimeout(() => {
     if (vecchioGiocatore && nuovo) {
-      animaPalla(vecchioGiocatore, nuovo, () => {
-        setTimeout(() => avviaContrasto(), 1000);
-      });
+      animaPalla(vecchioGiocatore, nuovo, () => setTimeout(() => avviaContrasto(), 1000));
     } else {
       renderCampo();
       setTimeout(() => avviaContrasto(), 1000);
     }
   }, 200);
 }
-
-/* =========================================================
-   OVERLAY
-   ========================================================= */
 function apriOverlay(html) {
   document.getElementById('overlay-box').innerHTML = html;
   document.getElementById('overlay').classList.remove('nascosto');
@@ -1676,8 +1449,7 @@ function mostraRisultatoOverlay(vincente, motivo) {
   const colore = vincente === 'tu' ? '#4dabf7' : '#ff6b6b';
   apriOverlay(`
     <h2 style="color:${colore};font-size:26px">🏆 ${vincente === 'tu' ? 'TU' : 'CPU'} VINCE!</h2>
-    <p style="font-size:14px;color:#aaa">${motivo}</p>
-    <div style="font-size:60px;margin-top:16px">⚽</div>`);
+    <p style="font-size:14px;color:#aaa">${motivo}</p>`);
 }
 function mostraGoal(vincente) {
   const ov = document.getElementById('goal-overlay');
@@ -1686,10 +1458,6 @@ function mostraGoal(vincente) {
   document.getElementById('goal-text').textContent = '⚽ GOAL! ⚽';
   setTimeout(() => ov.classList.remove('attivo'), 3000);
 }
-
-/* =========================================================
-   TIRO
-   ========================================================= */
 function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   nascondiPalla();
@@ -1698,10 +1466,7 @@ function tiroInPorta(attaccante) {
   const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
   if (giocatore) avviaAnimazione(giocatore.id, 'Tiro');
   setTimeout(() => {
-    apriOverlay(`
-      <h2>🥅 TIRO IN PORTA</h2>
-      <div class="fase-label">FASE 1 — Tiro attaccante</div>
-      <div id="area-tiro" style="margin-top:10px"></div>`);
+    apriOverlay(`<h2>🥅 TIRO IN PORTA</h2><div class="fase-label">FASE 1 — Tiro attaccante</div><div id="area-tiro" style="margin-top:10px"></div>`);
     setTimeout(() => {
       const dado = Math.floor(Math.random() * 9) + 1;
       document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
@@ -1719,14 +1484,12 @@ function tiroInPorta(attaccante) {
 }
 function fase2Tiro(attaccante, difensore, numAtt) {
   const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere (3d9)</div><div id="area-portiere"></div>`);
-  const disponibili = [1,2,3,4,6,7,9];
-  const dadi = mescola(disponibili).slice(0, 3);
+  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere</div><div id="area-portiere"></div>`);
+  const dadi = mescola([1,2,3,4,6,7,9]).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
-  log(`🧤 Portiere tira: [${dadi.join(', ')}]`);
+  log(`🧤 Portiere: [${dadi.join(', ')}]`);
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
-      log(`⚠️ Portiere ha preso il ${numAtt}!`);
       fase3Tiro(attaccante, difensore);
     } else {
       log(`⚽ GOAL!`, 'goal');
@@ -1739,7 +1502,6 @@ function fase3Tiro(attaccante, difensore) {
   box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
   const dado = Math.floor(Math.random() * 9) + 1;
   document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
-  log(`🎲 Esito: ${dado}`);
   let esito;
   if (dado === 1) esito = 'palo';
   else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
@@ -1770,9 +1532,9 @@ function gestisciGoal(attaccante) {
   stato.statistiche[attaccante].gol++;
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
   mostraGoal(attaccante);
-  const giocatoriSquadra = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
-  if (giocatoriSquadra.length > 0) {
-    const esultante = giocatoriSquadra[Math.floor(Math.random() * giocatoriSquadra.length)];
+  const gs = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
+  if (gs.length > 0) {
+    const esultante = gs[Math.floor(Math.random() * gs.length)];
     const esultanza = 'Esultanza' + (Math.floor(Math.random() * 3) + 1);
     avviaAnimazione(esultante.id, esultanza);
   }
@@ -1787,7 +1549,7 @@ function gestisciGoal(attaccante) {
   }, 3000);
 }
 function gestisciParata(attaccante, difensore) {
-  log(`🧤 Portiere rinvia al centro.`);
+  log(`🧤 Portiere rinvia.`);
   stato.zonaPalla = 4;
   stato.possessore = Math.random() < 0.5 ? 'tu' : 'cpu';
   const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 4 && !g.portiere && !g.espulso);
@@ -1796,14 +1558,14 @@ function gestisciParata(attaccante, difensore) {
   setTimeout(() => avviaContrasto(), 1000);
 }
 function gestisciPalo(attaccante, difensore) {
-  log(`🥅 Palo! Ricontesa.`);
+  log(`🥅 Palo!`);
   const zona = attaccante === 'tu' ? 6 : 1;
   stato.zonaPalla = zona; stato.possessore = attaccante;
   renderCampo(); renderHeader();
   setTimeout(() => avviaContrasto(), 1000);
 }
 function gestisciAngolo(attaccante, difensore) {
-  log(`🚩 Calcio d'angolo!`);
+  log(`🚩 Angolo!`);
   const zona = attaccante === 'tu' ? 6 : 1;
   stato.zonaPalla = zona; stato.possessore = attaccante;
   const gz = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
@@ -1811,25 +1573,16 @@ function gestisciAngolo(attaccante, difensore) {
   renderCampo(); renderHeader();
   setTimeout(() => avviaContrasto(), 1000);
 }
-
-/* =========================================================
-   RIGORE
-   ========================================================= */
 function eseguiRigore(squadra) {
   const difensore = squadra === 'tu' ? 'cpu' : 'tu';
   nascondiPalla();
   stato.statistiche[squadra].tiri++;
-  log(`🎯 RIGORE per ${squadra === 'tu' ? 'TU' : 'CPU'}!`, 'highlight');
-  apriOverlay(`
-    <h2>🎯 RIGORE</h2>
-    <div class="fase-label">FASE 1 — Tiro</div>
-    <div id="area-tiro" style="margin-top:10px"></div>`);
+  apriOverlay(`<h2>🎯 RIGORE</h2><div class="fase-label">FASE 1 — Tiro</div><div id="area-tiro" style="margin-top:10px"></div>`);
   setTimeout(() => {
     const dado = Math.floor(Math.random() * 9) + 1;
     document.getElementById('area-tiro').innerHTML = `<div class="dado ${squadra === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
     setTimeout(() => {
       if (dado === 5 || dado === 8) {
-        log(`🧤 PARATA!`, 'parata');
         stato.statistiche[difensore].parate++;
         eseguiEsitoRigore('parata', squadra, difensore);
         return;
@@ -1841,14 +1594,12 @@ function eseguiRigore(squadra) {
 function fase2Rigore(squadra, difensore, numAtt) {
   const box = document.getElementById('overlay-box');
   box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere</div><div id="area-portiere"></div>`);
-  const disponibili = [1,2,3,4,6,7,9];
-  const dadi = mescola(disponibili).slice(0, 3);
+  const dadi = mescola([1,2,3,4,6,7,9]).slice(0, 3);
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
   setTimeout(() => {
     if (dadi.includes(numAtt)) {
       fase3Rigore(squadra, difensore);
     } else {
-      log(`⚽ GOAL!`, 'goal');
       stato.statistiche[squadra].gol++;
       eseguiEsitoRigore('goal', squadra, difensore);
     }
@@ -1865,8 +1616,6 @@ function fase3Rigore(squadra, difensore) {
   else esito = 'parata';
   setTimeout(() => {
     if (esito === 'parata') stato.statistiche[difensore].parate++;
-    if (esito === 'palo') stato.statistiche[squadra].pali++;
-    if (esito === 'angolo') stato.statistiche[squadra].angoli++;
     eseguiEsitoRigore(esito, squadra, difensore);
   }, 1000);
 }
@@ -1876,7 +1625,7 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
   if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
   else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
   else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
-  else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
+  else if (esito === 'angolo') { msg = "🚩 ANGOLO!"; colore = 'angolo'; }
   box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
   setTimeout(() => {
     chiudiOverlay();
@@ -1886,21 +1635,15 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
     else if (esito === 'angolo') gestisciAngolo(squadra, difensore);
   }, 2200);
 }
-
-/* =========================================================
-   AVANZAMENTO
-   ========================================================= */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
-      stato.tempo = 2;
-      stato.mano = 1;
+      stato.tempo = 2; stato.mano = 1;
       log(`⏸️ FINE PRIMO TEMPO. ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
-      log(`💚 Recupero stamina completo`);
       const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
       stato.possessore = perdente;
       stato.zonaPalla = 3;
@@ -1909,59 +1652,82 @@ function avanzaMano() {
       renderCampo(); renderHeader();
       setTimeout(() => avviaContrasto(), 1000);
       return;
-    } else {
-      return finePartita();
-    }
+    } else return finePartita();
   }
   renderHeader(); renderCampo();
   setTimeout(() => avviaContrasto(), 800);
 }
-
-/* =========================================================
-   FINE PARTITA
-   ========================================================= */
 function finePartita() {
   stato.partitaFinita = true;
   const s = stato.statistiche;
-  let msg = '';
-  if (stato.punteggio.tu > stato.punteggio.cpu) msg = '🏆 HAI VINTO!';
-  else if (stato.punteggio.cpu > stato.punteggio.tu) msg = '😢 CPU vince';
-  else msg = '🤝 Pareggio';
+  let msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!' 
+           : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
   const possesoTu = s.tu.vinte + s.cpu.vinte > 0 ? Math.round(s.tu.vinte / (s.tu.vinte + s.cpu.vinte) * 100) : 50;
-  const possessoCpu = 100 - possesoTu;
-  const passTu = s.tu.passaggiTotali > 0 ? Math.round(s.tu.passaggiRiusciti / s.tu.passaggiTotali * 100) : 0;
-  const passCpu = s.cpu.passaggiTotali > 0 ? Math.round(s.cpu.passaggiRiusciti / s.cpu.passaggiTotali * 100) : 0;
   document.getElementById('modale-box').innerHTML = `
     <h2>FINE PARTITA</h2>
     <p style="font-size:32px;font-weight:bold">
-      <span style="color:#4dabf7">${stato.punteggio.tu}</span>
-      <span style="color:#fff"> - </span>
-      <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
+      <span style="color:#4dabf7">${stato.punteggio.tu}</span> - <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
     </p>
     <p style="font-size:18px;color:#ffd700;margin:12px 0">${msg}</p>
-    <table class="stats-table">
-      <tr><th>Statistica</th><th>TU</th><th>CPU</th></tr>
-      <tr><td>Gol</td><td class="tu-val">${s.tu.gol}</td><td class="cpu-val">${s.cpu.gol}</td></tr>
-      <tr><td>Tiri</td><td class="tu-val">${s.tu.tiri}</td><td class="cpu-val">${s.cpu.tiri}</td></tr>
-      <tr><td>Parate</td><td class="tu-val">${s.tu.parate}</td><td class="cpu-val">${s.cpu.parate}</td></tr>
-      <tr><td>Angoli</td><td class="tu-val">${s.tu.angoli}</td><td class="cpu-val">${s.cpu.angoli}</td></tr>
-      <tr><td>Pali</td><td class="tu-val">${s.tu.pali}</td><td class="cpu-val">${s.cpu.pali}</td></tr>
-      <tr><td>Contese</td><td class="tu-val">${s.tu.contese}</td><td class="cpu-val">${s.cpu.contese}</td></tr>
-      <tr><td>Vinte</td><td class="tu-val">${s.tu.vinte}</td><td class="cpu-val">${s.cpu.vinte}</td></tr>
-      <tr><td>Falli</td><td class="tu-val">${s.tu.falli}</td><td class="cpu-val">${s.cpu.falli}</td></tr>
-      <tr><td>Ammonizioni</td><td class="tu-val">${s.tu.ammonizioni}</td><td class="cpu-val">${s.cpu.ammonizioni}</td></tr>
-      <tr><td>Espulsioni</td><td class="tu-val">${s.tu.espulsioni}</td><td class="cpu-val">${s.cpu.espulsioni}</td></tr>
-      <tr><td>Sostituzioni</td><td class="tu-val">${s.tu.sostituzioni}</td><td class="cpu-val">${s.cpu.sostituzioni}</td></tr>
-      <tr><td>% Passaggi</td><td class="tu-val">${passTu}%</td><td class="cpu-val">${passCpu}%</td></tr>
-      <tr><td>Possesso</td><td class="tu-val">${possesoTu}%</td><td class="cpu-val">${possessoCpu}%</td></tr>
-    </table>
-    <button class="primario" onclick="location.reload()" style="margin-top:16px">NUOVA PARTITA</button>`;
+    <button class="primario" onclick="location.reload()">NUOVA PARTITA</button>`;
   document.getElementById('modale').classList.remove('nascosto');
 }
-
-/* =========================================================
-   INIT
-   ========================================================= */
+function apriSostituzioni() {
+  if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
+  if (stato.partitaFinita) return;
+  selezioneSost = { campo: null, panchina: null };
+  renderModaleSostituzioni();
+  document.getElementById('modale').classList.remove('nascosto');
+}
+function renderModaleSostituzioni() {
+  const sq = 'tu';
+  let html = `<h2>🔄 Sostituzioni</h2>`;
+  html += `<div class="sost-sezione"><h3>In campo</h3><div class="sost-lista">`;
+  stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
+    const sel = selezioneSost.campo === g.id ? ' selezionato' : '';
+    html += `<div class="sost-card${sel}" onclick="selezionaSostCampo('${g.id}')">
+      <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
+  });
+  html += `</div></div>`;
+  html += `<div class="sost-sezione"><h3>Panchina</h3><div class="sost-lista">`;
+  stato.panchina[sq].forEach(g => {
+    const sel = selezioneSost.panchina === g.id ? ' selezionato' : '';
+    const disab = g.entrato ? ' disabilitato' : '';
+    html += `<div class="sost-card${sel}${disab}" onclick="selezionaSostPanchina('${g.id}')">
+      <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
+  });
+  html += `</div></div><div style="margin-top:14px">`;
+  if (selezioneSost.campo && selezioneSost.panchina) {
+    html += `<button class="primario" onclick="confermaSostituzione()">CONFERMA</button>`;
+  }
+  html += `<button onclick="chiudiModale()">CHIUDI</button></div>`;
+  document.getElementById('modale-box').innerHTML = html;
+}
+function selezionaSostCampo(id) { selezioneSost.campo = id; renderModaleSostituzioni(); }
+function selezionaSostPanchina(id) {
+  const pan = stato.panchina.tu.find(g => g.id === id);
+  if (pan && pan.entrato) return;
+  selezioneSost.panchina = id;
+  renderModaleSostituzioni();
+}
+function confermaSostituzione() {
+  const sq = 'tu';
+  const campo = stato.giocatori[sq].find(g => g.id === selezioneSost.campo);
+  const pan = stato.panchina[sq].find(g => g.id === selezioneSost.panchina);
+  if (!campo || !pan || pan.entrato) return;
+  fermaAnimazione(campo.id);
+  const nuovo = {
+    id: pan.id, squadra: sq, zona: campo.zona, ruolo: pan.ruolo,
+    portiere: pan.portiere, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+    falli: 0, ammonito: false, espulso: false, nome: pan.nome
+  };
+  const idx = stato.giocatori[sq].indexOf(campo);
+  stato.giocatori[sq][idx] = nuovo;
+  pan.entrato = true;
+  stato.statistiche[sq].sostituzioni++;
+  selezioneSost = { campo: null, panchina: null };
+  renderCampo(); renderPanchina(); renderModaleSostituzioni();
+}
 initApp();
 </script>
 </body>
