@@ -477,33 +477,34 @@
    ========================================================= */
 const STAMINA_MAX = 45;
 
-// ⚠️ COORDINATE SPRITE SHEET (DA MODIFICARE CON I VALORI ESATTI)
-// Stimati dall'immagine: 1400x780, 10 colonne, 6 righe
+// ✅ SPRITE SHEET - Coordinate corrette
+// Immagine: 1408 x 768
+// 11 colonne totali (1 etichette + 10 frame)
+// 6 righe
 const SPRITE_SHEET = {
   file: 'sprite-sheet.png',
-  larghezza: 1400,  // ⚠️ DA VERIFICARE
-  altezza: 780,     // ⚠️ DA VERIFICARE
-  colonne: 10,
+  larghezza: 1408,
+  altezza: 768,
+  colonneFrame: 10,       // 10 frame di gioco
+  colonneTotali: 11,      // 1 etichette + 10 frame
   righe: 6,
-  // Larghezza/altezza di ogni cella (calcolata)
-  cellaWidth: 140,  // 1400/10
-  cellaHeight: 130, // 780/6
-  // Offset per la colonna delle etichette (se presente)
-  offsetX: 0,       // ⚠️ DA VERIFICARE (forse ~110 se c'è la colonna etichette)
+  cellaWidth: 128,        // 1408 / 11 = 128
+  cellaHeight: 128,       // 768 / 6 = 128
+  offsetX: 128,           // Salta la colonna etichette
   offsetY: 0
 };
 
 // Righe dello sprite sheet (1-based)
 const RIGHE_ANIMAZIONI = {
-  'Fermo': 1,
-  'Tiro': 2,
-  'Scivolata': 3,
-  'Esultanza1': 4,
-  'Esultanza2': 5,
-  'Esultanza3': 6
+  'Fermo': 1,          // INATTIVO
+  'Tiro': 2,           // CALCIA LA PALLA
+  'Scivolata': 3,      // TACKLE
+  'Esultanza1': 4,     // CELEBRAZIONE 1
+  'Esultanza2': 5,     // CELEBRAZIONE 2
+  'Esultanza3': 6      // CELEBRAZIONE 3
 };
 
-// Frame per ogni animazione (dall'immagine)
+// Frame per ogni animazione
 const FRAME_ANIMAZIONI = {
   'Fermo': 10,
   'Tiro': 10,
@@ -545,20 +546,19 @@ const SQUADRE = {
   portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' }
 };
 
-// Colori originali dello sprite sheet "tutto bianco"
-// Lo sprite è TUTTO bianco tranne pelle e scarpe nere
-const COLORE_PELLE = { r: 0xF4, g: 0xC9, b: 0xA0 }; // pelle (da NON toccare)
-const COLORE_SCARPE = { r: 0x2A, g: 0x2A, b: 0x2A }; // scarpe nere (da NON toccare)
+// Colori originali dello sprite sheet
+const COLORE_PELLE = { r: 0xF4, g: 0xC9, b: 0xA0 };
+const COLORE_SCARPE = { r: 0x2A, g: 0x2A, b: 0x2A };
 
 // Zone verticali (in percentuale) per capire cosa colorare
 const ZONA_CAPELLI_INIZIO = 0.00;
-const ZONA_CAPELLI_FINE = 0.20;
+const ZONA_CAPELLI_FINE = 0.22;
 const ZONA_MAGLIA_INIZIO = 0.35;
 const ZONA_MAGLIA_FINE = 0.60;
 const ZONA_PANTALONCINI_INIZIO = 0.60;
 const ZONA_PANTALONCINI_FINE = 0.78;
 const ZONA_CALZETTONI_INIZIO = 0.78;
-const ZONA_CALZETTONI_FINE = 0.95;
+const ZONA_CALZETTONI_FINE = 1.00;
 
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
@@ -582,13 +582,9 @@ function caricaSpriteSheet() {
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       spriteSheetImg = img;
-      // Aggiorna dimensioni in base all'immagine reale
-      SPRITE_SHEET.larghezza = img.width;
-      SPRITE_SHEET.altezza = img.height;
-      SPRITE_SHEET.cellaWidth = Math.round(img.width / SPRITE_SHEET.colonne);
-      SPRITE_SHEET.cellaHeight = Math.round(img.height / SPRITE_SHEET.righe);
       console.log('✅ Sprite sheet caricato:', img.width, 'x', img.height);
       console.log('   Cella:', SPRITE_SHEET.cellaWidth, 'x', SPRITE_SHEET.cellaHeight);
+      console.log('   Offset X:', SPRITE_SHEET.offsetX);
       resolve(img);
     };
     img.onerror = () => { console.error('❌ Sprite sheet non trovato'); resolve(null); };
@@ -609,8 +605,8 @@ async function caricaFrameColorato(squadra, animazione, numeroFrame) {
     try {
       const riga = RIGHE_ANIMAZIONI[animazione]; // 1-based
       const frame = numeroFrame; // 1-based
-      const sx = (frame - 1) * SPRITE_SHEET.cellaWidth + SPRITE_SHEET.offsetX;
-      const sy = (riga - 1) * SPRITE_SHEET.cellaHeight + SPRITE_SHEET.offsetY;
+      const sx = SPRITE_SHEET.offsetX + (frame - 1) * SPRITE_SHEET.cellaWidth;
+      const sy = SPRITE_SHEET.offsetY + (riga - 1) * SPRITE_SHEET.cellaHeight;
       const sw = SPRITE_SHEET.cellaWidth;
       const sh = SPRITE_SHEET.cellaHeight;
 
@@ -638,18 +634,16 @@ async function caricaFrameColorato(squadra, animazione, numeroFrame) {
 
         // Salta pelle e scarpe
         const distPelle = Math.abs(r - COLORE_PELLE.r) + Math.abs(g - COLORE_PELLE.g) + Math.abs(b - COLORE_PELLE.b);
-        if (distPelle < 60) continue;
+        if (distPelle < 80) continue;
 
         const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
-        if (distScarpe < 90) continue;
+        if (distScarpe < 100) continue;
 
-        // Considera solo pixel "bianchi o quasi"
+        // Considera solo pixel "bianchi o quasi" (da colorare)
         if (r < 200 || g < 200 || b < 200) continue;
 
         // Zona capelli (parte alta)
         if (yPerc >= ZONA_CAPELLI_INIZIO && yPerc < ZONA_CAPELLI_FINE) {
-          // I capelli sono sopra la testa, ma anche la pelle è lì...
-          // Sostituiamo solo se il pixel è bianco (capelli)
           data[i] = targetCapelli.r;
           data[i+1] = targetCapelli.g;
           data[i+2] = targetCapelli.b;
@@ -807,7 +801,7 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
     });
     frame++;
     if (frame > totaleFrame) {
-      if (nomeAnimazione === 'Fermo' || nomeAnimazione === 'Esultanza1' || nomeAnimazione === 'Esultanza2' || nomeAnimazione === 'Esultanza3') {
+      if (nomeAnimazione === 'Fermo' || nomeAnimazione.startsWith('Esultanza')) {
         frame = 1;
         setTimeout(tick, velocita);
       } else {
@@ -904,6 +898,10 @@ function avviaPartita(modalita) {
   distribuisciCarte('tu', 6); distribuisciCarte('cpu', 6);
   stato.punteggio = { tu: 0, cpu: 0 };
   stato.tempo = 1; stato.mano = 1;
+  stato.statistiche = {
+    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
+    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
+  };
   stato.logCompleto = [];
   document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
@@ -1659,10 +1657,8 @@ function avanzaMano() {
 }
 function finePartita() {
   stato.partitaFinita = true;
-  const s = stato.statistiche;
   let msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!' 
            : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
-  const possesoTu = s.tu.vinte + s.cpu.vinte > 0 ? Math.round(s.tu.vinte / (s.tu.vinte + s.cpu.vinte) * 100) : 50;
   document.getElementById('modale-box').innerHTML = `
     <h2>FINE PARTITA</h2>
     <p style="font-size:32px;font-weight:bold">
