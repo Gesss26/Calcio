@@ -528,7 +528,7 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE con FLOOD FILL
+   CANVAS COLORAZIONE con FLOOD FILL + OMBRE + LIMITI VERTICALI
    ========================================================= */
 const cacheImmagini = {};
 
@@ -556,33 +556,65 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
         const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
 
+        // Funzione ombra (colore scurito del 40%)
+        function ombra(c) {
+          return { r: Math.round(c.r * 0.6), g: Math.round(c.g * 0.6), b: Math.round(c.b * 0.6) };
+        }
+
         const W = canvas.width;
         const H = canvas.height;
 
-        // 1. Trova il bounding box del giocatore
+        // 1. Trova bounding box del giocatore
         const bbox = trovaBoundingBox(ctx, W, H);
         if (!bbox) { resolve(percorso); return; }
 
         const altezza = bbox.y2 - bbox.y1;
         const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
 
-        // 2. Trova i punti di partenza "bianchi" per ogni zona
-        const pCapelli = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.05), bbox.y1 + Math.floor(altezza * 0.20));
-        const pMaglia = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.30), bbox.y1 + Math.floor(altezza * 0.55));
-        const pPantaloncini = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.55), bbox.y1 + Math.floor(altezza * 0.75));
-        const pCalzettoni = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.75), bbox.y1 + Math.floor(altezza * 0.98));
+        // 2. Confini verticali (in pixel) tra le zone
+        // Proporzioni chibi: testa grande (30%), maglia (25%), pantaloncini (17%), calzettoni (28%)
+        const yCapelliInizio = bbox.y1;
+        const yCapelliFine = bbox.y1 + Math.floor(altezza * 0.30);
+        const yMagliaInizio = bbox.y1 + Math.floor(altezza * 0.30);
+        const yMagliaFine = bbox.y1 + Math.floor(altezza * 0.55);
+        const yPantalonciniInizio = bbox.y1 + Math.floor(altezza * 0.55);
+        const yPantalonciniFine = bbox.y1 + Math.floor(altezza * 0.72);
+        const yCalzettoniInizio = bbox.y1 + Math.floor(altezza * 0.72);
+        const yCalzettoniFine = bbox.y2;
 
-        // 3. Flood fill di ogni zona
-        if (pCapelli) floodFill(ctx, pCapelli.x, pCapelli.y, targetCapelli);
-        if (pMaglia) floodFill(ctx, pMaglia.x, pMaglia.y, targetMaglia);
-        if (pPantaloncini) floodFill(ctx, pPantaloncini.x, pPantaloncini.y, targetPantaloncini);
-        if (pCalzettoni) floodFill(ctx, pCalzettoni.x, pCalzettoni.y, targetCalzettoni);
+        // 3. Trova i punti di partenza (bianchi) per ogni zona
+        const pCapelli = trovaPuntoBianco(ctx, W, H, centroX, yCapelliInizio + 3, yCapelliFine - 3);
+        const pMaglia = trovaPuntoBianco(ctx, W, H, centroX, yMagliaInizio + 3, yMagliaFine - 3);
+        const pPantaloncini = trovaPuntoBianco(ctx, W, H, centroX, yPantalonciniInizio + 3, yPantalonciniFine - 3);
+        const pCalzettoni = trovaPuntoBianco(ctx, W, H, centroX, yCalzettoniInizio + 3, yCalzettoniFine - 3);
+
+        // 4. Per ogni zona: flood fill bianco + flood fill grigio (ombra)
+        // Capelli
+        if (pCapelli) {
+          floodFillLimitato(ctx, pCapelli.x, pCapelli.y, targetCapelli, yCapelliInizio, yCapelliFine, true);
+          floodFillLimitato(ctx, pCapelli.x, pCapelli.y, ombra(targetCapelli), yCapelliInizio, yCapelliFine, false);
+        }
+        // Maglia
+        if (pMaglia) {
+          floodFillLimitato(ctx, pMaglia.x, pMaglia.y, targetMaglia, yMagliaInizio, yMagliaFine, true);
+          floodFillLimitato(ctx, pMaglia.x, pMaglia.y, ombra(targetMaglia), yMagliaInizio, yMagliaFine, false);
+        }
+        // Pantaloncini
+        if (pPantaloncini) {
+          floodFillLimitato(ctx, pPantaloncini.x, pPantaloncini.y, targetPantaloncini, yPantalonciniInizio, yPantalonciniFine, true);
+          floodFillLimitato(ctx, pPantaloncini.x, pPantaloncini.y, ombra(targetPantaloncini), yPantalonciniInizio, yPantalonciniFine, false);
+        }
+        // Calzettoni
+        if (pCalzettoni) {
+          floodFillLimitato(ctx, pCalzettoni.x, pCalzettoni.y, targetCalzettoni, yCalzettoniInizio, yCalzettoniFine, true);
+          floodFillLimitato(ctx, pCalzettoni.x, pCalzettoni.y, ombra(targetCalzettoni), yCalzettoniInizio, yCalzettoniFine, false);
+        }
 
         const dataURL = canvas.toDataURL();
         cacheImmagini[chiave] = dataURL;
         resolve(dataURL);
       } catch (e) {
-        console.error('Errore:', e);
+        console.error('Errore Canvas:', e);
         resolve(percorso);
       }
     };
@@ -610,7 +642,6 @@ function trovaBoundingBox(ctx, w, h) {
   return trovato ? { x1, y1, x2, y2 } : null;
 }
 
-// Cerca un punto bianco partendo dal centro, in una fascia verticale
 function trovaPuntoBianco(ctx, w, h, centroX, yStart, yEnd) {
   const data = ctx.getImageData(0, 0, w, h).data;
   yStart = Math.max(0, yStart);
@@ -631,23 +662,29 @@ function trovaPuntoBianco(ctx, w, h, centroX, yStart, yEnd) {
   return null;
 }
 
-// Flood fill iterativo: colora tutti i pixel bianchi connessi al punto di partenza
-function floodFill(ctx, startX, startY, colore) {
+/* Flood fill con limiti verticali + tipo (bianco o grigio) */
+function floodFillLimitato(ctx, startX, startY, colore, minY, maxY, cercaBianco) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
 
   const startIdx = (startY * w + startX) * 4;
-  const sr = data[startIdx];
-  const sg = data[startIdx + 1];
-  const sb = data[startIdx + 2];
   const sa = data[startIdx + 3];
-
-  // Se pixel trasparente o non bianco, esci
   if (sa < 50) return;
-  const isBianco = sr > 200 && sg > 200 && sb > 200;
-  if (!isBianco) return;
+
+  function isTipo(r, g, b) {
+    if (cercaBianco) {
+      return r > 200 && g > 200 && b > 200;
+    } else {
+      const isBianco = r > 200 && g > 200 && b > 200;
+      const isGrigio = r > 130 && g > 130 && b > 130 &&
+                       Math.abs(r - g) < 30 && Math.abs(g - b) < 30 && Math.abs(r - b) < 30;
+      return !isBianco && isGrigio;
+    }
+  }
+
+  if (!isTipo(data[startIdx], data[startIdx + 1], data[startIdx + 2])) return;
 
   const stack = [[startX, startY]];
   const visitati = new Uint8Array(w * h);
@@ -655,24 +692,20 @@ function floodFill(ctx, startX, startY, colore) {
   while (stack.length > 0) {
     const [x, y] = stack.pop();
     if (x < 0 || x >= w || y < 0 || y >= h) continue;
+    if (y < minY || y >= maxY) continue;
     const idx = y * w + x;
     if (visitati[idx]) continue;
     visitati[idx] = 1;
 
     const i = idx * 4;
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-
     if (a < 50) continue;
+    if (!isTipo(r, g, b)) continue;
 
-    // Solo pixel bianchi
-    if (r < 200 || g < 200 || b < 200) continue;
-
-    // Colora
     data[i] = colore.r;
     data[i + 1] = colore.g;
     data[i + 2] = colore.b;
 
-    // Aggiungi i 4 vicini
     stack.push([x + 1, y]);
     stack.push([x - 1, y]);
     stack.push([x, y + 1]);
