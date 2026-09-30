@@ -483,8 +483,8 @@ const FRAME_ANIMAZIONI = {
   'Tiro': 5,
   'Scivolata': 5,
   'Esultanza1': 7,
-  'Esultanza2': 6,   // ⚠️ DA CONFERMARE
-  'Esultanza3': 6    // ⚠️ DA CONFERMARE
+  'Esultanza2': 6,
+  'Esultanza3': 6
 };
 
 const VELOCITA_ANIMAZIONI = {
@@ -543,7 +543,7 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE
+   CANVAS COLORAZIONE (CON FIX CAPELLI 2 COLORI)
    ========================================================= */
 const cacheImmagini = {};
 
@@ -587,18 +587,30 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
           const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
           if (distScarpe < 100) continue;
 
-          // Considera solo pixel bianchi
-          if (r < 200 || g < 200 || b < 200) continue;
+          // ✅ Bianco O grigio chiaro (fix capelli 2 colori)
+          const isBianco = r > 200 && g > 200 && b > 200;
+          const isGrigioChiaro = r > 150 && g > 150 && b > 150 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25;
+          if (!isBianco && !isGrigioChiaro) continue;
 
-          // Zone
+          // Fattore di luminosità: bianco pieno, grigio scurito
+          const fattore = isBianco ? 1 : 0.75;
+
           if (yPerc < ZONA_CAPELLI_FINE) {
-            data[i] = targetCapelli.r; data[i+1] = targetCapelli.g; data[i+2] = targetCapelli.b;
+            data[i] = Math.round(targetCapelli.r * fattore);
+            data[i+1] = Math.round(targetCapelli.g * fattore);
+            data[i+2] = Math.round(targetCapelli.b * fattore);
           } else if (yPerc >= ZONA_MAGLIA_INIZIO && yPerc < ZONA_MAGLIA_FINE) {
-            data[i] = targetMaglia.r; data[i+1] = targetMaglia.g; data[i+2] = targetMaglia.b;
+            data[i] = Math.round(targetMaglia.r * fattore);
+            data[i+1] = Math.round(targetMaglia.g * fattore);
+            data[i+2] = Math.round(targetMaglia.b * fattore);
           } else if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
-            data[i] = targetPantaloncini.r; data[i+1] = targetPantaloncini.g; data[i+2] = targetPantaloncini.b;
+            data[i] = Math.round(targetPantaloncini.r * fattore);
+            data[i+1] = Math.round(targetPantaloncini.g * fattore);
+            data[i+2] = Math.round(targetPantaloncini.b * fattore);
           } else if (yPerc >= ZONA_CALZETTONI_INIZIO && yPerc < ZONA_CALZETTONI_FINE) {
-            data[i] = targetCalzettoni.r; data[i+1] = targetCalzettoni.g; data[i+2] = targetCalzettoni.b;
+            data[i] = Math.round(targetCalzettoni.r * fattore);
+            data[i+1] = Math.round(targetCalzettoni.g * fattore);
+            data[i+2] = Math.round(targetCalzettoni.b * fattore);
           }
         }
         ctx.putImageData(imageData, 0, 0);
