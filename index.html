@@ -477,7 +477,6 @@
    ========================================================= */
 const STAMINA_MAX = 45;
 
-// ⚠️ FRAME PER ANIMAZIONE
 const FRAME_ANIMAZIONI = {
   'Fermo': 6,
   'Tiro': 5,
@@ -519,20 +518,6 @@ const SQUADRE = {
   portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' }
 };
 
-// Colori originali (da non toccare)
-const COLORE_PELLE = { r: 0xF4, g: 0xC9, b: 0xA0 };
-const COLORE_SCARPE = { r: 0x2A, g: 0x2A, b: 0x2A };
-
-// Zone verticali (in percentuale)
-const ZONA_CAPELLI_INIZIO = 0.00;
-const ZONA_CAPELLI_FINE = 0.25;
-const ZONA_MAGLIA_INIZIO = 0.30;
-const ZONA_MAGLIA_FINE = 0.60;
-const ZONA_PANTALONCINI_INIZIO = 0.60;
-const ZONA_PANTALONCINI_FINE = 0.78;
-const ZONA_CALZETTONI_INIZIO = 0.78;
-const ZONA_CALZETTONI_FINE = 1.00;
-
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
   return {
@@ -543,7 +528,7 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE (CON FIX CAPELLI 2 COLORI)
+   CANVAS COLORAZIONE con FLOOD FILL
    ========================================================= */
 const cacheImmagini = {};
 
@@ -565,66 +550,136 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        const H = canvas.height;
+
         const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
         const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
         const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
         const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
 
-        for (let i = 0; i < data.length; i += 4) {
-          const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-          if (a < 10) continue;
-          const y = Math.floor((i / 4) / canvas.width);
-          const yPerc = y / H;
+        const W = canvas.width;
+        const H = canvas.height;
 
-          // Salta pelle
-          const distPelle = Math.abs(r - COLORE_PELLE.r) + Math.abs(g - COLORE_PELLE.g) + Math.abs(b - COLORE_PELLE.b);
-          if (distPelle < 80) continue;
+        // 1. Trova il bounding box del giocatore
+        const bbox = trovaBoundingBox(ctx, W, H);
+        if (!bbox) { resolve(percorso); return; }
 
-          // Salta scarpe
-          const distScarpe = Math.abs(r - COLORE_SCARPE.r) + Math.abs(g - COLORE_SCARPE.g) + Math.abs(b - COLORE_SCARPE.b);
-          if (distScarpe < 100) continue;
+        const altezza = bbox.y2 - bbox.y1;
+        const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
 
-          // ✅ Bianco O grigio chiaro (fix capelli 2 colori)
-          const isBianco = r > 200 && g > 200 && b > 200;
-          const isGrigioChiaro = r > 150 && g > 150 && b > 150 && Math.abs(r - g) < 25 && Math.abs(g - b) < 25;
-          if (!isBianco && !isGrigioChiaro) continue;
+        // 2. Trova i punti di partenza "bianchi" per ogni zona
+        const pCapelli = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.05), bbox.y1 + Math.floor(altezza * 0.20));
+        const pMaglia = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.30), bbox.y1 + Math.floor(altezza * 0.55));
+        const pPantaloncini = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.55), bbox.y1 + Math.floor(altezza * 0.75));
+        const pCalzettoni = trovaPuntoBianco(ctx, W, H, centroX, bbox.y1 + Math.floor(altezza * 0.75), bbox.y1 + Math.floor(altezza * 0.98));
 
-          // Fattore di luminosità: bianco pieno, grigio scurito
-          const fattore = isBianco ? 1 : 0.75;
+        // 3. Flood fill di ogni zona
+        if (pCapelli) floodFill(ctx, pCapelli.x, pCapelli.y, targetCapelli);
+        if (pMaglia) floodFill(ctx, pMaglia.x, pMaglia.y, targetMaglia);
+        if (pPantaloncini) floodFill(ctx, pPantaloncini.x, pPantaloncini.y, targetPantaloncini);
+        if (pCalzettoni) floodFill(ctx, pCalzettoni.x, pCalzettoni.y, targetCalzettoni);
 
-          if (yPerc < ZONA_CAPELLI_FINE) {
-            data[i] = Math.round(targetCapelli.r * fattore);
-            data[i+1] = Math.round(targetCapelli.g * fattore);
-            data[i+2] = Math.round(targetCapelli.b * fattore);
-          } else if (yPerc >= ZONA_MAGLIA_INIZIO && yPerc < ZONA_MAGLIA_FINE) {
-            data[i] = Math.round(targetMaglia.r * fattore);
-            data[i+1] = Math.round(targetMaglia.g * fattore);
-            data[i+2] = Math.round(targetMaglia.b * fattore);
-          } else if (yPerc >= ZONA_PANTALONCINI_INIZIO && yPerc < ZONA_PANTALONCINI_FINE) {
-            data[i] = Math.round(targetPantaloncini.r * fattore);
-            data[i+1] = Math.round(targetPantaloncini.g * fattore);
-            data[i+2] = Math.round(targetPantaloncini.b * fattore);
-          } else if (yPerc >= ZONA_CALZETTONI_INIZIO && yPerc < ZONA_CALZETTONI_FINE) {
-            data[i] = Math.round(targetCalzettoni.r * fattore);
-            data[i+1] = Math.round(targetCalzettoni.g * fattore);
-            data[i+2] = Math.round(targetCalzettoni.b * fattore);
-          }
-        }
-        ctx.putImageData(imageData, 0, 0);
         const dataURL = canvas.toDataURL();
         cacheImmagini[chiave] = dataURL;
         resolve(dataURL);
       } catch (e) {
-        console.error('Errore Canvas:', e);
+        console.error('Errore:', e);
         resolve(percorso);
       }
     };
     img.onerror = () => resolve(percorso);
     img.src = percorso;
   });
+}
+
+function trovaBoundingBox(ctx, w, h) {
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let x1 = w, y1 = h, x2 = 0, y2 = 0;
+  let trovato = false;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (data[i + 3] > 20) {
+        trovato = true;
+        if (x < x1) x1 = x;
+        if (x > x2) x2 = x;
+        if (y < y1) y1 = y;
+        if (y > y2) y2 = y;
+      }
+    }
+  }
+  return trovato ? { x1, y1, x2, y2 } : null;
+}
+
+// Cerca un punto bianco partendo dal centro, in una fascia verticale
+function trovaPuntoBianco(ctx, w, h, centroX, yStart, yEnd) {
+  const data = ctx.getImageData(0, 0, w, h).data;
+  yStart = Math.max(0, yStart);
+  yEnd = Math.min(h, yEnd);
+  for (let y = yStart; y < yEnd; y++) {
+    for (let offset = 0; offset < w / 2; offset++) {
+      const xs = [centroX + offset, centroX - offset];
+      for (const x of xs) {
+        if (x < 0 || x >= w) continue;
+        const i = (y * w + x) * 4;
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+        if (a > 50 && r > 200 && g > 200 && b > 200) {
+          return { x, y };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// Flood fill iterativo: colora tutti i pixel bianchi connessi al punto di partenza
+function floodFill(ctx, startX, startY, colore) {
+  const w = ctx.canvas.width;
+  const h = ctx.canvas.height;
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+
+  const startIdx = (startY * w + startX) * 4;
+  const sr = data[startIdx];
+  const sg = data[startIdx + 1];
+  const sb = data[startIdx + 2];
+  const sa = data[startIdx + 3];
+
+  // Se pixel trasparente o non bianco, esci
+  if (sa < 50) return;
+  const isBianco = sr > 200 && sg > 200 && sb > 200;
+  if (!isBianco) return;
+
+  const stack = [[startX, startY]];
+  const visitati = new Uint8Array(w * h);
+
+  while (stack.length > 0) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+    const idx = y * w + x;
+    if (visitati[idx]) continue;
+    visitati[idx] = 1;
+
+    const i = idx * 4;
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+
+    if (a < 50) continue;
+
+    // Solo pixel bianchi
+    if (r < 200 || g < 200 || b < 200) continue;
+
+    // Colora
+    data[i] = colore.r;
+    data[i + 1] = colore.g;
+    data[i + 2] = colore.b;
+
+    // Aggiungi i 4 vicini
+    stack.push([x + 1, y]);
+    stack.push([x - 1, y]);
+    stack.push([x, y + 1]);
+    stack.push([x, y - 1]);
+  }
+
+  ctx.putImageData(imageData, 0, 0);
 }
 
 /* =========================================================
