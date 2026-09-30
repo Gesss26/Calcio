@@ -529,6 +529,7 @@ function hexToRgb(hex) {
 
 /* =========================================================
    CANVAS COLORAZIONE - LINE ART + FLOOD FILL
+   Proporzioni corrette per personaggi chibi
    ========================================================= */
 const cacheImmagini = {};
 
@@ -565,13 +566,16 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const altezza = bbox.y2 - bbox.y1;
         const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
 
-        // Punti di partenza (in % dell'altezza del giocatore)
-        // Con LINE ART, il flood fill si ferma sui bordi neri
+        // ✅ PROPORZIONI CHIBI CORRETTE
+        // Capelli: 5-15% (parte alta della testa, sopra il viso)
+        // Maglia: 50-58% (busto, sotto la testa)
+        // Pantaloncini: 63-70%
+        // Calzettoni: 82-92%
         const punti = {
           capelli:      { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.10) },
-          maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.45) },
-          pantaloncini: { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.65) },
-          calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.88) }
+          maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.54) },
+          pantaloncini: { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.67) },
+          calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.87) }
         };
 
         // Flood fill BIANCO
@@ -623,7 +627,7 @@ function trovaBoundingBox(ctx, w, h) {
   return trovato ? { x1, y1, x2, y2 } : null;
 }
 
-// Flood fill per pixel BIANCHI (si ferma sui bordi neri e sui pixel colorati)
+// Flood fill per pixel BIANCHI (si ferma sui bordi neri)
 function floodFillBianco(ctx, startX, startY, colore) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -636,10 +640,7 @@ function floodFillBianco(ctx, startX, startY, colore) {
 
   // Il pixel di partenza deve essere bianco
   const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
-  if (sr < 200 || sg < 200 || sb < 200) {
-    // Prova a spostare il punto (potrebbe essere su un pixel grigio)
-    return;
-  }
+  if (sr < 200 || sg < 200 || sb < 200) return;
 
   const stack = [[startX, startY]];
   const visitati = new Uint8Array(w * h);
@@ -655,10 +656,10 @@ function floodFillBianco(ctx, startX, startY, colore) {
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
 
-    // STOP sui bordi neri (line art)
+    // STOP sui bordi neri
     if (r < 100 && g < 100 && b < 100) continue;
 
-    // Colora SOLO pixel bianchi (non grigi)
+    // Colora SOLO pixel bianchi
     if (r < 200 || g < 200 || b < 200) continue;
 
     data[i] = colore.r;
@@ -694,9 +695,9 @@ function floodFillGrigio(ctx, startX, startY, colore) {
     const i = idx * 4;
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
-    if (r < 100 && g < 100 && b < 100) continue; // bordo nero
+    if (r < 100 && g < 100 && b < 100) continue;
 
-    // Solo grigio chiaro (ombre): non bianco puro, non troppo scuro
+    // Solo grigio chiaro (ombre): non bianco, non troppo scuro
     const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
     if (!isGrigio) continue;
 
