@@ -564,7 +564,7 @@
       <div class="minuto" id="minuto">0'</div>
     </div>
     <div class="info-top">
-      Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/15<br>
+      Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/23<br>
       Palla <span id="zona-palla">Z4</span>
     </div>
     <div class="topbar-buttons">
@@ -620,7 +620,7 @@
     <div class="info-carte">
       <span>Mazzo: <strong id="info-mazzo">52</strong></span>
       <span>Scarti: <strong id="info-scarti">0</strong></span>
-      <span>Mano: <strong id="info-mano-num">1</strong></span>
+      <span>Minuto: <strong id="info-minuto">0'</strong></span>
     </div>
     <div id="azioni-container"></div>
   </div>
@@ -658,6 +658,8 @@
    ========================================================= */
 const STAMINA_MAX = 45;
 const CARTE_INIZIALI = 7;
+const MINUTI_PER_MANO = 2;
+const MANI_PER_TEMPO = 23;
 
 const FRAME_ANIMAZIONI = {
   'Fermo': 6, 'Tiro': 5, 'Scivolata': 5,
@@ -688,7 +690,6 @@ const PANCHINA_CONFIG = [
    54 SQUADRE EUROPEE CON COLORI DIVISE, PELLE E CAPELLI
    ========================================================= */
 const SQUADRE = {
-  // EUROPA OCCIDENTALE / MEDITERRANEO
   italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#E8B88A', capelli: '#2A1A0F' },
   francia:    { nome: 'FRANCIA',    maglia: '#002395', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#8D5524', capelli: '#1A1008' },
   spagna:     { nome: 'SPAGNA',     maglia: '#C60B1E', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#D9A06B', capelli: '#1F1409' },
@@ -699,8 +700,6 @@ const SQUADRE = {
   sanmarino:  { nome: 'SAN MARINO', maglia: '#5EB6E4', pantaloncini: '#FFFFFF', calzettoni: '#5EB6E4', pelle: '#E8B88A', capelli: '#2A1A0F' },
   andorra:    { nome: 'ANDORRA',    maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#D9A06B', capelli: '#1F1409' },
   gibilterra: { nome: 'GIBILTERRA', maglia: '#FFFFFF', pantaloncini: '#DA291C', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' },
-
-  // EUROPA CENTRALE / GERMANICA
   germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' },
   austria:    { nome: 'AUSTRIA',    maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#F0C8A0', capelli: '#8B5A2B' },
   svizzera:   { nome: 'SVIZZERA',   maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#FF0000', pelle: '#F0C8A0', capelli: '#5C3A1E' },
@@ -708,8 +707,6 @@ const SQUADRE = {
   belgio:     { nome: 'BELGIO',     maglia: '#CC0000', pantaloncini: '#000000', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#5C3A1E' },
   lussemburgo:{ nome: 'LUSSEMBURGO',maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#00A1DE', pelle: '#F0C8A0', capelli: '#8B5A2B' },
   liechtenstein:{ nome: 'LIECHTENSTEIN', maglia: '#002B7F', pantaloncini: '#FFFFFF', calzettoni: '#CE1126', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-
-  // SCANDINAVIA / NORD EUROPA
   svezia:     { nome: 'SVEZIA',     maglia: '#FECC02', pantaloncini: '#005B99', calzettoni: '#FECC02', pelle: '#F8DCC0', capelli: '#E8C97A' },
   norvegia:   { nome: 'NORVEGIA',   maglia: '#BA0C2F', pantaloncini: '#FFFFFF', calzettoni: '#BA0C2F', pelle: '#F8DCC0', capelli: '#E8C97A' },
   danimarca:  { nome: 'DANIMARCA',  maglia: '#C60C30', pantaloncini: '#FFFFFF', calzettoni: '#C60C30', pelle: '#F8DCC0', capelli: '#D9B26A' },
@@ -719,14 +716,10 @@ const SQUADRE = {
   lettonia:   { nome: 'LETTONIA',   maglia: '#9E3039', pantaloncini: '#FFFFFF', calzettoni: '#9E3039', pelle: '#F5D0A9', capelli: '#A67B4A' },
   lituania:   { nome: 'LITUANIA',   maglia: '#FDB913', pantaloncini: '#006A44', calzettoni: '#C1272D', pelle: '#F5D0A9', capelli: '#A67B4A' },
   faroe:      { nome: 'FAROE',      maglia: '#FFFFFF', pantaloncini: '#003897', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#D9B26A' },
-
-  // ISOLE BRITANNICHE
   inghilterra:{ nome: 'INGHILTERRA',maglia: '#FFFFFF', pantaloncini: '#000080', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A0764A' },
   scozia:     { nome: 'SCOZIA',     maglia: '#0065BD', pantaloncini: '#FFFFFF', calzettoni: '#0065BD', pelle: '#F0C8A0', capelli: '#8B3A1E' },
   galles:     { nome: 'GALLES',     maglia: '#C8102E', pantaloncini: '#FFFFFF', calzettoni: '#C8102E', pelle: '#F0C8A0', capelli: '#3A1E0F' },
   irlanda:    { nome: 'IRLANDA',    maglia: '#169B62', pantaloncini: '#FFFFFF', calzettoni: '#169B62', pelle: '#F0C8A0', capelli: '#8B3A1E' },
-
-  // EUROPA CENTRO-ORIENTALE
   polonia:    { nome: 'POLONIA',    maglia: '#FFFFFF', pantaloncini: '#DC143C', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A67B4A' },
   cechia:     { nome: 'CECHIA',     maglia: '#D7141A', pantaloncini: '#FFFFFF', calzettoni: '#D7141A', pelle: '#F0C8A0', capelli: '#5C3A1E' },
   slovacchia: { nome: 'SLOVACCHIA', maglia: '#0B4EA2', pantaloncini: '#FFFFFF', calzettoni: '#EE1C25', pelle: '#F0C8A0', capelli: '#5C3A1E' },
@@ -739,16 +732,12 @@ const SQUADRE = {
   macedonia:  { nome: 'MACEDONIA',  maglia: '#D20000', pantaloncini: '#FFFFFF', calzettoni: '#D20000', pelle: '#D9A06B', capelli: '#1F1409' },
   kosovo:     { nome: 'KOSOVO',     maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#0033A0', pelle: '#D9A06B', capelli: '#1F1409' },
   albania:    { nome: 'ALBANIA',    maglia: '#E41E20', pantaloncini: '#000000', calzettoni: '#E41E20', pelle: '#D9A06B', capelli: '#1F1409' },
-
-  // EUROPA ORIENTALE / SLAVA
   romania:    { nome: 'ROMANIA',    maglia: '#FFCC00', pantaloncini: '#0033CC', calzettoni: '#FFCC00', pelle: '#E8B88A', capelli: '#3A1E0F' },
   bulgaria:   { nome: 'BULGARIA',   maglia: '#FFFFFF', pantaloncini: '#00966E', calzettoni: '#D62612', pelle: '#E8B88A', capelli: '#3A1E0F' },
   moldavia:   { nome: 'MOLDAVIA',   maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#CC0000', pelle: '#E8B88A', capelli: '#3A1E0F' },
   ucraina:    { nome: 'UCRAINA',    maglia: '#FFD700', pantaloncini: '#0057B7', calzettoni: '#FFD700', pelle: '#E8B88A', capelli: '#5C3A1E' },
   bielorussia:{ nome: 'BIELORUSSIA',maglia: '#C8313E', pantaloncini: '#FFFFFF', calzettoni: '#C8313E', pelle: '#F0C8A0', capelli: '#A67B4A' },
   russia:     { nome: 'RUSSIA',     maglia: '#CC0000', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-
-  // CAUCASO / ASIA OCCIDENTALE
   georgia:    { nome: 'GEORGIA',    maglia: '#FFFFFF', pantaloncini: '#FF0000', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' },
   armenia:    { nome: 'ARMENIA',    maglia: '#D90012', pantaloncini: '#0033A0', calzettoni: '#D90012', pelle: '#C68A5A', capelli: '#1F1409' },
   azerbaigian:{ nome: 'AZERBAIGIAN',maglia: '#00B5E2', pantaloncini: '#FFFFFF', calzettoni: '#00B5E2', pelle: '#C68A5A', capelli: '#1F1409' },
@@ -945,7 +934,7 @@ let stato = {
   tipoPartita: '1P',
   squadraTU: 'italia',
   squadraCPU: 'francia',
-  tempo: 1, mano: 1, maxMani: 15,
+  tempo: 1, mano: 1, maxMani: MANI_PER_TEMPO,
   punteggio: { tu: 0, cpu: 0 },
   zonaPalla: 4, possessore: null, giocatorePalla: null,
   pallaInAnimazione: false,
@@ -997,11 +986,11 @@ function pescaUnaCarta(sq) {
   }
 }
 
-/* MINUTO — ogni contrasto = 3 minuti (15 contrasti = 45 min per tempo) */
+/* MINUTO — ogni mano = 2 minuti, 23 mani per tempo → 46' + 46' = 92' */
 function calcolaMinuto() {
-  const tempoOffset = (stato.tempo - 1) * 45;
-  const minuto = tempoOffset + (stato.mano - 1) * 3;
-  return Math.min(minuto, 90);
+  const tempoOffset = (stato.tempo - 1) * MANI_PER_TEMPO * MINUTI_PER_MANO;
+  const minuto = tempoOffset + (stato.mano - 1) * MINUTI_PER_MANO;
+  return Math.min(minuto, 92);
 }
 
 /* LOG */
@@ -1235,9 +1224,13 @@ function renderHeader() {
   document.getElementById('punteggio-cpu').textContent = stato.punteggio.cpu;
   document.getElementById('tempo').textContent = stato.tempo + '°';
   document.getElementById('mano').textContent = stato.mano;
-  document.getElementById('minuto').textContent = calcolaMinuto() + "'";
+  const minuto = calcolaMinuto();
+  document.getElementById('minuto').textContent = minuto + "'";
   const zn = (stato.zonaPalla === 0 || stato.zonaPalla === 7) ? 'POR' : 'Z' + stato.zonaPalla;
   document.getElementById('zona-palla').textContent = zn;
+  // Aggiorna anche il minuto nel pannello carte se presente
+  const infoMinuto = document.getElementById('info-minuto');
+  if (infoMinuto) infoMinuto.textContent = minuto + "'";
 }
 
 async function renderCampo() {
@@ -1534,7 +1527,7 @@ function renderPannelloContrasto() {
   renderPilaMazzo();
   document.getElementById('info-mazzo').textContent = stato.mazzo.length;
   document.getElementById('info-scarti').textContent = stato.scarti.length;
-  document.getElementById('info-mano-num').textContent = stato.mano;
+  document.getElementById('info-minuto').textContent = calcolaMinuto() + "'";
 
   if (!c.risolto) {
     document.getElementById('azioni-container').innerHTML =
@@ -1909,14 +1902,14 @@ function gestisciParata(attaccante, difensore) {
   const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 4 && !g.portiere && !g.espulso);
   if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderCampo(); renderHeader();
-  setTimeout(() => avviaContrasto(), 1000);
+  setTimeout(() => avanzaMano(), 1000);
 }
 function gestisciPalo(attaccante, difensore) {
   log(`🥅 Palo!`);
   const zona = attaccante === 'tu' ? 6 : 1;
   stato.zonaPalla = zona; stato.possessore = attaccante;
   renderCampo(); renderHeader();
-  setTimeout(() => avviaContrasto(), 1000);
+  setTimeout(() => avanzaMano(), 1000);
 }
 function gestisciAngolo(attaccante, difensore) {
   log(`🚩 Angolo!`);
@@ -1925,7 +1918,7 @@ function gestisciAngolo(attaccante, difensore) {
   const gz = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   if (gz.length > 0) stato.giocatorePalla = gz[0].id;
   renderCampo(); renderHeader();
-  setTimeout(() => avviaContrasto(), 1000);
+  setTimeout(() => avanzaMano(), 1000);
 }
 function eseguiRigore(squadra) {
   const difensore = squadra === 'tu' ? 'cpu' : 'tu';
@@ -1990,7 +1983,7 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
 }
 
 /* =========================================================
-   AVANZAMENTO
+   AVANZAMENTO — chiamato dopo OGNI contrasto risolto
    ========================================================= */
 function avanzaMano() {
   stato.mano++;
@@ -2027,6 +2020,7 @@ function finePartita() {
       <span style="color:#4dabf7">${stato.punteggio.tu}</span> - <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
     </p>
     <p style="font-size:18px;color:#ffd700;margin:12px 0">${msg}</p>
+    <p style="font-size:12px;color:#aaa">Minuto finale: ${calcolaMinuto()}'</p>
     <button class="primario" onclick="location.reload()">NUOVA PARTITA</button>
     <button onclick="mostraMenuPrincipale()">MENU PRINCIPALE</button>`;
   document.getElementById('modale').classList.remove('nascosto');
