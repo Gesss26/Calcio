@@ -1739,7 +1739,7 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   if (falloso.falli === 3) { falloso.ammonito = true; stato.statistiche[difensore].ammonizioni++; log(`🟨 AMMONIZIONE!`, 'parata'); }
   if (falloso.falli >= 6) { falloso.espulso = true; fermaAnimazione(falloso.id); stato.statistiche[difensore].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
   const isRigore = (zona === 1 || zona === 6);
-  setTimeout(() => {
+    setTimeout(() => {
     chiudiOverlay();
     if (isRigore) {
       setTimeout(() => eseguiRigore(zona === 6 ? 'tu' : 'cpu'), 800);
@@ -1756,10 +1756,14 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
         renderHeader();
         setTimeout(() => {
           if (vecchioGiocatore && stato.giocatorePalla) {
-            animaPalla(vecchioGiocatore, stato.giocatorePalla, () => setTimeout(() => avviaContrasto(), 1000));
+            animaPalla(vecchioGiocatore, stato.giocatorePalla, () => {
+              // ✅ AVANZA LA MANO dopo il fallo
+              avanzaMano();
+            });
           } else {
             renderCampo();
-            setTimeout(() => avviaContrasto(), 1000);
+            // ✅ AVANZA LA MANO dopo il fallo
+            avanzaMano();
           }
         }, 200);
       }
