@@ -392,6 +392,38 @@
     .app.fase-combattimento .campo-wrapper { flex: 0 0 45vh; }
   }
   .nascosto { display: none !important; }
+
+  /* ===== PULSANTE EUROPEI 2028 ===== */
+  .btn-europei {
+    display: block;
+    margin: 20px auto 0;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: #16213e;
+    border: 3px solid #fff;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,215,0,0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-transform: uppercase;
+  }
+  .btn-europei:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 28px rgba(255,215,0,0.8);
+  }
+  .btn-europei:active { transform: translateY(0) scale(0.98); }
+  .separatore-menu {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin: 18px 0 4px; color: #ffd700; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 3px;
+  }
+  .separatore-menu::before, .separatore-menu::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  }
 </style>
 </head>
 <body>
@@ -529,7 +561,6 @@ function hexToRgb(hex) {
 
 /* =========================================================
    CANVAS COLORAZIONE - LINE ART + FLOOD FILL
-   Proporzioni corrette per personaggi chibi
    ========================================================= */
 const cacheImmagini = {};
 
@@ -566,11 +597,6 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         const altezza = bbox.y2 - bbox.y1;
         const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
 
-        // ✅ PROPORZIONI CHIBI CORRETTE
-        // Capelli: 5-15% (parte alta della testa, sopra il viso)
-        // Maglia: 50-58% (busto, sotto la testa)
-        // Pantaloncini: 63-70%
-        // Calzettoni: 82-92%
         const punti = {
           capelli:      { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.10) },
           maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.54) },
@@ -578,13 +604,11 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
           calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.87) }
         };
 
-        // Flood fill BIANCO
         floodFillBianco(ctx, punti.capelli.x, punti.capelli.y, targetCapelli);
         floodFillBianco(ctx, punti.maglia.x, punti.maglia.y, targetMaglia);
         floodFillBianco(ctx, punti.pantaloncini.x, punti.pantaloncini.y, targetPantaloncini);
         floodFillBianco(ctx, punti.calzettoni.x, punti.calzettoni.y, targetCalzettoni);
 
-        // Flood fill GRIGIO (ombre) - colore scurito del 30%
         const ombraCapelli = { r: Math.round(targetCapelli.r * 0.7), g: Math.round(targetCapelli.g * 0.7), b: Math.round(targetCapelli.b * 0.7) };
         const ombraMaglia = { r: Math.round(targetMaglia.r * 0.7), g: Math.round(targetMaglia.g * 0.7), b: Math.round(targetMaglia.b * 0.7) };
         const ombraPantaloncini = { r: Math.round(targetPantaloncini.r * 0.7), g: Math.round(targetPantaloncini.g * 0.7), b: Math.round(targetPantaloncini.b * 0.7) };
@@ -627,7 +651,6 @@ function trovaBoundingBox(ctx, w, h) {
   return trovato ? { x1, y1, x2, y2 } : null;
 }
 
-// Flood fill per pixel BIANCHI (si ferma sui bordi neri)
 function floodFillBianco(ctx, startX, startY, colore) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -638,7 +661,6 @@ function floodFillBianco(ctx, startX, startY, colore) {
   const sa = data[startIdx + 3];
   if (sa < 50) return;
 
-  // Il pixel di partenza deve essere bianco
   const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
   if (sr < 200 || sg < 200 || sb < 200) return;
 
@@ -656,10 +678,7 @@ function floodFillBianco(ctx, startX, startY, colore) {
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
 
-    // STOP sui bordi neri
     if (r < 100 && g < 100 && b < 100) continue;
-
-    // Colora SOLO pixel bianchi
     if (r < 200 || g < 200 || b < 200) continue;
 
     data[i] = colore.r;
@@ -675,7 +694,6 @@ function floodFillBianco(ctx, startX, startY, colore) {
   ctx.putImageData(imageData, 0, 0);
 }
 
-// Flood fill per pixel GRIGI (ombre)
 function floodFillGrigio(ctx, startX, startY, colore) {
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -697,7 +715,6 @@ function floodFillGrigio(ctx, startX, startY, colore) {
     if (a < 50) continue;
     if (r < 100 && g < 100 && b < 100) continue;
 
-    // Solo grigio chiaro (ombre): non bianco, non troppo scuro
     const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
     if (!isGrigio) continue;
 
@@ -906,7 +923,14 @@ async function initApp() {
       <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
     </div>`;
   });
-  html += `</div><div style="margin-top:16px">
+  html += `</div>`;
+
+  /* ===== PULSANTE EUROPEI 2028 ===== */
+  html += `<div class="separatore-menu">Modalità Torneo</div>
+    <button class="btn-europei" onclick="location.href='europei2028.html'">🏆 Europei 2028</button>
+    <div class="separatore-menu">Amichevole</div>`;
+
+  html += `<div style="margin-top:16px">
     <button class="primario" onclick="avviaPartita('1P')">INIZIA PARTITA</button>
   </div>`;
   document.getElementById('modale-box').innerHTML = html;

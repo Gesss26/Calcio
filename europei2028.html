@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Europei 2028 - Qualificazioni</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #0a0a15;
+    color: #eee;
+    overflow: hidden;
+    user-select: none;
+  }
+  .app { display: flex; flex-direction: column; height: 100vh; overflow-y: auto; }
+  .header {
+    background: linear-gradient(135deg, #16213e, #0f3460);
+    padding: 16px;
+    text-align: center;
+    border-bottom: 3px solid #ffd700;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header h1 { font-size: 22px; color: #ffd700; letter-spacing: 2px; }
+  .header p { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .content { padding: 16px; max-width: 900px; margin: 0 auto; width: 100%; }
+  .fase-titolo {
+    font-size: 16px; color: #ffd700; font-weight: bold;
+    margin: 20px 0 10px; padding: 8px 12px;
+    background: rgba(255,215,0,0.1); border-left: 4px solid #ffd700;
+    border-radius: 4px;
+  }
+  .gironi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .girone {
+    background: #16213e; border: 2px solid #0f3460; border-radius: 10px;
+    padding: 10px; overflow: hidden;
+  }
+  .girone h3 {
+    color: #ffd700; font-size: 13px; text-align: center;
+    margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,215,0,0.3);
+  }
+  .classifica { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .classifica th {
+    color: #ffd700; font-size: 10px; padding: 4px 2px;
+    text-align: center; border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .classifica td { padding: 3px 2px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .classifica td:first-child { text-align: left; font-weight: bold; }
+  .classifica tr.tua { background: rgba(77,171,247,0.25); }
+  .classifica tr.qualificata td:first-child { color: #4ade80; }
+  .classifica tr.spareggio td:first-child { color: #fbbf24; }
+  .partite-list { margin-top: 8px; font-size: 10px; color: #aaa; }
+  .partita-row {
+    display: flex; justify-content: space-between; padding: 2px 0;
+    border-bottom: 1px dotted rgba(255,255,255,0.1);
+  }
+  .partita-row.tua { color: #4dabf7; font-weight: bold; }
+  .squadre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px; margin-top: 12px;
+  }
+  .squadra-btn {
+    background: #0f3460; border: 2px solid #4dabf7; border-radius: 8px;
+    padding: 8px; cursor: pointer; text-align: center; color: #fff;
+    font-size: 11px; font-weight: bold; transition: all 0.2s;
+  }
+  .squadra-btn:hover { background: #4dabf7; color: #0f3460; }
+  .squadra-btn.selezionata { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  .squadra-btn .maglia {
+    width: 40px; height: 48px; margin: 0 auto 4px;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    image-rendering: pixelated;
+  }
+  .btn {
+    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: bold;
+    cursor: pointer; margin: 4px;
+  }
+  .btn:hover { background: #4dabf7; color: #0f3460; }
+  .btn.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  .btn.primario:hover { background: #fff; }
+  .turno-box {
+    background: #16213e; border: 2px solid #ffd700; border-radius: 10px;
+    padding: 12px; margin: 12px 0;
+  }
+  .turno-box h3 { color: #ffd700; font-size: 14px; margin-bottom: 8px; }
+  .match-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+  }
+  .match-row.tua { background: rgba(77,171,247,0.2); border-radius: 4px; }
+  .match-row .score { color: #ffd700; font-weight: bold; margin: 0 8px; }
+  .esito { font-size: 11px; color: #4ade80; margin-left: 8px; }
+  .esito.eliminata { color: #ef4444; }
+  .torna-menu {
+    position: fixed; top: 10px; left: 10px; z-index: 20;
+    background: #0f3460; border: 2px solid #4dabf7; color: #fff;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold;
+    font-size: 12px;
+  }
+  .torna-menu:hover { background: #4dabf7; color: #0f3460; }
+  .nascosto { display: none !important; }
+  .avviso {
+    background: rgba(255,215,0,0.15); border: 1px solid #ffd700;
+    border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #ffd700;
+    margin: 10px 0;
+  }
+</style>
+</head>
+<body>
+<button class="torna-menu" onclick="location.href='index.html'">← Menù</button>
+<div class="app">
+  <div class="header">
+    <h1>🏆 EUROPEI 2028</h1>
+    <p>Qualificazioni · Spareggi · Fase Finale</p>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+/* =========================================================
+   SQUADRE EUROPEE 2028 - COLORI DIVISE
+   ========================================================= */
+const SQUADRE_EURO = {
+  italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#F4C9A0', capelli: '#4B351F' },
+  francia:    { nome: 'FRANCIA',    maglia: '#002395', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  spagna:     { nome: 'SPAGNA',     maglia: '#C60B1E', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  portogallo: { nome: 'PORTOGALLO', maglia: '#006600', pantaloncini: '#CC0000', calzettoni: '#006600', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  inghilterra:{ nome: 'INGHILTERRA',maglia: '#FFFFFF', pantaloncini: '#000080', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#8B5A2B' },
+  olanda:     { nome: 'OLANDA',     maglia: '#FF6600', pantaloncini: '#000000', calzettoni: '#FF6600', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  belgio:     { nome: 'BELGIO',     maglia: '#CC0000', pantaloncini: '#000000', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#4B351F' },
+  croazia:    { nome: 'CROAZIA',    maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#0000CC', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  danimarca:  { nome: 'DANIMARCA',  maglia: '#C60C30', pantaloncini: '#FFFFFF', calzettoni: '#C60C30', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  svizzera:   { nome: 'SVIZZERA',   maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#FF0000', pelle: '#F4C9A0', capelli: '#4B351F' },
+  austria:    { nome: 'AUSTRIA',    maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  polonia:    { nome: 'POLONIA',    maglia: '#FFFFFF', pantaloncini: '#DC143C', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  ucraina:    { nome: 'UCRAINA',    maglia: '#FFD700', pantaloncini: '#0057B7', calzettoni: '#FFD700', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  turchia:    { nome: 'TURCHIA',    maglia: '#E30A17', pantaloncini: '#FFFFFF', calzettoni: '#E30A17', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  svezia:     { nome: 'SVEZIA',     maglia: '#FECC02', pantaloncini: '#005B99', calzettoni: '#FECC02', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  norvegia:   { nome: 'NORVEGIA',   maglia: '#BA0C2F', pantaloncini: '#FFFFFF', calzettoni: '#BA0C2F', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  scozia:     { nome: 'SCOZIA',     maglia: '#0065BD', pantaloncini: '#FFFFFF', calzettoni: '#0065BD', pelle: '#F4C9A0', capelli: '#8B5A2B' },
+  galles:     { nome: 'GALLES',     maglia: '#C8102E', pantaloncini: '#FFFFFF', calzettoni: '#C8102E', pelle: '#F4C9A0', capelli: '#4B351F' },
+  irlanda:    { nome: 'IRLANDA',    maglia: '#169B62', pantaloncini: '#FFFFFF', calzettoni: '#169B62', pelle: '#F4C9A0', capelli: '#8B5A2B' },
+  serbia:     { nome: 'SERBIA',     maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  ungheria:   { nome: 'UNGHERIA',   maglia: '#CE2939', pantaloncini: '#FFFFFF', calzettoni: '#477050', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  romania:    { nome: 'ROMANIA',    maglia: '#FFCC00', pantaloncini: '#0033CC', calzettoni: '#FFCC00', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  grecia:     { nome: 'GRECIA',     maglia: '#FFFFFF', pantaloncini: '#0066CC', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  cechia:     { nome: 'CECHIA',     maglia: '#D7141A', pantaloncini: '#FFFFFF', calzettoni: '#D7141A', pelle: '#F4C9A0', capelli: '#4B351F' },
+  slovacchia: { nome: 'SLOVACCHIA', maglia: '#0B4EA2', pantaloncini: '#FFFFFF', calzettoni: '#EE1C25', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  slovenia:   { nome: 'SLOVENIA',   maglia: '#FFFFFF', pantaloncini: '#005DA4', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  finlandia:  { nome: 'FINLANDIA',  maglia: '#FFFFFF', pantaloncini: '#002F6C', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  islanda:    { nome: 'ISLANDA',    maglia: '#003897', pantaloncini: '#FFFFFF', calzettoni: '#D72828', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  albania:    { nome: 'ALBANIA',    maglia: '#E41E20', pantaloncini: '#000000', calzettoni: '#E41E20', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  bosnia:     { nome: 'BOSNIA',     maglia: '#002F6C', pantaloncini: '#FFFFFF', calzettoni: '#002F6C', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  macedonia:  { nome: 'MACEDONIA',  maglia: '#D20000', pantaloncini: '#FFFFFF', calzettoni: '#D20000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  montenegro: { nome: 'MONTENEGRO', maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  bulgaria:   { nome: 'BULGARIA',   maglia: '#FFFFFF', pantaloncini: '#00966E', calzettoni: '#D62612', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  bielorussia:{ nome: 'BIELORUSSIA',maglia: '#C8313E', pantaloncini: '#FFFFFF', calzettoni: '#C8313E', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  georgia:    { nome: 'GEORGIA',    maglia: '#FFFFFF', pantaloncini: '#FF0000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  armenia:    { nome: 'ARMENIA',    maglia: '#D90012', pantaloncini: '#0033A0', calzettoni: '#D90012', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  azerbaigian:{ nome: 'AZERBAIGIAN',maglia: '#00B5E2', pantaloncini: '#FFFFFF', calzettoni: '#00B5E2', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  kazakistan: { nome: 'KAZAKISTAN', maglia: '#00AFCA', pantaloncini: '#FFFFFF', calzettoni: '#00AFCA', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  cipro:      { nome: 'CIPRO',      maglia: '#FFFFFF', pantaloncini: '#FF6600', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  malta:      { nome: 'MALTA',      maglia: '#CF142B', pantaloncini: '#FFFFFF', calzettoni: '#CF142B', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  lussemburgo:{ nome: 'LUSSEMBURGO',maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#00A1DE', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  estonia:    { nome: 'ESTONIA',    maglia: '#0072CE', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  lettonia:   { nome: 'LETTONIA',   maglia: '#9E3039', pantaloncini: '#FFFFFF', calzettoni: '#9E3039', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  lituania:   { nome: 'LITUANIA',   maglia: '#FDB913', pantaloncini: '#006A44', calzettoni: '#C1272D', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  moldavia:   { nome: 'MOLDAVIA',   maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  kosovo:     { nome: 'KOSOVO',     maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#0033A0', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  faroe:      { nome: 'FAROE',      maglia: '#FFFFFF', pantaloncini: '#003897', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  andorra:    { nome: 'ANDORRA',    maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  sanmarino:  { nome: 'SAN MARINO', maglia: '#5EB6E4', pantaloncini: '#FFFFFF', calzettoni: '#5EB6E4', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  gibilterra: { nome: 'GIBILTERRA', maglia: '#FFFFFF', pantaloncini: '#DA291C', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  liechtenstein:{ nome: 'LIECHTENSTEIN', maglia: '#002B7F', pantaloncini: '#FFFFFF', calzettoni: '#CE1126', pelle: '#F4C9A0', capelli: '#3A2A1A' }
+};
+
+/* =========================================================
+   STATO
+   ========================================================= */
+let stato = {
+  squadraScelta: null,
+  fase: 'scelta', // scelta, qualificazioni, spareggi, ottavi, quarti, semifinali, finale, fine
+  gironi: {},
+  qualificate: [],
+  spareggi: [],
+  tabellone: { ottavi: [], quarti: [], semifinali: [], finale: [] },
+  log: []
+};
+
+/* =========================================================
+   COLORAZIONE DINAMICA PEDINE
+   ========================================================= */
+function hexToRgb(hex) {
+  const h = hex.replace('#', '');
+  return {
+    r: parseInt(h.substring(0, 2), 16),
+    g: parseInt(h.substring(2, 4), 16),
+    b: parseInt(h.substring(4, 6), 16)
+  };
+}
+
+const cacheImmagini = {};
+
+function pathFrame(animazione, numero) {
+  return encodeURI(`${animazione}/${animazione} (${numero}).png`);
+}
+
+function caricaImmagineColorata(squadraId, animazione, numeroFrame) {
+  return new Promise((resolve) => {
+    const chiave = `${squadraId}|${animazione}|${numeroFrame}`;
+    if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
+    const percorso = pathFrame(animazione, numeroFrame);
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const squadra = SQUADRE_EURO[squadraId] || SQUADRE_EURO.italia;
+        const targetMaglia = hexToRgb(squadra.maglia);
+        const targetPantaloncini = hexToRgb(squadra.pantaloncini);
+        const targetCalzettoni = hexToRgb(squadra.calzettoni);
+        const targetCapelli = hexToRgb(squadra.capelli);
+
+        const W = canvas.width, H = canvas.height;
+        const bbox = trovaBoundingBox(ctx, W, H);
+        if (!bbox) { resolve(percorso); return; }
+
+        const altezza = bbox.y2 - bbox.y1;
+        const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
+
+        const punti = {
+          capelli:      { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.10) },
+          maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.54) },
+          pantaloncini: { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.67) },
+          calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.87) }
+        };
+
+        floodFillBianco(ctx, punti.capelli.x, punti.capelli.y, targetCapelli);
+        floodFillBianco(ctx, punti.maglia.x, punti.maglia.y, targetMaglia);
+        floodFillBianco(ctx, punti.pantaloncini.x, punti.pantaloncini.y, targetPantaloncini);
+        floodFillBianco(ctx, punti.calzettoni.x, punti.calzettoni.y, targetCalzettoni);
+
+        const ombraCapelli = { r: Math.round(targetCapelli.r * 0.7), g: Math.round(targetCapelli.g * 0.7), b: Math.round(targetCapelli.b * 0.7) };
+        const ombraMaglia = { r: Math.round(targetMaglia.r * 0.7), g: Math.round(targetMaglia.g * 0.7), b: Math.round(targetMaglia.b * 0.7) };
+        const ombraPantaloncini = { r: Math.round(targetPantaloncini.r * 0.7), g: Math.round(targetPantaloncini.g * 0.7), b: Math.round(targetPantaloncini.b * 0.7) };
+        const ombraCalzettoni = { r: Math.round(targetCalzettoni.r * 0.7), g: Math.round(targetCalzettoni.g * 0.7), b: Math.round(targetCalzettoni.b * 0.7) };
+
+        floodFillGrigio(ctx, punti.capelli.x, punti.capelli.y, ombraCapelli);
+        floodFillGrigio(ctx, punti.maglia.x, punti.maglia.y, ombraMaglia);
+        floodFillGrigio(ctx, punti.pantaloncini.x, punti.pantaloncini.y, ombraPantaloncini);
+        floodFillGrigio(ctx, punti.calzettoni.x, punti.calzettoni.y, ombraCalzettoni);
+
+        const dataURL = canvas.toDataURL();
+        cacheImmagini[chiave] = dataURL;
+        resolve(dataURL);
+      } catch (e) { resolve(percorso); }
+    };
+    img.onerror = () => resolve(percorso);
+    img.src = percorso;
+  });
+}
+
+function trovaBoundingBox(ctx, w, h) {
+  const data = ctx.getImageData(0, 0, w, h).data;
+  let x1 = w, y1 = h, x2 = 0, y2 = 0, trovato = false;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * 4;
+      if (data[i + 3] > 20) {
+        trovato = true;
+        if (x < x1) x1 = x;
+        if (x > x2) x2 = x;
+        if (y < y1) y1 = y;
+        if (y > y2) y2 = y;
+      }
+    }
+  }
+  return trovato ? { x1, y1, x2, y2 } : null;
+}
+
+function floodFillBianco(ctx, startX, startY, colore) {
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  const startIdx = (startY * w + startX) * 4;
+  if (data[startIdx + 3] < 50) return;
+  const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
+  if (sr < 200 || sg < 200 || sb < 200) return;
+  const stack = [[startX, startY]];
+  const visitati = new Uint8Array(w * h);
+  while (stack.length > 0) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+    const idx = y * w + x;
+    if (visitati[idx]) continue;
+    visitati[idx] = 1;
+    const i = idx * 4;
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+    if (a < 50) continue;
+    if (r < 100 && g < 100 && b < 100) continue;
+    if (r < 200 || g < 200 || b < 200) continue;
+    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
+    stack.push([x + 1, y]); stack.push([x - 1, y]);
+    stack.push([x, y + 1]); stack.push([x, y - 1]);
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function floodFillGrigio(ctx, startX, startY, colore) {
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  const imageData = ctx.getImageData(0, 0, w, h);
+  const data = imageData.data;
+  const stack = [[startX, startY]];
+  const visitati = new Uint8Array(w * h);
+  while (stack.length > 0) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+    const idx = y * w + x;
+    if (visitati[idx]) continue;
+    visitati[idx] = 1;
+    const i = idx * 4;
+    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+    if (a < 50) continue;
+    if (r < 100 && g < 100 && b < 100) continue;
+    const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
+    if (!isGrigio) continue;
+    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
+    stack.push([x + 1, y]); stack.push([x - 1, y]);
+    stack.push([x, y + 1]); stack.push([x, y - 1]);
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+/* =========================================================
+   LOGICA TORNEO
+   ========================================================= */
+const GRUPPI = ['A','B','C','D','E','F','G','H'];
+
+function creaGironi() {
+  const ids = Object.keys(SQUADRE_EURO);
+  const mescolate = [...ids].sort(() => Math.random() - 0.5);
+  const gironi = {};
+  GRUPPI.forEach((g, i) => {
+    gironi[g] = mescolate.slice(i * 6, i * 6 + 6);
+  });
+  return gironi;
+}
+
+function simulaPartita(a, b) {
+  // Forza basata su "prestigio" simulato: squadre più forti hanno più probabilità
+  const forza = {
+    italia: 90, francia: 92, germania: 88, spagna: 91, portogallo: 87,
+    inghilterra: 89, olanda: 85, belgio: 84, croazia: 83, danimarca: 82,
+    svizzera: 80, austria: 79, polonia: 78, ucraina: 77, turchia: 76,
+    svezia: 75, norvegia: 74, scozia: 73, galles: 72, irlanda: 71,
+    serbia: 70, ungheria: 69, romania: 68, grecia: 67, cechia: 66,
+    slovacchia: 65, slovenia: 64, finlandia: 63, islanda: 62, albania: 61,
+    bosnia: 60, macedonia: 59, montenegro: 58, bulgaria: 57, bielorussia: 56,
+    georgia: 55, armenia: 54, azerbaigian: 53, kazakistan: 52, cipro: 51,
+    malta: 50, lussemburgo: 49, estonia: 48, lettonia: 47, lituania: 46,
+    moldavia: 45, kosovo: 44, faroe: 43, andorra: 42, sanmarino: 41,
+    gibilterra: 40, liechtenstein: 39
+  };
+  const fa = forza[a] || 50, fb = forza[b] || 50;
+  const pa = fa / (fa + fb);
+  const golA = Math.random() < pa ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+  const golB = Math.random() < (1 - pa) ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+  return { golA, golB };
+}
+
+function simulaGirone(girone, squadre) {
+  const classifica = {};
+  squadre.forEach(s => classifica[s] = { punti: 0, gf: 0, gs: 0, dr: 0, giocate: 0 });
+  const partite = [];
+  // Andata e ritorno
+  for (let i = 0; i < squadre.length; i++) {
+    for (let j = i + 1; j < squadre.length; j++) {
+      // Andata
+      const r1 = simulaPartita(squadre[i], squadre[j]);
+      partite.push({ casa: squadre[i], trasferta: squadre[j], golCasa: r1.golA, golTrasferta: r1.golB });
+      classifica[squadre[i]].gf += r1.golA; classifica[squadre[i]].gs += r1.golB;
+      classifica[squadre[j]].gf += r1.golB; classifica[squadre[j]].gs += r1.golA;
+      classifica[squadre[i]].giocate++; classifica[squadre[j]].giocate++;
+      if (r1.golA > r1.golB) { classifica[squadre[i]].punti += 3; }
+      else if (r1.golA < r1.golB) { classifica[squadre[j]].punti += 3; }
+      else { classifica[squadre[i]].punti += 1; classifica[squadre[j]].punti += 1; }
+      // Ritorno
+      const r2 = simulaPartita(squadre[j], squadre[i]);
+      partite.push({ casa: squadre[j], trasferta: squadre[i], golCasa: r2.golA, golTrasferta: r2.golB });
+      classifica[squadre[j]].gf += r2.golA; classifica[squadre[j]].gs += r2.golB;
+      classifica[squadre[i]].gf += r2.golB; classifica[squadre[i]].gs += r2.golA;
+      classifica[squadre[j]].giocate++; classifica[squadre[i]].giocate++;
+      if (r2.golA > r2.golB) { classifica[squadre[j]].punti += 3; }
+      else if (r2.golA < r2.golB) { classifica[squadre[i]].punti += 3; }
+      else { classifica[squadre[j]].punti += 1; classifica[squadre[i]].punti += 1; }
+    }
+  }
+  const ordinata = Object.entries(classifica)
+    .map(([s, d]) => ({ squadra: s, ...d, dr: d.gf - d.gs }))
+    .sort((a, b) => b.punti - a.punti || b.dr - a.dr || b.gf - a.gf);
+  return { classifica: ordinata, partite };
+}
+
+function eseguiQualificazioni() {
+  stato.gironi = {};
+  for (const g of GRUPPI) {
+    const squadre = stato.gironiRaw[g];
+    stato.gironi[g] = simulaGirone(g, squadre);
+  }
+  // Qualificate: prime 2 di ogni girone
+  stato.qualificate = [];
+  for (const g of GRUPPI) {
+    const top2 = stato.gironi[g].classifica.slice(0, 2);
+    top2.forEach(t => stato.qualificate.push(t.squadra));
+  }
+  // Spareggi: terze e quarte (16 squadre)
+  const spareggianti = [];
+  for (const g of GRUPPI) {
+    const c = stato.gironi[g].classifica;
+    if (c[2]) spareggianti.push(c[2].squadra);
+    if (c[3]) spareggianti.push(c[3].squadra);
+  }
+  // Sorteggia 8 spareggi
+  const mescolati = spareggianti.sort(() => Math.random() - 0.5);
+  stato.spareggi = [];
+  for (let i = 0; i < 8; i++) {
+    const a = mescolati[i * 2], b = mescolati[i * 2 + 1];
+    const r = simulaPartita(a, b);
+    const vincitore = r.golA >= r.golB ? a : b;
+    stato.spareggi.push({ a, b, golA: r.golA, golB: r.golB, vincitore });
+  }
+  stato.qualificate = stato.qualificate.concat(stato.spareggi.map(s => s.vincitore));
+  stato.fase = 'qualificazioni';
+  render();
+}
+
+function simulaTurno(turno) {
+  const partite = stato.tabellone[turno];
+  partite.forEach(p => {
+    if (!p.vincitore) {
+      const r = simulaPartita(p.a, p.b);
+      p.golA = r.golA; p.golB = r.golB;
+      if (r.golA === r.golB) {
+        // Rigori
+        const rigA = Math.floor(Math.random() * 5) + 1;
+        const rigB = Math.floor(Math.random() * 5) + 1;
+        p.rigA = rigA; p.rigB = rigB;
+        p.vincitore = rigA >= rigB ? p.a : p.b;
+      } else {
+        p.vincitore = r.golA > r.golB ? p.a : p.b;
+      }
+    }
+  });
+}
+
+function creaTabellone(qualificate) {
+  const mescolate = [...qualificate].sort(() => Math.random() - 0.5);
+  const ottavi = [];
+  for (let i = 0; i < 16; i++) {
+    ottavi.push({ a: mescolate[i * 2], b: mescolate[i * 2 + 1] });
+  }
+  stato.tabellone.ottavi = ottavi;
+  stato.fase = 'ottavi';
+  render();
+}
+
+function avanzaTurno() {
+  if (stato.fase === 'ottavi') {
+    simulaTurno('ottavi');
+    const vincitori = stato.tabellone.ottavi.map(p => p.vincitore);
+    const quarti = [];
+    for (let i = 0; i < 8; i++) {
+      quarti.push({ a: vincitori[i * 2], b: vincitori[i * 2 + 1] });
+    }
+    stato.tabellone.quarti = quarti;
+    stato.fase = 'quarti';
+    render();
+  } else if (stato.fase === 'quarti') {
+    simulaTurno('quarti');
+    const vincitori = stato.tabellone.quarti.map(p => p.vincitore);
+    const semi = [];
+    for (let i = 0; i < 4; i++) {
+      semi.push({ a: vincitori[i * 2], b: vincitori[i * 2 + 1] });
+    }
+    stato.tabellone.semifinali = semi;
+    stato.fase = 'semifinali';
+    render();
+  } else if (stato.fase === 'semifinali') {
+    simulaTurno('semifinali');
+    const vincitori = stato.tabellone.semifinali.map(p => p.vincitore);
+    stato.tabellone.finale = [{ a: vincitori[0], b: vincitori[1] }];
+    stato.fase = 'finale';
+    render();
+  } else if (stato.fase === 'finale') {
+    simulaTurno('finale');
+    stato.fase = 'fine';
+    render();
+  }
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+async function render() {
+  const content = document.getElementById('content');
+  if (stato.fase === 'scelta') {
+    await renderScelta(content);
+  } else if (stato.fase === 'qualificazioni') {
+    renderQualificazioni(content);
+  } else if (stato.fase === 'spareggi') {
+    renderSpareggi(content);
+  } else if (['ottavi','quarti','semifinali','finale'].includes(stato.fase)) {
+    renderTabellone(content);
+  } else if (stato.fase === 'fine') {
+    renderFine(content);
+  }
+}
+
+async function renderScelta(content) {
+  const imgSquadre = {};
+  for (const id of Object.keys(SQUADRE_EURO)) {
+    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
+  }
+  let html = `<div class="fase-titolo">Scegli la tua squadra</div>
+    <div class="avviso">Seleziona una nazionale per iniziare le qualificazioni agli Europei 2028.</div>
+    <div class="squadre-grid">`;
+  Object.keys(SQUADRE_EURO).forEach(id => {
+    html += `<div class="squadra-btn ${id === stato.squadraScelta ? 'selezionata' : ''}" onclick="selezionaSquadra('${id}')">
+      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
+      <div>${SQUADRE_EURO[id].nome}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  if (stato.squadraScelta) {
+    html += `<div style="text-align:center;margin-top:16px">
+      <button class="btn primario" onclick="iniziaQualificazioni()">INIZIA QUALIFICAZIONI</button>
+    </div>`;
+  }
+  content.innerHTML = html;
+}
+
+function selezionaSquadra(id) {
+  stato.squadraScelta = id;
+  render();
+}
+
+function iniziaQualificazioni() {
+  stato.gironiRaw = creaGironi();
+  eseguiQualificazioni();
+}
+
+function renderQualificazioni(content) {
+  let html = `<div class="fase-titolo">📋 Fase a Gironi — Qualificazioni</div>`;
+  // Log
+  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE_EURO[stato.squadraScelta].nome}</strong></div>`;
+  html += `<div class="gironi-grid">`;
+  for (const g of GRUPPI) {
+    const girone = stato.gironi[g];
+    html += `<div class="girone"><h3>Girone ${g}</h3><table class="classifica">
+      <tr><th>Squadra</th><th>Pt</th><th>G</th><th>GF</th><th>GS</th><th>DR</th></tr>`;
+    girone.classifica.forEach((t, idx) => {
+      const cls = t.squadra === stato.squadraScelta ? 'tua' : '';
+      const qual = idx < 2 ? 'qualificata' : idx < 4 ? 'spareggio' : '';
+      html += `<tr class="${cls} ${qual}">
+        <td>${SQUADRE_EURO[t.squadra].nome}</td>
+        <td>${t.punti}</td><td>${t.giocate}</td><td>${t.gf}</td><td>${t.gs}</td><td>${t.dr > 0 ? '+' : ''}${t.dr}</td>
+      </tr>`;
+    });
+    html += `</table></div>`;
+  }
+  html += `</div>`;
+  // Spareggi
+  html += `<div class="fase-titolo">⚔️ Spareggi</div><div class="turno-box">`;
+  stato.spareggi.forEach(p => {
+    const cls = (p.a === stato.squadraScelta || p.b === stato.squadraScelta) ? 'tua' : '';
+    html += `<div class="match-row ${cls}">
+      <span>${SQUADRE_EURO[p.a].nome}</span>
+      <span class="score">${p.golA} - ${p.golB}</span>
+      <span>${SQUADRE_EURO[p.b].nome}</span>
+      <span class="esito">→ ${SQUADRE_EURO[p.vincitore].nome}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div style="text-align:center;margin-top:16px">
+    <button class="btn primario" onclick="vaiAgliOttavi()">VAI AGLI OTTAVI</button>
+  </div>`;
+  content.innerHTML = html;
+}
+
+function vaiAgliOttavi() {
+  creaTabellone(stato.qualificate);
+}
+
+function renderSpareggi(content) {
+  renderQualificazioni(content);
+}
+
+function renderTabellone(content) {
+  const turni = [
+    { key: 'ottavi', nome: 'Ottavi di Finale' },
+    { key: 'quarti', nome: 'Quarti di Finale' },
+    { key: 'semifinali', nome: 'Semifinali' },
+    { key: 'finale', nome: 'Finale' }
+  ];
+  let html = `<div class="fase-titolo">🏆 Fase Finale — Europei 2028</div>`;
+  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE_EURO[stato.squadraScelta].nome}</strong></div>`;
+  turni.forEach(t => {
+    const partite = stato.tabellone[t.key];
+    if (!partite || partite.length === 0) return;
+    const completato = partite.every(p => p.vincitore);
+    html += `<div class="turno-box"><h3>${t.nome} ${completato ? '✅' : ''}</h3>`;
+    partite.forEach(p => {
+      const cls = (p.a === stato.squadraScelta || p.b === stato.squadraScelta) ? 'tua' : '';
+      let score = '-';
+      if (p.golA !== undefined) score = `${p.golA} - ${p.golB}`;
+      if (p.rigA !== undefined) score += ` (${p.rigA}-${p.rigB} dcr)`;
+      let esito = '';
+      if (p.vincitore) {
+        esito = `→ ${SQUADRE_EURO[p.vincitore].nome}`;
+        if (p.vincitore !== stato.squadraScelta && (p.a === stato.squadraScelta || p.b === stato.squadraScelta)) {
+          esito += ' ❌';
+        }
+      }
+      html += `<div class="match-row ${cls}">
+        <span>${SQUADRE_EURO[p.a].nome}</span>
+        <span class="score">${score}</span>
+        <span>${SQUADRE_EURO[p.b].nome}</span>
+        <span class="esito">${esito}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  // Bottone avanza
+  const turnoCorrente = ['ottavi','quarti','semifinali','finale'].find(t => {
+    const p = stato.tabellone[t];
+    return p && p.length > 0 && !p.every(x => x.vincitore);
+  });
+  if (turnoCorrente) {
+    const nomeTurno = { ottavi:'Ottavi', quarti:'Quarti', semifinali:'Semifinali', finale:'Finale' }[turnoCorrente];
+    html += `<div style="text-align:center;margin:16px">
+      <button class="btn primario" onclick="avanzaTurno()">SIMULA ${nomeTurno.toUpperCase()}</button>
+    </div>`;
+  }
+  content.innerHTML = html;
+}
+
+function renderFine(content) {
+  const finale = stato.tabellone.finale[0];
+  const campione = finale.vincitore;
+  const tua = stato.squadraScelta;
+  let msg = campione === tua ? '🏆 HAI VINTO GLI EUROPEI 2028!' : `🏆 Campione: ${SQUADRE_EURO[campione].nome}`;
+  let html = `<div class="fase-titolo">🏆 Fine Torneo</div>
+    <div class="turno-box" style="text-align:center">
+      <h2 style="color:#ffd700;font-size:22px;margin:12px 0">${msg}</h2>
+      <p style="font-size:14px;color:#aaa;margin:8px 0">Finale: ${SQUADRE_EURO[finale.a].nome} ${finale.golA} - ${finale.golB} ${SQUADRE_EURO[finale.b].nome}</p>
+      ${finale.rigA !== undefined ? `<p style="font-size:12px;color:#aaa">Rigori: ${finale.rigA} - ${finale.rigB}</p>` : ''}
+      <button class="btn primario" onclick="location.reload()" style="margin-top:16px">NUOVO TORNEO</button>
+    </div>`;
+  content.innerHTML = html;
+}
+
+/* =========================================================
+   AVVIO
+   ========================================================= */
+render();
+</script>
+</body>
+</html>
