@@ -212,63 +212,134 @@
   .carte-panel {
     flex: 1; background: #16213e; padding: 8px 12px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 6px; overflow-y: auto;
+    gap: 8px; overflow-y: auto;
   }
   .app.fase-animazione .carte-panel { display: none; }
   .carte-panel.nascosto { display: none; }
+
+  /* ===== PANNELLO CONTRASTO A CARTE ===== */
   .info-mano {
-    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;
   }
   .info-mano .titolo {
     font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 1px;
   }
-  .info-mano .bersaglio {
-    font-size: 26px; font-weight: bold; color: #ffd700;
-    text-shadow: 0 0 12px rgba(255,215,0,0.7);
+  .info-mano .seme-guidatore {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 10px;
+    border: 2px solid #ffd700;
   }
-  .info-mano .turno-label { font-size: 12px; color: #aaa; }
+  .info-mano .seme-guidatore .label {
+    font-size: 10px; color: #ffd700; text-transform: uppercase; letter-spacing: 1px;
+    font-weight: bold;
+  }
+  .info-mano .seme-guidatore .seme {
+    font-size: 36px; line-height: 1;
+    filter: drop-shadow(0 0 8px rgba(255,215,0,0.9));
+    animation: pulseSeme 1.5s infinite;
+  }
+  @keyframes pulseSeme {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+  }
+  .info-mano .turno-label { font-size: 12px; color: #aaa; text-align: center; }
+
   .mano-wrapper {
-    display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center;
+    display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center;
+    width: 100%;
   }
+
+  .mano-sezione {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.25); border-radius: 10px; padding: 8px 12px;
+    min-width: 260px;
+  }
+  .mano-sezione .mano-label {
+    font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+  }
+  .mano-sezione.tu .mano-label { color: #4dabf7; }
+  .mano-sezione.cpu .mano-label { color: #ff6b6b; }
+
   .carte { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
   .carta {
-    width: 48px; height: 66px; background: #fff; color: #222;
-    border-radius: 6px; display: flex; align-items: center; justify-content: center;
-    font-size: 34px; font-weight: 900; font-family: 'Georgia', serif;
-    cursor: pointer; border: 3px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    width: 60px; height: 86px; background: #fff; color: #222;
+    border-radius: 8px; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+    padding: 4px 6px; cursor: pointer;
+    border: 3px solid transparent;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
   }
+  .carta:hover:not(.disabilitata):not(.coperta) { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(0,0,0,0.6); }
+  .carta .valore-alto { font-size: 15px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 34px; line-height: 1; }
+  .carta .valore-basso { font-size: 15px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
   .carta.selezionata {
-    border-color: #ffd700; background: #fff9c4; transform: translateY(-6px);
-    box-shadow: 0 0 16px #ffd700;
+    border-color: #ffd700; background: #fff9c4; transform: translateY(-10px);
+    box-shadow: 0 0 24px #ffd700;
   }
-  .carta.negativa {
-    background: linear-gradient(135deg, #fff5f5, #ffdddd);
-    color: #dc2626; border: 3px solid #dc2626; font-size: 30px;
+  .carta.disabilitata { opacity: 0.35; cursor: not-allowed; }
+  .carta.bloccata {
+    opacity: 0.35; cursor: not-allowed;
+    border-color: #ef4444;
   }
-  .pila-wrapper { display: flex; gap: 8px; align-items: center; }
-  .pila { position: relative; width: 36px; height: 50px; }
+  .carta.bloccata::before {
+    content: '🚫'; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); font-size: 32px; opacity: 0.9;
+    z-index: 5;
+  }
+  .carta.coperta {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    border: 3px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: default;
+  }
+  .carta.coperta::after {
+    content: '🂠'; color: #fff; font-size: 40px;
+  }
+  .carta.vincitrice {
+    border-color: #4ade80;
+    box-shadow: 0 0 24px #4ade80;
+    animation: pulseVincitrice 1s infinite;
+  }
+  @keyframes pulseVincitrice {
+    0%, 100% { box-shadow: 0 0 16px #4ade80; }
+    50% { box-shadow: 0 0 32px #4ade80; }
+  }
+
+  .pila-wrapper { display: flex; gap: 20px; align-items: center; }
+  .pila { position: relative; width: 44px; height: 62px; }
   .pila-titolo {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #ffd700; font-weight: bold;
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
-    position: absolute; width: 36px; height: 50px; border-radius: 4px;
+    position: absolute; width: 44px; height: 62px; border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: bold;
+    font-size: 20px; font-weight: bold;
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
     border: 2px solid #fff;
   }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 20px; }
-  .pila-carta.scarto { background: #fff; border: 2px solid #999; color: #222; }
-  .pila-carta.scarto.negativa { background: #ffdddd; color: #dc2626; border-color: #dc2626; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 24px; }
   .pila-count {
-    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #aaa;
+    position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #aaa; white-space: nowrap;
   }
+
+  /* Info carte rimanenti */
+  .info-carte {
+    display: flex; gap: 20px; font-size: 11px; color: #aaa;
+    background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 8px;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  .info-carte strong { color: #ffd700; }
+
   button {
     background: #0f3460; color: #fff; border: 2px solid #4dabf7;
     padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
@@ -277,6 +348,8 @@
   button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
   button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  button.primario:hover:not(:disabled) { background: #fff; }
+
   .dado {
     display: inline-flex; align-items: center; justify-content: center;
     width: 68px; height: 68px; background: #fff; color: #222;
@@ -294,6 +367,7 @@
   .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
   .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
   .dado.giallo { background: linear-gradient(135deg, #ffe066, #f59f00); color: #222; border: 3px solid #fff; }
+
   .overlay {
     position: absolute; inset: 0; background: rgba(0,0,0,0.78);
     display: flex; align-items: center; justify-content: center;
@@ -359,71 +433,67 @@
     background-size: contain; background-repeat: no-repeat; background-position: center;
     image-rendering: pixelated;
   }
-  .sost-sezione {
-    background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin: 12px 0;
+
+  /* ===== MENU PRINCIPALE ===== */
+  .menu-principale {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    padding: 20px;
   }
-  .sost-sezione h3 { font-size: 13px; color: #ffd700; margin-bottom: 8px; }
-  .sost-lista { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-  .sost-card {
-    background: #0f3460; border: 2px solid #4dabf7; border-radius: 6px;
-    padding: 6px 10px; font-size: 11px; cursor: pointer; min-width: 70px;
+  .menu-titolo {
+    font-size: 32px; font-weight: 900; color: #ffd700;
+    text-shadow: 0 4px 16px rgba(255,215,0,0.6);
+    letter-spacing: 4px; margin-bottom: 10px;
   }
-  .sost-card.selezionato { background: #ffd700; color: #16213e; }
-  .sost-card.disabilitato { opacity: 0.35; cursor: not-allowed; }
-  .log-box {
-    background: #0a0a15; border-radius: 8px; padding: 12px;
-    max-height: 60vh; overflow-y: auto; font-size: 12px;
-    text-align: left; font-family: 'Courier New', monospace;
+  .menu-sottotitolo {
+    font-size: 13px; color: #aaa; margin-bottom: 24px;
   }
-  .log-box p { margin: 2px 0; }
-  .log-box .tu { color: #4dabf7; font-weight: bold; }
-  .log-box .cpu { color: #ff6b6b; font-weight: bold; }
-  .log-box .goal { color: #ffd700; font-weight: bold; }
+  .menu-btn {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border: 3px solid #4dabf7; border-radius: 14px;
+    padding: 18px 28px; min-width: 320px;
+    cursor: pointer; color: #fff; font-weight: bold;
+    display: flex; align-items: center; gap: 16px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .menu-btn:hover {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(77,171,247,0.5);
+    border-color: #ffd700;
+  }
+  .menu-btn .icona { font-size: 36px; }
+  .menu-btn .testo {
+    display: flex; flex-direction: column; gap: 4px; text-align: left;
+  }
+  .menu-btn .testo .titolo { font-size: 16px; letter-spacing: 1px; }
+  .menu-btn .testo .descr { font-size: 11px; color: #ccc; font-weight: normal; }
+  .menu-btn.evidenza {
+    background: linear-gradient(135deg, #ffd700, #f59f00);
+    border-color: #fff;
+    color: #16213e;
+  }
+  .menu-btn.evidenza .testo .descr { color: #4a3000; }
+  .menu-btn.evidenza:hover {
+    background: linear-gradient(135deg, #fff, #ffd700);
+    box-shadow: 0 8px 24px rgba(255,215,0,0.7);
+  }
+
   .stats-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
   .stats-table th { background: #0f3460; color: #ffd700; padding: 6px 4px; font-size: 11px; }
   .stats-table td { padding: 5px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
   .stats-table td:first-child { text-align: left; color: #ccc; }
   .stats-table .tu-val { color: #4dabf7; font-weight: bold; }
   .stats-table .cpu-val { color: #ff6b6b; font-weight: bold; }
+
   @media (max-height: 500px) {
     .pedina { width: 30px; height: 36px; }
-    .carta { width: 40px; height: 56px; font-size: 28px; }
+    .carta { width: 48px; height: 68px; }
+    .carta .seme-centro { font-size: 26px; }
     .campo-wrapper { flex: 0 0 45vh; }
     .app.fase-combattimento .campo-wrapper { flex: 0 0 45vh; }
   }
   .nascosto { display: none !important; }
-
-  /* ===== PULSANTE EUROPEI 2028 ===== */
-  .btn-europei {
-    display: block;
-    margin: 20px auto 0;
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color: #16213e;
-    border: 3px solid #fff;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: 1px;
-    cursor: pointer;
-    box-shadow: 0 6px 20px rgba(255,215,0,0.5);
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-transform: uppercase;
-  }
-  .btn-europei:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 10px 28px rgba(255,215,0,0.8);
-  }
-  .btn-europei:active { transform: translateY(0) scale(0.98); }
-  .separatore-menu {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; margin: 18px 0 4px; color: #ffd700; font-size: 11px;
-    text-transform: uppercase; letter-spacing: 3px;
-  }
-  .separatore-menu::before, .separatore-menu::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, transparent, #ffd700, transparent);
-  }
 </style>
 </head>
 <body>
@@ -467,28 +537,36 @@
     <div class="flash-vincitore" id="flash"></div>
   </div>
   <div class="panchina" id="panchina"></div>
-  <div class="carte-panel" id="carte-panel">
+  <div class="carte-panel nascosto" id="carte-panel">
     <div class="info-mano">
-      <div>
-        <div class="titolo" id="titolo-mano">Contrasto</div>
-        <div class="bersaglio" id="bersaglio-mano">-</div>
+      <div class="titolo" id="titolo-mano">Contrasto</div>
+      <div class="seme-guidatore">
+        <span class="label">Seme guida</span>
+        <span class="seme" id="seme-guidatore">⚽</span>
       </div>
       <div class="turno-label" id="turno-label"></div>
     </div>
     <div class="mano-wrapper">
-      <div class="carte" id="carte-container"></div>
+      <div class="mano-sezione tu">
+        <div class="mano-label">Tu (<span id="count-tu">5</span> carte)</div>
+        <div class="carte" id="carte-tu"></div>
+      </div>
       <div class="pila-wrapper">
         <div class="pila">
           <div class="pila-titolo">MAZZO</div>
           <div class="pila-carte" id="mazzo-pila"></div>
           <div class="pila-count" id="mazzo-count">0</div>
         </div>
-        <div class="pila">
-          <div class="pila-titolo">SCARTO</div>
-          <div class="pila-carte" id="scarto-pila"></div>
-          <div class="pila-count" id="scarto-count">0</div>
-        </div>
       </div>
+      <div class="mano-sezione cpu">
+        <div class="mano-label">CPU (<span id="count-cpu">5</span> carte)</div>
+        <div class="carte" id="carte-cpu"></div>
+      </div>
+    </div>
+    <div class="info-carte">
+      <span>Mazzo: <strong id="info-mazzo">52</strong></span>
+      <span>Scarti: <strong id="info-scarti">0</strong></span>
+      <span>Mano: <strong id="info-mano-num">1</strong></span>
     </div>
     <div id="azioni-container"></div>
   </div>
@@ -499,7 +577,7 @@
 <div class="goal-overlay" id="goal-overlay">
   <div class="goal-text" id="goal-text">⚽ GOAL! ⚽</div>
 </div>
-<div class="modale nascosto" id="modale">
+<div class="modale" id="modale">
   <div class="modale-box" id="modale-box"></div>
 </div>
 
@@ -510,21 +588,13 @@
 const STAMINA_MAX = 45;
 
 const FRAME_ANIMAZIONI = {
-  'Fermo': 6,
-  'Tiro': 5,
-  'Scivolata': 5,
-  'Esultanza1': 7,
-  'Esultanza2': 6,
-  'Esultanza3': 6
+  'Fermo': 6, 'Tiro': 5, 'Scivolata': 5,
+  'Esultanza1': 7, 'Esultanza2': 6, 'Esultanza3': 6
 };
 
 const VELOCITA_ANIMAZIONI = {
-  'Fermo': 180,
-  'Tiro': 120,
-  'Scivolata': 120,
-  'Esultanza1': 180,
-  'Esultanza2': 180,
-  'Esultanza3': 180
+  'Fermo': 180, 'Tiro': 120, 'Scivolata': 120,
+  'Esultanza1': 180, 'Esultanza2': 180, 'Esultanza3': 180
 };
 
 const ZONE_CONFIG = [
@@ -547,7 +617,10 @@ const SQUADRE = {
   italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#F4C9A0', capelli: '#4B351F' },
   germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#D4A55C' },
   spagna:     { nome: 'SPAGNA',     maglia: '#CC0000', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
-  portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' }
+  portogallo: { nome: 'PORTOGALLO', maglia: '#CC0000', pantaloncini: '#006600', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#3A2A1A' },
+  inghilterra:{ nome: 'INGHILTERRA',maglia: '#FFFFFF', pantaloncini: '#000080', calzettoni: '#FFFFFF', pelle: '#F4C9A0', capelli: '#8B5A2B' },
+  olanda:     { nome: 'OLANDA',     maglia: '#FF6600', pantaloncini: '#000000', calzettoni: '#FF6600', pelle: '#F4C9A0', capelli: '#D4A55C' },
+  belgio:     { nome: 'BELGIO',     maglia: '#CC0000', pantaloncini: '#000000', calzettoni: '#CC0000', pelle: '#F4C9A0', capelli: '#4B351F' }
 };
 
 function hexToRgb(hex) {
@@ -560,7 +633,7 @@ function hexToRgb(hex) {
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE - LINE ART + FLOOD FILL
+   CANVAS COLORAZIONE
    ========================================================= */
 const cacheImmagini = {};
 
@@ -582,50 +655,37 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-
         const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
         const targetPantaloncini = hexToRgb(SQUADRE[squadra].pantaloncini);
         const targetCalzettoni = hexToRgb(SQUADRE[squadra].calzettoni);
         const targetCapelli = hexToRgb(SQUADRE[squadra].capelli);
-
-        const W = canvas.width;
-        const H = canvas.height;
-
+        const W = canvas.width, H = canvas.height;
         const bbox = trovaBoundingBox(ctx, W, H);
         if (!bbox) { resolve(percorso); return; }
-
         const altezza = bbox.y2 - bbox.y1;
         const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
-
         const punti = {
           capelli:      { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.10) },
           maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.54) },
           pantaloncini: { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.67) },
           calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.87) }
         };
-
         floodFillBianco(ctx, punti.capelli.x, punti.capelli.y, targetCapelli);
         floodFillBianco(ctx, punti.maglia.x, punti.maglia.y, targetMaglia);
         floodFillBianco(ctx, punti.pantaloncini.x, punti.pantaloncini.y, targetPantaloncini);
         floodFillBianco(ctx, punti.calzettoni.x, punti.calzettoni.y, targetCalzettoni);
-
         const ombraCapelli = { r: Math.round(targetCapelli.r * 0.7), g: Math.round(targetCapelli.g * 0.7), b: Math.round(targetCapelli.b * 0.7) };
         const ombraMaglia = { r: Math.round(targetMaglia.r * 0.7), g: Math.round(targetMaglia.g * 0.7), b: Math.round(targetMaglia.b * 0.7) };
         const ombraPantaloncini = { r: Math.round(targetPantaloncini.r * 0.7), g: Math.round(targetPantaloncini.g * 0.7), b: Math.round(targetPantaloncini.b * 0.7) };
         const ombraCalzettoni = { r: Math.round(targetCalzettoni.r * 0.7), g: Math.round(targetCalzettoni.g * 0.7), b: Math.round(targetCalzettoni.b * 0.7) };
-
         floodFillGrigio(ctx, punti.capelli.x, punti.capelli.y, ombraCapelli);
         floodFillGrigio(ctx, punti.maglia.x, punti.maglia.y, ombraMaglia);
         floodFillGrigio(ctx, punti.pantaloncini.x, punti.pantaloncini.y, ombraPantaloncini);
         floodFillGrigio(ctx, punti.calzettoni.x, punti.calzettoni.y, ombraCalzettoni);
-
         const dataURL = canvas.toDataURL();
         cacheImmagini[chiave] = dataURL;
         resolve(dataURL);
-      } catch (e) {
-        console.error('Errore Canvas:', e);
-        resolve(percorso);
-      }
+      } catch (e) { resolve(percorso); }
     };
     img.onerror = () => resolve(percorso);
     img.src = percorso;
@@ -634,8 +694,7 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
 
 function trovaBoundingBox(ctx, w, h) {
   const data = ctx.getImageData(0, 0, w, h).data;
-  let x1 = w, y1 = h, x2 = 0, y2 = 0;
-  let trovato = false;
+  let x1 = w, y1 = h, x2 = 0, y2 = 0, trovato = false;
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
@@ -652,115 +711,96 @@ function trovaBoundingBox(ctx, w, h) {
 }
 
 function floodFillBianco(ctx, startX, startY, colore) {
-  const w = ctx.canvas.width;
-  const h = ctx.canvas.height;
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
-
   const startIdx = (startY * w + startX) * 4;
-  const sa = data[startIdx + 3];
-  if (sa < 50) return;
-
+  if (data[startIdx + 3] < 50) return;
   const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
   if (sr < 200 || sg < 200 || sb < 200) return;
-
   const stack = [[startX, startY]];
   const visitati = new Uint8Array(w * h);
-
   while (stack.length > 0) {
     const [x, y] = stack.pop();
     if (x < 0 || x >= w || y < 0 || y >= h) continue;
     const idx = y * w + x;
     if (visitati[idx]) continue;
     visitati[idx] = 1;
-
     const i = idx * 4;
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
-
     if (r < 100 && g < 100 && b < 100) continue;
     if (r < 200 || g < 200 || b < 200) continue;
-
-    data[i] = colore.r;
-    data[i + 1] = colore.g;
-    data[i + 2] = colore.b;
-
-    stack.push([x + 1, y]);
-    stack.push([x - 1, y]);
-    stack.push([x, y + 1]);
-    stack.push([x, y - 1]);
+    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
+    stack.push([x + 1, y]); stack.push([x - 1, y]);
+    stack.push([x, y + 1]); stack.push([x, y - 1]);
   }
-
   ctx.putImageData(imageData, 0, 0);
 }
 
 function floodFillGrigio(ctx, startX, startY, colore) {
-  const w = ctx.canvas.width;
-  const h = ctx.canvas.height;
+  const w = ctx.canvas.width, h = ctx.canvas.height;
+  if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
-
   const stack = [[startX, startY]];
   const visitati = new Uint8Array(w * h);
-
   while (stack.length > 0) {
     const [x, y] = stack.pop();
     if (x < 0 || x >= w || y < 0 || y >= h) continue;
     const idx = y * w + x;
     if (visitati[idx]) continue;
     visitati[idx] = 1;
-
     const i = idx * 4;
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
     if (r < 100 && g < 100 && b < 100) continue;
-
     const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
     if (!isGrigio) continue;
-
-    data[i] = colore.r;
-    data[i + 1] = colore.g;
-    data[i + 2] = colore.b;
-
-    stack.push([x + 1, y]);
-    stack.push([x - 1, y]);
-    stack.push([x, y + 1]);
-    stack.push([x, y - 1]);
+    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
+    stack.push([x + 1, y]); stack.push([x - 1, y]);
+    stack.push([x, y + 1]); stack.push([x, y - 1]);
   }
-
   ctx.putImageData(imageData, 0, 0);
 }
 
 /* =========================================================
-   STATO
+   MAZZO CARTE POKER - SEMI CALCISTICI
    ========================================================= */
-let stato = {
-  modalita: '1P',
-  squadraTU: 'italia',
-  squadraCPU: 'francia',
-  tempo: 1, mano: 1, maxMani: 15,
-  punteggio: { tu: 0, cpu: 0 },
-  zonaPalla: 4, possessore: null, giocatorePalla: null,
-  pallaInAnimazione: false,
-  mazzi: { tu: [], cpu: [] },
-  scarti: { tu: [], cpu: [] },
-  mani: { tu: [], cpu: [] },
-  giocatori: { tu: [], cpu: [] },
-  panchina: { tu: [], cpu: [] },
-  turno: 'tu', monetaVinta: null,
-  partitaFinita: false, sostBloccate: false,
-  statistiche: {
-    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 },
-    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0, passaggiRiusciti: 0, passaggiTotali: 0 }
-  },
-  logCompleto: []
+const SEMI = {
+  palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
+  coppa:      { emoji: '🏆', nome: 'Coppa',      colore: 'rossa' },
+  guantone:   { emoji: '🧤', nome: 'Guantone',   colore: 'nera'  },
+  bandierina: { emoji: '🚩', nome: 'Bandierina', colore: 'rossa' }
 };
-let selezione = [];
-let selezioneSost = { campo: null, panchina: null };
-const animazioniInCorso = {};
+const SEMI_KEYS = Object.keys(SEMI);
+const VALORI = [
+  { valore: 14, label: 'A' },
+  { valore: 13, label: 'K' },
+  { valore: 12, label: 'Q' },
+  { valore: 11, label: 'J' },
+  { valore: 10, label: '10' },
+  { valore: 9,  label: '9' },
+  { valore: 8,  label: '8' },
+  { valore: 7,  label: '7' },
+  { valore: 6,  label: '6' },
+  { valore: 5,  label: '5' },
+  { valore: 4,  label: '4' },
+  { valore: 3,  label: '3' },
+  { valore: 2,  label: '2' }
+];
 
-/* MAZZO */
-function creaMazzo() { return mescola([0,1,2,3,4,5,6,7,8,9,'-1','-2']); }
+function creaMazzoPoker() {
+  const mazzo = [];
+  let id = 0;
+  for (const seme of SEMI_KEYS) {
+    for (const v of VALORI) {
+      mazzo.push({ id: 'c' + (id++), seme, valore: v.valore, label: v.label });
+    }
+  }
+  return mescola(mazzo);
+}
 function mescola(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -769,34 +809,66 @@ function mescola(arr) {
   }
   return a;
 }
-function resetMazzo(sq) {
-  stato.mazzi[sq] = creaMazzo();
-  stato.scarti[sq] = [];
-  stato.mani[sq] = [];
+
+/* =========================================================
+   STATO
+   ========================================================= */
+let stato = {
+  modalita: 'menu', // menu | setup1P | setup2P | partita
+  tipoPartita: '1P', // 1P | 2P
+  squadraTU: 'italia',
+  squadraCPU: 'francia',
+  tempo: 1, mano: 1, maxMani: 15,
+  punteggio: { tu: 0, cpu: 0 },
+  zonaPalla: 4, possessore: null, giocatorePalla: null,
+  pallaInAnimazione: false,
+  mazzo: [],
+  scarti: [],
+  mani: { tu: [], cpu: [] },
+  giocatori: { tu: [], cpu: [] },
+  panchina: { tu: [], cpu: [] },
+  turno: 'tu', monetaVinta: null,
+  partitaFinita: false, sostBloccate: false,
+  statistiche: {
+    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 },
+    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 }
+  },
+  logCompleto: []
+};
+let selezioneCarta = null;
+let selezioneSost = { campo: null, panchina: null };
+const animazioniInCorso = {};
+
+/* =========================================================
+   GESTIONE MAZZO CARTE
+   ========================================================= */
+function inizializzaMazzo() {
+  stato.mazzo = creaMazzoPoker();
+  stato.scarti = [];
+  stato.mani.tu = [];
+  stato.mani.cpu = [];
 }
-function distribuisciCarte(sq, n) {
-  stato.mani[sq] = [];
-  for (let i = 0; i < n && stato.mazzi[sq].length > 0; i++) {
-    stato.mani[sq].push(stato.mazzi[sq].pop());
-  }
-}
-function pescaCarte(sq, n) {
-  if (stato.mazzi[sq].length < n && stato.scarti[sq].length > 0) {
-    stato.mazzi[sq] = mescola([...stato.mazzi[sq], ...stato.scarti[sq]]);
-    stato.scarti[sq] = [];
-  }
+function pescaCarteMano(sq, n) {
   for (let i = 0; i < n; i++) {
-    if (stato.mazzi[sq].length === 0) stato.mazzi[sq] = creaMazzo();
-    stato.mani[sq].push(stato.mazzi[sq].pop());
+    if (stato.mazzo.length === 0) {
+      // Rimescola
+      stato.mazzo = mescola([...stato.mazzo, ...stato.scarti]);
+      stato.scarti = [];
+      log(`🔄 Mazzo esaurito, rimescolo!`);
+    }
+    if (stato.mazzo.length === 0) break;
+    stato.mani[sq].push(stato.mazzo.pop());
   }
 }
-function valoreCarta(carta) {
-  if (carta === '-1') return -1;
-  if (carta === '-2') return -2;
-  return carta;
-}
-function sommaCarte(carte) {
-  return carte.reduce((acc, c) => acc + valoreCarta(c), 0);
+function pescaUnaCarta(sq) {
+  if (stato.mazzo.length === 0) {
+    stato.mazzo = mescola([...stato.mazzo, ...stato.scarti]);
+    stato.scarti = [];
+    log(`🔄 Mazzo esaurito, rimescolo!`);
+  }
+  if (stato.mazzo.length > 0) {
+    stato.mani[sq].push(stato.mazzo.pop());
+  }
 }
 
 /* MINUTO */
@@ -819,8 +891,8 @@ function log(msg, classe = '') {
   }
 }
 function apriLog() {
-  let html = `<h2>📋 Cronaca</h2><div class="log-box" id="log-box">`;
-  stato.logCompleto.forEach(l => html += `<p class="${l.classe || ''}">${l.msg}</p>`);
+  let html = `<h2>📋 Cronaca</h2><div class="log-box" style="background:#0a0a15;border-radius:8px;padding:12px;max-height:60vh;overflow-y:auto;font-size:12px;text-align:left;font-family:'Courier New',monospace">`;
+  stato.logCompleto.forEach(l => html += `<p class="${l.classe || ''}" style="margin:2px 0">${l.msg}</p>`);
   html += `</div><button class="primario" onclick="chiudiModale()" style="margin-top:12px">CHIUDI</button>`;
   document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
@@ -838,7 +910,6 @@ function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
   animazioniInCorso[giocatoreId] = true;
   const velocita = VELOCITA_ANIMAZIONI[nomeAnimazione] || 150;
   const totaleFrame = FRAME_ANIMAZIONI[nomeAnimazione];
-
   const tick = () => {
     if (!animazioniInCorso[giocatoreId]) return;
     caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
@@ -899,54 +970,121 @@ function creaPanchina(sq) {
   return p;
 }
 
-/* INIT */
-async function initApp() {
-  renderCampo(); renderPanchina(); renderHeader();
-  document.getElementById('carte-panel').classList.add('nascosto');
+/* =========================================================
+   MENU PRINCIPALE
+   ========================================================= */
+function mostraMenuPrincipale() {
+  stato.modalita = 'menu';
+  document.getElementById('modale').classList.remove('nascosto');
+  document.getElementById('modale-box').innerHTML = `
+    <div class="menu-principale">
+      <div class="menu-titolo">⚽ CALCIO A CARTE ⚽</div>
+      <div class="menu-sottotitolo">Scegli la modalità di gioco</div>
+      <div class="menu-btn" onclick="avviaSetup1P()">
+        <div class="icona">🎮</div>
+        <div class="testo">
+          <div class="titolo">PARTITA SINGOLA</div>
+          <div class="descr">1 giocatore vs CPU</div>
+        </div>
+      </div>
+      <div class="menu-btn" onclick="avviaSetup2P()">
+        <div class="icona">👥</div>
+        <div class="testo">
+          <div class="titolo">PARTITA ONLINE</div>
+          <div class="descr">1 giocatore vs 2 giocatore (locale)</div>
+        </div>
+      </div>
+      <div class="menu-btn evidenza" onclick="location.href='europei2028.html'">
+        <div class="icona">🏆</div>
+        <div class="testo">
+          <div class="titolo">NATIONAL LEAGUE 2028</div>
+          <div class="descr">Qualificazioni · Spareggi · Fase Finale</div>
+        </div>
+      </div>
+    </div>`;
+}
 
+/* SETUP 1P: solo scelta squadra TU, CPU random */
+async function avviaSetup1P() {
+  stato.tipoPartita = '1P';
+  stato.modalita = 'setup1P';
+  document.getElementById('modale-box').innerHTML = `<h2>⏳ Caricamento...</h2>`;
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
     imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
   }
-
   let html = `<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaSquadraTU('${id}')">
-      <div class="nome">${SQUADRE[id].nome}</div>
-      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
-    </div>`;
-  });
-  html += `</div><h2 style="margin-top:20px">🖥️ Squadra CPU</h2><div class="squadre-griglia">`;
-  Object.keys(SQUADRE).forEach(id => {
-    html += `<div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaSquadraCPU('${id}')">
+    html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaTU1P('${id}')">
       <div class="nome">${SQUADRE[id].nome}</div>
       <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
     </div>`;
   });
   html += `</div>`;
-
-  /* ===== PULSANTE EUROPEI 2028 ===== */
-  html += `<div class="separatore-menu">Modalità Torneo</div>
-    <button class="btn-europei" onclick="location.href='europei2028.html'">🏆 Europei 2028</button>
-    <div class="separatore-menu">Amichevole</div>`;
-
   html += `<div style="margin-top:16px">
-    <button class="primario" onclick="avviaPartita('1P')">INIZIA PARTITA</button>
+    <button class="primario" onclick="avviaPartitaDaSetup()">INIZIA PARTITA</button>
+    <button onclick="mostraMenuPrincipale()">← INDIETRO</button>
   </div>`;
   document.getElementById('modale-box').innerHTML = html;
-  document.getElementById('modale').classList.remove('nascosto');
 }
-function selezionaSquadraTU(id) { stato.squadraTU = id; initApp(); }
-function selezionaSquadraCPU(id) { stato.squadraCPU = id; initApp(); }
 
-function avviaPartita(modalita) {
-  stato.modalita = modalita;
+function selezionaTU1P(id) {
+  stato.squadraTU = id;
+  avviaSetup1P();
+}
+
+/* SETUP 2P: entrambi scelgono */
+async function avviaSetup2P() {
+  stato.tipoPartita = '2P';
+  stato.modalita = 'setup2P';
+  document.getElementById('modale-box').innerHTML = `<h2>⏳ Caricamento...</h2>`;
+  const imgSquadre = {};
+  for (const id of Object.keys(SQUADRE)) {
+    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
+  }
+  let html = `<h2>👤 Giocatore 1 - Scegli squadra</h2><div class="squadre-griglia">`;
+  Object.keys(SQUADRE).forEach(id => {
+    html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaTU2P('${id}')">
+      <div class="nome">${SQUADRE[id].nome}</div>
+      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<h2 style="margin-top:20px">👤 Giocatore 2 - Scegli squadra</h2><div class="squadre-griglia">`;
+  Object.keys(SQUADRE).forEach(id => {
+    html += `<div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaCPU2P('${id}')">
+      <div class="nome">${SQUADRE[id].nome}</div>
+      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
+    </div>`;
+  });
+  html += `</div>`;
+  html += `<div style="margin-top:16px">
+    <button class="primario" onclick="avviaPartitaDaSetup()">INIZIA PARTITA</button>
+    <button onclick="mostraMenuPrincipale()">← INDIETRO</button>
+  </div>`;
+  document.getElementById('modale-box').innerHTML = html;
+}
+
+function selezionaTU2P(id) { stato.squadraTU = id; avviaSetup2P(); }
+function selezionaCPU2P(id) { stato.squadraCPU = id; avviaSetup2P(); }
+
+/* =========================================================
+   AVVIO PARTITA
+   ========================================================= */
+function avviaPartitaDaSetup() {
+  if (stato.tipoPartita === '1P') {
+    // CPU sceglie squadra random diversa dalla tua
+    const disponibili = Object.keys(SQUADRE).filter(id => id !== stato.squadraTU);
+    stato.squadraCPU = disponibili[Math.floor(Math.random() * disponibili.length)];
+  }
+  stato.modalita = 'partita';
   stato.giocatori.tu = creaGiocatori('tu');
   stato.giocatori.cpu = creaGiocatori('cpu');
   stato.panchina.tu = creaPanchina('tu');
   stato.panchina.cpu = creaPanchina('cpu');
-  resetMazzo('tu'); resetMazzo('cpu');
-  distribuisciCarte('tu', 6); distribuisciCarte('cpu', 6);
+  inizializzaMazzo();
+  pescaCarteMano('tu', 5);
+  pescaCarteMano('cpu', 5);
   stato.punteggio = { tu: 0, cpu: 0 };
   stato.tempo = 1; stato.mano = 1;
   stato.logCompleto = [];
@@ -956,12 +1094,13 @@ function avviaPartita(modalita) {
   chiudiModale();
   document.getElementById('modale-box').innerHTML = `
     <h2>🪙 Lancio della moneta</h2>
+    <p style="font-size:12px;color:#aaa;margin-bottom:12px">Scegli testa o croce per decidere chi inizia</p>
     <div>
       <button class="primario" onclick="lanciaMoneta('testa')">TESTA</button>
       <button class="primario" onclick="lanciaMoneta('croce')">CROCE</button>
     </div>`;
   document.getElementById('modale').classList.remove('nascosto');
-  log(`🎮 ${SQUADRE[stato.squadraTU].nome} vs ${SQUADRE[stato.squadraCPU].nome}`, 'highlight');
+  log(`🎮 ${SQUADRE[stato.squadraTU].nome} vs ${SQUADRE[stato.squadraCPU].nome}`);
 }
 
 function renderHeader() {
@@ -1103,6 +1242,7 @@ async function renderPanchina() {
   });
 }
 
+/* PALLA */
 function staccaPalla(daGiocatoreId) {
   stato.pallaInAnimazione = true;
   const pedina = document.querySelector(`[data-giocatore-id="${daGiocatoreId}"]`);
@@ -1158,6 +1298,9 @@ function flashVincitore(squadra) {
   setTimeout(() => flash.classList.remove('attivo'), 600);
 }
 
+/* =========================================================
+   MONETA
+   ========================================================= */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
@@ -1172,22 +1315,24 @@ function lanciaMoneta(scelta) {
   setTimeout(() => avviaContrasto(), 700);
 }
 
-/* CONTRASTO */
+/* =========================================================
+   CONTRASTO A CARTE
+   ========================================================= */
 function avviaContrasto() {
   document.getElementById('app').className = 'app fase-combattimento';
   document.getElementById('carte-panel').classList.remove('nascosto');
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
   renderHeader();
+
   const zona = stato.zonaPalla;
   const attaccante = stato.possessore;
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
-  const bersaglio = Math.floor(Math.random() * 9) + 1;
+
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
-  const nAtt = attaccantiZona.length;
-  const nDif = difensoriZona.length;
-  const giocatoreAtt = stato.giocatorePalla 
+
+  const giocatoreAtt = stato.giocatorePalla
     ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla)
     : attaccantiZona[0];
   let giocatoreDif = null;
@@ -1196,205 +1341,238 @@ function avviaContrasto() {
     const candidati = difensoriZona.filter(g => g.stamina === maxStamina);
     giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
   }
-  resetMazzo(attaccante); resetMazzo(difensore);
-  let carteAtt = 6;
-  if (giocatoreAtt && giocatoreAtt.stamina === 0) carteAtt -= 1;
-  if (nAtt < nDif) carteAtt -= 1;
-  let carteDif = 6;
-  if (giocatoreDif && giocatoreDif.stamina === 0) carteDif -= 1;
-  if (nDif < nAtt) carteDif -= 1;
-  distribuisciCarte(attaccante, carteAtt);
-  distribuisciCarte(difensore, carteDif);
+
+  // Seme guida scelto dal "gioco"
+  const semeGuida = SEMI_KEYS[Math.floor(Math.random() * SEMI_KEYS.length)];
+
+  // Assicurati che entrambi abbiano almeno 1 carta
+  if (stato.mani.tu.length === 0) pescaCarteMano('tu', 5);
+  if (stato.mani.cpu.length === 0) pescaCarteMano('cpu', 5);
+
   stato.contrasto = {
-    bersaglio, zona, attaccante, difensore, mano: 1,
-    risultati: { tu: null, cpu: null },
+    zona, attaccante, difensore,
+    semeGuida,
     giocatoreAtt: giocatoreAtt ? giocatoreAtt.id : null,
     giocatoreDif: giocatoreDif ? giocatoreDif.id : null,
-    carteAtt, carteDif
+    cartaTu: null,
+    cartaCpu: null,
+    risolto: false
   };
   stato.statistiche[attaccante].contese++;
-  log(`🎯 Contrasto Z${zona} — Bersaglio: ${bersaglio}`, 'highlight');
-  stato.turno = 'tu'; selezione = [];
+  log(`🎯 Contrasto Z${zona} — Seme guida: ${SEMI[semeGuida].emoji} ${SEMI[semeGuida].nome}`, 'highlight');
+  selezioneCarta = null;
   renderPannelloContrasto();
 }
+
 function renderPannelloContrasto() {
   const c = stato.contrasto;
-  document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona} — Mano ${c.mano}`;
-  document.getElementById('bersaglio-mano').textContent = '🎯 ' + c.bersaglio;
-  document.getElementById('turno-label').textContent = `Le tue carte (${stato.mani.tu.length})`;
-  const cont = document.getElementById('carte-container');
-  cont.innerHTML = '';
+  document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona}`;
+  document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
+
+  const isTurnoTu = (stato.tipoPartita === '2P') ? true : true;
+  document.getElementById('turno-label').textContent =
+    `Seme: ${SEMI[c.semeGuida].nome} ${SEMI[c.semeGuida].emoji} — Scegli una carta`;
+
+  // Mano TU
+  const contTu = document.getElementById('carte-tu');
+  contTu.innerHTML = '';
   stato.mani.tu.forEach((carta, idx) => {
-    const el = document.createElement('div');
-    el.className = 'carta';
-    if (carta === '-1' || carta === '-2') el.classList.add('negativa');
-    el.textContent = carta;
-    el.onclick = () => selezionaCarta(idx);
-    cont.appendChild(el);
+    const el = creaCartaEl(carta, true);
+    const haSeme = stato.mani.tu.some(x => x.seme === c.semeGuida);
+    if (haSeme && carta.seme !== c.semeGuida) {
+      el.classList.add('bloccata');
+      el.title = 'Devi giocare una carta del seme guida!';
+    } else {
+      el.onclick = () => selezionaCartaTu(idx);
+    }
+    if (selezioneCarta === idx) el.classList.add('selezionata');
+    if (c.cartaTu && c.cartaTu.id === carta.id) el.classList.add('vincitrice');
+    contTu.appendChild(el);
   });
-  renderPile('tu');
-  document.getElementById('azioni-container').innerHTML =
-    `<button class="primario" id="btn-gioca" onclick="giocaCarte()" disabled>GIOCA 2 CARTE</button>`;
+  document.getElementById('count-tu').textContent = stato.mani.tu.length;
+
+  // Mano CPU (coperte)
+  const contCpu = document.getElementById('carte-cpu');
+  contCpu.innerHTML = '';
+  stato.mani.cpu.forEach(carta => {
+    const el = document.createElement('div');
+    el.className = 'carta coperta';
+    if (c.cartaCpu && c.cartaCpu.id === carta.id && c.risolto) {
+      el.classList.remove('coperta');
+      el.classList.add(SEMI[carta.seme].colore === 'rossa' ? 'rossa' : 'nera');
+      el.innerHTML = `<div class="valore-alto">${carta.label}</div>
+        <div class="seme-centro">${SEMI[carta.seme].emoji}</div>
+        <div class="valore-basso">${carta.label}</div>`;
+      if (c.cartaCpu.id === carta.id && c.vincitore === 'cpu') el.classList.add('vincitrice');
+    }
+    contCpu.appendChild(el);
+  });
+  document.getElementById('count-cpu').textContent = stato.mani.cpu.length;
+
+  // Mazzo
+  renderPilaMazzo();
+  document.getElementById('info-mazzo').textContent = stato.mazzo.length;
+  document.getElementById('info-scarti').textContent = stato.scarti.length;
+  document.getElementById('info-mano-num').textContent = stato.mano;
+
+  // Bottone
+  const haSeme = stato.mani.tu.some(x => x.seme === c.semeGuida);
+  let btnHtml = `<button class="primario" id="btn-gioca" onclick="confermaCarta()" ${selezioneCarta === null ? 'disabled' : ''}>GIOCA CARTA</button>`;
+  if (!c.risolto) {
+    document.getElementById('azioni-container').innerHTML = btnHtml;
+  } else {
+    document.getElementById('azioni-container').innerHTML = '';
+  }
 }
-function renderPile(sq) {
+
+function creaCartaEl(carta, interattiva) {
+  const el = document.createElement('div');
+  el.className = 'carta ' + (SEMI[carta.seme].colore === 'rossa' ? 'rossa' : 'nera');
+  el.innerHTML = `<div class="valore-alto">${carta.label}</div>
+    <div class="seme-centro">${SEMI[carta.seme].emoji}</div>
+    <div class="valore-basso">${carta.label}</div>`;
+  return el;
+}
+
+function renderPilaMazzo() {
   const mazzoPila = document.getElementById('mazzo-pila');
-  const scartoPila = document.getElementById('scarto-pila');
-  mazzoPila.innerHTML = ''; scartoPila.innerHTML = '';
-  const numMazzo = Math.min(stato.mazzi[sq].length, 3);
-  for (let i = 0; i < numMazzo; i++) {
+  mazzoPila.innerHTML = '';
+  const num = Math.min(stato.mazzo.length, 4);
+  for (let i = 0; i < num; i++) {
     const el = document.createElement('div');
     el.className = 'pila-carta dietro';
     el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px';
     mazzoPila.appendChild(el);
   }
-  document.getElementById('mazzo-count').textContent = stato.mazzi[sq].length;
-  const scarto = stato.scarti[sq];
-  const numScarto = Math.min(scarto.length, 3);
-  for (let i = 0; i < numScarto; i++) {
-    const idx = scarto.length - 1 - i;
-    const el = document.createElement('div');
-    el.className = 'pila-carta scarto';
-    if (scarto[idx] === '-1' || scarto[idx] === '-2') el.classList.add('negativa');
-    el.textContent = scarto[idx];
-    el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px'; el.style.zIndex = 10 - i;
-    scartoPila.appendChild(el);
-  }
-  document.getElementById('scarto-count').textContent = stato.scarti[sq].length;
+  document.getElementById('mazzo-count').textContent = stato.mazzo.length + ' carte';
 }
-function selezionaCarta(idx) {
+
+function selezionaCartaTu(idx) {
+  if (stato.contrasto.risolto) return;
+  const carta = stato.mani.tu[idx];
+  const c = stato.contrasto;
+  const haSeme = stato.mani.tu.some(x => x.seme === c.semeGuida);
+  if (haSeme && carta.seme !== c.semeGuida) {
+    return; // bloccata
+  }
   if (!stato.sostBloccate) {
     stato.sostBloccate = true;
     document.getElementById('btn-sost').disabled = true;
   }
-  const els = document.querySelectorAll('#carte-container .carta');
-  if (selezione.includes(idx)) {
-    selezione = selezione.filter(i => i !== idx);
-    els[idx].classList.remove('selezionata');
-  } else {
-    if (selezione.length >= 2) return;
-    selezione.push(idx);
-    els[idx].classList.add('selezionata');
-  }
-  document.getElementById('btn-gioca').disabled = selezione.length !== 2;
-}
-function applicaPenalitaStamina0(somma, bersaglio, giocatore) {
-  if (!giocatore) return somma;
-  if (giocatore.stamina === 0 && somma === bersaglio) return bersaglio - 1;
-  return somma;
-}
-function giocaCarte() {
-  const c = stato.contrasto;
-  const carteGiocate = selezione.map(i => stato.mani.tu[i]);
-  let somma = sommaCarte(carteGiocate);
-  const giocatore = c.attaccante === 'tu' 
-    ? stato.giocatori.tu.find(g => g.id === c.giocatoreAtt)
-    : stato.giocatori.tu.find(g => g.id === c.giocatoreDif);
-  somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
-  log(`Tu giochi: [${carteGiocate.join(', ')}] = ${somma}`);
-  c.risultati.tu = { carte: carteGiocate, somma };
-  const idxs = [...selezione].sort((a, b) => b - a);
-  idxs.forEach(i => {
-    stato.scarti.tu.push(stato.mani.tu[i]);
-    stato.mani.tu.splice(i, 1);
-  });
-  selezione = [];
-  setTimeout(() => giocaCPU(), 500);
-}
-function giocaCPU() {
-  const c = stato.contrasto;
-  const carte = stato.mani.cpu;
-  let mig = null, mD = Infinity;
-  for (let i = 0; i < carte.length; i++) {
-    for (let j = i + 1; j < carte.length; j++) {
-      let somma = valoreCarta(carte[i]) + valoreCarta(carte[j]);
-      const giocatore = c.difensore === 'cpu' 
-        ? stato.giocatori.cpu.find(g => g.id === c.giocatoreDif)
-        : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
-      somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
-      const d = Math.abs(somma - c.bersaglio);
-      if (d < mD) { mD = d; mig = [i, j]; }
-    }
-  }
-  const cg = [carte[mig[0]], carte[mig[1]]];
-  let somma = sommaCarte(cg);
-  const giocatore = c.difensore === 'cpu' 
-    ? stato.giocatori.cpu.find(g => g.id === c.giocatoreDif)
-    : stato.giocatori.cpu.find(g => g.id === c.giocatoreAtt);
-  somma = applicaPenalitaStamina0(somma, c.bersaglio, giocatore);
-  log(`CPU gioca: [${cg.join(', ')}] = ${somma}`);
-  c.risultati.cpu = { carte: cg, somma };
-  const idxs = [...mig].sort((a, b) => b - a);
-  idxs.forEach(i => {
-    stato.scarti.cpu.push(stato.mani.cpu[i]);
-    stato.mani.cpu.splice(i, 1);
-  });
-  valutaMano();
-}
-function valutaMano() {
-  const c = stato.contrasto;
-  const att = c.attaccante, dif = c.difensore;
-  const rAtt = c.risultati[att], rDif = c.risultati[dif];
-  const dAtt = Math.abs(rAtt.somma - c.bersaglio);
-  const dDif = Math.abs(rDif.somma - c.bersaglio);
-  if (rAtt.somma === c.bersaglio && rDif.somma !== c.bersaglio) return vinciContrasto(att, 'esatto');
-  if (rDif.somma === c.bersaglio && rAtt.somma !== c.bersaglio) return vinciContrasto(dif, 'esatto');
-  if (rAtt.somma === c.bersaglio && rDif.somma === c.bersaglio) return spareggio();
-  if (dAtt < dDif) return vinciContrasto(att, 'più vicino');
-  if (dDif < dAtt) return vinciContrasto(dif, 'più vicino');
-  spareggio();
-}
-function spareggio() {
-  const c = stato.contrasto;
-  c.mano++;
-  log(`🔁 Pareggio! Mano ${c.mano} — si pescano 2 carte`);
-  c.risultati = { tu: null, cpu: null };
-  selezione = []; stato.turno = 'tu';
-  const att = c.attaccante, dif = c.difensore;
-  for (const sq of [att, dif]) pescaCarte(sq, 2);
-  const gAtt = stato.giocatori[att].find(g => g.id === c.giocatoreAtt);
-  const gDif = stato.giocatori[dif].find(g => g.id === c.giocatoreDif);
-  if (gAtt && !gAtt.portiere) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
-  if (gDif && !gDif.portiere) gDif.stamina = Math.max(0, gDif.stamina - 1);
+  selezioneCarta = idx;
   renderPannelloContrasto();
 }
-function vinciContrasto(vincente, motivo) {
+
+function confermaCarta() {
+  if (selezioneCarta === null) return;
   const c = stato.contrasto;
-  log(`✅ ${vincente === 'tu' ? 'TU' : 'CPU'} vince (${motivo})`, 'highlight');
+  const cartaTu = stato.mani.tu[selezioneCarta];
+  c.cartaTu = cartaTu;
+
+  // CPU sceglie carta
+  const cartaCpu = scegliCartaCPU();
+  c.cartaCpu = cartaCpu;
+
+  // Determina vincitore
+  let vincitore;
+  if (cartaTu.seme === c.semeGuida && cartaCpu.seme === c.semeGuida) {
+    // Entrambi seme guida
+    vincitore = cartaTu.valore > cartaCpu.valore ? 'tu' : 'cpu';
+  } else if (cartaTu.seme === c.semeGuida) {
+    vincitore = 'tu';
+  } else if (cartaCpu.seme === c.semeGuida) {
+    vincitore = 'cpu';
+  } else {
+    // Nessuno ha il seme guida → vince la carta più alta in assoluto
+    vincitore = cartaTu.valore > cartaCpu.valore ? 'tu' : 'cpu';
+  }
+
+  c.vincitore = vincitore;
+  c.risolto = true;
+
+  log(`Tu giochi: ${cartaTu.label}${SEMI[cartaTu.seme].emoji}`);
+  log(`CPU gioca: ${cartaCpu.label}${SEMI[cartaCpu.seme].emoji}`);
+  log(`✅ ${vincitore === 'tu' ? 'TU' : 'CPU'} vince il contrasto!`, 'highlight');
+
+  // Rimuovi le carte giocate dalla mano e mettile negli scarti
+  const idxTu = stato.mani.tu.indexOf(cartaTu);
+  if (idxTu > -1) { stato.scarti.push(stato.mani.tu[idxTu]); stato.mani.tu.splice(idxTu, 1); }
+  const idxCpu = stato.mani.cpu.indexOf(cartaCpu);
+  if (idxCpu > -1) { stato.scarti.push(stato.mani.cpu[idxCpu]); stato.mani.cpu.splice(idxCpu, 1); }
+
+  // Pesca 1 carta ciascuno (a fine mano)
+  pescaUnaCarta('tu');
+  pescaUnaCarta('cpu');
+
+  selezioneCarta = null;
+
+  // Mostra risultato
+  setTimeout(() => {
+    renderPannelloContrasto();
+    setTimeout(() => risolviContrasto(vincitore), 1800);
+  }, 300);
+}
+
+function scegliCartaCPU() {
+  const c = stato.contrasto;
+  const mano = stato.mani.cpu;
+  const haSeme = mano.some(x => x.seme === c.semeGuida);
+  let candidate;
+  if (haSeme) {
+    candidate = mano.filter(x => x.seme === c.semeGuida);
+  } else {
+    candidate = mano;
+  }
+  // Gioca la più alta
+  candidate.sort((a, b) => b.valore - a.valore);
+  return candidate[0];
+}
+
+/* =========================================================
+   RISOLUZIONE CONTRASTO
+   ========================================================= */
+function risolviContrasto(vincente) {
+  const c = stato.contrasto;
   flashVincitore(vincente);
   stato.statistiche[vincente].vinte++;
+
   const gAtt = stato.giocatori[c.attaccante].find(g => g.id === c.giocatoreAtt);
   const gDif = stato.giocatori[c.difensore].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere && !gDif.espulso) gDif.stamina = Math.max(0, gDif.stamina - 1);
+
   const zona = c.zona;
   const vecchioGiocatore = stato.giocatorePalla;
-  mostraRisultatoOverlay(vincente, motivo);
-  setTimeout(() => {
-    chiudiOverlay();
-    document.getElementById('app').className = 'app fase-animazione';
-    document.getElementById('carte-panel').classList.add('nascosto');
-    if (vincente === c.attaccante) {
-      eseguiDadoFallo(vincente, c, vecchioGiocatore);
-    } else {
-      stato.possessore = vincente;
-      stato.zonaPalla = zona;
-      const nuovoGiocatoreId = c.giocatoreDif;
-      if (nuovoGiocatoreId) {
-        const g = stato.giocatori[vincente].find(x => x.id === nuovoGiocatoreId);
-        if (g && !g.espulso) stato.giocatorePalla = g.id;
-      }
-      renderHeader();
-      setTimeout(() => {
-        if (vecchioGiocatore && stato.giocatorePalla) {
-          animaPalla(vecchioGiocatore, stato.giocatorePalla, () => setTimeout(() => avviaContrasto(), 1000));
-        } else {
-          renderCampo();
-          setTimeout(() => avviaContrasto(), 1000);
-        }
-      }, 200);
+
+  document.getElementById('app').className = 'app fase-animazione';
+  document.getElementById('carte-panel').classList.add('nascosto');
+
+  if (vincente === c.attaccante) {
+    // Attaccante vince → dado fallo
+    eseguiDadoFallo(vincente, c, vecchioGiocatore);
+  } else {
+    // Difensore vince → recupera palla
+    stato.possessore = vincente;
+    stato.zonaPalla = zona;
+    if (c.giocatoreDif) {
+      const g = stato.giocatori[vincente].find(x => x.id === c.giocatoreDif);
+      if (g && !g.espulso) stato.giocatorePalla = g.id;
     }
-  }, 1500);
+    renderHeader();
+    setTimeout(() => {
+      if (vecchioGiocatore && stato.giocatorePalla) {
+        animaPalla(vecchioGiocatore, stato.giocatorePalla, () => setTimeout(() => avviaContrasto(), 1000));
+      } else {
+        renderCampo();
+        setTimeout(() => avviaContrasto(), 1000);
+      }
+    }, 200);
+  }
 }
+
+/* =========================================================
+   FALLI / DADO
+   ========================================================= */
 function eseguiDadoFallo(vincente, c, vecchioGiocatore) {
   apriOverlay(`<h2>🎲 Dado fallo</h2><p style="font-size:12px;color:#aaa">Se 3 o 8 → fallo</p><div id="area-fallo" style="margin-top:12px"></div>`);
   setTimeout(() => {
@@ -1421,17 +1599,8 @@ function eseguiFallo(vincente, c, vecchioGiocatore) {
   falloso.falli++;
   stato.statistiche[difensore].falli++;
   log(`🟨 Fallo di ${falloso.nome}`);
-  if (falloso.falli === 3) {
-    falloso.ammonito = true;
-    stato.statistiche[difensore].ammonizioni++;
-    log(`🟨 AMMONIZIONE!`, 'parata');
-  }
-  if (falloso.falli >= 6) {
-    falloso.espulso = true;
-    fermaAnimazione(falloso.id);
-    stato.statistiche[difensore].espulsioni++;
-    log(`🟥 ESPULSIONE!`, 'parata');
-  }
+  if (falloso.falli === 3) { falloso.ammonito = true; stato.statistiche[difensore].ammonizioni++; log(`🟨 AMMONIZIONE!`, 'parata'); }
+  if (falloso.falli >= 6) { falloso.espulso = true; fermaAnimazione(falloso.id); stato.statistiche[difensore].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
   const isRigore = (zona === 1 || zona === 6);
   setTimeout(() => {
     chiudiOverlay();
@@ -1483,17 +1652,17 @@ function proseguiAzione(vincente, c, vecchioGiocatore) {
     }
   }, 200);
 }
+
+/* OVERLAY */
 function apriOverlay(html) {
   document.getElementById('overlay-box').innerHTML = html;
   document.getElementById('overlay').classList.remove('nascosto');
 }
 function chiudiOverlay() { document.getElementById('overlay').classList.add('nascosto'); }
-function mostraRisultatoOverlay(vincente, motivo) {
-  const colore = vincente === 'tu' ? '#4dabf7' : '#ff6b6b';
-  apriOverlay(`
-    <h2 style="color:${colore};font-size:26px">🏆 ${vincente === 'tu' ? 'TU' : 'CPU'} VINCE!</h2>
-    <p style="font-size:14px;color:#aaa">${motivo}</p>`);
-}
+
+/* =========================================================
+   TIRO IN PORTA (invariato)
+   ========================================================= */
 function mostraGoal(vincente) {
   const ov = document.getElementById('goal-overlay');
   ov.classList.remove('tu', 'cpu');
@@ -1517,8 +1686,7 @@ function tiroInPorta(attaccante) {
       setTimeout(() => {
         if (dado === 5 || dado === 8) {
           log(`🧤 PARATA DIRETTA!`, 'parata');
-          eseguiEsitoTiro('parata', attaccante, difensore);
-          return;
+          eseguiEsitoTiro('parata', attaccante, difensore); return;
         }
         fase2Tiro(attaccante, difensore, dado);
       }, 1200);
@@ -1627,8 +1795,7 @@ function eseguiRigore(squadra) {
     setTimeout(() => {
       if (dado === 5 || dado === 8) {
         stato.statistiche[difensore].parate++;
-        eseguiEsitoRigore('parata', squadra, difensore);
-        return;
+        eseguiEsitoRigore('parata', squadra, difensore); return;
       }
       fase2Rigore(squadra, difensore, dado);
     }, 1200);
@@ -1678,6 +1845,10 @@ function eseguiEsitoRigore(esito, squadra, difensore) {
     else if (esito === 'angolo') gestisciAngolo(squadra, difensore);
   }, 2200);
 }
+
+/* =========================================================
+   AVANZAMENTO
+   ========================================================= */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
@@ -1687,6 +1858,9 @@ function avanzaMano() {
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
+      // Ridistribuisci carte
+      pescaCarteMano('tu', 2);
+      pescaCarteMano('cpu', 2);
       const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
       stato.possessore = perdente;
       stato.zonaPalla = 3;
@@ -1700,9 +1874,10 @@ function avanzaMano() {
   renderHeader(); renderCampo();
   setTimeout(() => avviaContrasto(), 800);
 }
+
 function finePartita() {
   stato.partitaFinita = true;
-  let msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!' 
+  let msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!'
            : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
   document.getElementById('modale-box').innerHTML = `
     <h2>FINE PARTITA</h2>
@@ -1710,9 +1885,14 @@ function finePartita() {
       <span style="color:#4dabf7">${stato.punteggio.tu}</span> - <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
     </p>
     <p style="font-size:18px;color:#ffd700;margin:12px 0">${msg}</p>
-    <button class="primario" onclick="location.reload()">NUOVA PARTITA</button>`;
+    <button class="primario" onclick="location.reload()">NUOVA PARTITA</button>
+    <button onclick="mostraMenuPrincipale()">MENU PRINCIPALE</button>`;
   document.getElementById('modale').classList.remove('nascosto');
 }
+
+/* =========================================================
+   SOSTITUZIONI
+   ========================================================= */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
@@ -1723,18 +1903,18 @@ function apriSostituzioni() {
 function renderModaleSostituzioni() {
   const sq = 'tu';
   let html = `<h2>🔄 Sostituzioni</h2>`;
-  html += `<div class="sost-sezione"><h3>In campo</h3><div class="sost-lista">`;
+  html += `<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700;margin-bottom:8px">In campo</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">`;
   stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
-    const sel = selezioneSost.campo === g.id ? ' selezionato' : '';
-    html += `<div class="sost-card${sel}" onclick="selezionaSostCampo('${g.id}')">
+    const sel = selezioneSost.campo === g.id ? ' style="background:#ffd700;color:#16213e"' : '';
+    html += `<div${sel} style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;min-width:70px" onclick="selezionaSostCampo('${g.id}')">
       <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
   });
   html += `</div></div>`;
-  html += `<div class="sost-sezione"><h3>Panchina</h3><div class="sost-lista">`;
+  html += `<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700;margin-bottom:8px">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">`;
   stato.panchina[sq].forEach(g => {
-    const sel = selezioneSost.panchina === g.id ? ' selezionato' : '';
-    const disab = g.entrato ? ' disabilitato' : '';
-    html += `<div class="sost-card${sel}${disab}" onclick="selezionaSostPanchina('${g.id}')">
+    const sel = selezioneSost.panchina === g.id ? ' style="background:#ffd700;color:#16213e"' : '';
+    const disab = g.entrato ? ' opacity:0.35;cursor:not-allowed' : '';
+    html += `<div${sel} style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;min-width:70px${disab}" onclick="selezionaSostPanchina('${g.id}')">
       <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
   });
   html += `</div></div><div style="margin-top:14px">`;
@@ -1769,7 +1949,11 @@ function confermaSostituzione() {
   selezioneSost = { campo: null, panchina: null };
   renderCampo(); renderPanchina(); renderModaleSostituzioni();
 }
-initApp();
+
+/* =========================================================
+   AVVIO
+   ========================================================= */
+mostraMenuPrincipale();
 </script>
 </body>
 </html>
