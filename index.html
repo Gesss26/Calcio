@@ -49,79 +49,69 @@
   }
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ===== CAMPO CON IMMAGINE ===== */
   .campo-wrapper {
     flex: 0 0 40vh; position: relative; background: #1a5a28;
     overflow: hidden; transition: flex 0.4s ease;
   }
   .app.fase-animazione .campo-wrapper { flex: 1; }
   .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
-  .campo {
+  .scena-img {
     position: absolute; inset: 0;
-    background:
-      repeating-linear-gradient(90deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 60px, rgba(255,255,255,0.03) 60px, rgba(255,255,255,0.03) 120px),
-      linear-gradient(180deg, #2d8a3e 0%, #3aa04a 50%, #2d8a3e 100%);
-    transform: rotateX(6deg); transform-origin: center bottom;
-    border: 3px solid rgba(255,255,255,0.85);
-    margin: 10px 16px; border-radius: 6px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.7), inset 0 0 80px rgba(0,0,0,0.3);
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: opacity 0.6s ease;
+    z-index: 0;
   }
-  .righe-campo { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
-  .linea-centrocampo {
-    position: absolute; left: 50%; top: 6%; bottom: 6%;
-    width: 2px; background: rgba(255,255,255,0.7); transform: translateX(-50%);
+  .scena-img.nascosta { opacity: 0; }
+  .scena-fade {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, transparent 40%, transparent 60%, rgba(0,0,0,0.35) 100%);
   }
-  .cerchio-centrocampo {
-    position: absolute; left: 50%; top: 50%; width: 20%; aspect-ratio: 1;
-    border: 2px solid rgba(255,255,255,0.7); border-radius: 50%;
-    transform: translate(-50%, -50%);
+
+  /* Griglia zone sovrapposta */
+  .zone-overlay {
+    position: absolute; inset: 0; z-index: 2;
+    display: flex; pointer-events: none;
   }
-  .punto-centrocampo {
-    position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
-    background: rgba(255,255,255,0.9); border-radius: 50%;
-    transform: translate(-50%, -50%);
+  .zona-overlay {
+    flex: 1; border-right: 1px dashed rgba(255,215,0,0.25);
+    position: relative;
   }
-  .area-penale {
-    position: absolute; top: 50%; width: 14%; height: 60%;
-    border: 2px solid rgba(255,255,255,0.7); transform: translateY(-50%);
+  .zona-overlay:last-child { border-right: none; }
+  .zona-overlay .zona-num {
+    position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: rgba(255,215,0,0.7); font-weight: bold;
+    text-shadow: 0 1px 2px #000;
   }
-  .area-penale.sinistra { left: 0; border-left: none; border-radius: 0 6px 6px 0; }
-  .area-penale.destra { right: 0; border-right: none; border-radius: 6px 0 0 6px; }
-  .area-piccola {
-    position: absolute; top: 50%; width: 6%; height: 32%;
-    border: 2px solid rgba(255,255,255,0.6); transform: translateY(-50%);
+
+  /* ===== PEDINE SOPRA L'IMMAGINE ===== */
+  .zone {
+    display: flex; width: 100%; height: 100%;
+    position: absolute; inset: 0; z-index: 5;
   }
-  .area-piccola.sinistra { left: 0; border-left: none; border-radius: 0 4px 4px 0; }
-  .area-piccola.destra { right: 0; border-right: none; border-radius: 4px 0 0 4px; }
-  .porta {
-    position: absolute; top: 50%; width: 2%; height: 14%;
-    background: rgba(255,255,255,0.15); border: 3px solid #fff;
-    transform: translateY(-50%); box-shadow: 0 0 20px rgba(255,255,255,0.6);
-  }
-  .porta.sinistra { left: -4px; border-radius: 0 4px 4px 0; }
-  .porta.destra { right: -4px; border-radius: 4px 0 0 4px; }
-  .zone { display: flex; width: 100%; height: 100%; position: relative; z-index: 2; }
   .zona {
-    flex: 1; border-right: 1px dashed rgba(255,255,255,0.2);
+    flex: 1; border-right: 1px dashed rgba(255,255,255,0.15);
     position: relative; display: flex; flex-direction: row;
-    justify-content: center; align-items: center; gap: 4px; padding: 4px 2px;
+    justify-content: center; align-items: flex-end; gap: 4px; padding: 4px 2px 14px 2px;
   }
   .zona:last-child { border-right: none; }
-  .zona-portiere { flex: 0.5; }
   .zona-label {
     position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: rgba(255,215,0,0.8); font-weight: bold;
+    font-size: 9px; color: rgba(255,215,0,0.85); font-weight: bold;
     text-shadow: 0 1px 2px #000; pointer-events: none;
   }
   .lato-squadra {
     display: flex; flex-direction: column; gap: 3px; align-items: center;
-    justify-content: center; min-width: 24px; position: relative;
+    justify-content: flex-end; min-width: 24px; position: relative;
   }
-  .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.2); padding-right: 4px; }
+  .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.15); padding-right: 4px; }
   .lato-squadra.cpu { padding-left: 2px; }
-  .zona-portiere .lato-squadra.tu { border-right: none; padding-right: 0; }
   .pedina-wrapper { display: flex; align-items: center; gap: 3px; position: relative; }
   .info-laterale {
-    display: flex; flex-direction: column; gap: 2px; font-size: 10px;
+    display: flex; flex-direction: column; gap: 2px; font-size: 9px;
     line-height: 1.1; color: #fff; text-shadow: 0 1px 2px #000;
     pointer-events: none; font-weight: bold; font-family: 'Courier New', monospace;
   }
@@ -131,9 +121,9 @@
   .info-laterale .stamina-txt.medio { color: #fbbf24; }
   .info-laterale .stamina-txt.basso { color: #ef4444; }
   .info-laterale .falli-txt { color: #ff8a8a; }
-  .info-laterale .cartellini { font-size: 11px; }
+  .info-laterale .cartellini { font-size: 10px; }
   .pedina {
-    position: relative; width: 40px; height: 47px;
+    position: relative; width: 32px; height: 38px;
     display: flex; align-items: center; justify-content: center;
   }
   .pedina .sprite-img {
@@ -146,25 +136,25 @@
   .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
   .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
   .pedina.ammonito::after {
-    content: '🟨'; position: absolute; top: -6px; right: -6px; font-size: 12px;
+    content: '🟨'; position: absolute; top: -6px; right: -6px; font-size: 10px;
   }
   .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
   .pedina.espulso::after {
-    content: '🟥'; position: absolute; top: -6px; right: -6px; font-size: 12px;
+    content: '🟥'; position: absolute; top: -6px; right: -6px; font-size: 10px;
   }
   .pedina .stamina-bar {
-    position: absolute; bottom: -4px; left: 0; width: 100%; height: 3px;
+    position: absolute; bottom: -3px; left: 0; width: 100%; height: 2px;
     background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
   }
   .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
   .pedina .palla-attaccata {
-    position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
-    width: 16px; height: 16px;
+    position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+    width: 14px; height: 14px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6);
     z-index: 10; animation: pallaAttaccata 1.2s infinite;
   }
   .pedina .palla-attaccata::after {
@@ -173,15 +163,8 @@
     border-radius: 50%; opacity: 0.6;
   }
   @keyframes pallaAttaccata {
-    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6), 0 0 4px #ffd700; }
-    50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 18px rgba(255,215,0,1), 0 0 8px #ffd700; }
-  }
-  .palla-animata {
-    position: absolute; width: 20px; height: 20px;
-    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
-    z-index: 60; transform: translate(-50%, -50%); display: none;
+    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.6); }
+    50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 18px rgba(255,215,0,1); }
   }
   .flash-vincitore {
     position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
@@ -190,6 +173,7 @@
   .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
+
   .panchina {
     background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
     padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
@@ -248,7 +232,6 @@
     display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center;
     width: 100%;
   }
-
   .mano-sezione {
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     background: rgba(0,0,0,0.25); border-radius: 10px; padding: 8px 12px;
@@ -279,7 +262,6 @@
     border-color: #ffd700; background: #fff9c4; transform: translateY(-10px);
     box-shadow: 0 0 24px #ffd700;
   }
-  .carta.disabilitata { opacity: 0.35; cursor: not-allowed; }
   .carta.bloccata {
     opacity: 0.35; cursor: not-allowed;
     border-color: #ef4444;
@@ -318,8 +300,6 @@
   .pila-carta {
     position: absolute; width: 44px; height: 62px; border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; font-weight: bold;
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
@@ -369,6 +349,23 @@
     font-size: 10px; color: #ffd700; text-transform: uppercase;
     letter-spacing: 2px; margin-top: 8px;
   }
+  .dado {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 68px; height: 68px; background: #fff; color: #222;
+    border-radius: 12px; font-size: 42px; font-weight: 900;
+    margin: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+    animation: rollDado 0.6s ease;
+  }
+  @keyframes rollDado {
+    0% { transform: rotate(-720deg) scale(0.3); opacity: 0; }
+    60% { transform: rotate(0deg) scale(1.2); opacity: 1; }
+    100% { transform: rotate(0deg) scale(1); opacity: 1; }
+  }
+  .dadi-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .dado.piccolo { width: 50px; height: 50px; font-size: 28px; }
+  .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
+  .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
+
   .goal-overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -444,9 +441,7 @@
     border-color: #ffd700;
   }
   .menu-btn .icona { font-size: 36px; }
-  .menu-btn .testo {
-    display: flex; flex-direction: column; gap: 4px; text-align: left;
-  }
+  .menu-btn .testo { display: flex; flex-direction: column; gap: 4px; text-align: left; }
   .menu-btn .testo .titolo { font-size: 16px; letter-spacing: 1px; }
   .menu-btn .testo .descr { font-size: 11px; color: #ccc; font-weight: normal; }
   .menu-btn.evidenza {
@@ -526,7 +521,7 @@
   }
 
   @media (max-height: 500px) {
-    .pedina { width: 30px; height: 36px; }
+    .pedina { width: 26px; height: 32px; }
     .carta { width: 48px; height: 68px; }
     .carta .seme-centro { font-size: 26px; }
     .campo-wrapper { flex: 0 0 45vh; }
@@ -557,24 +552,16 @@
       <button class="btn-icona" onclick="apriLog()">📋</button>
     </div>
   </div>
+
+  <!-- ===== CAMPO CON SCENA IMMAGINE ===== -->
   <div class="campo-wrapper" id="campo-wrapper">
-    <div class="campo" id="campo">
-      <div class="righe-campo">
-        <div class="linea-centrocampo"></div>
-        <div class="cerchio-centrocampo"></div>
-        <div class="punto-centrocampo"></div>
-        <div class="area-penale sinistra"></div>
-        <div class="area-penale destra"></div>
-        <div class="area-piccola sinistra"></div>
-        <div class="area-piccola destra"></div>
-        <div class="porta sinistra"></div>
-        <div class="porta destra"></div>
-      </div>
-      <div class="zone" id="zone"></div>
-      <div class="palla-animata" id="palla-animata"></div>
-    </div>
+    <img class="scena-img" id="scena-img" src="" alt="">
+    <div class="scena-fade"></div>
+    <div class="zone-overlay" id="zone-overlay"></div>
+    <div class="zone" id="zone"></div>
     <div class="flash-vincitore" id="flash"></div>
   </div>
+
   <div class="panchina" id="panchina"></div>
   <div class="carte-panel nascosto" id="carte-panel">
     <div class="info-mano">
@@ -646,26 +633,87 @@ const STAMINA_MAX = 45;
 const CARTE_INIZIALI = 7;
 const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
+const DURATA_SCENA = 3000; // ms
 
-const FRAME_ANIMAZIONI = {
-  'Fermo': 6, 'Tiro': 5, 'Scivolata': 5,
-  'Esultanza1': 7, 'Esultanza2': 6, 'Esultanza3': 6
+/* =========================================================
+   SCENE - COORDINATE DEI GIOCATORI
+   Ogni scena ha:
+   - file: nome file immagine
+   - sx: array di punti (in percentuale) dei giocatori a SINISTRA (vincitori)
+   - dx: array di punti (in percentuale) dei giocatori a DESTRA (perdenti)
+   - sxStato / dxStato: 'esulta' (sorride) o 'triste' (piange)
+   
+   Le percentuali sono riferite a LARGHEZZA e ALTEZZA immagine.
+   ========================================================= */
+const SCENE = {
+  facciaafaccia: {
+    file: 'facciaafaccia.png',
+    // Due giocatori al centro: uno a sinistra, uno a destra
+    sx: [
+      // Giocatore sinistra
+      { testa: {x: 0.32, y: 0.38}, viso: {x: 0.32, y: 0.44}, maglia: {x: 0.32, y: 0.58}, pant: {x: 0.32, y: 0.68}, calze: {x: 0.30, y: 0.82} }
+    ],
+    dx: [
+      // Giocatore destra
+      { testa: {x: 0.65, y: 0.38}, viso: {x: 0.65, y: 0.44}, maglia: {x: 0.65, y: 0.58}, pant: {x: 0.65, y: 0.68}, calze: {x: 0.67, y: 0.82} }
+    ]
+  },
+  scivolata: {
+    file: 'scivolata.png',
+    sx: [
+      // Giocatore sinistra in piedi
+      { testa: {x: 0.28, y: 0.40}, viso: {x: 0.28, y: 0.46}, maglia: {x: 0.28, y: 0.58}, pant: {x: 0.28, y: 0.68}, calze: {x: 0.26, y: 0.82} }
+    ],
+    dx: [
+      // Giocatore destra che scivola (corpo disteso)
+      { testa: {x: 0.72, y: 0.48}, viso: {x: 0.72, y: 0.54}, maglia: {x: 0.65, y: 0.60}, pant: {x: 0.62, y: 0.68}, calze: {x: 0.78, y: 0.80} }
+    ]
+  },
+  tiro: {
+    file: 'tiro.png',
+    sx: [
+      // Giocatore sinistra che tira
+      { testa: {x: 0.28, y: 0.38}, viso: {x: 0.28, y: 0.44}, maglia: {x: 0.28, y: 0.58}, pant: {x: 0.28, y: 0.68}, calze: {x: 0.26, y: 0.82} }
+    ],
+    dx: [
+      // Portiere destra
+      { testa: {x: 0.80, y: 0.44}, viso: {x: 0.80, y: 0.50}, maglia: {x: 0.80, y: 0.62}, pant: {x: 0.80, y: 0.72}, calze: {x: 0.80, y: 0.85} }
+    ]
+  },
+  portiere: {
+    file: 'portiere.png',
+    sx: [
+      // Portiere in primo piano (da dietro) - è il vincitore
+      { testa: {x: 0.35, y: 0.38}, viso: {x: 0.35, y: 0.44}, maglia: {x: 0.35, y: 0.55}, pant: {x: 0.35, y: 0.68}, calze: {x: 0.33, y: 0.82} }
+    ],
+    dx: []
+  },
+  azione: {
+    file: 'azione.png',
+    sx: [
+      // Giocatore in primo piano con palla (sinistra)
+      { testa: {x: 0.22, y: 0.32}, viso: {x: 0.22, y: 0.38}, maglia: {x: 0.22, y: 0.52}, pant: {x: 0.22, y: 0.62}, calze: {x: 0.20, y: 0.78} }
+    ],
+    dx: [
+      // Compagno 1 (centro) - è della stessa squadra ma lo coloro come "avversario" per coerenza
+      { testa: {x: 0.58, y: 0.38}, viso: {x: 0.58, y: 0.44}, maglia: {x: 0.58, y: 0.56}, pant: {x: 0.58, y: 0.66}, calze: {x: 0.57, y: 0.80} },
+      // Compagno 2 / portiere avversario (destra)
+      { testa: {x: 0.78, y: 0.40}, viso: {x: 0.78, y: 0.46}, maglia: {x: 0.78, y: 0.58}, pant: {x: 0.78, y: 0.68}, calze: {x: 0.78, y: 0.82} }
+    ]
+  }
 };
 
-const VELOCITA_ANIMAZIONI = {
-  'Fermo': 180, 'Tiro': 120, 'Scivolata': 120,
-  'Esultanza1': 180, 'Esultanza2': 180, 'Esultanza3': 180
-};
-
+/* =========================================================
+   ZONE (7 zone)
+   ========================================================= */
 const ZONE_CONFIG = [
   { id: 0, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'tu' },
-  { id: 1, nome: 'Z1', ruolo: 'DIF', n: 1 },
-  { id: 2, nome: 'Z2', ruolo: 'DIF', n: 2 },
-  { id: 3, nome: 'Z3', ruolo: 'CEN', n: 2 },
-  { id: 4, nome: 'Z4', ruolo: 'CEN', n: 2 },
-  { id: 5, nome: 'Z5', ruolo: 'ATT', n: 2 },
-  { id: 6, nome: 'Z6', ruolo: 'ATT', n: 1 },
-  { id: 7, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'cpu' }
+  { id: 1, nome: 'AREA TU', ruolo: 'DIF', n: 2 },
+  { id: 2, nome: 'CAMPO TU', ruolo: 'CEN', n: 2 },
+  { id: 3, nome: 'CENTRO', ruolo: 'CEN', n: 2 },
+  { id: 4, nome: 'CAMPO CPU', ruolo: 'CEN', n: 2 },
+  { id: 5, nome: 'AREA CPU', ruolo: 'DIF', n: 2 },
+  { id: 6, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'cpu' }
 ];
 const PANCHINA_CONFIG = [
   { ruolo: 'POR', n: 1 }, { ruolo: 'DIF', n: 2 },
@@ -673,7 +721,7 @@ const PANCHINA_CONFIG = [
 ];
 
 /* =========================================================
-   54 SQUADRE EUROPEE
+   54 SQUADRE
    ========================================================= */
 const SQUADRE = {
   italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#E8B88A', capelli: '#2A1A0F' },
@@ -733,34 +781,27 @@ const SQUADRE = {
 
 function hexToRgb(hex) {
   const h = hex.replace('#', '');
-  return {
-    r: parseInt(h.substring(0, 2), 16),
-    g: parseInt(h.substring(2, 4), 16),
-    b: parseInt(h.substring(4, 6), 16)
-  };
+  return { r: parseInt(h.substring(0,2),16), g: parseInt(h.substring(2,4),16), b: parseInt(h.substring(4,6),16) };
 }
 
 /* =========================================================
-   CANVAS COLORAZIONE
+   CACHE IMMAGINI PEDINE (per mini-pedine 32x38)
    ========================================================= */
 const cacheImmagini = {};
-
-function pathFrame(animazione, numero) {
+function pathFramePedina(animazione, numero) {
   return encodeURI(`${animazione}/${animazione} (${numero}).png`);
 }
-
-function caricaImmagineColorata(squadra, animazione, numeroFrame) {
+async function caricaImmaginePedina(squadra, animazione, numeroFrame) {
   return new Promise((resolve) => {
-    const chiave = `${squadra}|${animazione}|${numeroFrame}`;
+    const chiave = `pedina|${squadra}|${animazione}|${numeroFrame}`;
     if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
-    const percorso = pathFrame(animazione, numeroFrame);
+    const percorso = pathFramePedina(animazione, numeroFrame);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
         const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = img.width; canvas.height = img.height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
         const targetMaglia = hexToRgb(SQUADRE[squadra].maglia);
@@ -782,14 +823,6 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
         floodFillBianco(ctx, punti.maglia.x, punti.maglia.y, targetMaglia);
         floodFillBianco(ctx, punti.pantaloncini.x, punti.pantaloncini.y, targetPantaloncini);
         floodFillBianco(ctx, punti.calzettoni.x, punti.calzettoni.y, targetCalzettoni);
-        const ombraCapelli = { r: Math.round(targetCapelli.r * 0.7), g: Math.round(targetCapelli.g * 0.7), b: Math.round(targetCapelli.b * 0.7) };
-        const ombraMaglia = { r: Math.round(targetMaglia.r * 0.7), g: Math.round(targetMaglia.g * 0.7), b: Math.round(targetMaglia.b * 0.7) };
-        const ombraPantaloncini = { r: Math.round(targetPantaloncini.r * 0.7), g: Math.round(targetPantaloncini.g * 0.7), b: Math.round(targetPantaloncini.b * 0.7) };
-        const ombraCalzettoni = { r: Math.round(targetCalzettoni.r * 0.7), g: Math.round(targetCalzettoni.g * 0.7), b: Math.round(targetCalzettoni.b * 0.7) };
-        floodFillGrigio(ctx, punti.capelli.x, punti.capelli.y, ombraCapelli);
-        floodFillGrigio(ctx, punti.maglia.x, punti.maglia.y, ombraMaglia);
-        floodFillGrigio(ctx, punti.pantaloncini.x, punti.pantaloncini.y, ombraPantaloncini);
-        floodFillGrigio(ctx, punti.calzettoni.x, punti.calzettoni.y, ombraCalzettoni);
         const dataURL = canvas.toDataURL();
         cacheImmagini[chiave] = dataURL;
         resolve(dataURL);
@@ -798,6 +831,88 @@ function caricaImmagineColorata(squadra, animazione, numeroFrame) {
     img.onerror = () => resolve(percorso);
     img.src = percorso;
   });
+}
+
+/* =========================================================
+   CACHE SCENE COLORATE
+   ========================================================= */
+const cacheScene = {};
+
+function caricaScenaColorata(nomeScena, squadraSx, squadraDx) {
+  return new Promise((resolve) => {
+    const chiave = `scena|${nomeScena}|${squadraSx}|${squadraDx}`;
+    if (cacheScene[chiave]) { resolve(cacheScene[chiave]); return; }
+    const scena = SCENE[nomeScena];
+    if (!scena) { resolve(null); return; }
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width; canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const W = canvas.width, H = canvas.height;
+
+        const sxSq = SQUADRE[squadraSx] || SQUADRE.italia;
+        const dxSq = SQUADRE[squadraDx] || SQUADRE.francia;
+
+        // Colora i giocatori a SINISTRA (vincitori)
+        scena.sx.forEach(g => {
+          coloraGiocatore(ctx, g, sxSq, W, H);
+        });
+        // Colora i giocatori a DESTRA (perdenti)
+        scena.dx.forEach(g => {
+          coloraGiocatore(ctx, g, dxSq, W, H);
+        });
+
+        const dataURL = canvas.toDataURL('image/png');
+        cacheScene[chiave] = dataURL;
+        resolve(dataURL);
+      } catch (e) {
+        console.error('Errore colorazione scena:', e);
+        resolve(img.src);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = scena.file;
+  });
+}
+
+function coloraGiocatore(ctx, punti, squadra, W, H) {
+  const targetMaglia = hexToRgb(squadra.maglia);
+  const targetPantaloncini = hexToRgb(squadra.pantaloncini);
+  const targetCalzettoni = hexToRgb(squadra.calzettoni);
+  const targetCapelli = hexToRgb(squadra.capelli);
+  const targetPelle = hexToRgb(squadra.pelle);
+
+  const toPx = (p) => ({ x: Math.floor(p.x * W), y: Math.floor(p.y * H) });
+
+  // Pelle (viso + braccia + gambe)
+  const viso = toPx(punti.viso);
+  floodFillBianco(ctx, viso.x, viso.y, targetPelle);
+  // Braccia: ai lati della maglia
+  const maglia = toPx(punti.maglia);
+  floodFillBianco(ctx, maglia.x - Math.floor(W*0.04), maglia.y + Math.floor(H*0.03), targetPelle);
+  floodFillBianco(ctx, maglia.x + Math.floor(W*0.04), maglia.y + Math.floor(H*0.03), targetPelle);
+  // Gambe (sotto i pantaloncini)
+  const pant = toPx(punti.pant);
+  floodFillBianco(ctx, pant.x - Math.floor(W*0.015), pant.y + Math.floor(H*0.05), targetPelle);
+  floodFillBianco(ctx, pant.x + Math.floor(W*0.015), pant.y + Math.floor(H*0.05), targetPelle);
+
+  // Capelli
+  const capelli = toPx(punti.testa);
+  floodFillBianco(ctx, capelli.x, capelli.y, targetCapelli);
+
+  // Maglia
+  floodFillBianco(ctx, maglia.x, maglia.y, targetMaglia);
+
+  // Pantaloncini
+  floodFillBianco(ctx, pant.x, pant.y, targetPantaloncini);
+
+  // Calzettoni
+  const calze = toPx(punti.calze);
+  floodFillBianco(ctx, calze.x, calze.y, targetCalzettoni);
 }
 
 function trovaBoundingBox(ctx, w, h) {
@@ -826,7 +941,8 @@ function floodFillBianco(ctx, startX, startY, colore) {
   const startIdx = (startY * w + startX) * 4;
   if (data[startIdx + 3] < 50) return;
   const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
-  if (sr < 200 || sg < 200 || sb < 200) return;
+  // Solo pixel bianchi (o quasi bianchi)
+  if (sr < 220 || sg < 220 || sb < 220) return;
   const stack = [[startX, startY]];
   const visitati = new Uint8Array(w * h);
   while (stack.length > 0) {
@@ -838,34 +954,10 @@ function floodFillBianco(ctx, startX, startY, colore) {
     const i = idx * 4;
     const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
     if (a < 50) continue;
+    // Bordo nero: stop
     if (r < 100 && g < 100 && b < 100) continue;
-    if (r < 200 || g < 200 || b < 200) continue;
-    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
-    stack.push([x + 1, y]); stack.push([x - 1, y]);
-    stack.push([x, y + 1]); stack.push([x, y - 1]);
-  }
-  ctx.putImageData(imageData, 0, 0);
-}
-
-function floodFillGrigio(ctx, startX, startY, colore) {
-  const w = ctx.canvas.width, h = ctx.canvas.height;
-  if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
-  const imageData = ctx.getImageData(0, 0, w, h);
-  const data = imageData.data;
-  const stack = [[startX, startY]];
-  const visitati = new Uint8Array(w * h);
-  while (stack.length > 0) {
-    const [x, y] = stack.pop();
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-    const idx = y * w + x;
-    if (visitati[idx]) continue;
-    visitati[idx] = 1;
-    const i = idx * 4;
-    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-    if (a < 50) continue;
-    if (r < 100 && g < 100 && b < 100) continue;
-    const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
-    if (!isGrigio) continue;
+    // Solo bianchi
+    if (r < 220 || g < 220 || b < 220) continue;
     data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
     stack.push([x + 1, y]); stack.push([x - 1, y]);
     stack.push([x, y + 1]); stack.push([x, y - 1]);
@@ -874,7 +966,52 @@ function floodFillGrigio(ctx, startX, startY, colore) {
 }
 
 /* =========================================================
-   MAZZO CARTE POKER - SEMI CALCISTICI
+   STATO
+   ========================================================= */
+let stato = {
+  modalita: 'menu',
+  tipoPartita: '1P',
+  squadraTU: 'italia',
+  squadraCPU: 'francia',
+  tempo: 1, mano: 1, maxMani: MANI_PER_TEMPO,
+  punteggio: { tu: 0, cpu: 0 },
+  zonaPalla: 3, possessore: null, giocatorePalla: null,
+  pallaInAnimazione: false,
+  mazzo: [],
+  scarti: [],
+  mani: { tu: [], cpu: [] },
+  giocatori: { tu: [], cpu: [] },
+  panchina: { tu: [], cpu: [] },
+  turno: 'tu', monetaVinta: null,
+  partitaFinita: false, sostBloccate: false,
+  statistiche: {
+    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 },
+    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 }
+  },
+  logCompleto: []
+};
+let selezioneCarta = null;
+let selezioneSost = { campo: null, panchina: null };
+const animazioniInCorso = {};
+let renderingCampoInCorso = false;
+let scenaAttuale = 'facciaafaccia';
+
+/* =========================================================
+   CARICA SCENA
+   ========================================================= */
+async function mostraScena(nomeScena, squadraSx, squadraDx) {
+  scenaAttuale = nomeScena;
+  const dataURL = await caricaScenaColorata(nomeScena, squadraSx, squadraDx);
+  const img = document.getElementById('scena-img');
+  if (dataURL) {
+    img.src = dataURL;
+  } else {
+    img.src = SCENE[nomeScena]?.file || 'facciaafaccia.png';
+  }
+}
+
+/* =========================================================
+   MAZZO CARTE
    ========================================================= */
 const SEMI = {
   palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
@@ -913,37 +1050,7 @@ function mescola(arr) {
 }
 
 /* =========================================================
-   STATO
-   ========================================================= */
-let stato = {
-  modalita: 'menu',
-  tipoPartita: '1P',
-  squadraTU: 'italia',
-  squadraCPU: 'francia',
-  tempo: 1, mano: 1, maxMani: MANI_PER_TEMPO,
-  punteggio: { tu: 0, cpu: 0 },
-  zonaPalla: 4, possessore: null, giocatorePalla: null,
-  pallaInAnimazione: false,
-  mazzo: [],
-  scarti: [],
-  mani: { tu: [], cpu: [] },
-  giocatori: { tu: [], cpu: [] },
-  panchina: { tu: [], cpu: [] },
-  turno: 'tu', monetaVinta: null,
-  partitaFinita: false, sostBloccate: false,
-  statistiche: {
-    tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 },
-    cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 }
-  },
-  logCompleto: []
-};
-let selezioneCarta = null;
-let selezioneSost = { campo: null, panchina: null };
-const animazioniInCorso = {};
-let renderingCampoInCorso = false;
-
-/* =========================================================
-   GESTIONE MAZZO CARTE
+   GESTIONE MAZZO
    ========================================================= */
 function inizializzaMazzo() {
   stato.mazzo = creaMazzoPoker();
@@ -968,9 +1075,7 @@ function pescaUnaCarta(sq) {
     stato.scarti = [];
     log(`🔄 Mazzo esaurito, rimescolo!`);
   }
-  if (stato.mazzo.length > 0) {
-    stato.mani[sq].push(stato.mazzo.pop());
-  }
+  if (stato.mazzo.length > 0) stato.mani[sq].push(stato.mazzo.pop());
 }
 function riempiMano(sq) {
   while (stato.mani[sq].length < CARTE_INIZIALI) {
@@ -1006,42 +1111,6 @@ function apriLog() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
-
-/* ANIMAZIONE */
-function avviaAnimazione(giocatoreId, nomeAnimazione, callback) {
-  fermaAnimazione(giocatoreId);
-  if (!FRAME_ANIMAZIONI[nomeAnimazione]) { if (callback) callback(); return; }
-  const img = document.querySelector(`[data-giocatore-id="${giocatoreId}"] .sprite-img`);
-  if (!img) { if (callback) callback(); return; }
-  const squadra = giocatoreId.startsWith('tu') ? stato.squadraTU : stato.squadraCPU;
-  let frame = 1;
-  animazioniInCorso[giocatoreId] = true;
-  const velocita = VELOCITA_ANIMAZIONI[nomeAnimazione] || 150;
-  const totaleFrame = FRAME_ANIMAZIONI[nomeAnimazione];
-  const tick = () => {
-    if (!animazioniInCorso[giocatoreId]) return;
-    caricaImmagineColorata(squadra, nomeAnimazione, frame).then(dataURL => {
-      if (animazioniInCorso[giocatoreId] && dataURL) img.src = dataURL;
-    });
-    frame++;
-    if (frame > totaleFrame) {
-      if (nomeAnimazione === 'Fermo' || nomeAnimazione.startsWith('Esultanza')) {
-        frame = 1;
-        setTimeout(tick, velocita);
-      } else {
-        animazioniInCorso[giocatoreId] = false;
-        if (callback) callback();
-        setTimeout(() => {
-          if (!animazioniInCorso[giocatoreId]) avviaAnimazione(giocatoreId, 'Fermo');
-        }, 100);
-      }
-    } else {
-      setTimeout(tick, velocita);
-    }
-  };
-  tick();
-}
-function fermaAnimazione(giocatoreId) { animazioniInCorso[giocatoreId] = false; }
 
 /* GIOCATORI */
 function creaGiocatori(sq) {
@@ -1079,7 +1148,7 @@ function creaPanchina(sq) {
 }
 
 /* =========================================================
-   MENU PRINCIPALE
+   MENU
    ========================================================= */
 function mostraMenuPrincipale() {
   stato.modalita = 'menu';
@@ -1090,24 +1159,15 @@ function mostraMenuPrincipale() {
       <div class="menu-sottotitolo">Scegli la modalità di gioco</div>
       <div class="menu-btn" onclick="avviaSetup1P()">
         <div class="icona">🎮</div>
-        <div class="testo">
-          <div class="titolo">PARTITA SINGOLA</div>
-          <div class="descr">1 giocatore vs CPU</div>
-        </div>
+        <div class="testo"><div class="titolo">PARTITA SINGOLA</div><div class="descr">1 giocatore vs CPU</div></div>
       </div>
       <div class="menu-btn" onclick="avviaSetup2P()">
         <div class="icona">👥</div>
-        <div class="testo">
-          <div class="titolo">PARTITA ONLINE</div>
-          <div class="descr">1 giocatore vs 2 giocatore (locale)</div>
-        </div>
+        <div class="testo"><div class="titolo">PARTITA ONLINE</div><div class="descr">1 giocatore vs 2 giocatore (locale)</div></div>
       </div>
       <div class="menu-btn evidenza" onclick="location.href='europei2028.html'">
         <div class="icona">🏆</div>
-        <div class="testo">
-          <div class="titolo">NATIONAL LEAGUE 2028</div>
-          <div class="descr">Qualificazioni · Spareggi · Fase Finale</div>
-        </div>
+        <div class="testo"><div class="titolo">NATIONAL LEAGUE 2028</div><div class="descr">Qualificazioni · Spareggi · Fase Finale</div></div>
       </div>
     </div>`;
 }
@@ -1115,11 +1175,9 @@ function mostraMenuPrincipale() {
 /* SETUP 1P */
 async function avviaSetup1P() {
   stato.tipoPartita = '1P';
-  stato.modalita = 'setup1P';
-  document.getElementById('modale-box').innerHTML = `<h2>⏳ Caricamento squadre...</h2>`;
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
-    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
+    imgSquadre[id] = await caricaImmaginePedina(id, 'Fermo', 1);
   }
   let html = `<h2>⚽ Scegli la tua squadra</h2>
     <p style="font-size:12px;color:#aaa;margin-bottom:8px">La CPU sceglierà casualmente tra le altre 53 nazionali</p>
@@ -1136,21 +1194,16 @@ async function avviaSetup1P() {
     <button onclick="mostraMenuPrincipale()">← INDIETRO</button>
   </div>`;
   document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale').classList.remove('nascosto');
 }
-
-function selezionaTU1P(id) {
-  stato.squadraTU = id;
-  avviaSetup1P();
-}
+function selezionaTU1P(id) { stato.squadraTU = id; avviaSetup1P(); }
 
 /* SETUP 2P */
 async function avviaSetup2P() {
   stato.tipoPartita = '2P';
-  stato.modalita = 'setup2P';
-  document.getElementById('modale-box').innerHTML = `<h2>⏳ Caricamento squadre...</h2>`;
   const imgSquadre = {};
   for (const id of Object.keys(SQUADRE)) {
-    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
+    imgSquadre[id] = await caricaImmaginePedina(id, 'Fermo', 1);
   }
   let html = `<h2>👤 Giocatore 1 - Scegli squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
@@ -1159,8 +1212,7 @@ async function avviaSetup2P() {
       <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
     </div>`;
   });
-  html += `</div>`;
-  html += `<h2 style="margin-top:20px">👤 Giocatore 2 - Scegli squadra</h2><div class="squadre-griglia">`;
+  html += `</div><h2 style="margin-top:20px">👤 Giocatore 2 - Scegli squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
     html += `<div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaCPU2P('${id}')">
       <div class="nome">${SQUADRE[id].nome}</div>
@@ -1173,15 +1225,15 @@ async function avviaSetup2P() {
     <button onclick="mostraMenuPrincipale()">← INDIETRO</button>
   </div>`;
   document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale').classList.remove('nascosto');
 }
-
 function selezionaTU2P(id) { stato.squadraTU = id; avviaSetup2P(); }
 function selezionaCPU2P(id) { stato.squadraCPU = id; avviaSetup2P(); }
 
 /* =========================================================
    AVVIO PARTITA
    ========================================================= */
-function avviaPartitaDaSetup() {
+async function avviaPartitaDaSetup() {
   if (stato.tipoPartita === '1P') {
     const disponibili = Object.keys(SQUADRE).filter(id => id !== stato.squadraTU);
     stato.squadraCPU = disponibili[Math.floor(Math.random() * disponibili.length)];
@@ -1199,7 +1251,10 @@ function avviaPartitaDaSetup() {
   stato.logCompleto = [];
   document.getElementById('nome-tu').textContent = SQUADRE[stato.squadraTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[stato.squadraCPU].nome;
-  renderCampo(); renderPanchina(); renderHeader();
+  renderZoneOverlay();
+  await renderCampo();
+  await renderPanchina();
+  renderHeader();
   chiudiModale();
   document.getElementById('modale-box').innerHTML = `
     <h2>🪙 Lancio della moneta</h2>
@@ -1219,28 +1274,33 @@ function renderHeader() {
   document.getElementById('mano').textContent = stato.mano;
   const minuto = calcolaMinuto();
   document.getElementById('minuto').textContent = minuto + "'";
-  const zn = (stato.zonaPalla === 0 || stato.zonaPalla === 7) ? 'POR' : 'Z' + stato.zonaPalla;
-  document.getElementById('zona-palla').textContent = zn;
+  document.getElementById('zona-palla').textContent = 'Z' + stato.zonaPalla;
   const infoMinuto = document.getElementById('info-minuto');
   if (infoMinuto) infoMinuto.textContent = minuto + "'";
 }
 
-/* ✅ renderCampo con flag anti-doppione */
+function renderZoneOverlay() {
+  const overlay = document.getElementById('zone-overlay');
+  overlay.innerHTML = '';
+  ZONE_CONFIG.forEach(z => {
+    const el = document.createElement('div');
+    el.className = 'zona-overlay';
+    el.innerHTML = `<div class="zona-num">${z.nome}</div>`;
+    overlay.appendChild(el);
+  });
+}
+
 async function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
   const zone = document.getElementById('zone');
   zone.innerHTML = '';
-  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaImmaginePedina(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmaginePedina(stato.squadraCPU, 'Fermo', 1);
   ZONE_CONFIG.forEach(z => {
     const zona = document.createElement('div');
-    zona.className = 'zona' + (z.portiere ? ' zona-portiere' : '');
+    zona.className = 'zona';
     zona.dataset.zona = z.id;
-    const label = document.createElement('div');
-    label.className = 'zona-label';
-    label.textContent = z.nome;
-    zona.appendChild(label);
     if (z.portiere) {
       const sq = z.proprietario;
       const portiere = stato.giocatori[sq].find(g => g.zona === z.id);
@@ -1263,13 +1323,6 @@ async function renderCampo() {
     zone.appendChild(zona);
   });
   renderingCampoInCorso = false;
-  setTimeout(() => {
-    ['tu', 'cpu'].forEach(sq => {
-      stato.giocatori[sq].forEach(g => {
-        if (!g.espulso && !animazioniInCorso[g.id]) avviaAnimazione(g.id, 'Fermo');
-      });
-    });
-  }, 50);
 }
 function creaPedinaWrapper(g, imgSrc) {
   const wrapper = document.createElement('div');
@@ -1330,8 +1383,8 @@ function creaPedinaEl(g, imgSrc) {
 async function renderPanchina() {
   const p = document.getElementById('panchina');
   p.innerHTML = '';
-  const imgTU = await caricaImmagineColorata(stato.squadraTU, 'Fermo', 1);
-  const imgCPU = await caricaImmagineColorata(stato.squadraCPU, 'Fermo', 1);
+  const imgTU = await caricaImmaginePedina(stato.squadraTU, 'Fermo', 1);
+  const imgCPU = await caricaImmaginePedina(stato.squadraCPU, 'Fermo', 1);
   const titoloTu = document.createElement('div');
   titoloTu.className = 'panchina-titolo';
   titoloTu.textContent = SQUADRE[stato.squadraTU].nome;
@@ -1358,70 +1411,14 @@ async function renderPanchina() {
   });
 }
 
-/* PALLA */
-function staccaPalla(daGiocatoreId) {
-  stato.pallaInAnimazione = true;
-  const pedina = document.querySelector(`[data-giocatore-id="${daGiocatoreId}"]`);
-  if (pedina) {
-    const pallaAttaccata = pedina.querySelector('.palla-attaccata');
-    if (pallaAttaccata) pallaAttaccata.remove();
-  }
-  const palla = document.getElementById('palla-animata');
-  const campo = document.getElementById('campo');
-  const campoRect = campo.getBoundingClientRect();
-  if (pedina) {
-    const pedRect = pedina.getBoundingClientRect();
-    const x = pedRect.left + pedRect.width / 2 - campoRect.left;
-    const y = pedRect.bottom - 6 - campoRect.top;
-    palla.style.transition = 'none';
-    palla.style.left = x + 'px'; palla.style.top = y + 'px';
-    palla.style.display = 'block'; void palla.offsetWidth;
-  }
-}
-function attaccaPalla(aGiocatoreId) {
-  const palla = document.getElementById('palla-animata');
-  palla.style.display = 'none';
-  stato.giocatorePalla = aGiocatoreId;
-  stato.pallaInAnimazione = false;
-  renderCampo();
-}
-function animaPalla(daId, aId, callback) {
-  const a = document.querySelector(`[data-giocatore-id="${aId}"]`);
-  if (!a) { if (aId) attaccaPalla(aId); if (callback) callback(); return; }
-  const palla = document.getElementById('palla-animata');
-  const campo = document.getElementById('campo');
-  const campoRect = campo.getBoundingClientRect();
-  const aRect = a.getBoundingClientRect();
-  const x2 = aRect.left + aRect.width / 2 - campoRect.left;
-  const y2 = aRect.bottom - 6 - campoRect.top;
-  const durata = 1000;
-  const easing = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-  if (daId) {
-    staccaPalla(daId);
-    setTimeout(() => {
-      palla.style.transition = `left ${durata}ms ${easing}, top ${durata}ms ${easing}`;
-      palla.style.left = x2 + 'px'; palla.style.top = y2 + 'px';
-      setTimeout(() => { attaccaPalla(aId); if (callback) callback(); }, durata + 50);
-    }, 50);
-  } else { attaccaPalla(aId); if (callback) callback(); }
-}
-function nascondiPalla() { document.getElementById('palla-animata').style.display = 'none'; }
-function flashVincitore(squadra) {
-  const flash = document.getElementById('flash');
-  flash.classList.remove('tu', 'cpu', 'attivo');
-  void flash.offsetWidth;
-  flash.classList.add(squadra, 'attivo');
-  setTimeout(() => flash.classList.remove('attivo'), 600);
-}
-
 /* MONETA */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
   log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
-  stato.possessore = vince; stato.zonaPalla = 4; stato.turno = vince;
-  const candidati = stato.giocatori[vince].filter(g => g.zona === 4 && !g.portiere);
+  stato.possessore = vince; stato.zonaPalla = 3;
+  const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
   chiudiModale();
@@ -1430,7 +1427,7 @@ function lanciaMoneta(scelta) {
 }
 
 /* =========================================================
-   CONTRASTO A CARTE — con logica falli per seme
+   CONTRASTO A CARTE
    ========================================================= */
 function avviaContrasto() {
   document.getElementById('app').className = 'app fase-combattimento';
@@ -1456,22 +1453,15 @@ function avviaContrasto() {
     giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
   }
 
-  // Riempi le mani fino a 7
-  riempiMano('tu');
-  riempiMano('cpu');
+  riempiMano('tu'); riempiMano('cpu');
 
   const semeGuida = SEMI_KEYS[Math.floor(Math.random() * SEMI_KEYS.length)];
 
   stato.contrasto = {
-    zona, attaccante, difensore,
-    semeGuida,
+    zona, attaccante, difensore, semeGuida,
     giocatoreAtt: giocatoreAtt ? giocatoreAtt.id : null,
     giocatoreDif: giocatoreDif ? giocatoreDif.id : null,
-    cartaTu: null,
-    cartaCpu: null,
-    risolto: false,
-    // storico delle carte giocate in questa mano (per pareggi multipli)
-    storico: []
+    cartaTu: null, cartaCpu: null, risolto: false
   };
   stato.statistiche[attaccante].contese++;
   log(`🎯 Contrasto Z${zona} — Seme guida: ${SEMI[semeGuida].emoji} ${SEMI[semeGuida].nome}`, 'highlight');
@@ -1483,7 +1473,6 @@ function renderPannelloContrasto() {
   const c = stato.contrasto;
   document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona}`;
   document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
-
   document.getElementById('turno-label').textContent =
     `Seme: ${SEMI[c.semeGuida].nome} ${SEMI[c.semeGuida].emoji} — Scegli una carta`;
 
@@ -1570,90 +1559,67 @@ function selezionaCartaTu(idx) {
   renderPannelloContrasto();
 }
 
-function confermaCarta() {
+async function confermaCarta() {
   if (selezioneCarta === null) return;
   const c = stato.contrasto;
   const cartaTu = stato.mani.tu[selezioneCarta];
   c.cartaTu = cartaTu;
-
   const cartaCpu = scegliCartaCPU();
   c.cartaCpu = cartaCpu;
 
-  // Determina esito
   const tuHaSeme = cartaTu.seme === c.semeGuida;
   const cpuHaSeme = cartaCpu.seme === c.semeGuida;
 
   let vincitore = null;
   let motivoFallo = null;
+  let eventoScena = 'facciaafaccia'; // default
 
   if (tuHaSeme && cpuHaSeme) {
-    // Entrambi hanno giocato il seme guida → vince carta più alta
     if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
     else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
-    else {
-      // Pareggio → nuova mano di gioco (non conta come fallo)
-      return risolviPareggio(cartaTu, cartaCpu);
-    }
+    else return risolviPareggio(cartaTu, cartaCpu);
+    eventoScena = 'facciaafaccia';
   } else if (tuHaSeme && !cpuHaSeme) {
-    // Tu hai giocato il seme, CPU no → CPU ha fatto fallo (se aveva il seme in mano)
+    vincitore = 'tu';
     const cpuAvevaSeme = stato.mani.cpu.some(x => x.seme === c.semeGuida && x.id !== cartaCpu.id);
-    if (cpuAvevaSeme) {
-      // CPU ha fatto fallo
-      vincitore = 'tu';
-      motivoFallo = 'cpu';
-    } else {
-      // CPU non aveva il seme → vince chi ha il seme (tu)
-      vincitore = 'tu';
-    }
+    if (cpuAvevaSeme) { motivoFallo = 'cpu'; eventoScena = 'scivolata'; }
+    else eventoScena = 'facciaafaccia';
   } else if (!tuHaSeme && cpuHaSeme) {
-    // CPU ha giocato il seme, tu no → tu hai fatto fallo (se avevi il seme in mano)
+    vincitore = 'cpu';
     const tuAvevaSeme = stato.mani.tu.some(x => x.seme === c.semeGuida && x.id !== cartaTu.id);
-    if (tuAvevaSeme) {
-      vincitore = 'cpu';
-      motivoFallo = 'tu';
-    } else {
-      vincitore = 'cpu';
-    }
+    if (tuAvevaSeme) { motivoFallo = 'tu'; eventoScena = 'scivolata'; }
+    else eventoScena = 'facciaafaccia';
   } else {
-    // Nessuno ha giocato il seme guida (nessuno lo aveva)
-    // → vince chi ha carta di valore più alto in assoluto
     if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
     else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
-    else {
-      // Pareggio anche qui → nuova mano di gioco
-      return risolviPareggio(cartaTu, cartaCpu);
-    }
+    else return risolviPareggio(cartaTu, cartaCpu);
+    eventoScena = 'facciaafaccia';
   }
 
   c.vincitore = vincitore;
   c.risolto = true;
   c.motivoFallo = motivoFallo;
+  c.eventoScena = eventoScena;
 
   log(`Tu giochi: ${cartaTu.label}${SEMI[cartaTu.seme].emoji}`);
   log(`CPU gioca: ${cartaCpu.label}${SEMI[cartaCpu.seme].emoji}`);
-  if (motivoFallo) {
-    log(`⚠️ FALLO di ${motivoFallo === 'tu' ? 'TU' : 'CPU'} (non ha risposto al seme)`, 'parata');
-  }
-  log(`✅ ${vincitore === 'tu' ? 'TU' : 'CPU'} vince il contrasto!`, 'highlight');
+  if (motivoFallo) log(`⚠️ FALLO di ${motivoFallo === 'tu' ? 'TU' : 'CPU'}`, 'parata');
+  log(`✅ ${vincitore === 'tu' ? 'TU' : 'CPU'} vince!`, 'highlight');
 
-  // Rimuovi carte giocate e mettile negli scarti
   const idxTu = stato.mani.tu.indexOf(cartaTu);
   if (idxTu > -1) { stato.scarti.push(stato.mani.tu[idxTu]); stato.mani.tu.splice(idxTu, 1); }
   const idxCpu = stato.mani.cpu.indexOf(cartaCpu);
   if (idxCpu > -1) { stato.scarti.push(stato.mani.cpu[idxCpu]); stato.mani.cpu.splice(idxCpu, 1); }
 
-  // Pesca 1 carta ciascuno (a fine mano)
-  pescaUnaCarta('tu');
-  pescaUnaCarta('cpu');
-
+  pescaUnaCarta('tu'); pescaUnaCarta('cpu');
   selezioneCarta = null;
   renderPannelloContrasto();
 
   const motivoBanner = motivoFallo
-    ? `Fallo di ${motivoFallo === 'tu' ? 'TU' : 'CPU'} — non ha risposto al seme`
+    ? `Fallo di ${motivoFallo === 'tu' ? 'TU' : 'CPU'}`
     : tuHaSeme && cpuHaSeme
-      ? 'Entrambi sul seme guida — vince il valore più alto'
-      : 'Nessuno aveva il seme — vince il valore più alto';
+      ? 'Entrambi sul seme guida'
+      : 'Nessuno aveva il seme';
 
   setTimeout(() => {
     mostraBannerMano(vincitore, cartaTu, cartaCpu, c.semeGuida, motivoBanner);
@@ -1661,42 +1627,26 @@ function confermaCarta() {
 
   setTimeout(() => {
     nascondiBannerMano();
-    setTimeout(() => risolviContrasto(vincitore, motivoFallo), 300);
+    setTimeout(() => risolviContrasto(vincitore, motivoFallo, eventoScena), 300);
   }, 3600);
 }
 
-/* Pareggio → nuova mano di gioco (stesso contrasto, nuove carte) */
 function risolviPareggio(cartaTu, cartaCpu) {
   const c = stato.contrasto;
-  log(`🔁 Pareggio! Nuova mano di gioco nel contrasto.`, 'highlight');
-
-  // Le carte giocate vanno negli scarti
+  log(`🔁 Pareggio! Nuova mano di gioco.`, 'highlight');
   const idxTu = stato.mani.tu.indexOf(cartaTu);
   if (idxTu > -1) { stato.scarti.push(stato.mani.tu[idxTu]); stato.mani.tu.splice(idxTu, 1); }
   const idxCpu = stato.mani.cpu.indexOf(cartaCpu);
   if (idxCpu > -1) { stato.scarti.push(stato.mani.cpu[idxCpu]); stato.mani.cpu.splice(idxCpu, 1); }
-
-  // Pesca 1 carta ciascuno
-  pescaUnaCarta('tu');
-  pescaUnaCarta('cpu');
-
-  // Se uno dei due ha finito le carte, pesca fino a 7 (o quel che c'è)
+  pescaUnaCarta('tu'); pescaUnaCarta('cpu');
   if (stato.mani.tu.length === 0) riempiMano('tu');
   if (stato.mani.cpu.length === 0) riempiMano('cpu');
-
-  // Reset selezione e carte
   selezioneCarta = null;
-  c.cartaTu = null;
-  c.cartaCpu = null;
-  c.risolto = false;
-  c.vincitore = null;
-  c.motivoFallo = null;
-
-  // Mostra banner "pareggio"
+  c.cartaTu = null; c.cartaCpu = null;
+  c.risolto = false; c.vincitore = null; c.motivoFallo = null;
   setTimeout(() => {
-    mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio! Si continua a giocare');
+    mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio! Si continua');
   }, 400);
-
   setTimeout(() => {
     nascondiBannerMano();
     renderPannelloContrasto();
@@ -1707,12 +1657,7 @@ function scegliCartaCPU() {
   const c = stato.contrasto;
   const mano = stato.mani.cpu;
   const haSeme = mano.some(x => x.seme === c.semeGuida);
-  let candidate;
-  if (haSeme) {
-    candidate = mano.filter(x => x.seme === c.semeGuida);
-  } else {
-    candidate = mano;
-  }
+  let candidate = haSeme ? mano.filter(x => x.seme === c.semeGuida) : mano;
   candidate.sort((a, b) => b.valore - a.valore);
   return candidate[0];
 }
@@ -1729,39 +1674,29 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
     banner.style.background = '';
     banner.classList.add(vincitore, 'attivo');
   }
-
   document.getElementById('banner-vincitore').textContent =
     vincitore === 'tu' ? '🏆 TU VINCI LA MANO!'
     : vincitore === 'cpu' ? '🏆 CPU VINCE LA MANO!'
     : '🤝 PAREGGIO!';
-
   const elTu = document.getElementById('banner-carta-tu');
-  elTu.innerHTML = '';
-  const cartaElTu = creaCartaEl(cartaTu);
-  cartaElTu.style.cursor = 'default';
-  elTu.appendChild(cartaElTu);
-
+  elTu.innerHTML = ''; elTu.appendChild(creaCartaEl(cartaTu));
   const elCpu = document.getElementById('banner-carta-cpu');
-  elCpu.innerHTML = '';
-  const cartaElCpu = creaCartaEl(cartaCpu);
-  cartaElCpu.style.cursor = 'default';
-  elCpu.appendChild(cartaElCpu);
-
+  elCpu.innerHTML = ''; elCpu.appendChild(creaCartaEl(cartaCpu));
   document.getElementById('banner-seme').textContent =
     `Seme guida: ${SEMI[semeGuida].nome} ${SEMI[semeGuida].emoji}`;
-
   const motivoEl = document.getElementById('banner-motivo');
   if (motivoEl) motivoEl.textContent = motivo || '';
 }
-
 function nascondiBannerMano() {
   const banner = document.getElementById('banner-mano');
   banner.classList.remove('attivo');
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO */
-function risolviContrasto(vincente, motivoFallo) {
+/* =========================================================
+   RISOLUZIONE CONTRASTO — con scena
+   ========================================================= */
+async function risolviContrasto(vincente, motivoFallo, eventoScena) {
   const c = stato.contrasto;
   flashVincitore(vincente);
   stato.statistiche[vincente].vinte++;
@@ -1771,10 +1706,12 @@ function risolviContrasto(vincente, motivoFallo) {
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere && !gDif.espulso) gDif.stamina = Math.max(0, gDif.stamina - 1);
 
-  // Applica fallo se c'è stato
-  if (motivoFallo) {
-    applicaFallo(motivoFallo, c);
-  }
+  if (motivoFallo) applicaFallo(motivoFallo, c);
+
+  // ✅ MOSTRA SCENA
+  const sqVincitore = vincente === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const sqPerdente = vincente === 'tu' ? stato.squadraCPU : stato.squadraTU;
+  await mostraScena(eventoScena || 'facciaafaccia', sqVincitore, sqPerdente);
 
   const zona = c.zona;
   const vecchioGiocatore = stato.giocatorePalla;
@@ -1782,27 +1719,24 @@ function risolviContrasto(vincente, motivoFallo) {
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  if (vincente === c.attaccante) {
-    // Attaccante vince → prosegui azione (senza dado fallo!)
-    proseguiAzione(vincente, c, vecchioGiocatore);
-  } else {
-    // Difensore vince → recupera palla
-    stato.possessore = vincente;
-    stato.zonaPalla = zona;
-    if (c.giocatoreDif) {
-      const g = stato.giocatori[vincente].find(x => x.id === c.giocatoreDif);
-      if (g && !g.espulso) stato.giocatorePalla = g.id;
-    }
-    renderHeader();
-    setTimeout(() => {
-      if (vecchioGiocatore && stato.giocatorePalla) {
-        animaPalla(vecchioGiocatore, stato.giocatorePalla, () => avanzaMano());
-      } else {
+  // Aspetta DURATA_SCENA prima di procedere
+  setTimeout(() => {
+    if (vincente === c.attaccante) {
+      proseguiAzione(vincente, c, vecchioGiocatore);
+    } else {
+      stato.possessore = vincente;
+      stato.zonaPalla = zona;
+      if (c.giocatoreDif) {
+        const g = stato.giocatori[vincente].find(x => x.id === c.giocatoreDif);
+        if (g && !g.espulso) stato.giocatorePalla = g.id;
+      }
+      renderHeader();
+      setTimeout(() => {
         renderCampo();
         avanzaMano();
-      }
-    }, 200);
-  }
+      }, 200);
+    }
+  }, DURATA_SCENA);
 }
 
 function applicaFallo(squadraFallosa, c) {
@@ -1816,40 +1750,29 @@ function applicaFallo(squadraFallosa, c) {
   if (falloso.falli === 3) {
     falloso.ammonito = true;
     stato.statistiche[squadraFallosa].ammonizioni++;
-    log(`🟨 AMMONIZIONE per ${falloso.nome}!`, 'parata');
+    log(`🟨 AMMONIZIONE!`, 'parata');
   }
   if (falloso.falli >= 6) {
     falloso.espulso = true;
     fermaAnimazione(falloso.id);
     stato.statistiche[squadraFallosa].espulsioni++;
-    log(`🟥 ESPULSIONE per ${falloso.nome}!`, 'parata');
+    log(`🟥 ESPULSIONE!`, 'parata');
   }
 }
 
-/* PROSEGUI AZIONE */
 function proseguiAzione(vincente, c, vecchioGiocatore) {
   const zona = c.zona;
   const nuovaZona = zona + (vincente === 'tu' ? +1 : -1);
-  if (nuovaZona === 7 || nuovaZona === 0) {
-    return tiroInPorta(vincente);
-  }
+  if (nuovaZona === 6 || nuovaZona === 0) return tiroInPorta(vincente);
+  if (nuovaZona < 0 || nuovaZona > 6) return avanzaMano();
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
-  let nuovo = null;
-  if (gz.length > 0) {
-    const scelto = gz[Math.floor(Math.random() * gz.length)];
-    nuovo = scelto.id;
-    stato.giocatorePalla = scelto.id;
-  }
+  if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderHeader();
   setTimeout(() => {
-    if (vecchioGiocatore && nuovo) {
-      animaPalla(vecchioGiocatore, nuovo, () => avanzaMano());
-    } else {
-      renderCampo();
-      avanzaMano();
-    }
+    renderCampo();
+    avanzaMano();
   }, 200);
 }
 
@@ -1867,28 +1790,24 @@ function mostraGoal(vincente) {
   document.getElementById('goal-text').textContent = '⚽ GOAL! ⚽';
   setTimeout(() => ov.classList.remove('attivo'), 3000);
 }
-function tiroInPorta(attaccante) {
+
+async function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
-  nascondiPalla();
   stato.statistiche[attaccante].tiri++;
   log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
-  const giocatore = stato.giocatori[attaccante].find(g => g.zona === stato.zonaPalla && !g.portiere);
-  if (giocatore) avviaAnimazione(giocatore.id, 'Tiro');
+  apriOverlay(`<h2>🥅 TIRO IN PORTA</h2><div class="fase-label">FASE 1 — Tiro attaccante</div><div id="area-tiro" style="margin-top:10px"></div>`);
   setTimeout(() => {
-    apriOverlay(`<h2>🥅 TIRO IN PORTA</h2><div class="fase-label">FASE 1 — Tiro attaccante</div><div id="area-tiro" style="margin-top:10px"></div>`);
+    const dado = Math.floor(Math.random() * 9) + 1;
+    document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
+    log(`🎲 ${attaccante === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
     setTimeout(() => {
-      const dado = Math.floor(Math.random() * 9) + 1;
-      document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
-      log(`🎲 ${attaccante === 'tu' ? 'Tu' : 'CPU'} tira: ${dado}`);
-      setTimeout(() => {
-        if (dado === 5 || dado === 8) {
-          log(`🧤 PARATA DIRETTA!`, 'parata');
-          eseguiEsitoTiro('parata', attaccante, difensore); return;
-        }
-        fase2Tiro(attaccante, difensore, dado);
-      }, 1200);
-    }, 400);
-  }, 1500);
+      if (dado === 5 || dado === 8) {
+        log(`🧤 PARATA DIRETTA!`, 'parata');
+        eseguiEsitoTiro('parata', attaccante, difensore); return;
+      }
+      fase2Tiro(attaccante, difensore, dado);
+    }, 1200);
+  }, 400);
 }
 function fase2Tiro(attaccante, difensore, numAtt) {
   const box = document.getElementById('overlay-box');
@@ -1897,12 +1816,8 @@ function fase2Tiro(attaccante, difensore, numAtt) {
   document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
   log(`🧤 Portiere: [${dadi.join(', ')}]`);
   setTimeout(() => {
-    if (dadi.includes(numAtt)) {
-      fase3Tiro(attaccante, difensore);
-    } else {
-      log(`⚽ GOAL!`, 'goal');
-      eseguiEsitoTiro('goal', attaccante, difensore);
-    }
+    if (dadi.includes(numAtt)) fase3Tiro(attaccante, difensore);
+    else { log(`⚽ GOAL!`, 'goal'); eseguiEsitoTiro('goal', attaccante, difensore); }
   }, 1500);
 }
 function fase3Tiro(attaccante, difensore) {
@@ -1916,7 +1831,7 @@ function fase3Tiro(attaccante, difensore) {
   else esito = 'parata';
   setTimeout(() => eseguiEsitoTiro(esito, attaccante, difensore), 1000);
 }
-function eseguiEsitoTiro(esito, attaccante, difensore) {
+async function eseguiEsitoTiro(esito, attaccante, difensore) {
   const box = document.getElementById('overlay-box');
   let msg, colore;
   if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
@@ -1927,7 +1842,7 @@ function eseguiEsitoTiro(esito, attaccante, difensore) {
   if (esito === 'parata') stato.statistiche[difensore].parate++;
   if (esito === 'palo') stato.statistiche[attaccante].pali++;
   if (esito === 'angolo') stato.statistiche[attaccante].angoli++;
-  setTimeout(() => {
+  setTimeout(async () => {
     chiudiOverlay();
     if (esito === 'goal') gestisciGoal(attaccante);
     else if (esito === 'parata') gestisciParata(attaccante, difensore);
@@ -1935,17 +1850,17 @@ function eseguiEsitoTiro(esito, attaccante, difensore) {
     else if (esito === 'angolo') gestisciAngolo(attaccante, difensore);
   }, 2200);
 }
-function gestisciGoal(attaccante) {
+async function gestisciGoal(attaccante) {
   stato.punteggio[attaccante]++;
   stato.statistiche[attaccante].gol++;
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'} segna!`, 'goal');
   mostraGoal(attaccante);
-  const gs = stato.giocatori[attaccante].filter(g => !g.espulso && !g.portiere);
-  if (gs.length > 0) {
-    const esultante = gs[Math.floor(Math.random() * gs.length)];
-    const esultanza = 'Esultanza' + (Math.floor(Math.random() * 3) + 1);
-    avviaAnimazione(esultante.id, esultanza);
-  }
+
+  // ✅ SCENA GOAL
+  const sqVinc = attaccante === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const sqPerd = attaccante === 'tu' ? stato.squadraCPU : stato.squadraTU;
+  await mostraScena('azione', sqVinc, sqPerd);
+
   setTimeout(() => {
     const subito = attaccante === 'tu' ? 'cpu' : 'tu';
     stato.possessore = subito;
@@ -1954,93 +1869,43 @@ function gestisciGoal(attaccante) {
     if (gz.length > 0) stato.giocatorePalla = gz[0].id;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 800);
-  }, 3000);
+  }, DURATA_SCENA);
 }
-function gestisciParata(attaccante, difensore) {
+async function gestisciParata(attaccante, difensore) {
   log(`🧤 Portiere rinvia.`);
-  stato.zonaPalla = 4;
+  // ✅ SCENA PORTIERE
+  const sqPort = difensore === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const sqAtt = attaccante === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  await mostraScena('portiere', sqPort, sqAtt);
+
+  stato.zonaPalla = 3;
   stato.possessore = Math.random() < 0.5 ? 'tu' : 'cpu';
-  const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 4 && !g.portiere && !g.espulso);
+  const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
   if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderCampo(); renderHeader();
-  setTimeout(() => avanzaMano(), 1000);
+  setTimeout(() => avanzaMano(), DURATA_SCENA);
 }
-function gestisciPalo(attaccante, difensore) {
+async function gestisciPalo(attaccante, difensore) {
   log(`🥅 Palo!`);
-  const zona = attaccante === 'tu' ? 6 : 1;
-  stato.zonaPalla = zona; stato.possessore = attaccante;
+  const sqVinc = attaccante === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const sqPerd = attaccante === 'tu' ? stato.squadraCPU : stato.squadraTU;
+  await mostraScena('tiro', sqVinc, sqPerd);
+  stato.zonaPalla = attaccante === 'tu' ? 5 : 1;
+  stato.possessore = attaccante;
   renderCampo(); renderHeader();
-  setTimeout(() => avanzaMano(), 1000);
+  setTimeout(() => avanzaMano(), DURATA_SCENA);
 }
-function gestisciAngolo(attaccante, difensore) {
+async function gestisciAngolo(attaccante, difensore) {
   log(`🚩 Angolo!`);
-  const zona = attaccante === 'tu' ? 6 : 1;
-  stato.zonaPalla = zona; stato.possessore = attaccante;
-  const gz = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
+  const sqVinc = attaccante === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  const sqPerd = attaccante === 'tu' ? stato.squadraCPU : stato.squadraTU;
+  await mostraScena('azione', sqVinc, sqPerd);
+  stato.zonaPalla = attaccante === 'tu' ? 5 : 1;
+  stato.possessore = attaccante;
+  const gz = stato.giocatori[attaccante].filter(g => g.zona === stato.zonaPalla && !g.portiere && !g.espulso);
   if (gz.length > 0) stato.giocatorePalla = gz[0].id;
   renderCampo(); renderHeader();
-  setTimeout(() => avanzaMano(), 1000);
-}
-function eseguiRigore(squadra) {
-  const difensore = squadra === 'tu' ? 'cpu' : 'tu';
-  nascondiPalla();
-  stato.statistiche[squadra].tiri++;
-  apriOverlay(`<h2>🎯 RIGORE</h2><div class="fase-label">FASE 1 — Tiro</div><div id="area-tiro" style="margin-top:10px"></div>`);
-  setTimeout(() => {
-    const dado = Math.floor(Math.random() * 9) + 1;
-    document.getElementById('area-tiro').innerHTML = `<div class="dado ${squadra === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
-    setTimeout(() => {
-      if (dado === 5 || dado === 8) {
-        stato.statistiche[difensore].parate++;
-        eseguiEsitoRigore('parata', squadra, difensore); return;
-      }
-      fase2Rigore(squadra, difensore, dado);
-    }, 1200);
-  }, 400);
-}
-function fase2Rigore(squadra, difensore, numAtt) {
-  const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere</div><div id="area-portiere"></div>`);
-  const dadi = mescola([1,2,3,4,6,7,9]).slice(0, 3);
-  document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
-  setTimeout(() => {
-    if (dadi.includes(numAtt)) {
-      fase3Rigore(squadra, difensore);
-    } else {
-      stato.statistiche[squadra].gol++;
-      eseguiEsitoRigore('goal', squadra, difensore);
-    }
-  }, 1500);
-}
-function fase3Rigore(squadra, difensore) {
-  const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
-  const dado = Math.floor(Math.random() * 9) + 1;
-  document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
-  let esito;
-  if (dado === 1) esito = 'palo';
-  else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
-  else esito = 'parata';
-  setTimeout(() => {
-    if (esito === 'parata') stato.statistiche[difensore].parate++;
-    eseguiEsitoRigore(esito, squadra, difensore);
-  }, 1000);
-}
-function eseguiEsitoRigore(esito, squadra, difensore) {
-  const box = document.getElementById('overlay-box');
-  let msg, colore;
-  if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
-  else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
-  else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
-  else if (esito === 'angolo') { msg = "🚩 ANGOLO!"; colore = 'angolo'; }
-  box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
-  setTimeout(() => {
-    chiudiOverlay();
-    if (esito === 'goal') gestisciGoal(squadra);
-    else if (esito === 'parata') gestisciParata(squadra, difensore);
-    else if (esito === 'palo') gestisciPalo(squadra, difensore);
-    else if (esito === 'angolo') gestisciAngolo(squadra, difensore);
-  }, 2200);
+  setTimeout(() => avanzaMano(), DURATA_SCENA);
 }
 
 /* AVANZAMENTO */
@@ -2053,12 +1918,9 @@ function avanzaMano() {
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
-      // Ripristina carte a 7
-      riempiMano('tu');
-      riempiMano('cpu');
+      riempiMano('tu'); riempiMano('cpu');
       const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
-      stato.possessore = perdente;
-      stato.zonaPalla = 3;
+      stato.possessore = perdente; stato.zonaPalla = 3;
       const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
       if (gz.length > 0) stato.giocatorePalla = gz[0].id;
       renderCampo(); renderHeader();
@@ -2130,7 +1992,6 @@ function confermaSostituzione() {
   const campo = stato.giocatori[sq].find(g => g.id === selezioneSost.campo);
   const pan = stato.panchina[sq].find(g => g.id === selezioneSost.panchina);
   if (!campo || !pan || pan.entrato) return;
-  fermaAnimazione(campo.id);
   const nuovo = {
     id: pan.id, squadra: sq, zona: campo.zona, ruolo: pan.ruolo,
     portiere: pan.portiere, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
