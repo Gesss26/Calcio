@@ -50,7 +50,6 @@
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* ===== CAMPO ===== */
   .campo-wrapper {
     flex: 0 0 42vh; position: relative; overflow: hidden;
     transition: flex 0.4s ease;
@@ -79,7 +78,6 @@
     text-shadow: 0 1px 2px #000;
   }
 
-  /* Zona contenitore giocatori */
   .zone {
     display: flex; width: 100%; height: 100%;
     position: absolute; inset: 0; z-index: 5;
@@ -111,7 +109,6 @@
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 9px; }
 
-  /* GIOCATORE SVG */
   .pedina {
     position: relative; width: 30px; height: 38px;
     display: flex; align-items: center; justify-content: center;
@@ -147,7 +144,6 @@
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
   }
 
-  /* PALLA VOLANTE (animazione tra zone) */
   .palla-volante {
     position: absolute; z-index: 15;
     width: 16px; height: 16px;
@@ -159,7 +155,6 @@
   }
   .palla-volante.attiva { display: block; }
 
-  /* Animazioni SVG */
   .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
   @keyframes animFermo {
     0%, 100% { transform: translateY(0); }
@@ -195,7 +190,6 @@
     100% { transform: translateY(0) rotate(0deg); }
   }
 
-  /* Flash vincitore */
   .flash-vincitore {
     position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
   }
@@ -204,7 +198,6 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* GOAL BANNER */
   .goal-banner {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -483,7 +476,6 @@
     box-shadow: 0 8px 24px rgba(255,215,0,0.7);
   }
 
-  /* Statistiche finali */
   .stats-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
     margin: 14px 0;
@@ -702,7 +694,7 @@ const STAMINA_MAX = 45;
 const CARTE_INIZIALI = 7;
 const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
-const DURATA_ANIM_PALLA = 1200;
+const DURATA_ANIM_PALLA = 2400;
 
 /* =========================================================
    GIOCATORE SVG CHIBI
@@ -836,7 +828,7 @@ function mescola(arr) {
 }
 
 /* =========================================================
-   MAZZO CARTE
+   GESTIONE MAZZO
    ========================================================= */
 function inizializzaMazzo() {
   stato.mazzo = creaMazzoPoker();
@@ -1077,7 +1069,6 @@ function renderCampo() {
     zona.className = 'zona';
     zona.dataset.zona = z.id;
 
-    // Lato TU
     const pedineTu = document.createElement('div');
     pedineTu.className = 'pedine-tu';
     if (z.portiere) {
@@ -1090,7 +1081,6 @@ function renderCampo() {
     }
     zona.appendChild(pedineTu);
 
-    // Lato CPU
     const pedineCpu = document.createElement('div');
     pedineCpu.className = 'pedine-cpu';
     if (z.portiere) {
@@ -1197,9 +1187,7 @@ function renderPanchina() {
   });
 }
 
-/* =========================================================
-   MONETA
-   ========================================================= */
+/* MONETA */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
@@ -1216,7 +1204,7 @@ function lanciaMoneta(scelta) {
 }
 
 /* =========================================================
-   ANIMAZIONE PALLA TRA ZONE
+   ANIMAZIONE PALLA TRA ZONE (velocità 2400ms)
    ========================================================= */
 function animaPallaVersoZona(zonaDa, zonaA, callback) {
   const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
@@ -1266,7 +1254,6 @@ function avviaContrasto() {
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
 
-  // Se il possessore attuale non è più nella zona, scegline uno casuale tra i 2
   let giocatoreAtt = stato.giocatorePalla
     ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla && g.zona === zona)
     : null;
@@ -1388,7 +1375,6 @@ function confermaCarta() {
   let vincitore = null;
   let motivoFallo = null;
 
-  // Fallo se non giochi il seme guida pur avendolo in mano
   const tuAvevaSeme = stato.mani.tu.some(x => x.seme === c.semeGuida && x.id !== cartaTu.id);
   const cpuAvevaSeme = stato.mani.cpu.some(x => x.seme === c.semeGuida && x.id !== cartaCpu.id);
 
@@ -1403,11 +1389,9 @@ function confermaCarta() {
     vincitore = 'cpu';
     if (tuAvevaSeme) motivoFallo = 'tu';
   } else {
-    // Nessuno ha giocato il seme guida
     if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
     else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
     else return risolviPareggio(cartaTu, cartaCpu);
-    // Fallo per chi aveva il seme ma non l'ha giocato
     if (tuAvevaSeme && !cpuAvevaSeme) motivoFallo = 'tu';
     else if (!tuAvevaSeme && cpuAvevaSeme) motivoFallo = 'cpu';
   }
@@ -1496,7 +1480,7 @@ function nascondiBannerMano() {
 }
 
 /* =========================================================
-   RISOLUZIONE CONTRASTO
+   RISOLUZIONE CONTRASTO — logica corretta
    ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
@@ -1513,30 +1497,20 @@ function risolviContrasto(vincente, motivoFallo) {
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // Se l'attaccante vince
+  // CASO 1: VINCE L'ATTACCANTE
   if (vincente === c.attaccante) {
-    // Verifica se è in zona tiro
-    if (c.attaccante === 'tu' && c.zona === 5) {
-      // Tiro in porta da Z5
-      setTimeout(() => tiroInPorta('tu'), 500);
-      return;
-    }
-    if (c.attaccante === 'cpu' && c.zona === 1) {
-      setTimeout(() => tiroInPorta('cpu'), 500);
-      return;
-    }
-    // Altrimenti avanza di zona
-    const nuovaZona = c.zona + (c.attaccante === 'tu' ? 1 : -1);
-    if (nuovaZona === 6 || nuovaZona === 0) {
-      // Fine campo
+    if ((c.attaccante === 'tu' && c.zona === 5) || (c.attaccante === 'cpu' && c.zona === 1)) {
       setTimeout(() => tiroInPorta(c.attaccante), 500);
       return;
     }
-    // Animazione palla verso la zona successiva
+    const nuovaZona = c.zona + (c.attaccante === 'tu' ? 1 : -1);
+    if (nuovaZona === 6 || nuovaZona === 0) {
+      setTimeout(() => tiroInPorta(c.attaccante), 500);
+      return;
+    }
     animaPallaVersoZona(c.zona, nuovaZona, () => {
       stato.zonaPalla = nuovaZona;
       stato.possessore = c.attaccante;
-      // Scegli un compagno CASUALE nella nuova zona
       const compagni = stato.giocatori[c.attaccante].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
       if (compagni.length > 0) {
         const scelto = compagni[Math.floor(Math.random() * compagni.length)];
@@ -1546,35 +1520,59 @@ function risolviContrasto(vincente, motivoFallo) {
       renderCampo(); renderHeader();
       setTimeout(() => avanzaMano(), 400);
     });
-  } else {
-    // Il difensore vince: prende palla e la passa al suo portiere
-    const nuovaZona = c.zona + (c.difensore === 'tu' ? -1 : 1);
-    // Il difensore passa al portiere (Z0 per TU, Z6 per CPU)
-    const zonaPortiere = c.difensore === 'tu' ? 0 : 6;
-    animaPallaVersoZona(c.zona, zonaPortiere, () => {
+    return;
+  }
+
+  // CASO 2: VINCE IL DIFENSORE
+  const difSquadra = vincente;
+  const zonaCorrente = c.zona;
+  const isZonaArea = (difSquadra === 'tu' && zonaCorrente === 1) || (difSquadra === 'cpu' && zonaCorrente === 5);
+
+  if (isZonaArea) {
+    // Passa al portiere e poi rilancio a Z3
+    const zonaPortiere = difSquadra === 'tu' ? 0 : 6;
+    animaPallaVersoZona(zonaCorrente, zonaPortiere, () => {
       stato.zonaPalla = zonaPortiere;
-      stato.possessore = c.difensore;
-      // Il portiere prende palla
-      const por = stato.giocatori[c.difensore].find(g => g.zona === zonaPortiere);
+      stato.possessore = difSquadra;
+      const por = stato.giocatori[difSquadra].find(g => g.zona === zonaPortiere);
       if (por) stato.giocatorePalla = por.id;
-      log(`🧤 ${c.difensore === 'tu' ? 'TU' : 'CPU'} passa al portiere`);
+      log(`🧤 ${difSquadra === 'tu' ? 'TU' : 'CPU'} passa al portiere`);
       renderCampo(); renderHeader();
-      // Dopo un momento, il portiere rilancia a Z3
+
       setTimeout(() => {
         animaPallaVersoZona(zonaPortiere, 3, () => {
           stato.zonaPalla = 3;
-          // Il possessore diventa casuale tra i 2 di Z3 (chi ha vinto il contrasto)
-          const compagni = stato.giocatori[c.difensore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+          stato.possessore = difSquadra;
+          const compagni = stato.giocatori[difSquadra].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
           if (compagni.length > 0) {
             const scelto = compagni[Math.floor(Math.random() * compagni.length)];
             stato.giocatorePalla = scelto.id;
           }
-          stato.possessore = c.difensore;
-          log(`🚀 Rilancio a centrocampo`);
+          log(`🚀 Rilancio del portiere a centrocampo`);
           renderCampo(); renderHeader();
           setTimeout(() => avanzaMano(), 400);
         });
       }, 500);
+    });
+  } else {
+    // Il difensore NON è in area → palla retrocede di 1 zona verso la sua porta
+    const zonaRetrocessa = difSquadra === 'tu' ? zonaCorrente - 1 : zonaCorrente + 1;
+    const zonaTarget = Math.max(0, Math.min(6, zonaRetrocessa));
+
+    animaPallaVersoZona(zonaCorrente, zonaTarget, () => {
+      stato.zonaPalla = zonaTarget;
+      stato.possessore = difSquadra;
+      const compagni = stato.giocatori[difSquadra].filter(g => g.zona === zonaTarget && !g.portiere && !g.espulso);
+      if (compagni.length > 0) {
+        const scelto = compagni[Math.floor(Math.random() * compagni.length)];
+        stato.giocatorePalla = scelto.id;
+        log(`⬅️ ${difSquadra === 'tu' ? 'TU' : 'CPU'} passa a ${scelto.nome}`);
+      } else {
+        const por = stato.giocatori[difSquadra].find(g => g.portiere);
+        if (por) stato.giocatorePalla = por.id;
+      }
+      renderCampo(); renderHeader();
+      setTimeout(() => avanzaMano(), 400);
     });
   }
 }
@@ -1591,9 +1589,7 @@ function applicaFallo(squadraFallosa, c) {
   if (falloso.falli >= 6) { falloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
 }
 
-/* =========================================================
-   TIRO IN PORTA
-   ========================================================= */
+/* TIRO IN PORTA */
 function mostraGoalBanner(vincente) {
   const banner = document.getElementById('goal-banner');
   banner.classList.remove('tu', 'cpu', 'attivo');
@@ -1714,16 +1710,13 @@ function flashVincitore(squadra) {
   setTimeout(() => flash.classList.remove('attivo'), 600);
 }
 
-/* =========================================================
-   AVANZAMENTO
-   ========================================================= */
+/* AVANZAMENTO */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
       stato.tempo = 2; stato.mano = 1;
       log(`⏸️ FINE PRIMO TEMPO. ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
-      // Cambio campo: ora la CPU attacca verso Z0
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
@@ -1787,9 +1780,7 @@ function finePartita() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* =========================================================
-   SOSTITUZIONI
-   ========================================================= */
+/* SOSTITUZIONI */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
