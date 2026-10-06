@@ -59,7 +59,7 @@
   .classifica tr.spareggio td:first-child { color: #fbbf24; }
   .squadre-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 8px; margin-top: 12px;
   }
   .squadra-btn {
@@ -67,13 +67,12 @@
     padding: 8px; cursor: pointer; text-align: center; color: #fff;
     font-size: 11px; font-weight: bold; transition: all 0.2s;
   }
-  .squadra-btn:hover { background: #4dabf7; color: #0f3460; }
+  .squadra-btn:hover { background: #4dabf7; color: #16213e; }
   .squadra-btn.selezionata { background: #ffd700; color: #16213e; border-color: #ffd700; }
   .squadra-btn .maglia {
-    width: 40px; height: 48px; margin: 0 auto 4px;
-    background-size: contain; background-repeat: no-repeat; background-position: center;
-    image-rendering: pixelated;
+    width: 40px; height: 52px; margin: 0 auto 4px;
   }
+  .squadra-btn .maglia svg { width: 100%; height: 100%; }
   .btn {
     background: #0f3460; color: #fff; border: 2px solid #4dabf7;
     padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: bold;
@@ -130,83 +129,55 @@
   <div class="content" id="content">
     <div class="loading">
       <div class="spinner"></div>
-      <div>Caricamento squadre...</div>
+      <div>Caricamento...</div>
     </div>
   </div>
 </div>
 
+<script src="divise.js"></script>
 <script>
 /* =========================================================
-   SQUADRE EUROPEE 2028 - COLORI DIVISE + PELLE + CAPELLI
+   GIOCATORE SVG (chibi) - riutilizzabile
    ========================================================= */
-const SQUADRE_EURO = {
-  // ===== EUROPA OCCIDENTALE / MEDITERRANEO =====
-  italia:     { nome: 'ITALIA',     maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#E8B88A', capelli: '#2A1A0F' },
-  francia:    { nome: 'FRANCIA',    maglia: '#002395', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#8D5524', capelli: '#1A1008' },
-  spagna:     { nome: 'SPAGNA',     maglia: '#C60B1E', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#D9A06B', capelli: '#1F1409' },
-  portogallo: { nome: 'PORTOGALLO', maglia: '#006600', pantaloncini: '#CC0000', calzettoni: '#006600', pelle: '#C68A5A', capelli: '#1F1409' },
-  grecia:     { nome: 'GRECIA',     maglia: '#FFFFFF', pantaloncini: '#0066CC', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' },
-  malta:      { nome: 'MALTA',      maglia: '#CF142B', pantaloncini: '#FFFFFF', calzettoni: '#CF142B', pelle: '#C68A5A', capelli: '#1F1409' },
-  cipro:      { nome: 'CIPRO',      maglia: '#FFFFFF', pantaloncini: '#FF6600', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' },
-  sanmarino:  { nome: 'SAN MARINO', maglia: '#5EB6E4', pantaloncini: '#FFFFFF', calzettoni: '#5EB6E4', pelle: '#E8B88A', capelli: '#2A1A0F' },
-  andorra:    { nome: 'ANDORRA',    maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#D9A06B', capelli: '#1F1409' },
-  gibilterra: { nome: 'GIBILTERRA', maglia: '#FFFFFF', pantaloncini: '#DA291C', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' },
-
-  // ===== EUROPA CENTRALE / GERMANICA =====
-  germania:   { nome: 'GERMANIA',   maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-  austria:    { nome: 'AUSTRIA',    maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-  svizzera:   { nome: 'SVIZZERA',   maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#FF0000', pelle: '#F0C8A0', capelli: '#5C3A1E' },
-  olanda:     { nome: 'OLANDA',     maglia: '#FF6600', pantaloncini: '#000000', calzettoni: '#FF6600', pelle: '#F5D0A9', capelli: '#C9A24A' },
-  belgio:     { nome: 'BELGIO',     maglia: '#CC0000', pantaloncini: '#000000', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#5C3A1E' },
-  lussemburgo:{ nome: 'LUSSEMBURGO',maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#00A1DE', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-  liechtenstein:{ nome: 'LIECHTENSTEIN', maglia: '#002B7F', pantaloncini: '#FFFFFF', calzettoni: '#CE1126', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-
-  // ===== SCANDINAVIA / NORD EUROPA =====
-  svezia:     { nome: 'SVEZIA',     maglia: '#FECC02', pantaloncini: '#005B99', calzettoni: '#FECC02', pelle: '#F8DCC0', capelli: '#E8C97A' },
-  norvegia:   { nome: 'NORVEGIA',   maglia: '#BA0C2F', pantaloncini: '#FFFFFF', calzettoni: '#BA0C2F', pelle: '#F8DCC0', capelli: '#E8C97A' },
-  danimarca:  { nome: 'DANIMARCA',  maglia: '#C60C30', pantaloncini: '#FFFFFF', calzettoni: '#C60C30', pelle: '#F8DCC0', capelli: '#D9B26A' },
-  finlandia:  { nome: 'FINLANDIA',  maglia: '#FFFFFF', pantaloncini: '#002F6C', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#E8C97A' },
-  islanda:    { nome: 'ISLANDA',    maglia: '#003897', pantaloncini: '#FFFFFF', calzettoni: '#D72828', pelle: '#F8DCC0', capelli: '#D9B26A' },
-  estonia:    { nome: 'ESTONIA',    maglia: '#0072CE', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F5D0A9', capelli: '#C9A24A' },
-  lettonia:   { nome: 'LETTONIA',   maglia: '#9E3039', pantaloncini: '#FFFFFF', calzettoni: '#9E3039', pelle: '#F5D0A9', capelli: '#A67B4A' },
-  lituania:   { nome: 'LITUANIA',   maglia: '#FDB913', pantaloncini: '#006A44', calzettoni: '#C1272D', pelle: '#F5D0A9', capelli: '#A67B4A' },
-  faroe:      { nome: 'FAROE',      maglia: '#FFFFFF', pantaloncini: '#003897', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#D9B26A' },
-
-  // ===== ISOLE BRITANNICHE =====
-  inghilterra:{ nome: 'INGHILTERRA',maglia: '#FFFFFF', pantaloncini: '#000080', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A0764A' },
-  scozia:     { nome: 'SCOZIA',     maglia: '#0065BD', pantaloncini: '#FFFFFF', calzettoni: '#0065BD', pelle: '#F0C8A0', capelli: '#8B3A1E' },
-  galles:     { nome: 'GALLES',     maglia: '#C8102E', pantaloncini: '#FFFFFF', calzettoni: '#C8102E', pelle: '#F0C8A0', capelli: '#3A1E0F' },
-  irlanda:    { nome: 'IRLANDA',    maglia: '#169B62', pantaloncini: '#FFFFFF', calzettoni: '#169B62', pelle: '#F0C8A0', capelli: '#8B3A1E' },
-
-  // ===== EUROPA CENTRO-ORIENTALE =====
-  polonia:    { nome: 'POLONIA',    maglia: '#FFFFFF', pantaloncini: '#DC143C', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A67B4A' },
-  cechia:     { nome: 'CECHIA',     maglia: '#D7141A', pantaloncini: '#FFFFFF', calzettoni: '#D7141A', pelle: '#F0C8A0', capelli: '#5C3A1E' },
-  slovacchia: { nome: 'SLOVACCHIA', maglia: '#0B4EA2', pantaloncini: '#FFFFFF', calzettoni: '#EE1C25', pelle: '#F0C8A0', capelli: '#5C3A1E' },
-  ungheria:   { nome: 'UNGHERIA',   maglia: '#CE2939', pantaloncini: '#FFFFFF', calzettoni: '#477050', pelle: '#E8B88A', capelli: '#3A1E0F' },
-  slovenia:   { nome: 'SLOVENIA',   maglia: '#FFFFFF', pantaloncini: '#005DA4', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' },
-  croazia:    { nome: 'CROAZIA',    maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#0000CC', pelle: '#E8B88A', capelli: '#3A1E0F' },
-  bosnia:     { nome: 'BOSNIA',     maglia: '#002F6C', pantaloncini: '#FFFFFF', calzettoni: '#002F6C', pelle: '#D9A06B', capelli: '#1F1409' },
-  serbia:     { nome: 'SERBIA',     maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#D9A06B', capelli: '#1F1409' },
-  montenegro: { nome: 'MONTENEGRO', maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#D9A06B', capelli: '#1F1409' },
-  macedonia:  { nome: 'MACEDONIA',  maglia: '#D20000', pantaloncini: '#FFFFFF', calzettoni: '#D20000', pelle: '#D9A06B', capelli: '#1F1409' },
-  kosovo:     { nome: 'KOSOVO',     maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#0033A0', pelle: '#D9A06B', capelli: '#1F1409' },
-  albania:    { nome: 'ALBANIA',    maglia: '#E41E20', pantaloncini: '#000000', calzettoni: '#E41E20', pelle: '#D9A06B', capelli: '#1F1409' },
-
-  // ===== EUROPA ORIENTALE / SLAVA =====
-  romania:    { nome: 'ROMANIA',    maglia: '#FFCC00', pantaloncini: '#0033CC', calzettoni: '#FFCC00', pelle: '#E8B88A', capelli: '#3A1E0F' },
-  bulgaria:   { nome: 'BULGARIA',   maglia: '#FFFFFF', pantaloncini: '#00966E', calzettoni: '#D62612', pelle: '#E8B88A', capelli: '#3A1E0F' },
-  moldavia:   { nome: 'MOLDAVIA',   maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#CC0000', pelle: '#E8B88A', capelli: '#3A1E0F' },
-  ucraina:    { nome: 'UCRAINA',    maglia: '#FFD700', pantaloncini: '#0057B7', calzettoni: '#FFD700', pelle: '#E8B88A', capelli: '#5C3A1E' },
-  bielorussia:{ nome: 'BIELORUSSIA',maglia: '#C8313E', pantaloncini: '#FFFFFF', calzettoni: '#C8313E', pelle: '#F0C8A0', capelli: '#A67B4A' },
-  russia:     { nome: 'RUSSIA',     maglia: '#CC0000', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#8B5A2B' },
-
-  // ===== CAUCASO / ASIA OCCIDENTALE =====
-  georgia:    { nome: 'GEORGIA',    maglia: '#FFFFFF', pantaloncini: '#FF0000', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' },
-  armenia:    { nome: 'ARMENIA',    maglia: '#D90012', pantaloncini: '#0033A0', calzettoni: '#D90012', pelle: '#C68A5A', capelli: '#1F1409' },
-  azerbaigian:{ nome: 'AZERBAIGIAN',maglia: '#00B5E2', pantaloncini: '#FFFFFF', calzettoni: '#00B5E2', pelle: '#C68A5A', capelli: '#1F1409' },
-  kazakistan: { nome: 'KAZAKISTAN', maglia: '#00AFCA', pantaloncini: '#FFFFFF', calzettoni: '#00AFCA', pelle: '#D9A06B', capelli: '#1F1409' },
-  turchia:    { nome: 'TURCHIA',    maglia: '#E30A17', pantaloncini: '#FFFFFF', calzettoni: '#E30A17', pelle: '#D9A06B', capelli: '#1F1409' }
-};
+function creaGiocatoreSVG(divisa, animazione = 'fermo') {
+  const capelli = divisa.capelli;
+  const pelle = divisa.pelle;
+  const maglia = divisa.maglia;
+  const pant = divisa.pantaloncini;
+  const calze = divisa.calzettoni;
+  return `
+    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="124" rx="22" ry="4" fill="rgba(0,0,0,0.35)"/>
+      <rect x="36" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
+      <rect x="53" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
+      <rect x="36" y="98" width="11" height="16" rx="2" fill="${calze}"/>
+      <rect x="53" y="98" width="11" height="16" rx="2" fill="${calze}"/>
+      <rect x="34" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
+      <rect x="52" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
+      <rect x="35" y="72" width="30" height="18" rx="4" fill="${pant}"/>
+      <rect x="32" y="42" width="36" height="32" rx="6" fill="${maglia}"/>
+      <rect x="24" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
+      <rect x="66" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
+      <rect x="22" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
+      <rect x="68" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
+      <circle cx="27" cy="78" r="5" fill="${pelle}"/>
+      <circle cx="73" cy="78" r="5" fill="${pelle}"/>
+      <rect x="46" y="38" width="8" height="6" fill="${pelle}"/>
+      <ellipse cx="50" cy="26" rx="20" ry="19" fill="${pelle}"/>
+      <path d="M 30 22 Q 32 8 50 6 Q 68 8 70 22 Q 68 16 60 14 Q 55 20 50 18 Q 44 20 40 14 Q 32 16 30 22 Z" fill="${capelli}"/>
+      <path d="M 30 22 Q 28 28 32 30 Q 34 26 34 22 Z" fill="${capelli}"/>
+      <path d="M 70 22 Q 72 28 68 30 Q 66 26 66 22 Z" fill="${capelli}"/>
+      <ellipse cx="43" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
+      <ellipse cx="57" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
+      <circle cx="44" cy="25.5" r="1" fill="#fff"/>
+      <circle cx="58" cy="25.5" r="1" fill="#fff"/>
+      <circle cx="38" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
+      <circle cx="62" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
+      <path d="M 45 35 Q 50 38 55 35" stroke="#8B2020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <text x="50" y="62" font-size="10" font-weight="bold" fill="rgba(0,0,0,0.35)" text-anchor="middle" font-family="Arial">10</text>
+    </svg>
+  `;
+}
 
 /* =========================================================
    STATO
@@ -222,189 +193,15 @@ let stato = {
 };
 
 /* =========================================================
-   COLORAZIONE DINAMICA PEDINE
-   ========================================================= */
-function hexToRgb(hex) {
-  const h = hex.replace('#', '');
-  return {
-    r: parseInt(h.substring(0, 2), 16),
-    g: parseInt(h.substring(2, 4), 16),
-    b: parseInt(h.substring(4, 6), 16)
-  };
-}
-
-const cacheImmagini = {};
-
-function pathFrame(animazione, numero) {
-  return encodeURI(`${animazione}/${animazione} (${numero}).png`);
-}
-
-function caricaImmagineColorata(squadraId, animazione, numeroFrame) {
-  return new Promise((resolve) => {
-    const chiave = `${squadraId}|${animazione}|${numeroFrame}`;
-    if (cacheImmagini[chiave]) { resolve(cacheImmagini[chiave]); return; }
-    const percorso = pathFrame(animazione, numeroFrame);
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-
-        const squadra = SQUADRE_EURO[squadraId] || SQUADRE_EURO.italia;
-        const targetMaglia = hexToRgb(squadra.maglia);
-        const targetPantaloncini = hexToRgb(squadra.pantaloncini);
-        const targetCalzettoni = hexToRgb(squadra.calzettoni);
-        const targetCapelli = hexToRgb(squadra.capelli);
-        const targetPelle = hexToRgb(squadra.pelle);
-
-        const W = canvas.width, H = canvas.height;
-        const bbox = trovaBoundingBox(ctx, W, H);
-        if (!bbox) { resolve(percorso); return; }
-
-        const altezza = bbox.y2 - bbox.y1;
-        const larghezza = bbox.x2 - bbox.x1;
-        const centroX = Math.floor((bbox.x1 + bbox.x2) / 2);
-
-        // Punti di riferimento per flood fill
-        const punti = {
-          capelli:      { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.10) },
-          viso:         { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.28) },
-          maglia:       { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.54) },
-          pantaloncini: { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.67) },
-          calzettoni:   { x: centroX, y: bbox.y1 + Math.floor(altezza * 0.87) }
-        };
-
-        // ✅ COLORAZIONE CAPELLI
-        floodFillBianco(ctx, punti.capelli.x, punti.capelli.y, targetCapelli);
-        // ✅ COLORAZIONE PELLE (viso, braccia, gambe)
-        floodFillBianco(ctx, punti.viso.x, punti.viso.y, targetPelle);
-        // Braccio sinistro
-        floodFillBianco(ctx, centroX - Math.floor(larghezza * 0.30), bbox.y1 + Math.floor(altezza * 0.58), targetPelle);
-        // Braccio destro
-        floodFillBianco(ctx, centroX + Math.floor(larghezza * 0.30), bbox.y1 + Math.floor(altezza * 0.58), targetPelle);
-        // Gamba sinistra (sotto i calzettoni)
-        floodFillBianco(ctx, centroX - Math.floor(larghezza * 0.15), bbox.y1 + Math.floor(altezza * 0.78), targetPelle);
-        // Gamba destra
-        floodFillBianco(ctx, centroX + Math.floor(larghezza * 0.15), bbox.y1 + Math.floor(altezza * 0.78), targetPelle);
-        // ✅ COLORAZIONE MAGLIA / PANTALONCINI / CALZETTONI
-        floodFillBianco(ctx, punti.maglia.x, punti.maglia.y, targetMaglia);
-        floodFillBianco(ctx, punti.pantaloncini.x, punti.pantaloncini.y, targetPantaloncini);
-        floodFillBianco(ctx, punti.calzettoni.x, punti.calzettoni.y, targetCalzettoni);
-
-        // Ombre (colore scurito del 30%)
-        const ombraCapelli = { r: Math.round(targetCapelli.r * 0.7), g: Math.round(targetCapelli.g * 0.7), b: Math.round(targetCapelli.b * 0.7) };
-        const ombraPelle = { r: Math.round(targetPelle.r * 0.8), g: Math.round(targetPelle.g * 0.8), b: Math.round(targetPelle.b * 0.8) };
-        const ombraMaglia = { r: Math.round(targetMaglia.r * 0.7), g: Math.round(targetMaglia.g * 0.7), b: Math.round(targetMaglia.b * 0.7) };
-        const ombraPantaloncini = { r: Math.round(targetPantaloncini.r * 0.7), g: Math.round(targetPantaloncini.g * 0.7), b: Math.round(targetPantaloncini.b * 0.7) };
-        const ombraCalzettoni = { r: Math.round(targetCalzettoni.r * 0.7), g: Math.round(targetCalzettoni.g * 0.7), b: Math.round(targetCalzettoni.b * 0.7) };
-
-        floodFillGrigio(ctx, punti.capelli.x, punti.capelli.y, ombraCapelli);
-        floodFillGrigio(ctx, punti.viso.x, punti.viso.y, ombraPelle);
-        floodFillGrigio(ctx, punti.maglia.x, punti.maglia.y, ombraMaglia);
-        floodFillGrigio(ctx, punti.pantaloncini.x, punti.pantaloncini.y, ombraPantaloncini);
-        floodFillGrigio(ctx, punti.calzettoni.x, punti.calzettoni.y, ombraCalzettoni);
-
-        const dataURL = canvas.toDataURL();
-        cacheImmagini[chiave] = dataURL;
-        resolve(dataURL);
-      } catch (e) {
-        console.error('Errore Canvas:', e);
-        resolve(percorso);
-      }
-    };
-    img.onerror = () => resolve(percorso);
-    img.src = percorso;
-  });
-}
-
-function trovaBoundingBox(ctx, w, h) {
-  const data = ctx.getImageData(0, 0, w, h).data;
-  let x1 = w, y1 = h, x2 = 0, y2 = 0, trovato = false;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = (y * w + x) * 4;
-      if (data[i + 3] > 20) {
-        trovato = true;
-        if (x < x1) x1 = x;
-        if (x > x2) x2 = x;
-        if (y < y1) y1 = y;
-        if (y > y2) y2 = y;
-      }
-    }
-  }
-  return trovato ? { x1, y1, x2, y2 } : null;
-}
-
-function floodFillBianco(ctx, startX, startY, colore) {
-  const w = ctx.canvas.width, h = ctx.canvas.height;
-  if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
-  const imageData = ctx.getImageData(0, 0, w, h);
-  const data = imageData.data;
-  const startIdx = (startY * w + startX) * 4;
-  if (data[startIdx + 3] < 50) return;
-  const sr = data[startIdx], sg = data[startIdx + 1], sb = data[startIdx + 2];
-  if (sr < 200 || sg < 200 || sb < 200) return;
-  const stack = [[startX, startY]];
-  const visitati = new Uint8Array(w * h);
-  while (stack.length > 0) {
-    const [x, y] = stack.pop();
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-    const idx = y * w + x;
-    if (visitati[idx]) continue;
-    visitati[idx] = 1;
-    const i = idx * 4;
-    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-    if (a < 50) continue;
-    if (r < 100 && g < 100 && b < 100) continue;
-    if (r < 200 || g < 200 || b < 200) continue;
-    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
-    stack.push([x + 1, y]); stack.push([x - 1, y]);
-    stack.push([x, y + 1]); stack.push([x, y - 1]);
-  }
-  ctx.putImageData(imageData, 0, 0);
-}
-
-function floodFillGrigio(ctx, startX, startY, colore) {
-  const w = ctx.canvas.width, h = ctx.canvas.height;
-  if (startX < 0 || startX >= w || startY < 0 || startY >= h) return;
-  const imageData = ctx.getImageData(0, 0, w, h);
-  const data = imageData.data;
-  const stack = [[startX, startY]];
-  const visitati = new Uint8Array(w * h);
-  while (stack.length > 0) {
-    const [x, y] = stack.pop();
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-    const idx = y * w + x;
-    if (visitati[idx]) continue;
-    visitati[idx] = 1;
-    const i = idx * 4;
-    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-    if (a < 50) continue;
-    if (r < 100 && g < 100 && b < 100) continue;
-    const isGrigio = r > 130 && r < 230 && Math.abs(r - g) < 30 && Math.abs(g - b) < 30;
-    if (!isGrigio) continue;
-    data[i] = colore.r; data[i + 1] = colore.g; data[i + 2] = colore.b;
-    stack.push([x + 1, y]); stack.push([x - 1, y]);
-    stack.push([x, y + 1]); stack.push([x, y - 1]);
-  }
-  ctx.putImageData(imageData, 0, 0);
-}
-
-/* =========================================================
    LOGICA TORNEO
    ========================================================= */
 const GRUPPI = ['A','B','C','D','E','F','G','H'];
 
 function creaGironi() {
-  const ids = Object.keys(SQUADRE_EURO);
+  const ids = Object.keys(SQUADRE);
   const mescolate = [...ids].sort(() => Math.random() - 0.5);
   const gironi = {};
-  // 8 gironi da 6-7 squadre ciascuno (53 squadre totali)
-  const perGirone = Math.ceil(ids.length / 8); // 7
+  const perGirone = Math.ceil(ids.length / 8);
   GRUPPI.forEach((g, i) => {
     gironi[g] = mescolate.slice(i * perGirone, (i + 1) * perGirone);
   });
@@ -468,13 +265,11 @@ function eseguiQualificazioni() {
     const squadre = stato.gironiRaw[g];
     stato.gironi[g] = simulaGirone(g, squadre);
   }
-  // Qualificate: prime 2 di ogni girone
   stato.qualificate = [];
   for (const g of GRUPPI) {
     const top2 = stato.gironi[g].classifica.slice(0, 2);
     top2.forEach(t => stato.qualificate.push(t.squadra));
   }
-  // Spareggi: terze e quarte (16 squadre)
   const spareggianti = [];
   for (const g of GRUPPI) {
     const c = stato.gironi[g].classifica;
@@ -514,7 +309,6 @@ function simulaTurno(turno) {
 }
 
 function creaTabellone(qualificate) {
-  // Prendi 16 qualificate (le prime 16 dopo spareggi)
   const q = qualificate.slice(0, 16);
   const mescolate = [...q].sort(() => Math.random() - 0.5);
   const ottavi = [];
@@ -559,10 +353,10 @@ function avanzaTurno() {
 /* =========================================================
    RENDER
    ========================================================= */
-async function render() {
+function render() {
   const content = document.getElementById('content');
   if (stato.fase === 'scelta') {
-    await renderScelta(content);
+    renderScelta(content);
   } else if (stato.fase === 'qualificazioni') {
     renderQualificazioni(content);
   } else if (['ottavi','quarti','semifinali','finale'].includes(stato.fase)) {
@@ -572,19 +366,14 @@ async function render() {
   }
 }
 
-async function renderScelta(content) {
-  content.innerHTML = `<div class="loading"><div class="spinner"></div><div>Colorazione maglie in corso...</div></div>`;
-  const imgSquadre = {};
-  for (const id of Object.keys(SQUADRE_EURO)) {
-    imgSquadre[id] = await caricaImmagineColorata(id, 'Fermo', 1);
-  }
+function renderScelta(content) {
   let html = `<div class="fase-titolo">Scegli la tua squadra</div>
     <div class="avviso">Seleziona una nazionale per iniziare le qualificazioni agli Europei 2028.</div>
     <div class="squadre-grid">`;
-  Object.keys(SQUADRE_EURO).forEach(id => {
+  Object.keys(SQUADRE).forEach(id => {
     html += `<div class="squadra-btn ${id === stato.squadraScelta ? 'selezionata' : ''}" onclick="selezionaSquadra('${id}')">
-      <div class="maglia" style="background-image: url('${imgSquadre[id]}');"></div>
-      <div>${SQUADRE_EURO[id].nome}</div>
+      <div class="maglia">${creaGiocatoreSVG(SQUADRE[id].casa, 'fermo')}</div>
+      <div>${SQUADRE[id].nome}</div>
     </div>`;
   });
   html += `</div>`;
@@ -608,7 +397,7 @@ function iniziaQualificazioni() {
 
 function renderQualificazioni(content) {
   let html = `<div class="fase-titolo">📋 Fase a Gironi — Qualificazioni</div>`;
-  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE_EURO[stato.squadraScelta].nome}</strong></div>`;
+  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE[stato.squadraScelta].nome}</strong></div>`;
   html += `<div class="gironi-grid">`;
   for (const g of GRUPPI) {
     const girone = stato.gironi[g];
@@ -619,7 +408,7 @@ function renderQualificazioni(content) {
       const cls = t.squadra === stato.squadraScelta ? 'tua' : '';
       const qual = idx < 2 ? 'qualificata' : idx < 4 ? 'spareggio' : '';
       html += `<tr class="${cls} ${qual}">
-        <td>${SQUADRE_EURO[t.squadra].nome}</td>
+        <td>${SQUADRE[t.squadra].nome}</td>
         <td>${t.punti}</td><td>${t.giocate}</td><td>${t.gf}</td><td>${t.gs}</td><td>${t.dr > 0 ? '+' : ''}${t.dr}</td>
       </tr>`;
     });
@@ -630,10 +419,10 @@ function renderQualificazioni(content) {
   stato.spareggi.forEach(p => {
     const cls = (p.a === stato.squadraScelta || p.b === stato.squadraScelta) ? 'tua' : '';
     html += `<div class="match-row ${cls}">
-      <span>${SQUADRE_EURO[p.a].nome}</span>
+      <span>${SQUADRE[p.a].nome}</span>
       <span class="score">${p.golA} - ${p.golB}</span>
-      <span>${SQUADRE_EURO[p.b].nome}</span>
-      <span class="esito">→ ${SQUADRE_EURO[p.vincitore].nome}</span>
+      <span>${SQUADRE[p.b].nome}</span>
+      <span class="esito">→ ${SQUADRE[p.vincitore].nome}</span>
     </div>`;
   });
   html += `</div>`;
@@ -655,7 +444,7 @@ function renderTabellone(content) {
     { key: 'finale', nome: 'Finale' }
   ];
   let html = `<div class="fase-titolo">🏆 Fase Finale — Europei 2028</div>`;
-  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE_EURO[stato.squadraScelta].nome}</strong></div>`;
+  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE[stato.squadraScelta].nome}</strong></div>`;
   turni.forEach(t => {
     const partite = stato.tabellone[t.key];
     if (!partite || partite.length === 0) return;
@@ -668,15 +457,15 @@ function renderTabellone(content) {
       if (p.rigA !== undefined) score += ` (${p.rigA}-${p.rigB} dcr)`;
       let esito = '';
       if (p.vincitore) {
-        esito = `→ ${SQUADRE_EURO[p.vincitore].nome}`;
+        esito = `→ ${SQUADRE[p.vincitore].nome}`;
         if (p.vincitore !== stato.squadraScelta && (p.a === stato.squadraScelta || p.b === stato.squadraScelta)) {
           esito += ' ❌';
         }
       }
       html += `<div class="match-row ${cls}">
-        <span>${SQUADRE_EURO[p.a].nome}</span>
+        <span>${SQUADRE[p.a].nome}</span>
         <span class="score">${score}</span>
-        <span>${SQUADRE_EURO[p.b].nome}</span>
+        <span>${SQUADRE[p.b].nome}</span>
         <span class="esito">${esito}</span>
       </div>`;
     });
@@ -699,11 +488,11 @@ function renderFine(content) {
   const finale = stato.tabellone.finale[0];
   const campione = finale.vincitore;
   const tua = stato.squadraScelta;
-  let msg = campione === tua ? '🏆 HAI VINTO GLI EUROPEI 2028!' : `🏆 Campione: ${SQUADRE_EURO[campione].nome}`;
+  let msg = campione === tua ? '🏆 HAI VINTO GLI EUROPEI 2028!' : `🏆 Campione: ${SQUADRE[campione].nome}`;
   let html = `<div class="fase-titolo">🏆 Fine Torneo</div>
     <div class="turno-box" style="text-align:center">
       <h2 style="color:#ffd700;font-size:22px;margin:12px 0">${msg}</h2>
-      <p style="font-size:14px;color:#aaa;margin:8px 0">Finale: ${SQUADRE_EURO[finale.a].nome} ${finale.golA} - ${finale.golB} ${SQUADRE_EURO[finale.b].nome}</p>
+      <p style="font-size:14px;color:#aaa;margin:8px 0">Finale: ${SQUADRE[finale.a].nome} ${finale.golA} - ${finale.golB} ${SQUADRE[finale.b].nome}</p>
       ${finale.rigA !== undefined ? `<p style="font-size:12px;color:#aaa">Rigori: ${finale.rigA} - ${finale.rigB}</p>` : ''}
       <button class="btn primario" onclick="location.reload()" style="margin-top:16px">NUOVO TORNEO</button>
     </div>`;

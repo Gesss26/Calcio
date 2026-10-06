@@ -31,7 +31,7 @@
   .minuto {
     font-size: 16px; font-weight: bold; color: #ffd700;
     background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 6px;
-    border: 1px solid rgba(255,215,0,0.4); min-width: 44px; text-align: center;
+    border: 1px solid rgba(255,215,0,0.4); min-width: 52px; text-align: center;
   }
   .info-top {
     position: absolute; right: 84px; top: 50%; transform: translateY(-50%);
@@ -52,7 +52,7 @@
 
   /* ===== CAMPO ===== */
   .campo-wrapper {
-    flex: 0 0 40vh; position: relative; overflow: hidden;
+    flex: 0 0 42vh; position: relative; overflow: hidden;
     transition: flex 0.4s ease;
     background: #1a5a28;
   }
@@ -64,61 +64,56 @@
     display: block;
   }
 
-  /* Zone sovrapposte */
   .zone-overlay {
     position: absolute; inset: 0; z-index: 2;
     display: flex; pointer-events: none;
   }
   .zona-overlay {
-    flex: 1; border-right: 1px dashed rgba(255,215,0,0.25);
+    flex: 1; border-right: 1px dashed rgba(255,215,0,0.2);
     position: relative;
   }
   .zona-overlay:last-child { border-right: none; }
   .zona-overlay .zona-num {
     position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: rgba(255,215,0,0.7); font-weight: bold;
+    font-size: 8px; color: rgba(255,215,0,0.7); font-weight: bold;
     text-shadow: 0 1px 2px #000;
   }
 
-  /* Pedine nelle zone */
+  /* Zona contenitore giocatori */
   .zone {
     display: flex; width: 100%; height: 100%;
     position: absolute; inset: 0; z-index: 5;
   }
   .zona {
-    flex: 1; border-right: 1px dashed rgba(255,255,255,0.12);
-    position: relative; display: flex; flex-direction: row;
-    justify-content: center; align-items: flex-end; gap: 2px; padding: 4px 2px 16px 2px;
+    flex: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
   }
-  .zona:last-child { border-right: none; }
-  .zona-label {
-    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: rgba(255,215,0,0.85); font-weight: bold;
-    text-shadow: 0 1px 2px #000; pointer-events: none;
+  .pedine-tu, .pedine-cpu {
+    display: flex; flex-direction: column; gap: 2px;
+    position: absolute; top: 50%; transform: translateY(-50%);
   }
-  .lato-squadra {
-    display: flex; flex-direction: column; gap: 2px; align-items: center;
-    justify-content: flex-end; min-width: 20px; position: relative;
+  .pedine-tu { left: 4px; align-items: flex-start; }
+  .pedine-cpu { right: 4px; align-items: flex-end; }
+  .pedina-wrapper {
+    display: flex; align-items: center; gap: 2px;
+    position: relative;
   }
-  .lato-squadra.tu { border-right: 1px solid rgba(255,255,255,0.12); padding-right: 3px; }
-  .lato-squadra.cpu { padding-left: 2px; }
-  .pedina-wrapper { display: flex; align-items: center; gap: 2px; position: relative; }
   .info-laterale {
     display: flex; flex-direction: column; gap: 1px; font-size: 8px;
     line-height: 1.05; color: #fff; text-shadow: 0 1px 2px #000;
     pointer-events: none; font-weight: bold; font-family: 'Courier New', monospace;
   }
-  .info-laterale.tu { text-align: right; }
-  .info-laterale.cpu { text-align: left; }
+  .info-laterale.tu { text-align: right; order: -1; }
+  .info-laterale.cpu { text-align: left; order: 2; }
   .info-laterale .stamina-txt { color: #4ade80; }
   .info-laterale .stamina-txt.medio { color: #fbbf24; }
   .info-laterale .stamina-txt.basso { color: #ef4444; }
   .info-laterale .falli-txt { color: #ff8a8a; }
   .info-laterale .cartellini { font-size: 9px; }
 
-  /* ===== GIOCATORE SVG ===== */
+  /* GIOCATORE SVG */
   .pedina {
-    position: relative; width: 36px; height: 46px;
+    position: relative; width: 30px; height: 38px;
     display: flex; align-items: center; justify-content: center;
   }
   .pedina.cpu svg { transform: scaleX(-1); }
@@ -140,8 +135,8 @@
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
   .pedina .palla-attaccata {
-    position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-    width: 12px; height: 12px;
+    position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+    width: 10px; height: 10px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.6);
@@ -152,65 +147,88 @@
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
   }
 
-  /* ===== SAGOMA GRANDE CONTRASTO ===== */
-  .sagoma-contrasto {
-    position: absolute;
-    top: 50%; left: 50%;
+  /* PALLA VOLANTE (animazione tra zone) */
+  .palla-volante {
+    position: absolute; z-index: 15;
+    width: 16px; height: 16px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    border-radius: 50%; border: 2px solid #222;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
+    display: none; pointer-events: none;
     transform: translate(-50%, -50%);
-    z-index: 20; pointer-events: none;
-    display: none;
-    align-items: center;
-    gap: 20px;
   }
-  .sagoma-contrasto.attiva { display: flex; }
-  .sagoma-grande {
-    width: 90px; height: 130px;
-    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.7));
-    animation: sagomaEntra 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-  @keyframes sagomaEntra {
-    0% { transform: translateY(30px) scale(0.3); opacity: 0; }
-    100% { transform: translateY(0) scale(1); opacity: 1; }
-  }
-  .sagoma-vs {
-    font-size: 22px; font-weight: 900; color: #ffd700;
-    text-shadow: 0 0 12px #ffd700, 0 2px 6px #000;
-    font-family: 'Georgia', serif;
-  }
+  .palla-volante.attiva { display: block; }
 
-  /* Animazioni SVG giocatori */
+  /* Animazioni SVG */
   .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
   @keyframes animFermo {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
+    50% { transform: translateY(-1.5px); }
   }
   .anim-esulta { animation: animEsulta 0.5s infinite ease-in-out; }
   @keyframes animEsulta {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    25% { transform: translateY(-8px) rotate(-3deg); }
-    75% { transform: translateY(-8px) rotate(3deg); }
+    25% { transform: translateY(-6px) rotate(-3deg); }
+    75% { transform: translateY(-6px) rotate(3deg); }
   }
   .anim-triste { animation: animTriste 2s infinite ease-in-out; }
   @keyframes animTriste {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(2px) rotate(-2deg); }
   }
-  .anim-tiro { animation: animTiro 0.6s ease-out; }
+  .anim-tiro { animation: animTiro 1.2s ease-out; }
   @keyframes animTiro {
-    0% { transform: rotate(-15deg); }
-    50% { transform: rotate(20deg); }
+    0% { transform: rotate(0deg); }
+    30% { transform: rotate(-20deg); }
+    60% { transform: rotate(25deg); }
     100% { transform: rotate(0deg); }
   }
-  .anim-scivola { animation: animScivola 0.8s ease-out; }
+  .anim-scivola { animation: animScivola 1.2s ease-out; }
   @keyframes animScivola {
     0% { transform: translateY(0) rotate(0deg); }
-    100% { transform: translateY(6px) rotate(-25deg); }
+    100% { transform: translateY(4px) rotate(-70deg); }
+  }
+  .anim-parata { animation: animParata 1.2s ease-out; }
+  @keyframes animParata {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(-45deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  /* Flash vincitore */
+  .flash-vincitore {
+    position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
+  }
+  .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
+  .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
+  .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
+  @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
+
+  /* GOAL BANNER */
+  .goal-banner {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  }
+  .goal-banner.attivo { opacity: 1; }
+  .goal-banner.tu { background: radial-gradient(circle, rgba(77,171,247,0.85), rgba(0,0,0,0.95)); }
+  .goal-banner.cpu { background: radial-gradient(circle, rgba(255,107,107,0.85), rgba(0,0,0,0.95)); }
+  .goal-banner-text {
+    font-size: 72px; font-weight: 900; color: #ffd700;
+    text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 6px 12px #000;
+    letter-spacing: 6px; font-family: 'Impact', 'Arial Black', sans-serif;
+    animation: goalPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+  }
+  @keyframes goalPulse {
+    0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
   .panchina {
     background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
     padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
-    gap: 4px; flex-shrink: 0; min-height: 52px;
+    gap: 4px; flex-shrink: 0; min-height: 50px;
   }
   .panchina-titolo {
     font-size: 9px; color: #ffd700; font-weight: bold;
@@ -221,10 +239,10 @@
   }
   .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
   .panchina-giocatore .pedina {
-    transform: scale(0.6); width: 30px; height: 38px;
+    transform: scale(0.55); width: 22px; height: 30px;
   }
   .panchina-giocatore .panchina-nome {
-    font-size: 8px; color: #ccc; margin-top: 2px; font-weight: bold;
+    font-size: 7px; color: #ccc; margin-top: 1px; font-weight: bold;
   }
 
   .carte-panel {
@@ -296,14 +314,8 @@
     border-color: #ffd700; background: #fff9c4; transform: translateY(-10px);
     box-shadow: 0 0 24px #ffd700;
   }
-  .carta.bloccata {
-    opacity: 0.35; cursor: not-allowed;
-    border-color: #ef4444;
-  }
-  .carta.bloccata::before {
-    content: '🚫'; position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%); font-size: 32px; opacity: 0.9;
-    z-index: 5;
+  .carta.seme-guidatore {
+    box-shadow: 0 0 12px rgba(255,215,0,0.7);
   }
   .carta.coperta {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
@@ -400,23 +412,6 @@
   .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
   .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
 
-  .goal-overlay {
-    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-    z-index: 90; pointer-events: none; opacity: 0; transition: opacity 0.3s;
-  }
-  .goal-overlay.attivo { opacity: 1; }
-  .goal-overlay.tu { background: radial-gradient(circle, rgba(77,171,247,0.6), rgba(0,0,0,0.85)); }
-  .goal-overlay.cpu { background: radial-gradient(circle, rgba(255,107,107,0.6), rgba(0,0,0,0.85)); }
-  .goal-text {
-    font-size: 96px; font-weight: 900; color: #ffd700;
-    text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700;
-    animation: goalZoom 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    letter-spacing: 4px;
-  }
-  @keyframes goalZoom {
-    0% { transform: scale(0.2) rotate(-15deg); opacity: 0; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
-  }
   .modale {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: flex; align-items: center; justify-content: center; z-index: 100;
@@ -488,6 +483,23 @@
     box-shadow: 0 8px 24px rgba(255,215,0,0.7);
   }
 
+  /* Statistiche finali */
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin: 14px 0;
+  }
+  .stats-card {
+    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px;
+    text-align: left; font-size: 12px;
+  }
+  .stats-card h3 {
+    font-size: 13px; color: #ffd700; margin-bottom: 8px;
+    text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3);
+    padding-bottom: 4px;
+  }
+  .stats-row { display: flex; justify-content: space-between; padding: 2px 0; }
+  .stats-row .val { color: #ffd700; font-weight: bold; }
+
   .banner-mano {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 95; pointer-events: none; opacity: 0; transition: opacity 0.4s;
@@ -554,7 +566,7 @@
   }
 
   @media (max-height: 500px) {
-    .pedina { width: 28px; height: 36px; }
+    .pedina { width: 24px; height: 32px; }
     .carta { width: 48px; height: 68px; }
     .carta .seme-centro { font-size: 26px; }
     .campo-wrapper { flex: 0 0 45vh; }
@@ -577,7 +589,7 @@
       <div class="minuto" id="minuto">0'</div>
     </div>
     <div class="info-top">
-      Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/23<br>
+      Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/46<br>
       Palla <span id="zona-palla">Z3</span>
     </div>
     <div class="topbar-buttons">
@@ -586,7 +598,6 @@
     </div>
   </div>
 
-  <!-- ===== CAMPO ===== -->
   <div class="campo-wrapper" id="campo-wrapper">
     <svg class="campo-svg" viewBox="0 0 800 400" preserveAspectRatio="none">
       <defs>
@@ -595,40 +606,27 @@
           <stop offset="50%" stop-color="#3aa04a"/>
           <stop offset="100%" stop-color="#2d8a3e"/>
         </linearGradient>
-        <pattern id="strisce" x="0" y="0" width="80" height="400" patternUnits="userSpaceOnUse">
-          <rect width="40" height="400" fill="rgba(255,255,255,0.03)"/>
+        <pattern id="strisce" x="0" y="0" width="114" height="400" patternUnits="userSpaceOnUse">
+          <rect width="57" height="400" fill="rgba(255,255,255,0.03)"/>
         </pattern>
       </defs>
       <rect width="800" height="400" fill="url(#erbaGrad)"/>
       <rect width="800" height="400" fill="url(#strisce)"/>
-      <!-- Bordo campo -->
-      <rect x="30" y="25" width="740" height="350" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3" rx="4"/>
-      <!-- Linea centrocampo -->
-      <line x1="400" y1="25" x2="400" y2="375" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
-      <!-- Cerchio centrocampo -->
-      <circle cx="400" cy="200" r="55" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+      <rect x="20" y="20" width="760" height="360" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3" rx="4"/>
+      <line x1="400" y1="20" x2="400" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
+      <circle cx="400" cy="200" r="60" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
       <circle cx="400" cy="200" r="4" fill="rgba(255,255,255,0.9)"/>
-      <!-- Area sinistra -->
-      <rect x="30" y="110" width="100" height="180" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
-      <rect x="30" y="155" width="40" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
-      <!-- Area destra -->
-      <rect x="670" y="110" width="100" height="180" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
-      <rect x="730" y="155" width="40" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
-      <!-- Porte -->
-      <rect x="26" y="170" width="8" height="60" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="3" rx="2"/>
-      <rect x="766" y="170" width="8" height="60" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="3" rx="2"/>
+      <rect x="20" y="110" width="100" height="180" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+      <rect x="20" y="155" width="40" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+      <rect x="680" y="110" width="100" height="180" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+      <rect x="740" y="155" width="40" height="90" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+      <rect x="16" y="170" width="8" height="60" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="3" rx="2"/>
+      <rect x="776" y="170" width="8" height="60" fill="rgba(255,255,255,0.15)" stroke="#fff" stroke-width="3" rx="2"/>
     </svg>
 
     <div class="zone-overlay" id="zone-overlay"></div>
     <div class="zone" id="zone"></div>
-
-    <!-- Sagoma grande contrasto -->
-    <div class="sagoma-contrasto" id="sagoma-contrasto">
-      <div class="sagoma-grande" id="sagoma-sx"></div>
-      <div class="sagoma-vs">VS</div>
-      <div class="sagoma-grande" id="sagoma-dx"></div>
-    </div>
-
+    <div class="palla-volante" id="palla-volante"></div>
     <div class="flash-vincitore" id="flash"></div>
   </div>
 
@@ -670,8 +668,8 @@
 <div class="overlay nascosto" id="overlay">
   <div class="overlay-box" id="overlay-box"></div>
 </div>
-<div class="goal-overlay" id="goal-overlay">
-  <div class="goal-text" id="goal-text">⚽ GOAL! ⚽</div>
+<div class="goal-banner" id="goal-banner">
+  <div class="goal-banner-text" id="goal-banner-text">GGGOOOAAALLL</div>
 </div>
 <div class="banner-mano" id="banner-mano">
   <div class="banner-mano-box">
@@ -695,6 +693,7 @@
   <div class="modale-box" id="modale-box"></div>
 </div>
 
+<script src="divise.js"></script>
 <script>
 /* =========================================================
    CONFIGURAZIONE
@@ -703,155 +702,51 @@ const STAMINA_MAX = 45;
 const CARTE_INIZIALI = 7;
 const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
-const DURATA_SAGOMA = 2500;
+const DURATA_ANIM_PALLA = 1200;
 
 /* =========================================================
-   54 SQUADRE CON DIVISA CASA + TRASFERTA
+   GIOCATORE SVG CHIBI
    ========================================================= */
-const SQUADRE = {
-  italia:     { nome: 'ITALIA',     casa: { maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#E8B88A', capelli: '#2A1A0F' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#0066CC', calzettoni: '#FFFFFF', pelle: '#E8B88A', capelli: '#2A1A0F' } },
-  francia:    { nome: 'FRANCIA',    casa: { maglia: '#002395', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#8D5524', capelli: '#1A1008' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#002395', calzettoni: '#FFFFFF', pelle: '#8D5524', capelli: '#1A1008' } },
-  spagna:     { nome: 'SPAGNA',     casa: { maglia: '#C60B1E', pantaloncini: '#000080', calzettoni: '#000000', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#000080', pantaloncini: '#C60B1E', calzettoni: '#000080', pelle: '#D9A06B', capelli: '#1F1409' } },
-  portogallo: { nome: 'PORTOGALLO', casa: { maglia: '#006600', pantaloncini: '#CC0000', calzettoni: '#006600', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#006600', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' } },
-  grecia:     { nome: 'GRECIA',     casa: { maglia: '#FFFFFF', pantaloncini: '#0066CC', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#0066CC', pantaloncini: '#FFFFFF', calzettoni: '#0066CC', pelle: '#D9A06B', capelli: '#1F1409' } },
-  malta:      { nome: 'MALTA',      casa: { maglia: '#CF142B', pantaloncini: '#FFFFFF', calzettoni: '#CF142B', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#CF142B', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' } },
-  cipro:      { nome: 'CIPRO',      casa: { maglia: '#FFFFFF', pantaloncini: '#FF6600', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#FF6600', pantaloncini: '#FFFFFF', calzettoni: '#FF6600', pelle: '#C68A5A', capelli: '#1F1409' } },
-  sanmarino:  { nome: 'SAN MARINO', casa: { maglia: '#5EB6E4', pantaloncini: '#FFFFFF', calzettoni: '#5EB6E4', pelle: '#E8B88A', capelli: '#2A1A0F' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#5EB6E4', calzettoni: '#FFFFFF', pelle: '#E8B88A', capelli: '#2A1A0F' } },
-  andorra:    { nome: 'ANDORRA',    casa: { maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#0033A0', pelle: '#D9A06B', capelli: '#1F1409' } },
-  gibilterra: { nome: 'GIBILTERRA', casa: { maglia: '#FFFFFF', pantaloncini: '#DA291C', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#DA291C', pantaloncini: '#FFFFFF', calzettoni: '#DA291C', pelle: '#C68A5A', capelli: '#1F1409' } },
-  germania:   { nome: 'GERMANIA',   casa: { maglia: '#FFFFFF', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' }, trasferta: { maglia: '#000000', pantaloncini: '#FFFFFF', calzettoni: '#000000', pelle: '#F0C8A0', capelli: '#8B5A2B' } },
-  austria:    { nome: 'AUSTRIA',    casa: { maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#ED2939', pelle: '#F0C8A0', capelli: '#8B5A2B' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#ED2939', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' } },
-  svizzera:   { nome: 'SVIZZERA',   casa: { maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#FF0000', pelle: '#F0C8A0', capelli: '#5C3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#FF0000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' } },
-  olanda:     { nome: 'OLANDA',     casa: { maglia: '#FF6600', pantaloncini: '#000000', calzettoni: '#FF6600', pelle: '#F5D0A9', capelli: '#C9A24A' }, trasferta: { maglia: '#000000', pantaloncini: '#FF6600', calzettoni: '#000000', pelle: '#F5D0A9', capelli: '#C9A24A' } },
-  belgio:     { nome: 'BELGIO',     casa: { maglia: '#CC0000', pantaloncini: '#000000', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#5C3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#CC0000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' } },
-  lussemburgo:{ nome: 'LUSSEMBURGO',casa: { maglia: '#ED2939', pantaloncini: '#FFFFFF', calzettoni: '#00A1DE', pelle: '#F0C8A0', capelli: '#8B5A2B' }, trasferta: { maglia: '#00A1DE', pantaloncini: '#ED2939', calzettoni: '#00A1DE', pelle: '#F0C8A0', capelli: '#8B5A2B' } },
-  liechtenstein:{ nome: 'LIECHTENSTEIN', casa: { maglia: '#002B7F', pantaloncini: '#FFFFFF', calzettoni: '#CE1126', pelle: '#F0C8A0', capelli: '#8B5A2B' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#002B7F', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' } },
-  svezia:     { nome: 'SVEZIA',     casa: { maglia: '#FECC02', pantaloncini: '#005B99', calzettoni: '#FECC02', pelle: '#F8DCC0', capelli: '#E8C97A' }, trasferta: { maglia: '#005B99', pantaloncini: '#FECC02', calzettoni: '#005B99', pelle: '#F8DCC0', capelli: '#E8C97A' } },
-  norvegia:   { nome: 'NORVEGIA',   casa: { maglia: '#BA0C2F', pantaloncini: '#FFFFFF', calzettoni: '#BA0C2F', pelle: '#F8DCC0', capelli: '#E8C97A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#BA0C2F', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#E8C97A' } },
-  danimarca:  { nome: 'DANIMARCA',  casa: { maglia: '#C60C30', pantaloncini: '#FFFFFF', calzettoni: '#C60C30', pelle: '#F8DCC0', capelli: '#D9B26A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#C60C30', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#D9B26A' } },
-  finlandia:  { nome: 'FINLANDIA',  casa: { maglia: '#FFFFFF', pantaloncini: '#002F6C', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#E8C97A' }, trasferta: { maglia: '#002F6C', pantaloncini: '#FFFFFF', calzettoni: '#002F6C', pelle: '#F8DCC0', capelli: '#E8C97A' } },
-  islanda:    { nome: 'ISLANDA',    casa: { maglia: '#003897', pantaloncini: '#FFFFFF', calzettoni: '#D72828', pelle: '#F8DCC0', capelli: '#D9B26A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#003897', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#D9B26A' } },
-  estonia:    { nome: 'ESTONIA',    casa: { maglia: '#0072CE', pantaloncini: '#000000', calzettoni: '#FFFFFF', pelle: '#F5D0A9', capelli: '#C9A24A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#0072CE', calzettoni: '#FFFFFF', pelle: '#F5D0A9', capelli: '#C9A24A' } },
-  lettonia:   { nome: 'LETTONIA',   casa: { maglia: '#9E3039', pantaloncini: '#FFFFFF', calzettoni: '#9E3039', pelle: '#F5D0A9', capelli: '#A67B4A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#9E3039', calzettoni: '#FFFFFF', pelle: '#F5D0A9', capelli: '#A67B4A' } },
-  lituania:   { nome: 'LITUANIA',   casa: { maglia: '#FDB913', pantaloncini: '#006A44', calzettoni: '#C1272D', pelle: '#F5D0A9', capelli: '#A67B4A' }, trasferta: { maglia: '#006A44', pantaloncini: '#FDB913', calzettoni: '#006A44', pelle: '#F5D0A9', capelli: '#A67B4A' } },
-  faroe:      { nome: 'FAROE',      casa: { maglia: '#FFFFFF', pantaloncini: '#003897', calzettoni: '#FFFFFF', pelle: '#F8DCC0', capelli: '#D9B26A' }, trasferta: { maglia: '#003897', pantaloncini: '#FFFFFF', calzettoni: '#003897', pelle: '#F8DCC0', capelli: '#D9B26A' } },
-  inghilterra:{ nome: 'INGHILTERRA',casa: { maglia: '#FFFFFF', pantaloncini: '#000080', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A0764A' }, trasferta: { maglia: '#000080', pantaloncini: '#FFFFFF', calzettoni: '#000080', pelle: '#F0C8A0', capelli: '#A0764A' } },
-  scozia:     { nome: 'SCOZIA',     casa: { maglia: '#0065BD', pantaloncini: '#FFFFFF', calzettoni: '#0065BD', pelle: '#F0C8A0', capelli: '#8B3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#0065BD', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B3A1E' } },
-  galles:     { nome: 'GALLES',     casa: { maglia: '#C8102E', pantaloncini: '#FFFFFF', calzettoni: '#C8102E', pelle: '#F0C8A0', capelli: '#3A1E0F' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#C8102E', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#3A1E0F' } },
-  irlanda:    { nome: 'IRLANDA',    casa: { maglia: '#169B62', pantaloncini: '#FFFFFF', calzettoni: '#169B62', pelle: '#F0C8A0', capelli: '#8B3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#169B62', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B3A1E' } },
-  polonia:    { nome: 'POLONIA',    casa: { maglia: '#FFFFFF', pantaloncini: '#DC143C', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A67B4A' }, trasferta: { maglia: '#DC143C', pantaloncini: '#FFFFFF', calzettoni: '#DC143C', pelle: '#F0C8A0', capelli: '#A67B4A' } },
-  cechia:     { nome: 'CECHIA',     casa: { maglia: '#D7141A', pantaloncini: '#FFFFFF', calzettoni: '#D7141A', pelle: '#F0C8A0', capelli: '#5C3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#D7141A', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' } },
-  slovacchia: { nome: 'SLOVACCHIA', casa: { maglia: '#0B4EA2', pantaloncini: '#FFFFFF', calzettoni: '#EE1C25', pelle: '#F0C8A0', capelli: '#5C3A1E' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#0B4EA2', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' } },
-  ungheria:   { nome: 'UNGHERIA',   casa: { maglia: '#CE2939', pantaloncini: '#FFFFFF', calzettoni: '#477050', pelle: '#E8B88A', capelli: '#3A1E0F' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#CE2939', calzettoni: '#FFFFFF', pelle: '#E8B88A', capelli: '#3A1E0F' } },
-  slovenia:   { nome: 'SLOVENIA',   casa: { maglia: '#FFFFFF', pantaloncini: '#005DA4', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#5C3A1E' }, trasferta: { maglia: '#005DA4', pantaloncini: '#FFFFFF', calzettoni: '#005DA4', pelle: '#F0C8A0', capelli: '#5C3A1E' } },
-  croazia:    { nome: 'CROAZIA',    casa: { maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#0000CC', pelle: '#E8B88A', capelli: '#3A1E0F' }, trasferta: { maglia: '#0000CC', pantaloncini: '#FF0000', calzettoni: '#0000CC', pelle: '#E8B88A', capelli: '#3A1E0F' } },
-  bosnia:     { nome: 'BOSNIA',     casa: { maglia: '#002F6C', pantaloncini: '#FFFFFF', calzettoni: '#002F6C', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#002F6C', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } },
-  serbia:     { nome: 'SERBIA',     casa: { maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#C6363C', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } },
-  montenegro: { nome: 'MONTENEGRO', casa: { maglia: '#C6363C', pantaloncini: '#FFFFFF', calzettoni: '#C6363C', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#C6363C', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } },
-  macedonia:  { nome: 'MACEDONIA',  casa: { maglia: '#D20000', pantaloncini: '#FFFFFF', calzettoni: '#D20000', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#D20000', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } },
-  kosovo:     { nome: 'KOSOVO',     casa: { maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#0033A0', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#D9A06B', capelli: '#1F1409' } },
-  albania:    { nome: 'ALBANIA',    casa: { maglia: '#E41E20', pantaloncini: '#000000', calzettoni: '#E41E20', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#000000', pantaloncini: '#E41E20', calzettoni: '#000000', pelle: '#D9A06B', capelli: '#1F1409' } },
-  romania:    { nome: 'ROMANIA',    casa: { maglia: '#FFCC00', pantaloncini: '#0033CC', calzettoni: '#FFCC00', pelle: '#E8B88A', capelli: '#3A1E0F' }, trasferta: { maglia: '#0033CC', pantaloncini: '#FFCC00', calzettoni: '#0033CC', pelle: '#E8B88A', capelli: '#3A1E0F' } },
-  bulgaria:   { nome: 'BULGARIA',   casa: { maglia: '#FFFFFF', pantaloncini: '#00966E', calzettoni: '#D62612', pelle: '#E8B88A', capelli: '#3A1E0F' }, trasferta: { maglia: '#00966E', pantaloncini: '#FFFFFF', calzettoni: '#00966E', pelle: '#E8B88A', capelli: '#3A1E0F' } },
-  moldavia:   { nome: 'MOLDAVIA',   casa: { maglia: '#0033A0', pantaloncini: '#FFD700', calzettoni: '#CC0000', pelle: '#E8B88A', capelli: '#3A1E0F' }, trasferta: { maglia: '#FFD700', pantaloncini: '#0033A0', calzettoni: '#FFD700', pelle: '#E8B88A', capelli: '#3A1E0F' } },
-  ucraina:    { nome: 'UCRAINA',    casa: { maglia: '#FFD700', pantaloncini: '#0057B7', calzettoni: '#FFD700', pelle: '#E8B88A', capelli: '#5C3A1E' }, trasferta: { maglia: '#0057B7', pantaloncini: '#FFD700', calzettoni: '#0057B7', pelle: '#E8B88A', capelli: '#5C3A1E' } },
-  bielorussia:{ nome: 'BIELORUSSIA',casa: { maglia: '#C8313E', pantaloncini: '#FFFFFF', calzettoni: '#C8313E', pelle: '#F0C8A0', capelli: '#A67B4A' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#C8313E', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#A67B4A' } },
-  russia:     { nome: 'RUSSIA',     casa: { maglia: '#CC0000', pantaloncini: '#FFFFFF', calzettoni: '#CC0000', pelle: '#F0C8A0', capelli: '#8B5A2B' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#CC0000', calzettoni: '#FFFFFF', pelle: '#F0C8A0', capelli: '#8B5A2B' } },
-  georgia:    { nome: 'GEORGIA',    casa: { maglia: '#FFFFFF', pantaloncini: '#FF0000', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#FF0000', pantaloncini: '#FFFFFF', calzettoni: '#FF0000', pelle: '#C68A5A', capelli: '#1F1409' } },
-  armenia:    { nome: 'ARMENIA',    casa: { maglia: '#D90012', pantaloncini: '#0033A0', calzettoni: '#D90012', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#0033A0', pantaloncini: '#D90012', calzettoni: '#0033A0', pelle: '#C68A5A', capelli: '#1F1409' } },
-  azerbaigian:{ nome: 'AZERBAIGIAN',casa: { maglia: '#00B5E2', pantaloncini: '#FFFFFF', calzettoni: '#00B5E2', pelle: '#C68A5A', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#00B5E2', calzettoni: '#FFFFFF', pelle: '#C68A5A', capelli: '#1F1409' } },
-  kazakistan: { nome: 'KAZAKISTAN', casa: { maglia: '#00AFCA', pantaloncini: '#FFFFFF', calzettoni: '#00AFCA', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#00AFCA', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } },
-  turchia:    { nome: 'TURCHIA',    casa: { maglia: '#E30A17', pantaloncini: '#FFFFFF', calzettoni: '#E30A17', pelle: '#D9A06B', capelli: '#1F1409' }, trasferta: { maglia: '#FFFFFF', pantaloncini: '#E30A17', calzettoni: '#FFFFFF', pelle: '#D9A06B', capelli: '#1F1409' } }
-};
-
-/* =========================================================
-   GIOCATORE SVG (stile chibi)
-   ========================================================= */
-function creaGiocatoreSVG(divisa, animazione = 'fermo', colore = 'normale') {
+function creaGiocatoreSVG(divisa, animazione = 'fermo') {
   const capelli = divisa.capelli;
   const pelle = divisa.pelle;
   const maglia = divisa.maglia;
   const pant = divisa.pantaloncini;
   const calze = divisa.calzettoni;
-  // colore: 'normale', 'triste' (leggermente grigio), 'felice' (default)
   return `
     <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" class="anim-${animazione}">
-      <!-- Ombra a terra -->
       <ellipse cx="50" cy="124" rx="22" ry="4" fill="rgba(0,0,0,0.35)"/>
-      <!-- Gambe -->
       <rect x="36" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
       <rect x="53" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
-      <!-- Calzettoni -->
       <rect x="36" y="98" width="11" height="16" rx="2" fill="${calze}"/>
       <rect x="53" y="98" width="11" height="16" rx="2" fill="${calze}"/>
-      <!-- Scarpe -->
       <rect x="34" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
       <rect x="52" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
-      <!-- Pantaloncini -->
       <rect x="35" y="72" width="30" height="18" rx="4" fill="${pant}"/>
-      <!-- Corpo / Maglia -->
       <rect x="32" y="42" width="36" height="32" rx="6" fill="${maglia}"/>
-      <!-- Maniche -->
       <rect x="24" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
       <rect x="66" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
-      <!-- Braccia -->
       <rect x="22" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
       <rect x="68" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
-      <!-- Mani -->
       <circle cx="27" cy="78" r="5" fill="${pelle}"/>
       <circle cx="73" cy="78" r="5" fill="${pelle}"/>
-      <!-- Collo -->
       <rect x="46" y="38" width="8" height="6" fill="${pelle}"/>
-      <!-- Testa -->
       <ellipse cx="50" cy="26" rx="20" ry="19" fill="${pelle}"/>
-      <!-- Capelli (chibi, con ciuffo) -->
       <path d="M 30 22 Q 32 8 50 6 Q 68 8 70 22 Q 68 16 60 14 Q 55 20 50 18 Q 44 20 40 14 Q 32 16 30 22 Z" fill="${capelli}"/>
       <path d="M 30 22 Q 28 28 32 30 Q 34 26 34 22 Z" fill="${capelli}"/>
       <path d="M 70 22 Q 72 28 68 30 Q 66 26 66 22 Z" fill="${capelli}"/>
-      <!-- Occhi -->
       <ellipse cx="43" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
       <ellipse cx="57" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
       <circle cx="44" cy="25.5" r="1" fill="#fff"/>
       <circle cx="58" cy="25.5" r="1" fill="#fff"/>
-      <!-- Guance -->
       <circle cx="38" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
       <circle cx="62" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
-      <!-- Bocca -->
-      ${animazione === 'triste' 
+      ${animazione === 'triste'
         ? `<path d="M 45 37 Q 50 34 55 37" stroke="#8B2020" stroke-width="1.8" fill="none" stroke-linecap="round"/>`
         : `<path d="M 45 35 Q 50 38 55 35" stroke="#8B2020" stroke-width="1.8" fill="none" stroke-linecap="round"/>`}
-      <!-- Numero maglia (per realismo) -->
       <text x="50" y="62" font-size="10" font-weight="bold" fill="rgba(0,0,0,0.35)" text-anchor="middle" font-family="Arial">10</text>
     </svg>
   `;
-}
-
-/* =========================================================
-   DIVISA CON VERIFICA SIMILARITÀ
-   ========================================================= */
-function hexToRgb(hex) {
-  const h = hex.replace('#', '');
-  return { r: parseInt(h.substring(0,2),16), g: parseInt(h.substring(2,4),16), b: parseInt(h.substring(4,6),16) };
-}
-function coloreSimile(c1, c2) {
-  const a = hexToRgb(c1), b = hexToRgb(c2);
-  const dist = Math.sqrt((a.r-b.r)**2 + (a.g-b.g)**2 + (a.b-b.b)**2);
-  return dist < 80;
-}
-function scegliDivise(sqTU, sqCPU) {
-  const tuCasa = SQUADRE[sqTU].casa;
-  const cpuCasa = SQUADRE[sqCPU].casa;
-  let divisaTU = tuCasa;
-  let divisaCPU = cpuCasa;
-  // Se le maglie sono simili, la CPU passa alla trasferta
-  if (coloreSimile(tuCasa.maglia, cpuCasa.maglia)) {
-    divisaCPU = SQUADRE[sqCPU].trasferta;
-    // Se anche la trasferta è simile, uso un colore neutro
-    if (coloreSimile(tuCasa.maglia, divisaCPU.maglia)) {
-      divisaCPU = { ...divisaCPU, maglia: '#222222', pantaloncini: '#FFFFFF', calzettoni: '#222222' };
-    }
-  }
-  return { tu: divisaTU, cpu: divisaCPU };
 }
 
 /* =========================================================
@@ -885,15 +780,15 @@ let selezioneSost = { campo: null, panchina: null };
 let renderingCampoInCorso = false;
 
 /* =========================================================
-   ZONE (7 zone)
+   ZONE (7 zone - 11 vs 11)
    ========================================================= */
 const ZONE_CONFIG = [
   { id: 0, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'tu' },
-  { id: 1, nome: 'AREA TU', ruolo: 'DIF', n: 2 },
-  { id: 2, nome: 'CAMPO TU', ruolo: 'CEN', n: 2 },
-  { id: 3, nome: 'CENTRO', ruolo: 'CEN', n: 2 },
-  { id: 4, nome: 'CAMPO CPU', ruolo: 'CEN', n: 2 },
-  { id: 5, nome: 'AREA CPU', ruolo: 'DIF', n: 2 },
+  { id: 1, nome: 'AREA TU', ruolo: 'DIF', n: 2, tu: 2, cpu: 2 },
+  { id: 2, nome: 'CAMPO TU', ruolo: 'CEN', n: 2, tu: 2, cpu: 2 },
+  { id: 3, nome: 'CENTRO', ruolo: 'CEN', n: 2, tu: 2, cpu: 2 },
+  { id: 4, nome: 'CAMPO CPU', ruolo: 'CEN', n: 2, tu: 2, cpu: 2 },
+  { id: 5, nome: 'AREA CPU', ruolo: 'DIF', n: 2, tu: 2, cpu: 2 },
   { id: 6, nome: 'POR', ruolo: 'POR', n: 1, portiere: true, proprietario: 'cpu' }
 ];
 const PANCHINA_CONFIG = [
@@ -941,7 +836,7 @@ function mescola(arr) {
 }
 
 /* =========================================================
-   MAZZO
+   MAZZO CARTE
    ========================================================= */
 function inizializzaMazzo() {
   stato.mazzo = creaMazzoPoker();
@@ -965,11 +860,13 @@ function riempiMano(sq) {
   }
 }
 
-/* MINUTO */
+/* MINUTO - 2 minuti per mano, 23 mani per tempo = 46' + 46' = 92' */
 function calcolaMinuto() {
-  const tempoOffset = (stato.tempo - 1) * MANI_PER_TEMPO * MINUTI_PER_MANO;
-  const minuto = tempoOffset + (stato.mano - 1) * MINUTI_PER_MANO;
-  return Math.min(minuto, 92);
+  if (stato.tempo === 1) {
+    return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
+  } else {
+    return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
+  }
 }
 
 /* LOG */
@@ -993,17 +890,27 @@ function apriLog() {
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
-/* GIOCATORI */
+/* =========================================================
+   GIOCATORI
+   ========================================================= */
 function creaGiocatori(sq) {
   const g = [];
   let id = 0;
   ZONE_CONFIG.forEach(z => {
-    if (z.portiere && z.proprietario !== sq) return;
-    for (let i = 0; i < z.n; i++) {
+    if (z.portiere) {
+      if (z.proprietario !== sq) return;
       g.push({
         id: sq + '_' + (id++), squadra: sq, zona: z.id, ruolo: z.ruolo,
-        portiere: !!z.portiere,
-        stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+        portiere: true, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
+        falli: 0, ammonito: false, espulso: false, nome: 'POR'
+      });
+      return;
+    }
+    const numGiocatori = sq === 'tu' ? z.tu : z.cpu;
+    for (let i = 0; i < numGiocatori; i++) {
+      g.push({
+        id: sq + '_' + (id++), squadra: sq, zona: z.id, ruolo: z.ruolo,
+        portiere: false, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX,
         falli: 0, ammonito: false, espulso: false,
         nome: z.ruolo + (i + 1)
       });
@@ -1052,17 +959,15 @@ function mostraMenuPrincipale() {
     </div>`;
 }
 
-/* SETUP 1P */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   let html = `<h2>⚽ Scegli la tua squadra</h2>
     <p style="font-size:12px;color:#aaa;margin-bottom:8px">La CPU sceglierà casualmente tra le altre 53 nazionali</p>
     <div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    const div = SQUADRE[id].casa;
     html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaTU1P('${id}')">
       <div class="nome">${SQUADRE[id].nome}</div>
-      <div class="maglia">${creaGiocatoreSVG(div, 'fermo')}</div>
+      <div class="maglia">${creaGiocatoreSVG(SQUADRE[id].casa, 'fermo')}</div>
     </div>`;
   });
   html += `</div>`;
@@ -1075,23 +980,20 @@ function avviaSetup1P() {
 }
 function selezionaTU1P(id) { stato.squadraTU = id; avviaSetup1P(); }
 
-/* SETUP 2P */
 function avviaSetup2P() {
   stato.tipoPartita = '2P';
   let html = `<h2>👤 Giocatore 1 - Scegli squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    const div = SQUADRE[id].casa;
     html += `<div class="squadra-btn ${id === stato.squadraTU ? 'selezionata' : ''}" onclick="selezionaTU2P('${id}')">
       <div class="nome">${SQUADRE[id].nome}</div>
-      <div class="maglia">${creaGiocatoreSVG(div, 'fermo')}</div>
+      <div class="maglia">${creaGiocatoreSVG(SQUADRE[id].casa, 'fermo')}</div>
     </div>`;
   });
   html += `</div><h2 style="margin-top:20px">👤 Giocatore 2 - Scegli squadra</h2><div class="squadre-griglia">`;
   Object.keys(SQUADRE).forEach(id => {
-    const div = SQUADRE[id].casa;
     html += `<div class="squadra-btn ${id === stato.squadraCPU ? 'selezionata' : ''}" onclick="selezionaCPU2P('${id}')">
       <div class="nome">${SQUADRE[id].nome}</div>
-      <div class="maglia">${creaGiocatoreSVG(div, 'fermo')}</div>
+      <div class="maglia">${creaGiocatoreSVG(SQUADRE[id].casa, 'fermo')}</div>
     </div>`;
   });
   html += `</div>`;
@@ -1174,29 +1076,38 @@ function renderCampo() {
     const zona = document.createElement('div');
     zona.className = 'zona';
     zona.dataset.zona = z.id;
+
+    // Lato TU
+    const pedineTu = document.createElement('div');
+    pedineTu.className = 'pedine-tu';
     if (z.portiere) {
-      const sq = z.proprietario;
-      const portiere = stato.giocatori[sq].find(g => g.zona === z.id);
-      if (portiere) {
-        const lato = document.createElement('div');
-        lato.className = 'lato-squadra ' + sq;
-        lato.appendChild(creaPedinaWrapper(portiere));
-        zona.appendChild(lato);
+      if (z.proprietario === 'tu') {
+        const por = stato.giocatori.tu.find(g => g.zona === z.id);
+        if (por) pedineTu.appendChild(creaPedinaWrapper(por));
       }
-      zone.appendChild(zona); return;
+    } else {
+      stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => pedineTu.appendChild(creaPedinaWrapper(g)));
     }
-    const latoTu = document.createElement('div');
-    latoTu.className = 'lato-squadra tu';
-    stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => latoTu.appendChild(creaPedinaWrapper(g)));
-    zona.appendChild(latoTu);
-    const latoCpu = document.createElement('div');
-    latoCpu.className = 'lato-squadra cpu';
-    stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => latoCpu.appendChild(creaPedinaWrapper(g)));
-    zona.appendChild(latoCpu);
+    zona.appendChild(pedineTu);
+
+    // Lato CPU
+    const pedineCpu = document.createElement('div');
+    pedineCpu.className = 'pedine-cpu';
+    if (z.portiere) {
+      if (z.proprietario === 'cpu') {
+        const por = stato.giocatori.cpu.find(g => g.zona === z.id);
+        if (por) pedineCpu.appendChild(creaPedinaWrapper(por));
+      }
+    } else {
+      stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => pedineCpu.appendChild(creaPedinaWrapper(g)));
+    }
+    zona.appendChild(pedineCpu);
+
     zone.appendChild(zona);
   });
   renderingCampoInCorso = false;
 }
+
 function creaPedinaWrapper(g) {
   const wrapper = document.createElement('div');
   wrapper.className = 'pedina-wrapper ' + g.squadra;
@@ -1231,7 +1142,13 @@ function creaPedinaEl(g, animazione = 'fermo') {
   if (g.ammonito) el.classList.add('ammonito');
   if (g.espulso) el.classList.add('espulso');
   el.title = `${g.nome} - Stamina ${g.stamina}/${g.staminaMax}`;
-  const divisa = g.squadra === 'tu' ? stato.divise.tu : stato.divise.cpu;
+  let divisa;
+  if (g.portiere) {
+    const sqId = g.squadra === 'tu' ? stato.squadraTU : stato.squadraCPU;
+    divisa = SQUADRE[sqId].portiere;
+  } else {
+    divisa = g.squadra === 'tu' ? stato.divise.tu : stato.divise.cpu;
+  }
   el.innerHTML = creaGiocatoreSVG(divisa, animazione);
   if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
     const palla = document.createElement('div');
@@ -1280,13 +1197,16 @@ function renderPanchina() {
   });
 }
 
-/* MONETA */
+/* =========================================================
+   MONETA
+   ========================================================= */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
   log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
-  stato.possessore = vince; stato.zonaPalla = 3;
+  stato.possessore = vince;
+  stato.zonaPalla = 3;
   const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
@@ -1296,22 +1216,37 @@ function lanciaMoneta(scelta) {
 }
 
 /* =========================================================
-   SAGOMA GRANDE CONTRASTO
+   ANIMAZIONE PALLA TRA ZONE
    ========================================================= */
-function mostraSagomaContrasto(gAtt, gDif) {
-  const el = document.getElementById('sagoma-contrasto');
-  const sx = document.getElementById('sagoma-sx');
-  const dx = document.getElementById('sagoma-dx');
-  const divAtt = stato.contrasto.attaccante === 'tu' ? stato.divise.tu : stato.divise.cpu;
-  const divDif = stato.contrasto.attaccante === 'tu' ? stato.divise.cpu : stato.divise.tu;
-  // Attaccante a sinistra, difensore a destra
-  sx.innerHTML = creaGiocatoreSVG(divAtt, 'fermo');
-  dx.innerHTML = creaGiocatoreSVG(divDif, 'fermo');
-  dx.querySelector('svg').style.transform = 'scaleX(-1)';
-  el.classList.add('attiva');
-}
-function nascondiSagomaContrasto() {
-  document.getElementById('sagoma-contrasto').classList.remove('attiva');
+function animaPallaVersoZona(zonaDa, zonaA, callback) {
+  const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
+  const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
+  if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
+
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const daRect = zonaElDa.getBoundingClientRect();
+  const aRect = zonaElA.getBoundingClientRect();
+
+  const x1 = daRect.left + daRect.width / 2 - campoRect.left;
+  const y1 = daRect.top + daRect.height / 2 - campoRect.top;
+  const x2 = aRect.left + aRect.width / 2 - campoRect.left;
+  const y2 = aRect.top + aRect.height / 2 - campoRect.top;
+
+  const palla = document.getElementById('palla-volante');
+  palla.style.left = x1 + 'px';
+  palla.style.top = y1 + 'px';
+  palla.style.transition = 'none';
+  palla.classList.add('attiva');
+  void palla.offsetWidth;
+
+  palla.style.transition = `left ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), top ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+  palla.style.left = x2 + 'px';
+  palla.style.top = y2 + 'px';
+
+  setTimeout(() => {
+    palla.classList.remove('attiva');
+    if (callback) callback();
+  }, DURATA_ANIM_PALLA + 100);
 }
 
 /* =========================================================
@@ -1331,14 +1266,16 @@ function avviaContrasto() {
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
 
-  const giocatoreAtt = stato.giocatorePalla
-    ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla)
-    : attaccantiZona[0];
+  // Se il possessore attuale non è più nella zona, scegline uno casuale tra i 2
+  let giocatoreAtt = stato.giocatorePalla
+    ? stato.giocatori[attaccante].find(g => g.id === stato.giocatorePalla && g.zona === zona)
+    : null;
+  if (!giocatoreAtt) {
+    giocatoreAtt = attaccantiZona[Math.floor(Math.random() * attaccantiZona.length)];
+  }
   let giocatoreDif = null;
   if (difensoriZona.length > 0) {
-    const maxStamina = Math.max(...difensoriZona.map(g => g.stamina));
-    const candidati = difensoriZona.filter(g => g.stamina === maxStamina);
-    giocatoreDif = candidati[Math.floor(Math.random() * candidati.length)];
+    giocatoreDif = difensoriZona[Math.floor(Math.random() * difensoriZona.length)];
   }
 
   riempiMano('tu'); riempiMano('cpu');
@@ -1354,7 +1291,6 @@ function avviaContrasto() {
   stato.statistiche[attaccante].contese++;
   log(`🎯 Contrasto Z${zona} — Seme: ${SEMI[semeGuida].emoji} ${SEMI[semeGuida].nome}`, 'highlight');
   selezioneCarta = null;
-  mostraSagomaContrasto(giocatoreAtt, giocatoreDif);
   renderPannelloContrasto();
 }
 
@@ -1363,18 +1299,14 @@ function renderPannelloContrasto() {
   document.getElementById('titolo-mano').textContent = `Contrasto Z${c.zona}`;
   document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
   document.getElementById('turno-label').textContent =
-    `Seme: ${SEMI[c.semeGuida].nome} ${SEMI[c.semeGuida].emoji} — Scegli una carta`;
+    `Seme guida: ${SEMI[c.semeGuida].nome} ${SEMI[c.semeGuida].emoji} — Puoi giocare qualsiasi carta`;
 
   const contTu = document.getElementById('carte-tu');
   contTu.innerHTML = '';
   stato.mani.tu.forEach((carta, idx) => {
     const el = creaCartaEl(carta);
-    const haSeme = stato.mani.tu.some(x => x.seme === c.semeGuida);
-    if (haSeme && carta.seme !== c.semeGuida) {
-      el.classList.add('bloccata');
-    } else {
-      el.onclick = () => selezionaCartaTu(idx);
-    }
+    if (carta.seme === c.semeGuida) el.classList.add('seme-guidatore');
+    el.onclick = () => selezionaCartaTu(idx);
     if (selezioneCarta === idx) el.classList.add('selezionata');
     if (c.cartaTu && c.cartaTu.id === carta.id && c.risolto) el.classList.add('vincitrice');
     contTu.appendChild(el);
@@ -1434,10 +1366,6 @@ function renderPilaMazzo() {
 
 function selezionaCartaTu(idx) {
   if (stato.contrasto.risolto) return;
-  const carta = stato.mani.tu[idx];
-  const c = stato.contrasto;
-  const haSeme = stato.mani.tu.some(x => x.seme === c.semeGuida);
-  if (haSeme && carta.seme !== c.semeGuida) return;
   if (!stato.sostBloccate) {
     stato.sostBloccate = true;
     document.getElementById('btn-sost').disabled = true;
@@ -1460,20 +1388,28 @@ function confermaCarta() {
   let vincitore = null;
   let motivoFallo = null;
 
+  // Fallo se non giochi il seme guida pur avendolo in mano
+  const tuAvevaSeme = stato.mani.tu.some(x => x.seme === c.semeGuida && x.id !== cartaTu.id);
+  const cpuAvevaSeme = stato.mani.cpu.some(x => x.seme === c.semeGuida && x.id !== cartaCpu.id);
+
   if (tuHaSeme && cpuHaSeme) {
     if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
     else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
     else return risolviPareggio(cartaTu, cartaCpu);
   } else if (tuHaSeme && !cpuHaSeme) {
     vincitore = 'tu';
-    if (stato.mani.cpu.some(x => x.seme === c.semeGuida && x.id !== cartaCpu.id)) motivoFallo = 'cpu';
+    if (cpuAvevaSeme) motivoFallo = 'cpu';
   } else if (!tuHaSeme && cpuHaSeme) {
     vincitore = 'cpu';
-    if (stato.mani.tu.some(x => x.seme === c.semeGuida && x.id !== cartaTu.id)) motivoFallo = 'tu';
+    if (tuAvevaSeme) motivoFallo = 'tu';
   } else {
+    // Nessuno ha giocato il seme guida
     if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
     else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
     else return risolviPareggio(cartaTu, cartaCpu);
+    // Fallo per chi aveva il seme ma non l'ha giocato
+    if (tuAvevaSeme && !cpuAvevaSeme) motivoFallo = 'tu';
+    else if (!tuAvevaSeme && cpuAvevaSeme) motivoFallo = 'cpu';
   }
 
   c.vincitore = vincitore;
@@ -1519,7 +1455,7 @@ function risolviPareggio(cartaTu, cartaCpu) {
   selezioneCarta = null;
   c.cartaTu = null; c.cartaCpu = null;
   c.risolto = false; c.vincitore = null; c.motivoFallo = null;
-  setTimeout(() => mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio!'), 400);
+  setTimeout(() => mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio! Si continua'), 400);
   setTimeout(() => { nascondiBannerMano(); renderPannelloContrasto(); }, 3000);
 }
 
@@ -1550,8 +1486,7 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
   elTu.innerHTML = ''; elTu.appendChild(creaCartaEl(cartaTu));
   const elCpu = document.getElementById('banner-carta-cpu');
   elCpu.innerHTML = ''; elCpu.appendChild(creaCartaEl(cartaCpu));
-  document.getElementById('banner-seme').textContent =
-    `Seme: ${SEMI[semeGuida].nome} ${SEMI[semeGuida].emoji}`;
+  document.getElementById('banner-seme').textContent = `Seme: ${SEMI[semeGuida].nome} ${SEMI[semeGuida].emoji}`;
   document.getElementById('banner-motivo').textContent = motivo || '';
 }
 function nascondiBannerMano() {
@@ -1560,7 +1495,9 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO */
+/* =========================================================
+   RISOLUZIONE CONTRASTO
+   ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -1573,25 +1510,73 @@ function risolviContrasto(vincente, motivoFallo) {
 
   if (motivoFallo) applicaFallo(motivoFallo, c);
 
-  // Aspetta 2.5s per mostrare sagoma + flash
-  setTimeout(() => {
-    nascondiSagomaContrasto();
-    document.getElementById('app').className = 'app fase-animazione';
-    document.getElementById('carte-panel').classList.add('nascosto');
+  document.getElementById('app').className = 'app fase-animazione';
+  document.getElementById('carte-panel').classList.add('nascosto');
 
-    if (vincente === c.attaccante) {
-      proseguiAzione(vincente, c, stato.giocatorePalla);
-    } else {
-      stato.possessore = vincente;
-      stato.zonaPalla = c.zona;
-      if (c.giocatoreDif) {
-        const g = stato.giocatori[vincente].find(x => x.id === c.giocatoreDif);
-        if (g && !g.espulso) stato.giocatorePalla = g.id;
-      }
-      renderHeader();
-      setTimeout(() => { renderCampo(); avanzaMano(); }, 200);
+  // Se l'attaccante vince
+  if (vincente === c.attaccante) {
+    // Verifica se è in zona tiro
+    if (c.attaccante === 'tu' && c.zona === 5) {
+      // Tiro in porta da Z5
+      setTimeout(() => tiroInPorta('tu'), 500);
+      return;
     }
-  }, DURATA_SAGOMA);
+    if (c.attaccante === 'cpu' && c.zona === 1) {
+      setTimeout(() => tiroInPorta('cpu'), 500);
+      return;
+    }
+    // Altrimenti avanza di zona
+    const nuovaZona = c.zona + (c.attaccante === 'tu' ? 1 : -1);
+    if (nuovaZona === 6 || nuovaZona === 0) {
+      // Fine campo
+      setTimeout(() => tiroInPorta(c.attaccante), 500);
+      return;
+    }
+    // Animazione palla verso la zona successiva
+    animaPallaVersoZona(c.zona, nuovaZona, () => {
+      stato.zonaPalla = nuovaZona;
+      stato.possessore = c.attaccante;
+      // Scegli un compagno CASUALE nella nuova zona
+      const compagni = stato.giocatori[c.attaccante].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+      if (compagni.length > 0) {
+        const scelto = compagni[Math.floor(Math.random() * compagni.length)];
+        stato.giocatorePalla = scelto.id;
+        log(`➡️ Passaggio a ${scelto.nome}`);
+      }
+      renderCampo(); renderHeader();
+      setTimeout(() => avanzaMano(), 400);
+    });
+  } else {
+    // Il difensore vince: prende palla e la passa al suo portiere
+    const nuovaZona = c.zona + (c.difensore === 'tu' ? -1 : 1);
+    // Il difensore passa al portiere (Z0 per TU, Z6 per CPU)
+    const zonaPortiere = c.difensore === 'tu' ? 0 : 6;
+    animaPallaVersoZona(c.zona, zonaPortiere, () => {
+      stato.zonaPalla = zonaPortiere;
+      stato.possessore = c.difensore;
+      // Il portiere prende palla
+      const por = stato.giocatori[c.difensore].find(g => g.zona === zonaPortiere);
+      if (por) stato.giocatorePalla = por.id;
+      log(`🧤 ${c.difensore === 'tu' ? 'TU' : 'CPU'} passa al portiere`);
+      renderCampo(); renderHeader();
+      // Dopo un momento, il portiere rilancia a Z3
+      setTimeout(() => {
+        animaPallaVersoZona(zonaPortiere, 3, () => {
+          stato.zonaPalla = 3;
+          // Il possessore diventa casuale tra i 2 di Z3 (chi ha vinto il contrasto)
+          const compagni = stato.giocatori[c.difensore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+          if (compagni.length > 0) {
+            const scelto = compagni[Math.floor(Math.random() * compagni.length)];
+            stato.giocatorePalla = scelto.id;
+          }
+          stato.possessore = c.difensore;
+          log(`🚀 Rilancio a centrocampo`);
+          renderCampo(); renderHeader();
+          setTimeout(() => avanzaMano(), 400);
+        });
+      }, 500);
+    });
+  }
 }
 
 function applicaFallo(squadraFallosa, c) {
@@ -1606,32 +1591,18 @@ function applicaFallo(squadraFallosa, c) {
   if (falloso.falli >= 6) { falloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
 }
 
-function proseguiAzione(vincente, c, vecchioGiocatore) {
-  const zona = c.zona;
-  const nuovaZona = zona + (vincente === 'tu' ? +1 : -1);
-  if (nuovaZona === 6 || nuovaZona === 0) return tiroInPorta(vincente);
-  if (nuovaZona < 0 || nuovaZona > 6) return avanzaMano();
-  stato.zonaPalla = nuovaZona;
-  stato.possessore = vincente;
-  const gz = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
-  if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
-  renderHeader();
-  setTimeout(() => { renderCampo(); avanzaMano(); }, 200);
+/* =========================================================
+   TIRO IN PORTA
+   ========================================================= */
+function mostraGoalBanner(vincente) {
+  const banner = document.getElementById('goal-banner');
+  banner.classList.remove('tu', 'cpu', 'attivo');
+  void banner.offsetWidth;
+  banner.classList.add(vincente, 'attivo');
+  document.getElementById('goal-banner-text').textContent = 'GGGOOOAAALLL';
+  setTimeout(() => banner.classList.remove('attivo'), 3200);
 }
 
-function apriOverlay(html) {
-  document.getElementById('overlay-box').innerHTML = html;
-  document.getElementById('overlay').classList.remove('nascosto');
-}
-function chiudiOverlay() { document.getElementById('overlay').classList.add('nascosto'); }
-
-/* TIRO IN PORTA */
-function mostraGoal(vincente) {
-  const ov = document.getElementById('goal-overlay');
-  ov.classList.remove('tu', 'cpu');
-  ov.classList.add(vincente, 'attivo');
-  setTimeout(() => ov.classList.remove('attivo'), 3000);
-}
 function tiroInPorta(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[attaccante].tiri++;
@@ -1673,7 +1644,7 @@ function eseguiEsitoTiro(esito, attaccante, difensore) {
   if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
   else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
   else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
-  else if (esito === 'angolo') { msg = "🚩 ANGOLO!"; colore = 'angolo'; }
+  else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
   box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
   if (esito === 'parata') stato.statistiche[difensore].parate++;
   if (esito === 'palo') stato.statistiche[attaccante].pali++;
@@ -1690,57 +1661,78 @@ function gestisciGoal(attaccante) {
   stato.punteggio[attaccante]++;
   stato.statistiche[attaccante].gol++;
   log(`⚽ GOAL! ${attaccante === 'tu' ? 'TU' : 'CPU'}!`, 'goal');
-  mostraGoal(attaccante);
+  mostraGoalBanner(attaccante);
   setTimeout(() => {
     const subito = attaccante === 'tu' ? 'cpu' : 'tu';
-    stato.possessore = subito; stato.zonaPalla = 3;
+    stato.possessore = subito;
+    stato.zonaPalla = 3;
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
-    if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+    if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 800);
-  }, 3000);
+  }, 3200);
 }
 function gestisciParata(attaccante, difensore) {
   log(`🧤 Rinvio del portiere.`);
   stato.zonaPalla = 3;
-  stato.possessore = Math.random() < 0.5 ? 'tu' : 'cpu';
-  const gz = stato.giocatori[stato.possessore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+  stato.possessore = difensore;
+  const gz = stato.giocatori[difensore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
   if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderCampo(); renderHeader();
   setTimeout(() => avanzaMano(), 1000);
 }
-function gestisciPalo(attaccante) {
+function gestisciPalo(attaccante, difensore) {
   log(`🥅 Palo!`);
-  stato.zonaPalla = attaccante === 'tu' ? 5 : 1;
+  stato.zonaPalla = 3;
   stato.possessore = attaccante;
+  const gz = stato.giocatori[attaccante].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+  if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderCampo(); renderHeader();
   setTimeout(() => avanzaMano(), 1000);
 }
-function gestisciAngolo(attaccante) {
+function gestisciAngolo(attaccante, difensore) {
   log(`🚩 Angolo!`);
-  stato.zonaPalla = attaccante === 'tu' ? 5 : 1;
+  stato.zonaPalla = 3;
   stato.possessore = attaccante;
-  const gz = stato.giocatori[attaccante].filter(g => g.zona === stato.zonaPalla && !g.portiere && !g.espulso);
-  if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+  const gz = stato.giocatori[attaccante].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+  if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
   renderCampo(); renderHeader();
   setTimeout(() => avanzaMano(), 1000);
 }
 
-/* AVANZAMENTO */
+function apriOverlay(html) {
+  document.getElementById('overlay-box').innerHTML = html;
+  document.getElementById('overlay').classList.remove('nascosto');
+}
+function chiudiOverlay() { document.getElementById('overlay').classList.add('nascosto'); }
+
+function flashVincitore(squadra) {
+  const flash = document.getElementById('flash');
+  flash.classList.remove('tu', 'cpu', 'attivo');
+  void flash.offsetWidth;
+  flash.classList.add(squadra, 'attivo');
+  setTimeout(() => flash.classList.remove('attivo'), 600);
+}
+
+/* =========================================================
+   AVANZAMENTO
+   ========================================================= */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
       stato.tempo = 2; stato.mano = 1;
       log(`⏸️ FINE PRIMO TEMPO. ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
+      // Cambio campo: ora la CPU attacca verso Z0
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
       riempiMano('tu'); riempiMano('cpu');
       const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
-      stato.possessore = perdente; stato.zonaPalla = 3;
+      stato.possessore = perdente;
+      stato.zonaPalla = 3;
       const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
-      if (gz.length > 0) stato.giocatorePalla = gz[0].id;
+      if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
       renderCampo(); renderHeader();
       setTimeout(() => avviaContrasto(), 1000);
       return;
@@ -1754,19 +1746,50 @@ function finePartita() {
   stato.partitaFinita = true;
   let msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!'
            : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
+  const s = stato.statistiche;
   document.getElementById('modale-box').innerHTML = `
     <h2>FINE PARTITA</h2>
-    <p style="font-size:32px;font-weight:bold">
+    <p style="font-size:36px;font-weight:bold;margin:10px 0">
       <span style="color:#4dabf7">${stato.punteggio.tu}</span> - <span style="color:#ff6b6b">${stato.punteggio.cpu}</span>
     </p>
     <p style="font-size:18px;color:#ffd700;margin:12px 0">${msg}</p>
-    <p style="font-size:12px;color:#aaa">Minuto finale: ${calcolaMinuto()}'</p>
+    <p style="font-size:12px;color:#aaa;margin-bottom:16px">Minuto finale: ${calcolaMinuto()}'</p>
+    <div class="stats-grid">
+      <div class="stats-card">
+        <h3>${SQUADRE[stato.squadraTU].nome}</h3>
+        <div class="stats-row"><span>Gol</span><span class="val">${s.tu.gol}</span></div>
+        <div class="stats-row"><span>Tiri</span><span class="val">${s.tu.tiri}</span></div>
+        <div class="stats-row"><span>Parate</span><span class="val">${s.tu.parate}</span></div>
+        <div class="stats-row"><span>Angoli</span><span class="val">${s.tu.angoli}</span></div>
+        <div class="stats-row"><span>Pali</span><span class="val">${s.tu.pali}</span></div>
+        <div class="stats-row"><span>Contese</span><span class="val">${s.tu.contese}</span></div>
+        <div class="stats-row"><span>Vinte</span><span class="val">${s.tu.vinte}</span></div>
+        <div class="stats-row"><span>Falli</span><span class="val">${s.tu.falli}</span></div>
+        <div class="stats-row"><span>Ammonizioni</span><span class="val">${s.tu.ammonizioni}</span></div>
+        <div class="stats-row"><span>Espulsioni</span><span class="val">${s.tu.espulsioni}</span></div>
+      </div>
+      <div class="stats-card">
+        <h3>${SQUADRE[stato.squadraCPU].nome}</h3>
+        <div class="stats-row"><span>Gol</span><span class="val">${s.cpu.gol}</span></div>
+        <div class="stats-row"><span>Tiri</span><span class="val">${s.cpu.tiri}</span></div>
+        <div class="stats-row"><span>Parate</span><span class="val">${s.cpu.parate}</span></div>
+        <div class="stats-row"><span>Angoli</span><span class="val">${s.cpu.angoli}</span></div>
+        <div class="stats-row"><span>Pali</span><span class="val">${s.cpu.pali}</span></div>
+        <div class="stats-row"><span>Contese</span><span class="val">${s.cpu.contese}</span></div>
+        <div class="stats-row"><span>Vinte</span><span class="val">${s.cpu.vinte}</span></div>
+        <div class="stats-row"><span>Falli</span><span class="val">${s.cpu.falli}</span></div>
+        <div class="stats-row"><span>Ammonizioni</span><span class="val">${s.cpu.ammonizioni}</span></div>
+        <div class="stats-row"><span>Espulsioni</span><span class="val">${s.cpu.espulsioni}</span></div>
+      </div>
+    </div>
     <button class="primario" onclick="location.reload()">NUOVA PARTITA</button>
     <button onclick="mostraMenuPrincipale()">MENU</button>`;
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* SOSTITUZIONI */
+/* =========================================================
+   SOSTITUZIONI
+   ========================================================= */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
