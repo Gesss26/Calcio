@@ -93,6 +93,18 @@
   }
   .match-row.tua { background: rgba(77,171,247,0.2); border-radius: 4px; }
   .match-row .score { color: #ffd700; font-weight: bold; margin: 0 8px; }
+  .match-row .play-btn {
+    background: #ffd700; color: #16213e; border: none;
+    padding: 4px 10px; border-radius: 4px; font-weight: bold;
+    cursor: pointer; font-size: 11px; margin-left: 8px;
+  }
+  .match-row .play-btn:hover { background: #fff; }
+  .match-row .played {
+    color: #4ade80; font-weight: bold; font-size: 11px; margin-left: 8px;
+  }
+  .match-row .locked {
+    color: #666; font-size: 11px; margin-left: 8px;
+  }
   .esito { font-size: 11px; color: #4ade80; margin-left: 8px; }
   .torna-menu {
     position: fixed; top: 10px; left: 10px; z-index: 20;
@@ -117,10 +129,32 @@
     margin-bottom: 12px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .prossima-partita {
+    background: linear-gradient(135deg, #ffd700, #f59f00);
+    border-radius: 10px; padding: 14px; margin: 14px 0;
+    color: #16213e; text-align: center;
+  }
+  .prossima-partita h3 { font-size: 14px; margin-bottom: 8px; }
+  .prossima-partita .vs { font-size: 20px; font-weight: 900; margin: 8px 0; letter-spacing: 2px; }
+  .prossima-partita .info { font-size: 11px; margin-bottom: 8px; }
+  .prossima-partita .play-big {
+    background: #16213e; color: #ffd700; border: none;
+    padding: 10px 24px; border-radius: 8px; font-weight: bold;
+    font-size: 14px; cursor: pointer;
+  }
+  .prossima-partita .play-big:hover { background: #000; }
+  .reset-btn {
+    position: fixed; top: 10px; right: 10px; z-index: 20;
+    background: #8B2020; border: 2px solid #ff6b6b; color: #fff;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold;
+    font-size: 12px;
+  }
+  .reset-btn:hover { background: #ff6b6b; }
 </style>
 </head>
 <body>
 <button class="torna-menu" onclick="location.href='index.html'">← Menù</button>
+<button class="reset-btn" onclick="resetTorneo()">🗑 Reset</button>
 <div class="app">
   <div class="header">
     <h1>🏆 EUROPEI 2028</h1>
@@ -137,78 +171,164 @@
 <script src="divise.js"></script>
 <script>
 /* =========================================================
-   GIOCATORE SVG (chibi) - riutilizzabile
+   STATO TORNEO
    ========================================================= */
-function creaGiocatoreSVG(divisa, animazione = 'fermo') {
-  const capelli = divisa.capelli;
-  const pelle = divisa.pelle;
-  const maglia = divisa.maglia;
-  const pant = divisa.pantaloncini;
-  const calze = divisa.calzettoni;
-  return `
-    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="50" cy="124" rx="22" ry="4" fill="rgba(0,0,0,0.35)"/>
-      <rect x="36" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
-      <rect x="53" y="85" width="11" height="25" rx="4" fill="${pelle}"/>
-      <rect x="36" y="98" width="11" height="16" rx="2" fill="${calze}"/>
-      <rect x="53" y="98" width="11" height="16" rx="2" fill="${calze}"/>
-      <rect x="34" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
-      <rect x="52" y="114" width="14" height="8" rx="3" fill="#1a1a1a"/>
-      <rect x="35" y="72" width="30" height="18" rx="4" fill="${pant}"/>
-      <rect x="32" y="42" width="36" height="32" rx="6" fill="${maglia}"/>
-      <rect x="24" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
-      <rect x="66" y="44" width="10" height="18" rx="4" fill="${maglia}"/>
-      <rect x="22" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
-      <rect x="68" y="58" width="10" height="18" rx="4" fill="${pelle}"/>
-      <circle cx="27" cy="78" r="5" fill="${pelle}"/>
-      <circle cx="73" cy="78" r="5" fill="${pelle}"/>
-      <rect x="46" y="38" width="8" height="6" fill="${pelle}"/>
-      <ellipse cx="50" cy="26" rx="20" ry="19" fill="${pelle}"/>
-      <path d="M 30 22 Q 32 8 50 6 Q 68 8 70 22 Q 68 16 60 14 Q 55 20 50 18 Q 44 20 40 14 Q 32 16 30 22 Z" fill="${capelli}"/>
-      <path d="M 30 22 Q 28 28 32 30 Q 34 26 34 22 Z" fill="${capelli}"/>
-      <path d="M 70 22 Q 72 28 68 30 Q 66 26 66 22 Z" fill="${capelli}"/>
-      <ellipse cx="43" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
-      <ellipse cx="57" cy="27" rx="3" ry="4" fill="#1a1a1a"/>
-      <circle cx="44" cy="25.5" r="1" fill="#fff"/>
-      <circle cx="58" cy="25.5" r="1" fill="#fff"/>
-      <circle cx="38" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
-      <circle cx="62" cy="33" r="2.5" fill="rgba(255,120,120,0.5)"/>
-      <path d="M 45 35 Q 50 38 55 35" stroke="#8B2020" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-      <text x="50" y="62" font-size="10" font-weight="bold" fill="rgba(0,0,0,0.35)" text-anchor="middle" font-family="Arial">10</text>
-    </svg>
-  `;
-}
+const STORAGE_KEY = 'europei2028_stato';
 
-/* =========================================================
-   STATO
-   ========================================================= */
-let stato = {
+let torneo = {
   squadraScelta: null,
-  fase: 'scelta',
-  gironi: {},
-  gironiRaw: {},
+  fase: 'scelta', // scelta | qualificazioni | spareggi | ottavi | quarti | semifinali | finale | fine
+  gironi: {},        // { A: [sq1, sq2, sq3, sq4], ... }
+  partite: [],       // Tutte le partite: { id, girone, andata: {casa, trasferta, golCasa, golTrasferta, played}, ritorno: {...} }
+  classifica: {},    // { A: [{squadra, punti, giocate, vinte, pareggi, perse, gf, gs, dr}, ...] }
   qualificate: [],
   spareggi: [],
-  tabellone: { ottavi: [], quarti: [], semifinali: [], finale: [] }
+  tabellone: { ottavi: [], quarti: [], semifinali: [], finale: [] },
+  prossimaPartita: null // { tipo: 'girone'|'spareggio'|'ottavi'|..., id, casa, trasferta }
 };
 
 /* =========================================================
-   LOGICA TORNEO
+   INIZIALIZZAZIONE
    ========================================================= */
-const GRUPPI = ['A','B','C','D','E','F','G','H'];
+const GRUPPI_NOMI = ['A','B','C','D','E','F','G','H','I','J','K','L'];
 
+function caricaStato() {
+  const salvato = localStorage.getItem(STORAGE_KEY);
+  if (salvato) {
+    try {
+      torneo = JSON.parse(salvato);
+      return true;
+    } catch (e) { return false; }
+  }
+  return false;
+}
+function salvaStato() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(torneo));
+}
+function resetTorneo() {
+  if (confirm('Sei sicuro di voler resettare il torneo? Perderai tutti i progressi.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+/* =========================================================
+   CREAZIONE TORNEO
+   ========================================================= */
 function creaGironi() {
   const ids = Object.keys(SQUADRE);
+  // Mescola le squadre
   const mescolate = [...ids].sort(() => Math.random() - 0.5);
+
+  // 54 squadre / 12 gironi = 4.5 → facciamo 6 gironi da 4 e 6 gironi da 5 = 24 + 30 = 54
   const gironi = {};
-  const perGirone = Math.ceil(ids.length / 8);
-  GRUPPI.forEach((g, i) => {
-    gironi[g] = mescolate.slice(i * perGirone, (i + 1) * perGirone);
+  let idx = 0;
+  GRUPPI_NOMI.forEach((nome, i) => {
+    const numSquadre = i < 6 ? 5 : 4; // 6 gironi da 5, 6 gironi da 4
+    gironi[nome] = mescolate.slice(idx, idx + numSquadre);
+    idx += numSquadre;
   });
   return gironi;
 }
 
-function simulaPartita(a, b) {
+function creaPartiteGirone(gironi) {
+  const partite = [];
+  let idPartita = 0;
+  for (const nome of GRUPPI_NOMI) {
+    const squadre = gironi[nome];
+    // Genera accoppiamenti andata/ritorno
+    for (let i = 0; i < squadre.length; i++) {
+      for (let j = i + 1; j < squadre.length; j++) {
+        // Sorteggio casa/trasferta per l'andata
+        const casaAndata = Math.random() < 0.5 ? squadre[i] : squadre[j];
+        const trasfertaAndata = casaAndata === squadre[i] ? squadre[j] : squadre[i];
+        partite.push({
+          id: 'gir_' + nome + '_' + (idPartita++),
+          girone: nome,
+          andata: { casa: casaAndata, trasferta: trasfertaAndata, golCasa: null, golTrasferta: null, played: false },
+          ritorno: { casa: trasfertaAndata, trasferta: casaAndata, golCasa: null, golTrasferta: null, played: false }
+        });
+      }
+    }
+  }
+  return partite;
+}
+
+function inizializzaTorneo(squadraScelta) {
+  torneo = {
+    squadraScelta: squadraScelta,
+    fase: 'qualificazioni',
+    gironi: {},
+    partite: [],
+    classifica: {},
+    qualificate: [],
+    spareggi: [],
+    tabellone: { ottavi: [], quarti: [], semifinali: [], finale: [] },
+    prossimaPartita: null
+  };
+  torneo.gironi = creaGironi();
+  torneo.partite = creaPartiteGirone(torneo.gironi);
+  // Inizializza classifiche
+  for (const nome of GRUPPI_NOMI) {
+    torneo.classifica[nome] = torneo.gironi[nome].map(sq => ({
+      squadra: sq, punti: 0, giocate: 0, vinte: 0, pareggi: 0, perse: 0, gf: 0, gs: 0, dr: 0
+    }));
+  }
+  calcolaProssimaPartita();
+  salvaStato();
+  render();
+}
+
+/* =========================================================
+   TROVA LA PROSSIMA PARTITA DELLA TUA SQUADRA
+   ========================================================= */
+function calcolaProssimaPartita() {
+  const tua = torneo.squadraScelta;
+  if (!tua) { torneo.prossimaPartita = null; return; }
+
+  if (torneo.fase === 'qualificazioni') {
+    // Cerca la prima partita non giocata della tua squadra
+    for (const p of torneo.partite) {
+      if (!p.andata.played && (p.andata.casa === tua || p.andata.trasferta === tua)) {
+        torneo.prossimaPartita = { tipo: 'girone', id: p.id, sotto: 'andata', casa: p.andata.casa, trasferta: p.andata.trasferta, girone: p.girone };
+        return;
+      }
+      if (!p.ritorno.played && (p.ritorno.casa === tua || p.ritorno.trasferta === tua)) {
+        torneo.prossimaPartita = { tipo: 'girone', id: p.id, sotto: 'ritorno', casa: p.ritorno.casa, trasferta: p.ritorno.trasferta, girone: p.girone };
+        return;
+      }
+    }
+    torneo.prossimaPartita = null;
+  } else if (torneo.fase === 'spareggi') {
+    // Trova spareggio con la tua squadra
+    for (const s of torneo.spareggi) {
+      if ((s.casa === tua || s.trasferta === tua) && !s.played) {
+        torneo.prossimaPartita = { tipo: 'spareggio', id: s.id, casa: s.casa, trasferta: s.trasferta };
+        return;
+      }
+    }
+    torneo.prossimaPartita = null;
+  } else if (['ottavi','quarti','semifinali','finale'].includes(torneo.fase)) {
+    const turno = torneo.tabellone[torneo.fase];
+    if (!turno) { torneo.prossimaPartita = null; return; }
+    for (const p of turno) {
+      if ((p.casa === tua || p.trasferta === tua) && (!p.played && !p.playedRitorno)) {
+        if (!p.played) {
+          torneo.prossimaPartita = { tipo: torneo.fase, id: p.id, sotto: 'andata', casa: p.casa, trasferta: p.trasferta };
+        } else if (!p.playedRitorno) {
+          torneo.prossimaPartita = { tipo: torneo.fase, id: p.id, sotto: 'ritorno', casa: p.trasferta, trasferta: p.casa };
+        }
+        return;
+      }
+    }
+    torneo.prossimaPartita = null;
+  }
+}
+
+/* =========================================================
+   SIMULAZIONE PARTITA
+   ========================================================= */
+function forzaSquadra(id) {
   const forza = {
     italia: 90, francia: 92, germania: 88, spagna: 91, portogallo: 87,
     inghilterra: 89, olanda: 85, belgio: 84, croazia: 83, danimarca: 82,
@@ -222,132 +342,242 @@ function simulaPartita(a, b) {
     moldavia: 45, kosovo: 44, faroe: 43, andorra: 42, sanmarino: 41,
     gibilterra: 40, liechtenstein: 39, russia: 80
   };
-  const fa = forza[a] || 50, fb = forza[b] || 50;
+  return forza[id] || 50;
+}
+
+function simulaPartita(a, b, casaA = true) {
+  const fa = forzaSquadra(a) + (casaA ? 5 : 0);
+  const fb = forzaSquadra(b) + (casaA ? 0 : 5);
   const pa = fa / (fa + fb);
   const golA = Math.random() < pa ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
   const golB = Math.random() < (1 - pa) ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
   return { golA, golB };
 }
 
-function simulaGirone(girone, squadre) {
-  const classifica = {};
-  squadre.forEach(s => classifica[s] = { punti: 0, gf: 0, gs: 0, dr: 0, giocate: 0 });
-  const partite = [];
-  for (let i = 0; i < squadre.length; i++) {
-    for (let j = i + 1; j < squadre.length; j++) {
-      const r1 = simulaPartita(squadre[i], squadre[j]);
-      partite.push({ casa: squadre[i], trasferta: squadre[j], golCasa: r1.golA, golTrasferta: r1.golB });
-      classifica[squadre[i]].gf += r1.golA; classifica[squadre[i]].gs += r1.golB;
-      classifica[squadre[j]].gf += r1.golB; classifica[squadre[j]].gs += r1.golA;
-      classifica[squadre[i]].giocate++; classifica[squadre[j]].giocate++;
-      if (r1.golA > r1.golB) classifica[squadre[i]].punti += 3;
-      else if (r1.golA < r1.golB) classifica[squadre[j]].punti += 3;
-      else { classifica[squadre[i]].punti += 1; classifica[squadre[j]].punti += 1; }
-      const r2 = simulaPartita(squadre[j], squadre[i]);
-      partite.push({ casa: squadre[j], trasferta: squadre[i], golCasa: r2.golA, golTrasferta: r2.golB });
-      classifica[squadre[j]].gf += r2.golA; classifica[squadre[j]].gs += r2.golB;
-      classifica[squadre[i]].gf += r2.golB; classifica[squadre[i]].gs += r2.golA;
-      classifica[squadre[j]].giocate++; classifica[squadre[i]].giocate++;
-      if (r2.golA > r2.golB) classifica[squadre[j]].punti += 3;
-      else if (r2.golA < r2.golB) classifica[squadre[i]].punti += 3;
-      else { classifica[squadre[j]].punti += 1; classifica[squadre[i]].punti += 1; }
+/* =========================================================
+   AGGIORNA CLASSIFICA
+   ========================================================= */
+function aggiornaClassifica(girone, casa, trasferta, golCasa, golTrasferta) {
+  const cls = torneo.classifica[girone];
+  const c = cls.find(x => x.squadra === casa);
+  const t = cls.find(x => x.squadra === trasferta);
+  c.giocate++; t.giocate++;
+  c.gf += golCasa; c.gs += golTrasferta;
+  t.gf += golTrasferta; t.gs += golCasa;
+  if (golCasa > golTrasferta) { c.punti += 3; c.vinte++; t.perse++; }
+  else if (golCasa < golTrasferta) { t.punti += 3; t.vinte++; c.perse++; }
+  else { c.punti += 1; t.punti += 1; c.pareggi++; t.pareggi++; }
+  c.dr = c.gf - c.gs;
+  t.dr = t.gf - t.gs;
+  cls.sort((a, b) => b.punti - a.punti || b.dr - a.dr || b.gf - a.gf);
+}
+
+/* =========================================================
+   GIOCA PARTITA (link a index.html)
+   ========================================================= */
+function giocaPartita(tipo, idPartita, sotto, casa, trasferta) {
+  // Salva i dati della partita attiva
+  const datiPartita = {
+    sqTU: casa === torneo.squadraScelta ? casa : trasferta,
+    sqCPU: casa === torneo.squadraScelta ? trasferta : casa,
+    tipo: tipo,
+    idPartita: idPartita,
+    sotto: sotto,
+    casaOriginale: casa,
+    trasfertaOriginale: trasferta
+  };
+  localStorage.setItem('torneo_partita_attiva_' + idPartita + '_' + sotto, JSON.stringify(datiPartita));
+  // Vai al gioco
+  location.href = 'index.html?torneo=europei&partita=' + encodeURIComponent(idPartita + '_' + sotto);
+}
+
+/* =========================================================
+   RICEZIONE RISULTATO DA index.html
+   ========================================================= */
+function riceviRisultato() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const risultatoId = urlParams.get('risultato');
+  if (!risultatoId) return false;
+
+  const key = 'torneo_partita_' + risultatoId;
+  const risultatoJson = localStorage.getItem(key);
+  if (!risultatoJson) return false;
+
+  const risultato = JSON.parse(risultatoJson);
+  localStorage.removeItem(key);
+
+  // Parsing id: "gir_A_0_andata" oppure "spareggio_0"
+  const parti = risultatoId.split('_');
+  if (parti[0] === 'gir') {
+    // Partita di girone: gir_A_0_andata
+    const girone = parti[1];
+    const idPartita = 'gir_' + parti[1] + '_' + parti[2];
+    const sotto = parti[3];
+    const partita = torneo.partite.find(p => p.id === idPartita);
+    if (!partita) return false;
+    const datiAttivi = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + risultatoId) || '{}');
+    const sqTU = datiAttivi.sqTU;
+    const sqCPU = datiAttivi.sqCPU;
+    const golTU = risultato.golTU;
+    const golCPU = risultato.golCPU;
+    // Determina chi è casa e chi trasferta
+    const casa = datiAttivi.casaOriginale;
+    const trasferta = datiAttivi.trasfertaOriginale;
+    const golCasa = casa === sqTU ? golTU : golCPU;
+    const golTrasferta = casa === sqTU ? golCPU : golTU;
+    partita[sotto].golCasa = golCasa;
+    partita[sotto].golTrasferta = golTrasferta;
+    partita[sotto].played = true;
+    aggiornaClassifica(girone, casa, trasferta, golCasa, golTrasferta);
+  } else if (parti[0] === 'spareggio') {
+    const idPartita = 'spareggio_' + parti[1];
+    const sotto = parti[2] || 'unica';
+    const s = torneo.spareggi.find(x => x.id === idPartita);
+    if (!s) return false;
+    const datiAttivi = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + risultatoId) || '{}');
+    s.golCasa = datiAttivi.casaOriginale === datiAttivi.sqTU ? risultato.golTU : risultato.golCPU;
+    s.golTrasferta = datiAttivi.casaOriginale === datiAttivi.sqTU ? risultato.golCPU : risultato.golTU;
+    s.played = true;
+  } else {
+    // Fase finale: ottavi_0_andata
+    const turno = parti[0];
+    const index = parseInt(parti[1]);
+    const sotto = parti[2];
+    const p = torneo.tabellone[turno]?.[index];
+    if (!p) return false;
+    const datiAttivi = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + risultatoId) || '{}');
+    const golCasa = datiAttivi.casaOriginale === datiAttivi.sqTU ? risultato.golTU : risultato.golCPU;
+    const golTrasferta = datiAttivi.casaOriginale === datiAttivi.sqTU ? risultato.golCPU : risultato.golTU;
+    if (sotto === 'andata') {
+      p.golCasaAndata = golCasa;
+      p.golTrasfertaAndata = golTrasferta;
+      p.played = true;
+    } else {
+      p.golCasaRitorno = golCasa;
+      p.golTrasfertaRitorno = golTrasferta;
+      p.playedRitorno = true;
     }
   }
-  const ordinata = Object.entries(classifica)
-    .map(([s, d]) => ({ squadra: s, ...d, dr: d.gf - d.gs }))
-    .sort((a, b) => b.punti - a.punti || b.dr - a.dr || b.gf - a.gf);
-  return { classifica: ordinata, partite };
+
+  // Pulisci URL
+  window.history.replaceState({}, document.title, 'europei2028.html');
+  salvaStato();
+  return true;
 }
 
-function eseguiQualificazioni() {
-  stato.gironi = {};
-  for (const g of GRUPPI) {
-    const squadre = stato.gironiRaw[g];
-    stato.gironi[g] = simulaGirone(g, squadre);
-  }
-  stato.qualificate = [];
-  for (const g of GRUPPI) {
-    const top2 = stato.gironi[g].classifica.slice(0, 2);
-    top2.forEach(t => stato.qualificate.push(t.squadra));
-  }
-  const spareggianti = [];
-  for (const g of GRUPPI) {
-    const c = stato.gironi[g].classifica;
-    if (c[2]) spareggianti.push(c[2].squadra);
-    if (c[3]) spareggianti.push(c[3].squadra);
-  }
-  const mescolati = spareggianti.sort(() => Math.random() - 0.5);
-  stato.spareggi = [];
-  for (let i = 0; i < 8; i++) {
-    const a = mescolati[i * 2], b = mescolati[i * 2 + 1];
-    if (!a || !b) continue;
-    const r = simulaPartita(a, b);
-    const vincitore = r.golA >= r.golB ? a : b;
-    stato.spareggi.push({ a, b, golA: r.golA, golB: r.golB, vincitore });
-  }
-  stato.qualificate = stato.qualificate.concat(stato.spareggi.map(s => s.vincitore));
-  stato.fase = 'qualificazioni';
-  render();
-}
-
-function simulaTurno(turno) {
-  const partite = stato.tabellone[turno];
-  partite.forEach(p => {
-    if (!p.vincitore) {
-      const r = simulaPartita(p.a, p.b);
-      p.golA = r.golA; p.golB = r.golB;
-      if (r.golA === r.golB) {
-        const rigA = Math.floor(Math.random() * 5) + 1;
-        const rigB = Math.floor(Math.random() * 5) + 1;
-        p.rigA = rigA; p.rigB = rigB;
-        p.vincitore = rigA >= rigB ? p.a : p.b;
-      } else {
-        p.vincitore = r.golA > r.golB ? p.a : p.b;
+/* =========================================================
+   SIMULAZIONE ALTRE PARTITE
+   ========================================================= */
+function simulaAltrePartite() {
+  const tua = torneo.squadraScelta;
+  if (torneo.fase === 'qualificazioni') {
+    for (const p of torneo.partite) {
+      if (!p.andata.played && p.andata.casa !== tua && p.andata.trasferta !== tua) {
+        const r = simulaPartita(p.andata.casa, p.andata.trasferta, true);
+        p.andata.golCasa = r.golA;
+        p.andata.golTrasferta = r.golB;
+        p.andata.played = true;
+        aggiornaClassifica(p.girone, p.andata.casa, p.andata.trasferta, r.golA, r.golB);
+      }
+      if (!p.ritorno.played && p.ritorno.casa !== tua && p.ritorno.trasferta !== tua) {
+        const r = simulaPartita(p.ritorno.casa, p.ritorno.trasferta, true);
+        p.ritorno.golCasa = r.golA;
+        p.ritorno.golTrasferta = r.golB;
+        p.ritorno.played = true;
+        aggiornaClassifica(p.girone, p.ritorno.casa, p.ritorno.trasferta, r.golA, r.golB);
       }
     }
-  });
+  }
 }
 
-function creaTabellone(qualificate) {
-  const q = qualificate.slice(0, 16);
-  const mescolate = [...q].sort(() => Math.random() - 0.5);
-  const ottavi = [];
-  for (let i = 0; i < 8; i++) {
-    ottavi.push({ a: mescolate[i * 2], b: mescolate[i * 2 + 1] });
+/* =========================================================
+   VERIFICA FINE FASE
+   ========================================================= */
+function controllaFineFase() {
+  if (torneo.fase === 'qualificazioni') {
+    const tutteGiocate = torneo.partite.every(p => p.andata.played && p.ritorno.played);
+    if (tutteGiocate) {
+      // Calcola qualificate: prime 2 di ogni girone + migliori terze
+      const primeDue = [];
+      const terze = [];
+      for (const nome of GRUPPI_NOMI) {
+        const cls = torneo.classifica[nome];
+        if (cls[0]) primeDue.push(cls[0].squadra);
+        if (cls[1]) primeDue.push(cls[1].squadra);
+        if (cls[2]) terze.push({ squadra: cls[2].squadra, punti: cls[2].punti, dr: cls[2].dr, gf: cls[2].gf });
+      }
+      // Ordina le terze
+      terze.sort((a, b) => b.punti - a.punti || b.dr - a.dr || b.gf - a.gf);
+      // Prendi le migliori 4 terze
+      const miglioriTerze = terze.slice(0, 4).map(t => t.squadra);
+      torneo.qualificate = [...primeDue, ...miglioriTerze];
+      // Crea tabellone ottavi (16 squadre)
+      const mescolate = [...torneo.qualificate].sort(() => Math.random() - 0.5);
+      torneo.tabellone.ottavi = [];
+      for (let i = 0; i < 8; i++) {
+        torneo.tabellone.ottavi.push({
+          id: 'ottavi_' + i,
+          casa: mescolate[i * 2],
+          trasferta: mescolate[i * 2 + 1],
+          played: false, playedRitorno: false,
+          golCasaAndata: null, golTrasfertaAndata: null,
+          golCasaRitorno: null, golTrasfertaRitorno: null
+        });
+      }
+      torneo.fase = 'ottavi';
+    }
+  } else if (['ottavi','quarti','semifinali'].includes(torneo.fase)) {
+    const turno = torneo.tabellone[torneo.fase];
+    const tutteGiocate = turno.every(p => p.played && p.playedRitorno);
+    if (tutteGiocate) {
+      // Calcola vincitori
+      const vincitori = [];
+      for (const p of turno) {
+        const totCasa = (p.golCasaAndata || 0) + (p.golCasaRitorno || 0);
+        const totTrasferta = (p.golTrasfertaAndata || 0) + (p.golTrasfertaRitorno || 0);
+        if (totCasa > totTrasferta) vincitori.push(p.casa);
+        else if (totTrasferta > totCasa) vincitori.push(p.trasferta);
+        else {
+          // Pareggio: rigori (random)
+          vincitori.push(Math.random() < 0.5 ? p.casa : p.trasferta);
+        }
+      }
+      // Crea turno successivo
+      let prossimoTurno;
+      if (torneo.fase === 'ottavi') prossimoTurno = 'quarti';
+      else if (torneo.fase === 'quarti') prossimoTurno = 'semifinali';
+      else if (torneo.fase === 'semifinali') prossimoTurno = 'finale';
+      torneo.tabellone[prossimoTurno] = [];
+      const numPartite = vincitori.length / 2;
+      for (let i = 0; i < numPartite; i++) {
+        const a = vincitori[i * 2], b = vincitori[i * 2 + 1];
+        const casaAndata = Math.random() < 0.5 ? a : b;
+        const trasfertaAndata = casaAndata === a ? b : a;
+        torneo.tabellone[prossimoTurno].push({
+          id: prossimoTurno + '_' + i,
+          casa: casaAndata,
+          trasferta: trasfertaAndata,
+          played: false, playedRitorno: false,
+          golCasaAndata: null, golTrasfertaAndata: null,
+          golCasaRitorno: null, golTrasfertaRitorno: null
+        });
+      }
+      torneo.fase = prossimoTurno;
+    }
+  } else if (torneo.fase === 'finale') {
+    const p = torneo.tabellone.finale[0];
+    if (p.played && p.playedRitorno) {
+      // Calcola vincitore finale (partita secca: prendi il ritorno)
+      const totCasa = (p.golCasaAndata || 0) + (p.golCasaRitorno || 0);
+      const totTrasferta = (p.golTrasfertaAndata || 0) + (p.golTrasfertaRitorno || 0);
+      if (totCasa > totTrasferta) p.vincitore = p.casa;
+      else if (totTrasferta > totCasa) p.vincitore = p.trasferta;
+      else p.vincitore = Math.random() < 0.5 ? p.casa : p.trasferta;
+      torneo.fase = 'fine';
+    }
   }
-  stato.tabellone.ottavi = ottavi;
-  stato.fase = 'ottavi';
-  render();
-}
-
-function avanzaTurno() {
-  if (stato.fase === 'ottavi') {
-    simulaTurno('ottavi');
-    const vincitori = stato.tabellone.ottavi.map(p => p.vincitore);
-    const quarti = [];
-    for (let i = 0; i < 4; i++) quarti.push({ a: vincitori[i * 2], b: vincitori[i * 2 + 1] });
-    stato.tabellone.quarti = quarti;
-    stato.fase = 'quarti';
-    render();
-  } else if (stato.fase === 'quarti') {
-    simulaTurno('quarti');
-    const vincitori = stato.tabellone.quarti.map(p => p.vincitore);
-    const semi = [];
-    for (let i = 0; i < 2; i++) semi.push({ a: vincitori[i * 2], b: vincitori[i * 2 + 1] });
-    stato.tabellone.semifinali = semi;
-    stato.fase = 'semifinali';
-    render();
-  } else if (stato.fase === 'semifinali') {
-    simulaTurno('semifinali');
-    const vincitori = stato.tabellone.semifinali.map(p => p.vincitore);
-    stato.tabellone.finale = [{ a: vincitori[0], b: vincitori[1] }];
-    stato.fase = 'finale';
-    render();
-  } else if (stato.fase === 'finale') {
-    simulaTurno('finale');
-    stato.fase = 'fine';
-    render();
-  }
+  calcolaProssimaPartita();
+  salvaStato();
 }
 
 /* =========================================================
@@ -355,14 +585,12 @@ function avanzaTurno() {
    ========================================================= */
 function render() {
   const content = document.getElementById('content');
-  if (stato.fase === 'scelta') {
+  if (torneo.fase === 'scelta') {
     renderScelta(content);
-  } else if (stato.fase === 'qualificazioni') {
-    renderQualificazioni(content);
-  } else if (['ottavi','quarti','semifinali','finale'].includes(stato.fase)) {
-    renderTabellone(content);
-  } else if (stato.fase === 'fine') {
+  } else if (torneo.fase === 'fine') {
     renderFine(content);
+  } else {
+    renderTorneo(content);
   }
 }
 
@@ -371,13 +599,13 @@ function renderScelta(content) {
     <div class="avviso">Seleziona una nazionale per iniziare le qualificazioni agli Europei 2028.</div>
     <div class="squadre-grid">`;
   Object.keys(SQUADRE).forEach(id => {
-    html += `<div class="squadra-btn ${id === stato.squadraScelta ? 'selezionata' : ''}" onclick="selezionaSquadra('${id}')">
+    html += `<div class="squadra-btn ${id === torneo.squadraScelta ? 'selezionata' : ''}" onclick="selezionaSquadra('${id}')">
       <div class="maglia">${creaGiocatoreSVG(SQUADRE[id].casa, 'fermo')}</div>
       <div>${SQUADRE[id].nome}</div>
     </div>`;
   });
   html += `</div>`;
-  if (stato.squadraScelta) {
+  if (torneo.squadraScelta) {
     html += `<div style="text-align:center;margin-top:16px">
       <button class="btn primario" onclick="iniziaQualificazioni()">INIZIA QUALIFICAZIONI</button>
     </div>`;
@@ -386,122 +614,141 @@ function renderScelta(content) {
 }
 
 function selezionaSquadra(id) {
-  stato.squadraScelta = id;
+  torneo.squadraScelta = id;
   render();
 }
-
 function iniziaQualificazioni() {
-  stato.gironiRaw = creaGironi();
-  eseguiQualificazioni();
+  inizializzaTorneo(torneo.squadraScelta);
 }
 
-function renderQualificazioni(content) {
-  let html = `<div class="fase-titolo">📋 Fase a Gironi — Qualificazioni</div>`;
-  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE[stato.squadraScelta].nome}</strong></div>`;
-  html += `<div class="gironi-grid">`;
-  for (const g of GRUPPI) {
-    const girone = stato.gironi[g];
-    if (!girone) continue;
-    html += `<div class="girone"><h3>Girone ${g}</h3><table class="classifica">
-      <tr><th>Squadra</th><th>Pt</th><th>G</th><th>GF</th><th>GS</th><th>DR</th></tr>`;
-    girone.classifica.forEach((t, idx) => {
-      const cls = t.squadra === stato.squadraScelta ? 'tua' : '';
-      const qual = idx < 2 ? 'qualificata' : idx < 4 ? 'spareggio' : '';
-      html += `<tr class="${cls} ${qual}">
-        <td>${SQUADRE[t.squadra].nome}</td>
-        <td>${t.punti}</td><td>${t.giocate}</td><td>${t.gf}</td><td>${t.gs}</td><td>${t.dr > 0 ? '+' : ''}${t.dr}</td>
-      </tr>`;
-    });
-    html += `</table></div>`;
-  }
-  html += `</div>`;
-  html += `<div class="fase-titolo">⚔️ Spareggi</div><div class="turno-box">`;
-  stato.spareggi.forEach(p => {
-    const cls = (p.a === stato.squadraScelta || p.b === stato.squadraScelta) ? 'tua' : '';
-    html += `<div class="match-row ${cls}">
-      <span>${SQUADRE[p.a].nome}</span>
-      <span class="score">${p.golA} - ${p.golB}</span>
-      <span>${SQUADRE[p.b].nome}</span>
-      <span class="esito">→ ${SQUADRE[p.vincitore].nome}</span>
+function renderTorneo(content) {
+  const tua = torneo.squadraScelta;
+  let html = `<div class="avviso">La tua squadra: <strong>${SQUADRE[tua].nome}</strong> · Fase: <strong>${torneo.fase.toUpperCase()}</strong></div>`;
+
+  // Prossima partita
+  if (torneo.prossimaPartita) {
+    const pp = torneo.prossimaPartita;
+    const casa = SQUADRE[pp.casa].nome;
+    const trasferta = SQUADRE[pp.trasferta].nome;
+    html += `<div class="prossima-partita">
+      <h3>⚽ PROSSIMA PARTITA</h3>
+      <div class="vs">${casa} <span style="font-size:14px">vs</span> ${trasferta}</div>
+      <div class="info">${pp.sotto === 'andata' ? 'Andata' : 'Ritorno'} · ${pp.tipo.toUpperCase()}</div>
+      <button class="play-big" onclick="giocaPartita('${pp.tipo}', '${pp.id}', '${pp.sotto}', '${pp.casa}', '${pp.trasferta}')">▶ GIOCA</button>
     </div>`;
-  });
-  html += `</div>`;
-  html += `<div style="text-align:center;margin-top:16px">
-    <button class="btn primario" onclick="vaiAgliOttavi()">VAI AGLI OTTAVI</button>
-  </div>`;
+  } else {
+    html += `<div class="prossima-partita" style="background:#16213e;color:#ffd700">
+      <h3>⏳ In attesa...</h3>
+      <p style="font-size:12px">La tua squadra non ha partite in programma in questa fase.</p>
+      <button class="play-big" onclick="simulaAvanti()">SIMULA AVANTI</button>
+    </div>`;
+  }
+
+  // Fase a gironi
+  if (torneo.fase === 'qualificazioni') {
+    html += `<div class="fase-titolo">📋 Fase a Gironi — Qualificazioni</div>`;
+    html += `<div class="gironi-grid">`;
+    for (const nome of GRUPPI_NOMI) {
+      const cls = torneo.classifica[nome];
+      if (!cls) continue;
+      html += `<div class="girone"><h3>Girone ${nome}</h3><table class="classifica">
+        <tr><th>Squadra</th><th>Pt</th><th>G</th><th>GF</th><th>GS</th><th>DR</th></tr>`;
+      cls.forEach((t, idx) => {
+        const isTua = t.squadra === tua ? 'tua' : '';
+        const qual = idx < 2 ? 'qualificata' : '';
+        html += `<tr class="${isTua} ${qual}">
+          <td>${SQUADRE[t.squadra].nome}</td>
+          <td>${t.punti}</td><td>${t.giocate}</td><td>${t.gf}</td><td>${t.gs}</td><td>${t.dr > 0 ? '+' : ''}${t.dr}</td>
+        </tr>`;
+      });
+      html += `</table></div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Tabellone fase finale
+  if (['ottavi','quarti','semifinali','finale'].includes(torneo.fase)) {
+    html += renderTabellone(tua);
+  }
+
   content.innerHTML = html;
 }
 
-function vaiAgliOttavi() {
-  creaTabellone(stato.qualificate);
-}
-
-function renderTabellone(content) {
+function renderTabellone(tua) {
+  let html = `<div class="fase-titolo">🏆 Fase Finale</div>`;
   const turni = [
     { key: 'ottavi', nome: 'Ottavi di Finale' },
     { key: 'quarti', nome: 'Quarti di Finale' },
     { key: 'semifinali', nome: 'Semifinali' },
     { key: 'finale', nome: 'Finale' }
   ];
-  let html = `<div class="fase-titolo">🏆 Fase Finale — Europei 2028</div>`;
-  html += `<div class="avviso">La tua squadra: <strong>${SQUADRE[stato.squadraScelta].nome}</strong></div>`;
   turni.forEach(t => {
-    const partite = stato.tabellone[t.key];
+    const partite = torneo.tabellone[t.key];
     if (!partite || partite.length === 0) return;
-    const completato = partite.every(p => p.vincitore);
-    html += `<div class="turno-box"><h3>${t.nome} ${completato ? '✅' : ''}</h3>`;
+    html += `<div class="turno-box"><h3>${t.nome}</h3>`;
     partite.forEach(p => {
-      const cls = (p.a === stato.squadraScelta || p.b === stato.squadraScelta) ? 'tua' : '';
-      let score = '-';
-      if (p.golA !== undefined) score = `${p.golA} - ${p.golB}`;
-      if (p.rigA !== undefined) score += ` (${p.rigA}-${p.rigB} dcr)`;
-      let esito = '';
-      if (p.vincitore) {
-        esito = `→ ${SQUADRE[p.vincitore].nome}`;
-        if (p.vincitore !== stato.squadraScelta && (p.a === stato.squadraScelta || p.b === stato.squadraScelta)) {
-          esito += ' ❌';
-        }
+      const isTua = (p.casa === tua || p.trasferta === tua) ? 'tua' : '';
+      let score = 'Da giocare';
+      if (p.played && p.playedRitorno) {
+        const totCasa = (p.golCasaAndata || 0) + (p.golCasaRitorno || 0);
+        const totTrasferta = (p.golTrasfertaAndata || 0) + (p.golTrasfertaRitorno || 0);
+        score = `${p.golCasaAndata}-${p.golTrasfertaAndata} / ${p.golCasaRitorno}-${p.golTrasfertaRitorno}`;
+      } else if (p.played) {
+        score = `${p.golCasaAndata}-${p.golTrasfertaAndata} (andata)`;
       }
-      html += `<div class="match-row ${cls}">
-        <span>${SQUADRE[p.a].nome}</span>
+      html += `<div class="match-row ${isTua}">
+        <span>${SQUADRE[p.casa].nome}</span>
         <span class="score">${score}</span>
-        <span>${SQUADRE[p.b].nome}</span>
-        <span class="esito">${esito}</span>
+        <span>${SQUADRE[p.trasferta].nome}</span>
       </div>`;
     });
     html += `</div>`;
   });
-  const turnoCorrente = ['ottavi','quarti','semifinali','finale'].find(t => {
-    const p = stato.tabellone[t];
-    return p && p.length > 0 && !p.every(x => x.vincitore);
-  });
-  if (turnoCorrente) {
-    const nomeTurno = { ottavi:'Ottavi', quarti:'Quarti', semifinali:'Semifinali', finale:'Finale' }[turnoCorrente];
-    html += `<div style="text-align:center;margin:16px">
-      <button class="btn primario" onclick="avanzaTurno()">SIMULA ${nomeTurno.toUpperCase()}</button>
-    </div>`;
-  }
-  content.innerHTML = html;
+  return html;
 }
 
 function renderFine(content) {
-  const finale = stato.tabellone.finale[0];
-  const campione = finale.vincitore;
-  const tua = stato.squadraScelta;
-  let msg = campione === tua ? '🏆 HAI VINTO GLI EUROPEI 2028!' : `🏆 Campione: ${SQUADRE[campione].nome}`;
-  let html = `<div class="fase-titolo">🏆 Fine Torneo</div>
+  const finale = torneo.tabellone.finale[0];
+  const vincitore = finale.vincitore;
+  const tua = torneo.squadraScelta;
+  const msg = vincitore === tua ? '🏆 HAI VINTO GLI EUROPEI 2028!' : `🏆 Campione: ${SQUADRE[vincitore].nome}`;
+  content.innerHTML = `
+    <div class="fase-titolo">🏆 Fine Torneo</div>
     <div class="turno-box" style="text-align:center">
       <h2 style="color:#ffd700;font-size:22px;margin:12px 0">${msg}</h2>
-      <p style="font-size:14px;color:#aaa;margin:8px 0">Finale: ${SQUADRE[finale.a].nome} ${finale.golA} - ${finale.golB} ${SQUADRE[finale.b].nome}</p>
-      ${finale.rigA !== undefined ? `<p style="font-size:12px;color:#aaa">Rigori: ${finale.rigA} - ${finale.rigB}</p>` : ''}
-      <button class="btn primario" onclick="location.reload()" style="margin-top:16px">NUOVO TORNEO</button>
+      <button class="btn primario" onclick="resetTorneo()" style="margin-top:16px">NUOVO TORNEO</button>
     </div>`;
-  content.innerHTML = html;
+}
+
+/* Simula tutto fino alla prossima partita della tua squadra */
+function simulaAvanti() {
+  simulaAltrePartite();
+  controllaFineFase();
+  salvaStato();
+  render();
 }
 
 /* =========================================================
    AVVIO
    ========================================================= */
+// Controlla se c'è un risultato da ricevere
+if (!riceviRisultato()) {
+  // Nessun risultato: carica stato o mostra scelta
+  if (!caricaStato()) {
+    torneo = {
+      squadraScelta: null,
+      fase: 'scelta',
+      gironi: {}, partite: [], classifica: {}, qualificate: [], spareggi: [],
+      tabellone: { ottavi: [], quarti: [], semifinali: [], finale: [] },
+      prossimaPartita: null
+    };
+  }
+}
+// Simula le partite in corso
+if (torneo.fase !== 'scelta' && torneo.fase !== 'fine') {
+  simulaAltrePartite();
+  controllaFineFase();
+}
 render();
 </script>
 </body>

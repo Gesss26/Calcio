@@ -172,13 +172,6 @@
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(2px) rotate(-2deg); }
   }
-  .anim-tiro { animation: animTiro 1.2s ease-out; }
-  @keyframes animTiro {
-    0% { transform: rotate(0deg); }
-    30% { transform: rotate(-20deg); }
-    60% { transform: rotate(25deg); }
-    100% { transform: rotate(0deg); }
-  }
   .anim-calcia { animation: animCalcia 0.8s ease-out; }
   @keyframes animCalcia {
     0% { transform: rotate(0deg); }
@@ -304,18 +297,14 @@
     border-color: #ffd700; background: #fff9c4; transform: translateY(-10px);
     box-shadow: 0 0 24px #ffd700;
   }
-  .carta.seme-guidatore {
-    box-shadow: 0 0 12px rgba(255,215,0,0.7);
-  }
+  .carta.seme-guidatore { box-shadow: 0 0 12px rgba(255,215,0,0.7); }
   .carta.coperta {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
     border: 3px solid #fff;
     display: flex; align-items: center; justify-content: center;
     cursor: default;
   }
-  .carta.coperta::after {
-    content: '🂠'; color: #fff; font-size: 38px;
-  }
+  .carta.coperta::after { content: '🂠'; color: #fff; font-size: 38px; }
   .carta.vincitrice {
     border-color: #4ade80;
     box-shadow: 0 0 24px #4ade80;
@@ -422,13 +411,9 @@
     transition: transform 0.15s, background 0.15s;
   }
   .squadra-btn:hover { transform: translateY(-2px); }
-  .squadra-btn.selezionata {
-    background: #ffd700; color: #16213e; border-color: #ffd700;
-  }
+  .squadra-btn.selezionata { background: #ffd700; color: #16213e; border-color: #ffd700; }
   .squadra-btn .nome { font-size: 11px; margin-bottom: 4px; }
-  .squadra-btn .maglia {
-    width: 40px; height: 52px; margin: 0 auto;
-  }
+  .squadra-btn .maglia { width: 40px; height: 52px; margin: 0 auto; }
   .squadra-btn .maglia svg { width: 100%; height: 100%; }
 
   .menu-principale {
@@ -440,9 +425,7 @@
     text-shadow: 0 4px 16px rgba(255,215,0,0.6);
     letter-spacing: 4px; margin-bottom: 10px;
   }
-  .menu-sottotitolo {
-    font-size: 13px; color: #aaa; margin-bottom: 24px;
-  }
+  .menu-sottotitolo { font-size: 13px; color: #aaa; margin-bottom: 24px; }
   .menu-btn {
     background: linear-gradient(135deg, #0f3460, #16213e);
     border: 3px solid #4dabf7; border-radius: 14px;
@@ -473,14 +456,8 @@
     box-shadow: 0 8px 24px rgba(255,215,0,0.7);
   }
 
-  .stats-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    margin: 14px 0;
-  }
-  .stats-card {
-    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px;
-    text-align: left; font-size: 12px;
-  }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+  .stats-card { background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px; text-align: left; font-size: 12px; }
   .stats-card h3 {
     font-size: 13px; color: #ffd700; margin-bottom: 8px;
     text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3);
@@ -518,23 +495,15 @@
   }
   .banner-mano.tu .banner-mano-vincitore { color: #4dabf7; text-shadow: 0 0 20px #4dabf7; }
   .banner-mano.cpu .banner-mano-vincitore { color: #ff6b6b; text-shadow: 0 0 20px #ff6b6b; }
-  .banner-mano-carte {
-    display: flex; justify-content: center; align-items: center; gap: 20px;
-    margin-top: 10px;
-  }
-  .banner-mano-carta {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-  }
+  .banner-mano-carte { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
+  .banner-mano-carta { display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .banner-mano-carta .chi {
     font-size: 11px; font-weight: bold; text-transform: uppercase;
     letter-spacing: 1px; color: #aaa;
   }
   .banner-mano-carta.tu .chi { color: #4dabf7; }
   .banner-mano-carta.cpu .chi { color: #ff6b6b; }
-  .banner-mano-carta .carta {
-    width: 70px; height: 98px;
-    animation: cartaEntra 0.6s ease-out;
-  }
+  .banner-mano-carta .carta { width: 70px; height: 98px; animation: cartaEntra 0.6s ease-out; }
   .banner-mano-carta .carta .seme-centro { font-size: 42px; }
   .banner-mano-carta .carta .valore-alto,
   .banner-mano-carta .carta .valore-basso { font-size: 18px; }
@@ -542,17 +511,12 @@
     0% { transform: translateY(30px) scale(0.5); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
-  .banner-mano-vs {
-    font-size: 22px; color: #ffd700; font-weight: 900;
-    margin: 0 4px;
-  }
+  .banner-mano-vs { font-size: 22px; color: #ffd700; font-weight: 900; margin: 0 4px; }
   .banner-mano-seme {
     margin-top: 14px; font-size: 13px; color: #ffd700;
     letter-spacing: 2px; text-transform: uppercase;
   }
-  .banner-mano-motivo {
-    margin-top: 8px; font-size: 12px; color: #ccc;
-  }
+  .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
   @media (max-height: 500px) {
     .pedina { width: 24px; height: 32px; }
@@ -693,9 +657,6 @@ const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
 const DURATA_ANIM_PALLA = 2400;
 
-/* =========================================================
-   PARAMETRI URL (per modalità torneo)
-   ========================================================= */
 const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
 const PARTITA_TORNEO = urlParams.get('partita');
@@ -775,9 +736,7 @@ let selezioneCarta = null;
 let selezioneSost = { campo: null, panchina: null };
 let renderingCampoInCorso = false;
 
-/* =========================================================
-   ZONE (7 zone - 11 vs 11)
-   ========================================================= */
+/* ZONE */
 const ZONE_CONFIG = [
   { id: 0, nome: 'Z0', ruolo: 'POR', portiere: true, proprietario: 'tu' },
   { id: 1, nome: 'Z1', ruolo: 'DIF', tu: 2, cpu: 2 },
@@ -792,9 +751,7 @@ const PANCHINA_CONFIG = [
   { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
 
-/* =========================================================
-   MAZZO CARTE
-   ========================================================= */
+/* MAZZO CARTE */
 const SEMI = {
   palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
   coppa:      { emoji: '🏆', nome: 'Coppa',      colore: 'rossa' },
@@ -852,16 +809,11 @@ function riempiMano(sq) {
     if (stato.mazzo.length === 0 && stato.scarti.length === 0) break;
   }
 }
-
 function calcolaMinuto() {
-  if (stato.tempo === 1) {
-    return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
-  } else {
-    return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
-  }
+  if (stato.tempo === 1) return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
+  else return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
 }
 
-/* LOG */
 function log(msg, classe = '') {
   stato.logCompleto.push({ msg, classe });
   const logBox = document.getElementById('log-box');
@@ -1208,8 +1160,65 @@ function lanciaMoneta(scelta) {
   setTimeout(() => avviaContrasto(), 700);
 }
 
-/* ANIMAZIONE PALLA */
-function animaPallaVersoZona(zonaDa, zonaA, callback, tipo = 'retta') {
+/* =========================================================
+   ANIMAZIONE PALLA — da giocatore a giocatore (linea retta o diagonale)
+   ========================================================= */
+function animaPallaTraGiocatori(idCalciatore, idRicevente, tipo = 'retta', callback) {
+  const calciatoreEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
+  const riceventeEl = document.querySelector(`[data-giocatore-id="${idRicevente}"]`);
+  if (!calciatoreEl || !riceventeEl) { if (callback) callback(); return; }
+
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const calcRect = calciatoreEl.getBoundingClientRect();
+  const ricevRect = riceventeEl.getBoundingClientRect();
+
+  // Punto di partenza: centro-basso del calciatore (piedi)
+  const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
+  const y1 = calcRect.bottom - calcRect.height * 0.15 - campoRect.top;
+
+  // Punto di arrivo: centro-basso del ricevente
+  const x2 = ricevRect.left + ricevRect.width / 2 - campoRect.left;
+  const y2 = ricevRect.bottom - ricevRect.height * 0.15 - campoRect.top;
+
+  const palla = document.getElementById('palla-volante');
+  palla.style.transition = 'none';
+  palla.style.left = x1 + 'px';
+  palla.style.top = y1 + 'px';
+  palla.classList.add('attiva');
+  palla.classList.remove('parabola');
+  void palla.offsetWidth;
+
+  const durata = DURATA_ANIM_PALLA;
+  const altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
+  const inizio = performance.now();
+
+  if (tipo === 'parabola') palla.classList.add('parabola');
+
+  function anima(now) {
+    const t = Math.min((now - inizio) / durata, 1);
+    const x = x1 + (x2 - x1) * t;
+    const yLineare = y1 + (y2 - y1) * t;
+    const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
+    const y = yLineare + offsetParabolico;
+
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+
+    if (t < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      palla.classList.remove('attiva');
+      palla.classList.remove('parabola');
+      if (callback) callback();
+    }
+  }
+  requestAnimationFrame(anima);
+}
+
+/* =========================================================
+   ANIMAZIONE PALLA — verso il centro di una zona (per il portiere)
+   ========================================================= */
+function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
   const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
   const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
   if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
@@ -1471,7 +1480,6 @@ function scegliCartaCPU() {
   return candidate[0];
 }
 
-/* BANNER */
 function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
   const banner = document.getElementById('banner-mano');
   banner.classList.remove('tu', 'cpu', 'attivo');
@@ -1498,7 +1506,9 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO — logica: chi vince avanza di 1 zona verso la porta avversaria */
+/* =========================================================
+   RISOLUZIONE CONTRASTO — chi vince avanza di 1 zona
+   ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -1514,27 +1524,30 @@ function risolviContrasto(vincente, motivoFallo) {
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // Direzione: se vince TU → +1 (verso Z6); se vince CPU → -1 (verso Z0)
-  const direzione = vincente === 'tu' ? +1 : -1;
-  const nuovaZona = c.zona + direzione;
-
-  // Controlla tiro in porta
-  // TU vince in Z5 → tiro verso Z6
-  // CPU vince in Z1 → tiro verso Z0
+  // Verifica tiro in porta
   if ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1)) {
     setTimeout(() => tiroInPorta(vincente), 500);
     return;
   }
 
-  // Controlla se la palla andrebbe oltre il campo (impossibile, ma sicurezza)
+  const direzione = vincente === 'tu' ? +1 : -1;
+  const nuovaZona = c.zona + direzione;
   if (nuovaZona < 0 || nuovaZona > 6) {
     setTimeout(() => tiroInPorta(vincente), 500);
     return;
   }
 
-  // Animazione: il giocatore che ha vinto calcia la palla verso la nuova zona
-  // Mostra animazione calcio sul giocatore vincente
+  // Giocatore che ha vinto (il calciatore)
   const giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
+
+  // Trova il ricevente nella nuova zona (compagno casuale)
+  const compagniNuovaZona = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+  let riceventeId = null;
+  if (compagniNuovaZona.length > 0) {
+    riceventeId = compagniNuovaZona[Math.floor(Math.random() * compagniNuovaZona.length)].id;
+  }
+
+  // Animazione calcio del giocatore
   const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"] svg`);
   if (pedinaEl) {
     pedinaEl.classList.remove('anim-fermo');
@@ -1545,27 +1558,24 @@ function risolviContrasto(vincente, motivoFallo) {
     }, 800);
   }
 
-  // Dopo l'animazione del calcio, muovi la palla
+  // Dopo il calcio, muovi la palla dal calciatore al ricevente in linea retta (o diagonale)
   setTimeout(() => {
-    animaPallaVersoZona(c.zona, nuovaZona, () => {
+    if (riceventeId) {
+      animaPallaTraGiocatori(giocatoreVincenteId, riceventeId, 'retta', () => {
+        stato.zonaPalla = nuovaZona;
+        stato.possessore = vincente;
+        stato.giocatorePalla = riceventeId;
+        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa a ${stato.giocatori[vincente].find(g => g.id === riceventeId).nome} in Z${nuovaZona}`);
+        renderCampo(); renderHeader();
+        setTimeout(() => avanzaMano(), 400);
+      });
+    } else {
+      // Nessun ricevente: vai direttamente alla nuova zona
       stato.zonaPalla = nuovaZona;
       stato.possessore = vincente;
-      // Scegli un compagno CASUALE nella nuova zona
-      const compagni = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
-      if (compagni.length > 0) {
-        const scelto = compagni[Math.floor(Math.random() * compagni.length)];
-        stato.giocatorePalla = scelto.id;
-        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa a ${scelto.nome} in Z${nuovaZona}`);
-      } else {
-        // Nessun compagno disponibile: se è area, tiro in porta
-        if ((vincente === 'tu' && nuovaZona === 5) || (vincente === 'cpu' && nuovaZona === 1)) {
-          setTimeout(() => tiroInPorta(vincente), 300);
-          return;
-        }
-      }
       renderCampo(); renderHeader();
       setTimeout(() => avanzaMano(), 400);
-    });
+    }
   }, 800);
 }
 
@@ -1664,12 +1674,10 @@ function gestisciGoal(attaccante) {
 
 function gestisciParata(attaccante, difensore) {
   log(`🧤 Il portiere para e rinvia!`);
-  // Il portiere avversario (che ha parato) calcia verso Z3 con parabola
-  const portiereSquadra = difensore; // chi ha parato è il difensore
+  const portiereSquadra = difensore;
   const portiere = stato.giocatori[portiereSquadra].find(g => g.portiere && !g.espulso);
   const zonaPortiere = portiereSquadra === 'tu' ? 0 : 6;
 
-  // Animazione calcio del portiere
   if (portiere) {
     const pedinaEl = document.querySelector(`[data-giocatore-id="${portiere.id}"] svg`);
     if (pedinaEl) {
@@ -1683,7 +1691,8 @@ function gestisciParata(attaccante, difensore) {
   }
 
   setTimeout(() => {
-    animaPallaVersoZona(zonaPortiere, 3, () => {
+    // Rinvio del portiere: parabola dal portiere a Z3 (centro campo)
+    animaPallaVersoZona(zonaPortiere, 3, 'parabola', () => {
       stato.zonaPalla = 3;
       stato.possessore = difensore;
       const gz = stato.giocatori[difensore].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
@@ -1691,7 +1700,7 @@ function gestisciParata(attaccante, difensore) {
       log(`🚀 Rinvio del portiere a centrocampo`);
       renderCampo(); renderHeader();
       setTimeout(() => avanzaMano(), 400);
-    }, 'parabola');
+    });
   }, 800);
 }
 
@@ -1761,7 +1770,6 @@ function avanzaMano() {
 
 function finePartita() {
   stato.partitaFinita = true;
-  // Se è modalità torneo, salva il risultato e torna al torneo
   if (TORNEO_MODE === 'europei') {
     salvaRisultatoTorneo();
     return;
@@ -1805,17 +1813,14 @@ function finePartita() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* SALVATAGGIO TORNEO */
 function salvaRisultatoTorneo() {
   const risultato = {
     golTU: stato.punteggio.tu,
     golCPU: stato.punteggio.cpu,
     statistiche: JSON.parse(JSON.stringify(stato.statistiche))
   };
-  // Salva in localStorage
   const key = 'torneo_partita_' + PARTITA_TORNEO;
   localStorage.setItem(key, JSON.stringify(risultato));
-  // Torna al torneo
   setTimeout(() => {
     location.href = 'europei2028.html?risultato=' + encodeURIComponent(PARTITA_TORNEO);
   }, 1500);
@@ -1880,7 +1885,6 @@ function confermaSostituzione() {
 
 /* AVVIO */
 if (TORNEO_MODE === 'europei' && PARTITA_TORNEO) {
-  // Modalità torneo: leggi i dati della partita e avvia
   const datiPartita = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + PARTITA_TORNEO) || '{}');
   if (datiPartita.sqTU && datiPartita.sqCPU) {
     avviaPartita(datiPartita.sqTU, datiPartita.sqCPU, '1P');
