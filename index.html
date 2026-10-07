@@ -1207,6 +1207,7 @@ function lanciaMoneta(scelta) {
 /* =========================================================
    ANIMAZIONE PALLA TRA ZONE
    - tipo: 'retta' (default) o 'parabola'
+   - SEMPRE con requestAnimationFrame (linea retta o arco)
    ========================================================= */
 function animaPallaVersoZona(zonaDa, zonaA, callback, tipo = 'retta') {
   const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
@@ -1223,50 +1224,44 @@ function animaPallaVersoZona(zonaDa, zonaA, callback, tipo = 'retta') {
   const y2 = aRect.top + aRect.height / 2 - campoRect.top;
 
   const palla = document.getElementById('palla-volante');
+
+  // Posiziona la palla al punto di partenza SENZA transizione
+  palla.style.transition = 'none';
   palla.style.left = x1 + 'px';
   palla.style.top = y1 + 'px';
-  palla.style.transition = 'none';
   palla.classList.add('attiva');
   palla.classList.remove('parabola');
   void palla.offsetWidth;
 
+  const durata = DURATA_ANIM_PALLA;
+  const altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
+  const inizio = performance.now();
+
   if (tipo === 'parabola') {
-    // ===== PARABOLA: animazione con requestAnimationFrame =====
     palla.classList.add('parabola');
-    const durata = DURATA_ANIM_PALLA;
-    const altezzaArco = Math.max(80, Math.abs(x2 - x1) * 0.4);
-    const inizio = performance.now();
-
-    function anima(now) {
-      const t = Math.min((now - inizio) / durata, 1);
-      const x = x1 + (x2 - x1) * t;
-      const yLineare = y1 + (y2 - y1) * t;
-      const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
-      const y = yLineare + offsetParabolico;
-
-      palla.style.left = x + 'px';
-      palla.style.top = y + 'px';
-
-      if (t < 1) {
-        requestAnimationFrame(anima);
-      } else {
-        palla.classList.remove('attiva');
-        palla.classList.remove('parabola');
-        if (callback) callback();
-      }
-    }
-    requestAnimationFrame(anima);
-  } else {
-    // ===== LINEA RETTA: transizione CSS =====
-    palla.style.transition = `left ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), top ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-    palla.style.left = x2 + 'px';
-    palla.style.top = y2 + 'px';
-
-    setTimeout(() => {
-      palla.classList.remove('attiva');
-      if (callback) callback();
-    }, DURATA_ANIM_PALLA + 100);
   }
+
+  function anima(now) {
+    const t = Math.min((now - inizio) / durata, 1);
+    // Interpolazione lineare X e Y
+    const x = x1 + (x2 - x1) * t;
+    const yLineare = y1 + (y2 - y1) * t;
+    // Aggiungi la parabola solo se richiesta (sin(π*t) va 0 → 1 → 0)
+    const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
+    const y = yLineare + offsetParabolico;
+
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+
+    if (t < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      palla.classList.remove('attiva');
+      palla.classList.remove('parabola');
+      if (callback) callback();
+    }
+  }
+  requestAnimationFrame(anima);
 }
 
 /* =========================================================
@@ -1512,7 +1507,7 @@ function nascondiBannerMano() {
 }
 
 /* =========================================================
-   RISOLUZIONE CONTRASTO
+   RISOLUZIONE CONTRASTO — logica corretta (no retropassaggio se vince attaccante)
    ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
@@ -1529,8 +1524,11 @@ function risolviContrasto(vincente, motivoFallo) {
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // CASO 1: VINCE L'ATTACCANTE
+  // ============================================================
+  // CASO 1: VINCE L'ATTACCANTE → avanza di zona
+  // ============================================================
   if (vincente === c.attaccante) {
+    // Tiro in porta se TU vince in Z5 o CPU vince in Z1
     if ((c.attaccante === 'tu' && c.zona === 5) || (c.attaccante === 'cpu' && c.zona === 1)) {
       setTimeout(() => tiroInPorta(c.attaccante), 500);
       return;
@@ -1552,15 +1550,18 @@ function risolviContrasto(vincente, motivoFallo) {
       renderCampo(); renderHeader();
       setTimeout(() => avanzaMano(), 400);
     });
-    return;
+    return; // ⚠️ FONDAMENTALE: esce dalla funzione, NON esegue il blocco del difensore
   }
 
-  // CASO 2: VINCE IL DIFENSORE
+  // ============================================================
+  // CASO 2: VINCE IL DIFENSORE → palla verso la SUA porta
+  // ============================================================
   const difSquadra = vincente;
   const zonaCorrente = c.zona;
   const isZonaArea = (difSquadra === 'tu' && zonaCorrente === 1) || (difSquadra === 'cpu' && zonaCorrente === 5);
 
   if (isZonaArea) {
+    // Z1 (TU) o Z5 (CPU): passa al portiere, poi rilancio a Z3 in parabola
     const zonaPortiere = difSquadra === 'tu' ? 0 : 6;
     animaPallaVersoZona(zonaCorrente, zonaPortiere, () => {
       stato.zonaPalla = zonaPortiere;
@@ -1571,7 +1572,6 @@ function risolviContrasto(vincente, motivoFallo) {
       renderCampo(); renderHeader();
 
       setTimeout(() => {
-        // RINVIO DEL PORTIERE — sempre verso Z3, con PARABOLA
         animaPallaVersoZona(zonaPortiere, 3, () => {
           stato.zonaPalla = 3;
           stato.possessore = difSquadra;
@@ -1587,6 +1587,7 @@ function risolviContrasto(vincente, motivoFallo) {
       }, 500);
     });
   } else {
+    // Difensore non in area → palla retrocede di 1 zona verso la sua porta
     const zonaRetrocessa = difSquadra === 'tu' ? zonaCorrente - 1 : zonaCorrente + 1;
     const zonaTarget = Math.max(0, Math.min(6, zonaRetrocessa));
 
