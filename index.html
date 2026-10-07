@@ -154,6 +154,7 @@
     transform: translate(-50%, -50%);
   }
   .palla-volante.attiva { display: block; }
+  .palla-volante.parabola { box-shadow: 0 8px 20px rgba(0,0,0,0.9), 0 0 24px rgba(255,215,0,0.8); }
 
   .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
   @keyframes animFermo {
@@ -852,7 +853,7 @@ function riempiMano(sq) {
   }
 }
 
-/* MINUTO - 2 minuti per mano, 23 mani per tempo = 46' + 46' = 92' */
+/* MINUTO - 2 minuti per mano */
 function calcolaMinuto() {
   if (stato.tempo === 1) {
     return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
@@ -1204,9 +1205,10 @@ function lanciaMoneta(scelta) {
 }
 
 /* =========================================================
-   ANIMAZIONE PALLA TRA ZONE (velocità 2400ms)
+   ANIMAZIONE PALLA TRA ZONE
+   - tipo: 'retta' (default) o 'parabola'
    ========================================================= */
-function animaPallaVersoZona(zonaDa, zonaA, callback) {
+function animaPallaVersoZona(zonaDa, zonaA, callback, tipo = 'retta') {
   const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
   const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
   if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
@@ -1225,16 +1227,46 @@ function animaPallaVersoZona(zonaDa, zonaA, callback) {
   palla.style.top = y1 + 'px';
   palla.style.transition = 'none';
   palla.classList.add('attiva');
+  palla.classList.remove('parabola');
   void palla.offsetWidth;
 
-  palla.style.transition = `left ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), top ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-  palla.style.left = x2 + 'px';
-  palla.style.top = y2 + 'px';
+  if (tipo === 'parabola') {
+    // ===== PARABOLA: animazione con requestAnimationFrame =====
+    palla.classList.add('parabola');
+    const durata = DURATA_ANIM_PALLA;
+    const altezzaArco = Math.max(80, Math.abs(x2 - x1) * 0.4);
+    const inizio = performance.now();
 
-  setTimeout(() => {
-    palla.classList.remove('attiva');
-    if (callback) callback();
-  }, DURATA_ANIM_PALLA + 100);
+    function anima(now) {
+      const t = Math.min((now - inizio) / durata, 1);
+      const x = x1 + (x2 - x1) * t;
+      const yLineare = y1 + (y2 - y1) * t;
+      const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
+      const y = yLineare + offsetParabolico;
+
+      palla.style.left = x + 'px';
+      palla.style.top = y + 'px';
+
+      if (t < 1) {
+        requestAnimationFrame(anima);
+      } else {
+        palla.classList.remove('attiva');
+        palla.classList.remove('parabola');
+        if (callback) callback();
+      }
+    }
+    requestAnimationFrame(anima);
+  } else {
+    // ===== LINEA RETTA: transizione CSS =====
+    palla.style.transition = `left ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), top ${DURATA_ANIM_PALLA}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+    palla.style.left = x2 + 'px';
+    palla.style.top = y2 + 'px';
+
+    setTimeout(() => {
+      palla.classList.remove('attiva');
+      if (callback) callback();
+    }, DURATA_ANIM_PALLA + 100);
+  }
 }
 
 /* =========================================================
@@ -1480,7 +1512,7 @@ function nascondiBannerMano() {
 }
 
 /* =========================================================
-   RISOLUZIONE CONTRASTO — logica corretta
+   RISOLUZIONE CONTRASTO
    ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
@@ -1529,7 +1561,6 @@ function risolviContrasto(vincente, motivoFallo) {
   const isZonaArea = (difSquadra === 'tu' && zonaCorrente === 1) || (difSquadra === 'cpu' && zonaCorrente === 5);
 
   if (isZonaArea) {
-    // Passa al portiere e poi rilancio a Z3
     const zonaPortiere = difSquadra === 'tu' ? 0 : 6;
     animaPallaVersoZona(zonaCorrente, zonaPortiere, () => {
       stato.zonaPalla = zonaPortiere;
@@ -1540,6 +1571,7 @@ function risolviContrasto(vincente, motivoFallo) {
       renderCampo(); renderHeader();
 
       setTimeout(() => {
+        // RINVIO DEL PORTIERE — sempre verso Z3, con PARABOLA
         animaPallaVersoZona(zonaPortiere, 3, () => {
           stato.zonaPalla = 3;
           stato.possessore = difSquadra;
@@ -1551,11 +1583,10 @@ function risolviContrasto(vincente, motivoFallo) {
           log(`🚀 Rilancio del portiere a centrocampo`);
           renderCampo(); renderHeader();
           setTimeout(() => avanzaMano(), 400);
-        });
+        }, 'parabola');
       }, 500);
     });
   } else {
-    // Il difensore NON è in area → palla retrocede di 1 zona verso la sua porta
     const zonaRetrocessa = difSquadra === 'tu' ? zonaCorrente - 1 : zonaCorrente + 1;
     const zonaTarget = Math.max(0, Math.min(6, zonaRetrocessa));
 
