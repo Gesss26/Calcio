@@ -518,6 +518,108 @@
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
+  /* =========================================================
+     SCHERMATA TIRO IN PORTA
+     ========================================================= */
+  .tiro-overlay {
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, #1a3a5c 0%, #0a1a2e 50%, #1a5a28 100%);
+    z-index: 200;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 20px; opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .tiro-overlay.attiva { opacity: 1; }
+  .tiro-titolo {
+    color: #ffd700; font-size: 22px; font-weight: 900;
+    letter-spacing: 3px; margin-bottom: 12px;
+    text-shadow: 0 0 20px rgba(255,215,0,0.8);
+    text-align: center;
+  }
+  .tiro-porta-wrapper {
+    position: relative;
+    width: 90%; max-width: 500px;
+    aspect-ratio: 3 / 2;
+    margin: 10px auto;
+  }
+  .tiro-porta-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .tiro-griglia {
+    position: absolute;
+    top: 8%; left: 5%; right: 5%; bottom: 8%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 2px;
+    pointer-events: none;
+  }
+  .tiro-casella {
+    border: 1px solid rgba(255,215,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900;
+    color: rgba(255,215,0,0.5);
+    transition: all 0.3s;
+    position: relative;
+  }
+  .tiro-casella .numero-casella {
+    position: absolute; top: 4px; left: 6px;
+    font-size: 11px; color: rgba(255,215,0,0.6);
+  }
+  .tiro-casella.colpita {
+    background: rgba(255,215,0,0.3);
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255,215,0,0.8) inset;
+  }
+  .tiro-portiere {
+    position: absolute;
+    width: 33.33%;
+    height: 66.67%;
+    left: 33.33%;
+    top: 8%;
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .tiro-portiere svg { width: 100%; height: 100%; }
+  .tiro-palla {
+    position: absolute;
+    width: 24px; height: 24px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    border-radius: 50%; border: 2px solid #222;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
+    z-index: 20;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: translate(-50%, -50%);
+    left: 50%;
+    bottom: 5%;
+    top: auto;
+  }
+  .tiro-palla.iniziale {
+    bottom: 5%; left: 50%;
+    width: 40px; height: 40px;
+  }
+  .tiro-esito {
+    font-size: 42px; font-weight: 900;
+    color: #ffd700; text-align: center;
+    margin-top: 20px; letter-spacing: 4px;
+    text-shadow: 0 0 30px #ffd700;
+    animation: goalPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    min-height: 60px;
+  }
+  .tiro-esito.goal { color: #4ade80; text-shadow: 0 0 30px #4ade80; }
+  .tiro-esito.parata { color: #ef4444; text-shadow: 0 0 30px #ef4444; }
+  .tiro-esito.palo { color: #f59f00; text-shadow: 0 0 30px #f59f00; }
+  .tiro-esito.angolo { color: #4dabf7; text-shadow: 0 0 30px #4dabf7; }
+  .tiro-info {
+    font-size: 13px; color: #ffd700; margin-top: 10px;
+    text-align: center; letter-spacing: 2px;
+    min-height: 20px;
+  }
+
   @media (max-height: 500px) {
     .pedina { width: 24px; height: 32px; }
     .carta { width: 48px; height: 68px; }
@@ -660,6 +762,53 @@ const DURATA_ANIM_PALLA = 2400;
 const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
 const PARTITA_TORNEO = urlParams.get('partita');
+
+/* =========================================================
+   SUONI — Web Audio API
+   ========================================================= */
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { audioCtx = null; }
+  }
+}
+function suonaFischietto(tipo = 'fallo') {
+  initAudio();
+  if (!audioCtx) return;
+  const ora = audioCtx.currentTime;
+  let durata, freqBase, freqMod;
+  if (tipo === 'fallo') {
+    durata = 0.4; freqBase = 2200; freqMod = 30;
+  } else if (tipo === 'fine-tempo') {
+    durata = 1.2; freqBase = 2400; freqMod = 25;
+  } else if (tipo === 'fine-partita') {
+    durata = 1.8; freqBase = 2500; freqMod = 20;
+  } else {
+    durata = 0.3; freqBase = 2200; freqMod = 30;
+  }
+  const osc = audioCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(freqBase, ora);
+  const lfo = audioCtx.createOscillator();
+  lfo.frequency.setValueAtTime(freqMod, ora);
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.setValueAtTime(30, ora);
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc.frequency);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0, ora);
+  gain.gain.linearRampToValueAtTime(0.25, ora + 0.05);
+  gain.gain.linearRampToValueAtTime(0.25, ora + durata - 0.1);
+  gain.gain.linearRampToValueAtTime(0, ora + durata);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(ora);
+  lfo.start(ora);
+  osc.stop(ora + durata);
+  lfo.stop(ora + durata);
+}
 
 /* =========================================================
    GIOCATORE SVG CHIBI
@@ -810,8 +959,11 @@ function riempiMano(sq) {
   }
 }
 function calcolaMinuto() {
-  if (stato.tempo === 1) return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
-  else return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
+  if (stato.tempo === 1) {
+    return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45);
+  } else {
+    return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
+  }
 }
 
 function log(msg, classe = '') {
@@ -1172,11 +1324,8 @@ function animaPallaTraGiocatori(idCalciatore, idRicevente, tipo = 'retta', callb
   const calcRect = calciatoreEl.getBoundingClientRect();
   const ricevRect = riceventeEl.getBoundingClientRect();
 
-  // Punto di partenza: centro-basso del calciatore (piedi)
   const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
   const y1 = calcRect.bottom - calcRect.height * 0.15 - campoRect.top;
-
-  // Punto di arrivo: centro-basso del ricevente
   const x2 = ricevRect.left + ricevRect.width / 2 - campoRect.left;
   const y2 = ricevRect.bottom - ricevRect.height * 0.15 - campoRect.top;
 
@@ -1209,6 +1358,52 @@ function animaPallaTraGiocatori(idCalciatore, idRicevente, tipo = 'retta', callb
     } else {
       palla.classList.remove('attiva');
       palla.classList.remove('parabola');
+      if (callback) callback();
+    }
+  }
+  requestAnimationFrame(anima);
+}
+
+/* =========================================================
+   ANIMAZIONE PALLA — verso il centro tra 2 giocatori
+   ========================================================= */
+function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callback) {
+  const calcEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
+  const g1El = document.querySelector(`[data-giocatore-id="${idGiocatore1}"]`);
+  const g2El = document.querySelector(`[data-giocatore-id="${idGiocatore2}"]`);
+  if (!calcEl || !g1El || !g2El) { if (callback) callback(); return; }
+
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const calcRect = calcEl.getBoundingClientRect();
+  const g1Rect = g1El.getBoundingClientRect();
+  const g2Rect = g2El.getBoundingClientRect();
+
+  const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
+  const y1 = calcRect.bottom - calcRect.height * 0.15 - campoRect.top;
+  const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
+  const y2 = ((g1Rect.bottom - g1Rect.height * 0.15) + (g2Rect.bottom - g2Rect.height * 0.15)) / 2 - campoRect.top;
+
+  const palla = document.getElementById('palla-volante');
+  palla.style.transition = 'none';
+  palla.style.left = x1 + 'px';
+  palla.style.top = y1 + 'px';
+  palla.classList.add('attiva');
+  palla.classList.remove('parabola');
+  void palla.offsetWidth;
+
+  const durata = DURATA_ANIM_PALLA;
+  const inizio = performance.now();
+
+  function anima(now) {
+    const t = Math.min((now - inizio) / durata, 1);
+    const x = x1 + (x2 - x1) * t;
+    const y = y1 + (y2 - y1) * t;
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+    if (t < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      palla.classList.remove('attiva');
       if (callback) callback();
     }
   }
@@ -1507,7 +1702,7 @@ function nascondiBannerMano() {
 }
 
 /* =========================================================
-   RISOLUZIONE CONTRASTO — chi vince avanza di 1 zona
+   RISOLUZIONE CONTRASTO — passa al centro tra i 2 giocatori
    ========================================================= */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
@@ -1526,28 +1721,20 @@ function risolviContrasto(vincente, motivoFallo) {
 
   // Verifica tiro in porta
   if ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1)) {
-    setTimeout(() => tiroInPorta(vincente), 500);
+    setTimeout(() => apriSchermataTiro(vincente), 500);
     return;
   }
 
   const direzione = vincente === 'tu' ? +1 : -1;
   const nuovaZona = c.zona + direzione;
   if (nuovaZona < 0 || nuovaZona > 6) {
-    setTimeout(() => tiroInPorta(vincente), 500);
+    setTimeout(() => apriSchermataTiro(vincente), 500);
     return;
   }
 
-  // Giocatore che ha vinto (il calciatore)
   const giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
 
-  // Trova il ricevente nella nuova zona (compagno casuale)
-  const compagniNuovaZona = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
-  let riceventeId = null;
-  if (compagniNuovaZona.length > 0) {
-    riceventeId = compagniNuovaZona[Math.floor(Math.random() * compagniNuovaZona.length)].id;
-  }
-
-  // Animazione calcio del giocatore
+  // Animazione calcio del giocatore vincente
   const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"] svg`);
   if (pedinaEl) {
     pedinaEl.classList.remove('anim-fermo');
@@ -1558,19 +1745,29 @@ function risolviContrasto(vincente, motivoFallo) {
     }, 800);
   }
 
-  // Dopo il calcio, muovi la palla dal calciatore al ricevente in linea retta (o diagonale)
+  // Trova i compagni nella nuova zona
+  const compagniNuovaZona = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+
   setTimeout(() => {
-    if (riceventeId) {
-      animaPallaTraGiocatori(giocatoreVincenteId, riceventeId, 'retta', () => {
+    if (compagniNuovaZona.length >= 2) {
+      // Palla al centro tra i 2 giocatori
+      animaPallaVersoCentro(giocatoreVincenteId, compagniNuovaZona[0].id, compagniNuovaZona[1].id, () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
-        stato.giocatorePalla = riceventeId;
-        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa a ${stato.giocatori[vincente].find(g => g.id === riceventeId).nome} in Z${nuovaZona}`);
+        stato.giocatorePalla = null;
+        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa in mezzo ai 2 giocatori in Z${nuovaZona}`);
+        renderCampo(); renderHeader();
+        setTimeout(() => avanzaMano(), 400);
+      });
+    } else if (compagniNuovaZona.length === 1) {
+      animaPallaTraGiocatori(giocatoreVincenteId, compagniNuovaZona[0].id, 'retta', () => {
+        stato.zonaPalla = nuovaZona;
+        stato.possessore = vincente;
+        stato.giocatorePalla = compagniNuovaZona[0].id;
         renderCampo(); renderHeader();
         setTimeout(() => avanzaMano(), 400);
       });
     } else {
-      // Nessun ricevente: vai direttamente alla nuova zona
       stato.zonaPalla = nuovaZona;
       stato.possessore = vincente;
       renderCampo(); renderHeader();
@@ -1580,6 +1777,7 @@ function risolviContrasto(vincente, motivoFallo) {
 }
 
 function applicaFallo(squadraFallosa, c) {
+  suonaFischietto('fallo');
   const zona = c.zona;
   const giocatoriZona = stato.giocatori[squadraFallosa].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   if (giocatoriZona.length === 0) return;
@@ -1591,7 +1789,198 @@ function applicaFallo(squadraFallosa, c) {
   if (falloso.falli >= 6) { falloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
 }
 
-/* TIRO IN PORTA */
+/* =========================================================
+   SCHERMATA TIRO IN PORTA
+   ========================================================= */
+function apriSchermataTiro(attaccante) {
+  const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
+  stato.statistiche[attaccante].tiri++;
+  log(`🥅 TIRO IN PORTA di ${attaccante === 'tu' ? 'TE' : 'CPU'}!`, 'highlight');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'tiro-overlay';
+  overlay.id = 'tiro-overlay';
+
+  const titolo = document.createElement('div');
+  titolo.className = 'tiro-titolo';
+  titolo.textContent = attaccante === 'tu' ? '🥅 IL TUO TIRO IN PORTA' : '🥅 TIRO DELLA CPU';
+  overlay.appendChild(titolo);
+
+  const portaWrapper = document.createElement('div');
+  portaWrapper.className = 'tiro-porta-wrapper';
+
+  // SVG porta
+  const portaSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  portaSvg.setAttribute('viewBox', '0 0 300 200');
+  portaSvg.setAttribute('class', 'tiro-porta-svg');
+  portaSvg.innerHTML = `
+    <defs>
+      <linearGradient id="cieloGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#1a3a5c"/>
+        <stop offset="100%" stop-color="#0a1a2e"/>
+      </linearGradient>
+      <pattern id="rete" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+        <path d="M 0 0 L 10 10 M 10 0 L 0 10" stroke="rgba(255,255,255,0.25)" stroke-width="0.5" fill="none"/>
+      </pattern>
+    </defs>
+    <rect x="20" y="10" width="260" height="180" fill="url(#rete)"/>
+    <rect x="15" y="5" width="8" height="190" fill="#fff" rx="2"/>
+    <rect x="277" y="5" width="8" height="190" fill="#fff" rx="2"/>
+    <rect x="15" y="5" width="270" height="8" fill="#fff" rx="2"/>
+  `;
+  portaWrapper.appendChild(portaSvg);
+
+  // Griglia 3x3
+  const griglia = document.createElement('div');
+  griglia.className = 'tiro-griglia';
+  for (let i = 1; i <= 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'tiro-casella';
+    c.dataset.numero = i;
+    c.innerHTML = `<span class="numero-casella">${i}</span>`;
+    griglia.appendChild(c);
+  }
+  portaWrapper.appendChild(griglia);
+
+  // Portiere
+  const portiere = document.createElement('div');
+  portiere.className = 'tiro-portiere';
+  portiere.id = 'tiro-portiere';
+  const sqPort = difensore === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  portiere.innerHTML = creaGiocatoreSVG(SQUADRE[sqPort].portiere, 'fermo');
+  portaWrapper.appendChild(portiere);
+
+  // Palla
+  const palla = document.createElement('div');
+  palla.className = 'tiro-palla iniziale';
+  palla.id = 'tiro-palla';
+  portaWrapper.appendChild(palla);
+
+  overlay.appendChild(portaWrapper);
+
+  const info = document.createElement('div');
+  info.className = 'tiro-info';
+  info.id = 'tiro-info';
+  info.textContent = 'FASE 1 — Tiro dell\'attaccante';
+  overlay.appendChild(info);
+
+  const esito = document.createElement('div');
+  esito.className = 'tiro-esito';
+  esito.id = 'tiro-esito';
+  overlay.appendChild(esito);
+
+  document.body.appendChild(overlay);
+  setTimeout(() => overlay.classList.add('attiva'), 50);
+
+  setTimeout(() => eseguiTiroConGrafica(attaccante, difensore), 1200);
+}
+
+function eseguiTiroConGrafica(attaccante, difensore) {
+  const dadoTiro = Math.floor(Math.random() * 9) + 1;
+  const posizioniCaselle = {
+    1: { x: 22, y: 20 }, 2: { x: 50, y: 20 }, 3: { x: 78, y: 20 },
+    4: { x: 22, y: 50 }, 5: { x: 50, y: 50 }, 6: { x: 78, y: 50 },
+    7: { x: 22, y: 80 }, 8: { x: 50, y: 80 }, 9: { x: 78, y: 80 }
+  };
+  const pos = posizioniCaselle[dadoTiro];
+  const palla = document.getElementById('tiro-palla');
+  if (palla) {
+    palla.classList.remove('iniziale');
+    palla.style.left = pos.x + '%';
+    palla.style.top = pos.y + '%';
+  }
+  document.getElementById('tiro-info').textContent = `FASE 1 — Tiro sulla casella ${dadoTiro}`;
+
+  setTimeout(() => {
+    if (dadoTiro === 5 || dadoTiro === 8) {
+      mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 Il portiere para facilmente');
+      return;
+    }
+    const dadiPortiere = mescola([1,2,3,4,6,7,9]).slice(0, 3);
+    document.getElementById('tiro-info').textContent = `FASE 2 — Il portiere si tuffa...`;
+    // Media delle 3 caselle
+    const mediaX = dadiPortiere.reduce((sum, n) => sum + posizioniCaselle[n].x, 0) / 3;
+    const mediaY = dadiPortiere.reduce((sum, n) => sum + posizioniCaselle[n].y, 0) / 3;
+    const portiere = document.getElementById('tiro-portiere');
+    if (portiere) {
+      portiere.style.left = (mediaX - 16.66) + '%';
+      portiere.style.top = (mediaY - 22.22) + '%';
+    }
+    dadiPortiere.forEach(n => {
+      const c = document.querySelector(`.tiro-casella[data-numero="${n}"]`);
+      if (c) c.classList.add('colpita');
+    });
+
+    setTimeout(() => {
+      if (dadiPortiere.includes(dadoTiro)) {
+        mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 PARATA! Il portiere respinge');
+      } else {
+        fase3TiroConGrafica(dadoTiro, attaccante, difensore);
+      }
+    }, 1800);
+  }, 1200);
+}
+
+function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
+  document.getElementById('tiro-info').textContent = `FASE 3 — Esito finale`;
+  const dadoEsito = Math.floor(Math.random() * 9) + 1;
+  setTimeout(() => {
+    let esito, motivo;
+    if (dadoEsito === 1) {
+      esito = 'palo';
+      motivo = '🥅 PALO! La palla colpisce il palo!';
+    } else if (dadoEsito === 3 || dadoEsito === 6 || dadoEsito === 9) {
+      esito = 'angolo';
+      motivo = '🚩 CALCIO D\'ANGOLO!';
+    } else {
+      esito = 'parata';
+      motivo = '🧤 PARATA! Il portiere respinge';
+    }
+    if (esito === 'parata') {
+      const posizioniCaselle = {
+        1: { x: 22, y: 20 }, 2: { x: 50, y: 20 }, 3: { x: 78, y: 20 },
+        4: { x: 22, y: 50 }, 5: { x: 50, y: 50 }, 6: { x: 78, y: 50 },
+        7: { x: 22, y: 80 }, 8: { x: 50, y: 80 }, 9: { x: 78, y: 80 }
+      };
+      const pos = posizioniCaselle[dadoTiro];
+      const portiere = document.getElementById('tiro-portiere');
+      if (portiere) {
+        portiere.style.left = (pos.x - 16.66) + '%';
+        portiere.style.top = (pos.y - 22.22) + '%';
+      }
+    }
+    mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motivo);
+  }, 1000);
+}
+
+function mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motivo) {
+  const esitoEl = document.getElementById('tiro-esito');
+  esitoEl.textContent = motivo;
+  esitoEl.classList.add(esito);
+
+  setTimeout(() => {
+    const overlay = document.getElementById('tiro-overlay');
+    if (overlay) {
+      overlay.classList.remove('attiva');
+      setTimeout(() => overlay.remove(), 400);
+    }
+    if (esito === 'goal') gestisciGoal(attaccante);
+    else if (esito === 'parata') {
+      stato.statistiche[difensore].parate++;
+      gestisciParata(attaccante, difensore);
+    } else if (esito === 'palo') {
+      stato.statistiche[attaccante].pali++;
+      gestisciPalo(attaccante, difensore);
+    } else if (esito === 'angolo') {
+      stato.statistiche[attaccante].angoli++;
+      gestisciAngolo(attaccante, difensore);
+    }
+  }, 2500);
+}
+
+/* =========================================================
+   GESTIONE ESITI
+   ========================================================= */
 function mostraGoalBanner(vincente) {
   const banner = document.getElementById('goal-banner');
   banner.classList.remove('tu', 'cpu', 'attivo');
@@ -1599,61 +1988,6 @@ function mostraGoalBanner(vincente) {
   banner.classList.add(vincente, 'attivo');
   document.getElementById('goal-banner-text').textContent = 'GGGOOOAAALLL';
   setTimeout(() => banner.classList.remove('attivo'), 3200);
-}
-
-function tiroInPorta(attaccante) {
-  const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
-  stato.statistiche[attaccante].tiri++;
-  log(`🥅 TIRO IN PORTA!`, 'highlight');
-  apriOverlay(`<h2>🥅 TIRO IN PORTA</h2><div class="fase-label">FASE 1 — Tiro</div><div id="area-tiro" style="margin-top:10px"></div>`);
-  setTimeout(() => {
-    const dado = Math.floor(Math.random() * 9) + 1;
-    document.getElementById('area-tiro').innerHTML = `<div class="dado ${attaccante === 'tu' ? 'blu' : 'rosso'}">${dado}</div>`;
-    setTimeout(() => {
-      if (dado === 5 || dado === 8) eseguiEsitoTiro('parata', attaccante, difensore);
-      else fase2Tiro(attaccante, difensore, dado);
-    }, 1200);
-  }, 400);
-}
-function fase2Tiro(attaccante, difensore, numAtt) {
-  const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 2 — Portiere</div><div id="area-portiere"></div>`);
-  const dadi = mescola([1,2,3,4,6,7,9]).slice(0, 3);
-  document.getElementById('area-portiere').innerHTML = `<div class="dadi-row">${dadi.map(d => `<div class="dado piccolo rosso">${d}</div>`).join('')}</div>`;
-  setTimeout(() => {
-    if (dadi.includes(numAtt)) fase3Tiro(attaccante, difensore);
-    else eseguiEsitoTiro('goal', attaccante, difensore);
-  }, 1500);
-}
-function fase3Tiro(attaccante, difensore) {
-  const box = document.getElementById('overlay-box');
-  box.insertAdjacentHTML('beforeend', `<div class="fase-label">FASE 3 — Esito</div><div id="area-esito"></div>`);
-  const dado = Math.floor(Math.random() * 9) + 1;
-  document.getElementById('area-esito').innerHTML = `<div class="dado">${dado}</div>`;
-  let esito;
-  if (dado === 1) esito = 'palo';
-  else if (dado === 3 || dado === 6 || dado === 9) esito = 'angolo';
-  else esito = 'parata';
-  setTimeout(() => eseguiEsitoTiro(esito, attaccante, difensore), 1000);
-}
-function eseguiEsitoTiro(esito, attaccante, difensore) {
-  const box = document.getElementById('overlay-box');
-  let msg, colore;
-  if (esito === 'goal') { msg = '⚽ GOAL!'; colore = 'goal'; }
-  else if (esito === 'parata') { msg = '🧤 PARATA!'; colore = 'parata'; }
-  else if (esito === 'palo') { msg = '🥅 PALO!'; colore = 'palo'; }
-  else if (esito === 'angolo') { msg = "🚩 CALCIO D'ANGOLO!"; colore = 'angolo'; }
-  box.insertAdjacentHTML('beforeend', `<div class="esito-tiro ${colore}">${msg}</div>`);
-  if (esito === 'parata') stato.statistiche[difensore].parate++;
-  if (esito === 'palo') stato.statistiche[attaccante].pali++;
-  if (esito === 'angolo') stato.statistiche[attaccante].angoli++;
-  setTimeout(() => {
-    chiudiOverlay();
-    if (esito === 'goal') gestisciGoal(attaccante);
-    else if (esito === 'parata') gestisciParata(attaccante, difensore);
-    else if (esito === 'palo') gestisciPalo(attaccante, difensore);
-    else if (esito === 'angolo') gestisciAngolo(attaccante, difensore);
-  }, 2200);
 }
 
 function gestisciGoal(attaccante) {
@@ -1691,7 +2025,6 @@ function gestisciParata(attaccante, difensore) {
   }
 
   setTimeout(() => {
-    // Rinvio del portiere: parabola dal portiere a Z3 (centro campo)
     animaPallaVersoZona(zonaPortiere, 3, 'parabola', () => {
       stato.zonaPalla = 3;
       stato.possessore = difensore;
@@ -1744,23 +2077,30 @@ function flashVincitore(squadra) {
   setTimeout(() => flash.classList.remove('attivo'), 600);
 }
 
+/* =========================================================
+   AVANZAMENTO — con finestra fine primo tempo
+   ========================================================= */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
+      suonaFischietto('fine-tempo');
       stato.tempo = 2; stato.mano = 1;
       log(`⏸️ FINE PRIMO TEMPO. ${stato.punteggio.tu} - ${stato.punteggio.cpu}`, 'goal');
       ['tu', 'cpu'].forEach(sq => {
         stato.giocatori[sq].forEach(g => g.stamina = g.staminaMax);
       });
       riempiMano('tu'); riempiMano('cpu');
-      const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
-      stato.possessore = perdente;
-      stato.zonaPalla = 3;
-      const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
-      if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
-      renderCampo(); renderHeader();
-      setTimeout(() => avviaContrasto(), 1000);
+      mostraFinestraFineTempo(() => {
+        const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
+        stato.possessore = perdente;
+        stato.zonaPalla = 3;
+        stato.giocatorePalla = null;
+        const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
+        if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+        renderCampo(); renderHeader();
+        setTimeout(() => avviaContrasto(), 500);
+      });
       return;
     } else return finePartita();
   }
@@ -1768,8 +2108,49 @@ function avanzaMano() {
   setTimeout(() => avviaContrasto(), 800);
 }
 
+function mostraFinestraFineTempo(callback) {
+  const s = stato.statistiche;
+  const html = `
+    <div style="text-align:center;padding:10px">
+      <h2 style="font-size:26px;color:#ffd700;margin-bottom:12px">⏸️ FINE PRIMO TEMPO</h2>
+      <p style="font-size:32px;font-weight:bold;margin:12px 0">
+        <span style="color:#4dabf7">${SQUADRE[stato.squadraTU].nome} ${stato.punteggio.tu}</span>
+        <span style="color:#fff;margin:0 12px">-</span>
+        <span style="color:#ff6b6b">${stato.punteggio.cpu} ${SQUADRE[stato.squadraCPU].nome}</span>
+      </p>
+      <div class="stats-grid" style="margin-top:16px">
+        <div class="stats-card">
+          <h3>${SQUADRE[stato.squadraTU].nome}</h3>
+          <div class="stats-row"><span>Gol</span><span class="val">${s.tu.gol}</span></div>
+          <div class="stats-row"><span>Tiri</span><span class="val">${s.tu.tiri}</span></div>
+          <div class="stats-row"><span>Parate</span><span class="val">${s.tu.parate}</span></div>
+          <div class="stats-row"><span>Angoli</span><span class="val">${s.tu.angoli}</span></div>
+          <div class="stats-row"><span>Pali</span><span class="val">${s.tu.pali}</span></div>
+          <div class="stats-row"><span>Falli</span><span class="val">${s.tu.falli}</span></div>
+        </div>
+        <div class="stats-card">
+          <h3>${SQUADRE[stato.squadraCPU].nome}</h3>
+          <div class="stats-row"><span>Gol</span><span class="val">${s.cpu.gol}</span></div>
+          <div class="stats-row"><span>Tiri</span><span class="val">${s.cpu.tiri}</span></div>
+          <div class="stats-row"><span>Parate</span><span class="val">${s.cpu.parate}</span></div>
+          <div class="stats-row"><span>Angoli</span><span class="val">${s.cpu.angoli}</span></div>
+          <div class="stats-row"><span>Pali</span><span class="val">${s.cpu.pali}</span></div>
+          <div class="stats-row"><span>Falli</span><span class="val">${s.cpu.falli}</span></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#aaa;margin-top:16px">Ripresa tra 3 secondi...</p>
+    </div>`;
+  document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale').classList.remove('nascosto');
+  setTimeout(() => {
+    document.getElementById('modale').classList.add('nascosto');
+    if (callback) callback();
+  }, 3000);
+}
+
 function finePartita() {
   stato.partitaFinita = true;
+  suonaFischietto('fine-partita');
   if (TORNEO_MODE === 'europei') {
     salvaRisultatoTorneo();
     return;
