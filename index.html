@@ -88,40 +88,51 @@
   }
   .zona {
     flex: 1; position: relative;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .pedine-tu, .pedine-cpu {
-    display: flex; flex-direction: column; gap: 8px;
-    position: absolute; top: 50%; transform: translateY(-50%);
-  }
-  .pedine-tu { left: 4px; align-items: flex-start; }
-  .pedine-cpu { right: 4px; align-items: flex-end; }
-  .pedina-wrapper {
     display: flex; flex-direction: column;
-    align-items: center; gap: 2px;
+    justify-content: center;
+    align-items: stretch;
+  }
+  /* Metà superiore e inferiore */
+  .meta-sup, .meta-inf {
+    display: flex; flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex: 1;
+    padding: 2px 4px;
     position: relative;
   }
-  /* TU: info SOTTO il giocatore */
-  .pedina-wrapper.tu { flex-direction: column; }
-  .pedina-wrapper.tu .info-laterale { order: 2; }
-  .pedina-wrapper.tu .pedina { order: 1; }
-  /* CPU: info SOPRA il giocatore */
-  .pedina-wrapper.cpu { flex-direction: column; }
-  .pedina-wrapper.cpu .info-laterale { order: 1; }
+  .meta-sup { border-bottom: 1px dashed rgba(255,255,255,0.15); }
+  .meta-inf { }
+
+  /* Pedina wrapper con info */
+  .pedina-wrapper {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1px;
+    position: relative;
+  }
+  .pedina-wrapper.tu .info-laterale { order: -1; }
+  .pedina-wrapper.tu .pedina { order: 2; }
+  .pedina-wrapper.cpu .info-laterale { order: -1; }
   .pedina-wrapper.cpu .pedina { order: 2; }
+  /* Per la metà inferiore: info SOTTO */
+  .meta-inf .pedina-wrapper.tu .info-laterale { order: 2; }
+  .meta-inf .pedina-wrapper.tu .pedina { order: 1; }
+  .meta-inf .pedina-wrapper.cpu .info-laterale { order: 2; }
+  .meta-inf .pedina-wrapper.cpu .pedina { order: 1; }
 
   .info-laterale {
-    display: flex; flex-direction: column; gap: 1px;
-    font-size: 11px; line-height: 1.05; color: #fff;
+    display: flex; flex-direction: row; gap: 4px;
+    font-size: 11px; line-height: 1;
+    color: #fff;
     text-shadow: 0 1px 3px #000, 0 0 4px #000;
     pointer-events: none; font-weight: 900;
     font-family: 'Courier New', monospace;
-    background: rgba(0,0,0,0.55);
-    padding: 2px 5px;
+    background: rgba(0,0,0,0.6);
+    padding: 2px 6px;
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.15);
-    min-width: 34px;
     text-align: center;
+    white-space: nowrap;
   }
   .info-laterale .stamina-txt { color: #4ade80; font-size: 12px; }
   .info-laterale .stamina-txt.medio { color: #fbbf24; }
@@ -134,7 +145,6 @@
   .info-laterale .falli-txt.zero { color: #555; font-size: 11px; }
   .info-laterale .cartellini { font-size: 12px; line-height: 1; }
 
-  /* Amonizione/espulsione: bordo colorato sull'info */
   .info-laterale.ammonito-info {
     border-color: #ffd700;
     box-shadow: 0 0 6px rgba(255,215,0,0.6);
@@ -160,9 +170,11 @@
   .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
+
+  /* Palla attaccata al giocatore */
   .pedina .palla-attaccata {
     position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
-    width: 10px; height: 10px;
+    width: 12px; height: 12px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.6);
@@ -173,9 +185,26 @@
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
   }
 
+  /* PALLA AL CENTRO — sempre visibile */
+  .palla-centro {
+    position: absolute;
+    width: 14px; height: 14px;
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    border-radius: 50%; border: 2px solid #222;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.8);
+    z-index: 12; pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: pallaCentro 1.5s infinite;
+  }
+  @keyframes pallaCentro {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  /* Palla volante per le animazioni */
   .palla-volante {
     position: absolute; z-index: 15;
-    width: 16px; height: 16px;
+    width: 14px; height: 14px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
@@ -189,17 +218,6 @@
   @keyframes animFermo {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-1.5px); }
-  }
-  .anim-esulta { animation: animEsulta 0.5s infinite ease-in-out; }
-  @keyframes animEsulta {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    25% { transform: translateY(-6px) rotate(-3deg); }
-    75% { transform: translateY(-6px) rotate(3deg); }
-  }
-  .anim-triste { animation: animTriste 2s infinite ease-in-out; }
-  @keyframes animTriste {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(2px) rotate(-2deg); }
   }
   .anim-calcia { animation: animCalcia 0.8s ease-out; }
   @keyframes animCalcia {
@@ -337,11 +355,6 @@
   .carta.vincitrice {
     border-color: #4ade80;
     box-shadow: 0 0 24px #4ade80;
-    animation: pulseVincitrice 1s infinite;
-  }
-  @keyframes pulseVincitrice {
-    0%, 100% { box-shadow: 0 0 16px #4ade80; }
-    50% { box-shadow: 0 0 32px #4ade80; }
   }
 
   .pila-wrapper { display: flex; gap: 20px; align-items: center; }
@@ -548,7 +561,6 @@
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
-  /* SCHERMATA TIRO IN PORTA / RIGORE */
   .tiro-overlay {
     position: fixed; inset: 0;
     background: linear-gradient(180deg, #1a3a5c 0%, #0a1a2e 50%, #1a5a28 100%);
@@ -958,7 +970,7 @@ function calcolaMinutoTotale() {
   return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
 }
 
-/* SEME GUIDA — non ripetuto */
+/* SEME GUIDA */
 function scegliSemeGuida() {
   const disponibili = SEMI_KEYS.filter(s => s !== stato.semeGuidaPrecedente);
   const scelto = disponibili[Math.floor(Math.random() * disponibili.length)];
@@ -1153,6 +1165,9 @@ function renderZoneOverlay() {
   });
 }
 
+/* =========================================================
+   RENDER CAMPO — con zone divise in 2 metà orizzontali
+   ========================================================= */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -1163,44 +1178,92 @@ function renderCampo() {
     zona.className = 'zona';
     zona.dataset.zona = z.id;
 
-    const pedineTu = document.createElement('div');
-    pedineTu.className = 'pedine-tu';
+    // PORTIERE (Z0 o Z6) — al centro, info sopra
     if (z.portiere) {
-      if (z.proprietario === 'tu') {
-        const por = stato.giocatori.tu.find(g => g.zona === z.id);
-        if (por) pedineTu.appendChild(creaPedinaWrapper(por));
+      const sq = z.proprietario;
+      const por = stato.giocatori[sq].find(g => g.zona === z.id);
+      const meta = document.createElement('div');
+      meta.className = 'meta-sup'; // portiere sopra
+      if (por) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pedina-wrapper ' + sq;
+        wrapper.appendChild(creaInfoLaterale(por));
+        wrapper.appendChild(creaPedinaEl(por));
+        meta.appendChild(wrapper);
       }
-    } else {
-      stato.giocatori.tu.filter(g => g.zona === z.id).forEach(g => pedineTu.appendChild(creaPedinaWrapper(g)));
+      zona.appendChild(meta);
+      zone.appendChild(zona);
+      return;
     }
-    zona.appendChild(pedineTu);
 
-    const pedineCpu = document.createElement('div');
-    pedineCpu.className = 'pedine-cpu';
-    if (z.portiere) {
-      if (z.proprietario === 'cpu') {
-        const por = stato.giocatori.cpu.find(g => g.zona === z.id);
-        if (por) pedineCpu.appendChild(creaPedinaWrapper(por));
-      }
-    } else {
-      stato.giocatori.cpu.filter(g => g.zona === z.id).forEach(g => pedineCpu.appendChild(creaPedinaWrapper(g)));
+    // Giocatori TU e CPU della zona
+    const tuGiocatori = stato.giocatori.tu.filter(g => g.zona === z.id);
+    const cpuGiocatori = stato.giocatori.cpu.filter(g => g.zona === z.id);
+
+    // Meta superiore: primo giocatore TU + primo giocatore CPU
+    const metaSup = document.createElement('div');
+    metaSup.className = 'meta-sup';
+    if (tuGiocatori[0]) {
+      const w = document.createElement('div');
+      w.className = 'pedina-wrapper tu';
+      w.appendChild(creaInfoLaterale(tuGiocatori[0]));
+      w.appendChild(creaPedinaEl(tuGiocatori[0]));
+      metaSup.appendChild(w);
     }
-    zona.appendChild(pedineCpu);
+    if (cpuGiocatori[0]) {
+      const w = document.createElement('div');
+      w.className = 'pedina-wrapper cpu';
+      w.appendChild(creaInfoLaterale(cpuGiocatori[0]));
+      w.appendChild(creaPedinaEl(cpuGiocatori[0]));
+      metaSup.appendChild(w);
+    }
+    zona.appendChild(metaSup);
+
+    // Meta inferiore: secondo giocatore TU + secondo giocatore CPU
+    const metaInf = document.createElement('div');
+    metaInf.className = 'meta-inf';
+    if (tuGiocatori[1]) {
+      const w = document.createElement('div');
+      w.className = 'pedina-wrapper tu';
+      w.appendChild(creaInfoLaterale(tuGiocatori[1]));
+      w.appendChild(creaPedinaEl(tuGiocatori[1]));
+      metaInf.appendChild(w);
+    }
+    if (cpuGiocatori[1]) {
+      const w = document.createElement('div');
+      w.className = 'pedina-wrapper cpu';
+      w.appendChild(creaInfoLaterale(cpuGiocatori[1]));
+      w.appendChild(creaPedinaEl(cpuGiocatori[1]));
+      metaInf.appendChild(w);
+    }
+    zona.appendChild(metaInf);
 
     zone.appendChild(zona);
   });
+
+  // Palla al centro della zona palla (se non in animazione)
+  setTimeout(() => {
+    if (!stato.pallaInAnimazione && stato.zonaPalla !== null) {
+      mostraPallaAlCentro(stato.zonaPalla);
+    }
+  }, 50);
+
   renderingCampoInCorso = false;
 }
 
-function creaPedinaWrapper(g) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'pedina-wrapper ' + g.squadra;
-  const info = creaInfoLaterale(g);
-  const pedina = creaPedinaEl(g);
-  wrapper.appendChild(info);
-  wrapper.appendChild(pedina);
-  return wrapper;
+/* Mostra la palla al centro della zona */
+function mostraPallaAlCentro(zonaId) {
+  // Rimuovi eventuali palle centrali esistenti
+  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
+  const zonaEl = document.querySelector(`.zona[data-zona="${zonaId}"]`);
+  if (!zonaEl) return;
+  const palla = document.createElement('div');
+  palla.className = 'palla-centro';
+  palla.style.left = '50%';
+  palla.style.top = '50%';
+  zonaEl.appendChild(palla);
 }
+
 function creaInfoLaterale(g) {
   const el = document.createElement('div');
   el.className = 'info-laterale ' + g.squadra;
@@ -1210,13 +1273,13 @@ function creaInfoLaterale(g) {
   let classeStam = '';
   if (perc < 20) classeStam = 'basso';
   else if (perc < 50) classeStam = 'medio';
-  let html = `<div class="stamina-txt ${classeStam}">${g.stamina}</div>`;
+  let html = `<span class="stamina-txt ${classeStam}">${g.stamina}</span>`;
   const falliClasse = g.falli === 0 ? 'zero' : '';
-  html += `<div class="falli-txt ${falliClasse}">${g.falli}</div>`;
-  let cart = '--';
+  html += `<span class="falli-txt ${falliClasse}">${g.falli}</span>`;
+  let cart = '·';
   if (g.espulso) cart = '🟥';
   else if (g.ammonito) cart = '🟨';
-  html += `<div class="cartellini">${cart}</div>`;
+  html += `<span class="cartellini">${cart}</span>`;
   el.innerHTML = html;
   return el;
 }
@@ -1301,42 +1364,8 @@ function lanciaMoneta(scelta) {
 }
 
 /* ANIMAZIONI PALLA */
-function animaPallaTraGiocatori(idCalciatore, idRicevente, tipo = 'retta', callback) {
-  const calciatoreEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
-  const riceventeEl = document.querySelector(`[data-giocatore-id="${idRicevente}"]`);
-  if (!calciatoreEl || !riceventeEl) { if (callback) callback(); return; }
-
-  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
-  const calcRect = calciatoreEl.getBoundingClientRect();
-  const ricevRect = riceventeEl.getBoundingClientRect();
-
-  const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
-  const y1 = calcRect.bottom - calcRect.height * 0.15 - campoRect.top;
-  const x2 = ricevRect.left + ricevRect.width / 2 - campoRect.left;
-  const y2 = ricevRect.bottom - ricevRect.height * 0.15 - campoRect.top;
-
-  const palla = document.getElementById('palla-volante');
-  palla.style.transition = 'none';
-  palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
-  palla.classList.add('attiva'); palla.classList.remove('parabola');
-  void palla.offsetWidth;
-
-  const durata = DURATA_ANIM_PALLA;
-  const altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
-  const inizio = performance.now();
-  if (tipo === 'parabola') palla.classList.add('parabola');
-
-  function anima(now) {
-    const t = Math.min((now - inizio) / durata, 1);
-    const x = x1 + (x2 - x1) * t;
-    const yLineare = y1 + (y2 - y1) * t;
-    const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
-    const y = yLineare + offsetParabolico;
-    palla.style.left = x + 'px'; palla.style.top = y + 'px';
-    if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); palla.classList.remove('parabola'); if (callback) callback(); }
-  }
-  requestAnimationFrame(anima);
+function nascondiPallaCentro() {
+  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
 }
 
 function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callback) {
@@ -1355,6 +1384,7 @@ function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callbac
   const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
   const y2 = ((g1Rect.bottom - g1Rect.height * 0.15) + (g2Rect.bottom - g2Rect.height * 0.15)) / 2 - campoRect.top;
 
+  nascondiPallaCentro();
   const palla = document.getElementById('palla-volante');
   palla.style.transition = 'none';
   palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
@@ -1370,7 +1400,11 @@ function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callbac
     const y = y1 + (y2 - y1) * t;
     palla.style.left = x + 'px'; palla.style.top = y + 'px';
     if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); if (callback) callback(); }
+    else {
+      palla.classList.remove('attiva');
+      // Dopo animazione, mostra palla al centro della zona
+      if (callback) callback();
+    }
   }
   requestAnimationFrame(anima);
 }
@@ -1389,6 +1423,7 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
   const x2 = aRect.left + aRect.width / 2 - campoRect.left;
   const y2 = aRect.top + aRect.height / 2 - campoRect.top;
 
+  nascondiPallaCentro();
   const palla = document.getElementById('palla-volante');
   palla.style.transition = 'none';
   palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
@@ -1532,9 +1567,7 @@ function selezionaCartaTu(idx) {
   renderPannelloContrasto();
 }
 
-/* =========================================================
-   NUOVA LOGICA FALLO: chi NON ha il seme in mano fa fallo
-   ========================================================= */
+/* LOGICA FALLO: chi NON ha il seme in mano fa fallo */
 function confermaCarta() {
   if (selezioneCarta === null) return;
   const c = stato.contrasto;
@@ -1543,38 +1576,22 @@ function confermaCarta() {
   const cartaCpu = scegliCartaCPU();
   c.cartaCpu = cartaCpu;
 
-  // Chi HA il seme in mano (non necessariamente giocato)
   const tuHaSemeInMano = stato.mani.tu.some(x => x.seme === c.semeGuida);
   const cpuHaSemeInMano = stato.mani.cpu.some(x => x.seme === c.semeGuida);
 
-  // Chi ha GIOCATO il seme
-  const tuHaGiocatoSeme = cartaTu.seme === c.semeGuida;
-  const cpuHaGiocatoSeme = cartaCpu.seme === c.semeGuida;
-
-  // ============================================================
-  // FALLO: chi NON ha il seme in mano fa fallo
-  // ============================================================
   let falloso = null;
   if (tuHaSemeInMano && !cpuHaSemeInMano) falloso = 'cpu';
   else if (!tuHaSemeInMano && cpuHaSemeInMano) falloso = 'tu';
 
-  // Se c'è un falloso, gestiscilo
   if (falloso) {
-    return eseguiFalloConRecupero(cartaTu, cartaCpu, falloso, c.semeGuida, tuHaGiocatoSeme, cpuHaGiocatoSeme);
+    return eseguiFalloConRecupero(cartaTu, cartaCpu, falloso, c.semeGuida);
   }
 
-  // ============================================================
-  // NESSUN FALLO: entrambi hanno il seme o nessuno ce l'ha
-  // ============================================================
   let vincitore;
   if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
   else if (cartaCpu.valore > cartaTu.valore) vincitore = 'cpu';
-  else {
-    // PAREGGIO: annulla mano
-    return risolviPareggioConSeme(cartaTu, cartaCpu);
-  }
+  else return risolviPareggioConSeme(cartaTu, cartaCpu);
 
-  // Carte vanno negli scarti (non c'è recupero perché non c'è fallo)
   const idxTu = stato.mani.tu.indexOf(cartaTu);
   if (idxTu > -1) { stato.scarti.push(stato.mani.tu[idxTu]); stato.mani.tu.splice(idxTu, 1); }
   const idxCpu = stato.mani.cpu.indexOf(cartaCpu);
@@ -1599,19 +1616,12 @@ function confermaCarta() {
   setTimeout(() => { nascondiBannerMano(); setTimeout(() => risolviContrasto(vincitore, null), 300); }, 3600);
 }
 
-/* =========================================================
-   FALLO CON RECUPERO CARTA
-   - Chi ha il seme RECUPERA la sua carta (non va negli scarti)
-   - Chi NON ha il seme fa fallo: +1 falli, carta negli scarti, pesca 1 carta
-   ========================================================= */
-function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida, tuHaGiocatoSeme, cpuHaGiocatoSeme) {
+function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida) {
   const c = stato.contrasto;
   const vincitore = squadraFallosa === 'tu' ? 'cpu' : 'tu';
 
-  // Fischio
   suonaFischietto('fallo');
 
-  // Applica +1 fallo al giocatore falloso della zona
   const zona = c.zona;
   const giocatoriZona = stato.giocatori[squadraFallosa].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   let giocatoreFalloso = null;
@@ -1624,21 +1634,15 @@ function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida, tu
     if (giocatoreFalloso.falli >= 6) { giocatoreFalloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
   }
 
-  // Gestione carte: chi ha giocato il seme RECUPERA la carta, chi fa fallo la perde
-  // Carta del falloso → scarti
   if (squadraFallosa === 'tu') {
     const idx = stato.mani.tu.indexOf(cartaTu);
     if (idx > -1) { stato.scarti.push(stato.mani.tu[idx]); stato.mani.tu.splice(idx, 1); }
+    pescaUnaCarta('tu');
   } else {
     const idx = stato.mani.cpu.indexOf(cartaCpu);
     if (idx > -1) { stato.scarti.push(stato.mani.cpu[idx]); stato.mani.cpu.splice(idx, 1); }
+    pescaUnaCarta('cpu');
   }
-  // Carta di chi ha giocato il seme: RECUPERATA (resta in mano)
-  // Quindi non la rimuoviamo
-
-  // Chi ha fatto fallo pesca 1 carta per tornare a 7
-  if (squadraFallosa === 'tu') pescaUnaCarta('tu');
-  else pescaUnaCarta('cpu');
 
   c.vincitore = vincitore;
   c.risolto = true;
@@ -1650,13 +1654,10 @@ function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida, tu
   selezioneCarta = null;
   renderPannelloContrasto();
 
-  setTimeout(() => mostraBannerMano(vincitore, cartaTu, cartaCpu, c.semeGuida, `FALLO di ${squadraFallosa === 'tu' ? 'TU' : 'CPU'} — non aveva il seme`), 600);
+  setTimeout(() => mostraBannerMano(vincitore, cartaTu, cartaCpu, c.semeGuida, `FALLO di ${squadraFallosa === 'tu' ? 'TU' : 'CPU'}`), 600);
   setTimeout(() => { nascondiBannerMano(); setTimeout(() => risolviContrasto(vincitore, squadraFallosa), 300); }, 3600);
 }
 
-/* =========================================================
-   PAREGGIO
-   ========================================================= */
 function risolviPareggioConSeme(cartaTu, cartaCpu) {
   const c = stato.contrasto;
   log(`🔁 Pareggio! Si annulla la mano, si pesca 1 carta a testa e si rigioca.`, 'highlight');
@@ -1720,9 +1721,7 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* =========================================================
-   RISOLUZIONE CONTRASTO
-   ========================================================= */
+/* RISOLUZIONE CONTRASTO */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -1738,7 +1737,7 @@ function risolviContrasto(vincente, motivoFallo) {
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // Verifica RIGORE: fallo in Z1 (TU) o Z5 (CPU)
+  // RIGORE
   if (motivoFallo) {
     const zona = c.zona;
     if ((vincente === 'tu' && zona === 5) || (vincente === 'cpu' && zona === 1)) {
@@ -1747,7 +1746,6 @@ function risolviContrasto(vincente, motivoFallo) {
       return;
     }
   } else {
-    // Nessun fallo: tiro in porta normale
     if ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1)) {
       setTimeout(() => apriSchermataTiro(vincente), 500);
       return;
@@ -1781,14 +1779,6 @@ function risolviContrasto(vincente, motivoFallo) {
         renderCampo(); renderHeader();
         setTimeout(() => avanzaMano(), 400);
       });
-    } else if (compagniNuovaZona.length === 1) {
-      animaPallaTraGiocatori(giocatoreVincenteId, compagniNuovaZona[0].id, 'retta', () => {
-        stato.zonaPalla = nuovaZona;
-        stato.possessore = vincente;
-        stato.giocatorePalla = compagniNuovaZona[0].id;
-        renderCampo(); renderHeader();
-        setTimeout(() => avanzaMano(), 400);
-      });
     } else {
       stato.zonaPalla = nuovaZona;
       stato.possessore = vincente;
@@ -1798,7 +1788,7 @@ function risolviContrasto(vincente, motivoFallo) {
   }, 800);
 }
 
-/* SCHERMATA TIRO IN PORTA / RIGORE */
+/* SCHERMATA TIRO / RIGORE */
 function apriSchermataTiro(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[attaccante].tiri++;
@@ -1928,11 +1918,8 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
       if (dadiPortiere.includes(dadoTiro)) {
         mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 PARATA! Il portiere respinge');
       } else {
-        if (isRigore) {
-          fase3RigoreConGrafica(dadoTiro, attaccante, difensore);
-        } else {
-          fase3TiroConGrafica(dadoTiro, attaccante, difensore);
-        }
+        if (isRigore) fase3RigoreConGrafica(dadoTiro, attaccante, difensore);
+        else fase3TiroConGrafica(dadoTiro, attaccante, difensore);
       }
     }, 1800);
   }, 1200);
@@ -1975,7 +1962,7 @@ function mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motiv
     else if (esito === 'parata') { stato.statistiche[difensore].parate++; gestisciParata(attaccante, difensore); }
     else if (esito === 'palo') { stato.statistiche[attaccante].pali++; gestisciPalo(attaccante, difensore); }
     else if (esito === 'angolo') { stato.statistiche[attaccante].angoli++; gestisciAngolo(attaccante, difensore); }
-    else if (esito === 'fuori') { gestisciFuori(attaccante, difensore); }
+    else if (esito === 'fuori') gestisciFuori(attaccante, difensore);
   }, 2500);
 }
 
@@ -2065,12 +2052,6 @@ function gestisciFuori(attaccante, difensore) {
     setTimeout(() => avanzaMano(), 400);
   }, 800);
 }
-
-function apriOverlay(html) {
-  document.getElementById('overlay-box').innerHTML = html;
-  document.getElementById('overlay').classList.remove('nascosto');
-}
-function chiudiOverlay() { document.getElementById('overlay').classList.add('nascosto'); }
 
 function flashVincitore(squadra) {
   const flash = document.getElementById('flash');
