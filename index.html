@@ -102,7 +102,6 @@
     position: relative;
   }
   .meta-sup { border-bottom: 1px dashed rgba(255,255,255,0.15); }
-  .meta-inf { }
 
   /* Pedina wrapper con info */
   .pedina-wrapper {
@@ -110,25 +109,22 @@
     align-items: center; gap: 1px;
     position: relative;
   }
-  .pedina-wrapper.tu .info-laterale { order: -1; }
-  .pedina-wrapper.tu .pedina { order: 2; }
-  .pedina-wrapper.cpu .info-laterale { order: -1; }
-  .pedina-wrapper.cpu .pedina { order: 2; }
-  /* Per la metà inferiore: info SOTTO */
-  .meta-inf .pedina-wrapper.tu .info-laterale { order: 2; }
-  .meta-inf .pedina-wrapper.tu .pedina { order: 1; }
-  .meta-inf .pedina-wrapper.cpu .info-laterale { order: 2; }
-  .meta-inf .pedina-wrapper.cpu .pedina { order: 1; }
+  /* Metà superiore: info SOPRA */
+  .meta-sup .pedina-wrapper .info-laterale { order: -1; }
+  .meta-sup .pedina-wrapper .pedina { order: 2; }
+  /* Metà inferiore: info SOTTO */
+  .meta-inf .pedina-wrapper .info-laterale { order: 2; }
+  .meta-inf .pedina-wrapper .pedina { order: 1; }
 
   .info-laterale {
-    display: flex; flex-direction: row; gap: 4px;
+    display: flex; flex-direction: row; gap: 3px;
     font-size: 11px; line-height: 1;
     color: #fff;
     text-shadow: 0 1px 3px #000, 0 0 4px #000;
     pointer-events: none; font-weight: 900;
     font-family: 'Courier New', monospace;
     background: rgba(0,0,0,0.6);
-    padding: 2px 6px;
+    padding: 2px 5px;
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.15);
     text-align: center;
@@ -171,7 +167,6 @@
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
 
-  /* Palla attaccata al giocatore */
   .pedina .palla-attaccata {
     position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
     width: 12px; height: 12px;
@@ -185,7 +180,7 @@
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
   }
 
-  /* PALLA AL CENTRO — sempre visibile */
+  /* PALLA FERMA al centro tra i 2 giocatori */
   .palla-centro {
     position: absolute;
     width: 14px; height: 14px;
@@ -407,32 +402,6 @@
     max-height: 100%; overflow-y: auto;
   }
   .overlay-box h2 { color: #ffd700; margin-bottom: 10px; font-size: 17px; }
-  .esito-tiro { font-size: 22px; font-weight: bold; margin: 10px 0; }
-  .esito-tiro.goal { color: #4ade80; }
-  .esito-tiro.parata { color: #ef4444; }
-  .esito-tiro.palo { color: #f59f00; }
-  .esito-tiro.angolo { color: #4dabf7; }
-  .esito-tiro.fuori { color: #666; }
-  .fase-label {
-    font-size: 10px; color: #ffd700; text-transform: uppercase;
-    letter-spacing: 2px; margin-top: 8px;
-  }
-  .dado {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 68px; height: 68px; background: #fff; color: #222;
-    border-radius: 12px; font-size: 42px; font-weight: 900;
-    margin: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.7);
-    animation: rollDado 0.6s ease;
-  }
-  @keyframes rollDado {
-    0% { transform: rotate(-720deg) scale(0.3); opacity: 0; }
-    60% { transform: rotate(0deg) scale(1.2); opacity: 1; }
-    100% { transform: rotate(0deg) scale(1); opacity: 1; }
-  }
-  .dadi-row { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
-  .dado.piccolo { width: 50px; height: 50px; font-size: 28px; }
-  .dado.blu { background: linear-gradient(135deg, #6bb6ff, #2563eb); color: #fff; border: 3px solid #fff; }
-  .dado.rosso { background: linear-gradient(135deg, #ff8a8a, #dc2626); color: #fff; border: 3px solid #fff; }
 
   .modale {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
@@ -561,6 +530,7 @@
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
+  /* SCHERMATA TIRO / RIGORE */
   .tiro-overlay {
     position: fixed; inset: 0;
     background: linear-gradient(180deg, #1a3a5c 0%, #0a1a2e 50%, #1a5a28 100%);
@@ -638,14 +608,8 @@
     bottom: 5%;
     top: auto;
   }
-  .tiro-palla.iniziale {
-    bottom: 5%; left: 50%;
-    width: 40px; height: 40px;
-  }
-  .tiro-palla.rigore {
-    bottom: 15%; left: 50%;
-    width: 28px; height: 28px;
-  }
+  .tiro-palla.iniziale { bottom: 5%; left: 50%; width: 40px; height: 40px; }
+  .tiro-palla.rigore { bottom: 15%; left: 50%; width: 28px; height: 28px; }
   .tiro-esito {
     font-size: 42px; font-weight: 900;
     color: #ffd700; text-align: center;
@@ -1166,7 +1130,7 @@ function renderZoneOverlay() {
 }
 
 /* =========================================================
-   RENDER CAMPO — con zone divise in 2 metà orizzontali
+   RENDER CAMPO — zone divise in 2 metà orizzontali
    ========================================================= */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -1178,29 +1142,31 @@ function renderCampo() {
     zona.className = 'zona';
     zona.dataset.zona = z.id;
 
-    // PORTIERE (Z0 o Z6) — al centro, info sopra
+    // PORTIERE (Z0 o Z6)
     if (z.portiere) {
       const sq = z.proprietario;
       const por = stato.giocatori[sq].find(g => g.zona === z.id);
-      const meta = document.createElement('div');
-      meta.className = 'meta-sup'; // portiere sopra
+      const metaSup = document.createElement('div');
+      metaSup.className = 'meta-sup';
       if (por) {
         const wrapper = document.createElement('div');
         wrapper.className = 'pedina-wrapper ' + sq;
         wrapper.appendChild(creaInfoLaterale(por));
         wrapper.appendChild(creaPedinaEl(por));
-        meta.appendChild(wrapper);
+        metaSup.appendChild(wrapper);
       }
-      zona.appendChild(meta);
+      zona.appendChild(metaSup);
+      const metaInf = document.createElement('div');
+      metaInf.className = 'meta-inf';
+      zona.appendChild(metaInf);
       zone.appendChild(zona);
       return;
     }
 
-    // Giocatori TU e CPU della zona
     const tuGiocatori = stato.giocatori.tu.filter(g => g.zona === z.id);
     const cpuGiocatori = stato.giocatori.cpu.filter(g => g.zona === z.id);
 
-    // Meta superiore: primo giocatore TU + primo giocatore CPU
+    // Meta superiore
     const metaSup = document.createElement('div');
     metaSup.className = 'meta-sup';
     if (tuGiocatori[0]) {
@@ -1219,7 +1185,7 @@ function renderCampo() {
     }
     zona.appendChild(metaSup);
 
-    // Meta inferiore: secondo giocatore TU + secondo giocatore CPU
+    // Meta inferiore
     const metaInf = document.createElement('div');
     metaInf.className = 'meta-inf';
     if (tuGiocatori[1]) {
@@ -1241,26 +1207,67 @@ function renderCampo() {
     zone.appendChild(zona);
   });
 
-  // Palla al centro della zona palla (se non in animazione)
+  // Palla tra i 2 giocatori della squadra in possesso
   setTimeout(() => {
-    if (!stato.pallaInAnimazione && stato.zonaPalla !== null) {
-      mostraPallaAlCentro(stato.zonaPalla);
+    if (!stato.pallaInAnimazione && stato.zonaPalla !== null && stato.possessore) {
+      mostraPallaTraGiocatori(stato.zonaPalla);
     }
   }, 50);
 
   renderingCampoInCorso = false;
 }
 
-/* Mostra la palla al centro della zona */
-function mostraPallaAlCentro(zonaId) {
-  // Rimuovi eventuali palle centrali esistenti
+/* Mostra la palla al centro tra i 2 giocatori della zona */
+function mostraPallaTraGiocatori(zonaId) {
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
   const zonaEl = document.querySelector(`.zona[data-zona="${zonaId}"]`);
   if (!zonaEl) return;
+  const squadra = stato.possessore;
+  if (!squadra) return;
+  const giocatoriZona = stato.giocatori[squadra].filter(g => g.zona === zonaId && !g.portiere && !g.espulso);
+
+  let xPerc = 50, yPerc = 50;
+
+  if (giocatoriZona.length >= 2) {
+    const el1 = document.querySelector(`[data-giocatore-id="${giocatoriZona[0].id}"]`);
+    const el2 = document.querySelector(`[data-giocatore-id="${giocatoriZona[1].id}"]`);
+    if (el1 && el2) {
+      const zonaRect = zonaEl.getBoundingClientRect();
+      const r1 = el1.getBoundingClientRect();
+      const r2 = el2.getBoundingClientRect();
+      const x1 = r1.left + r1.width / 2 - zonaRect.left;
+      const y1 = r1.top + r1.height / 2 - zonaRect.top;
+      const x2 = r2.left + r2.width / 2 - zonaRect.left;
+      const y2 = r2.top + r2.height / 2 - zonaRect.top;
+      xPerc = ((x1 + x2) / 2) / zonaRect.width * 100;
+      yPerc = ((y1 + y2) / 2) / zonaRect.height * 100;
+    }
+  } else if (giocatoriZona.length === 1) {
+    const el1 = document.querySelector(`[data-giocatore-id="${giocatoriZona[0].id}"]`);
+    if (el1) {
+      const zonaRect = zonaEl.getBoundingClientRect();
+      const r1 = el1.getBoundingClientRect();
+      xPerc = (r1.left + r1.width / 2 - zonaRect.left) / zonaRect.width * 100;
+      yPerc = (r1.top + r1.height / 2 - zonaRect.top) / zonaRect.height * 100;
+    }
+  } else {
+    // Portiere
+    const por = stato.giocatori[squadra].find(g => g.zona === zonaId && g.portiere);
+    if (por) {
+      const el = document.querySelector(`[data-giocatore-id="${por.id}"]`);
+      if (el) {
+        const zonaRect = zonaEl.getBoundingClientRect();
+        const r = el.getBoundingClientRect();
+        xPerc = (r.left + r.width / 2 - zonaRect.left) / zonaRect.width * 100;
+        yPerc = (r.top + r.height / 2 - zonaRect.top) / zonaRect.height * 100;
+      }
+    }
+  }
+
   const palla = document.createElement('div');
   palla.className = 'palla-centro';
-  palla.style.left = '50%';
-  palla.style.top = '50%';
+  palla.style.left = xPerc + '%';
+  palla.style.top = yPerc + '%';
   zonaEl.appendChild(palla);
 }
 
@@ -1380,9 +1387,9 @@ function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callbac
   const g2Rect = g2El.getBoundingClientRect();
 
   const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
-  const y1 = calcRect.bottom - calcRect.height * 0.15 - campoRect.top;
+  const y1 = calcRect.top + calcRect.height / 2 - campoRect.top;
   const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
-  const y2 = ((g1Rect.bottom - g1Rect.height * 0.15) + (g2Rect.bottom - g2Rect.height * 0.15)) / 2 - campoRect.top;
+  const y2 = ((g1Rect.top + g1Rect.height / 2) + (g2Rect.top + g2Rect.height / 2)) / 2 - campoRect.top;
 
   nascondiPallaCentro();
   const palla = document.getElementById('palla-volante');
@@ -1402,7 +1409,6 @@ function animaPallaVersoCentro(idCalciatore, idGiocatore1, idGiocatore2, callbac
     if (t < 1) requestAnimationFrame(anima);
     else {
       palla.classList.remove('attiva');
-      // Dopo animazione, mostra palla al centro della zona
       if (callback) callback();
     }
   }
@@ -1777,13 +1783,21 @@ function risolviContrasto(vincente, motivoFallo) {
         stato.giocatorePalla = null;
         log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa in mezzo ai 2 giocatori in Z${nuovaZona}`);
         renderCampo(); renderHeader();
-        setTimeout(() => avanzaMano(), 400);
+        setTimeout(() => avanzaMano(), 800);
+      });
+    } else if (compagniNuovaZona.length === 1) {
+      animaPallaVersoCentro(giocatoreVincenteId, compagniNuovaZona[0].id, compagniNuovaZona[0].id, () => {
+        stato.zonaPalla = nuovaZona;
+        stato.possessore = vincente;
+        stato.giocatorePalla = compagniNuovaZona[0].id;
+        renderCampo(); renderHeader();
+        setTimeout(() => avanzaMano(), 800);
       });
     } else {
       stato.zonaPalla = nuovaZona;
       stato.possessore = vincente;
       renderCampo(); renderHeader();
-      setTimeout(() => avanzaMano(), 400);
+      setTimeout(() => avanzaMano(), 800);
     }
   }, 800);
 }
