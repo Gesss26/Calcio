@@ -205,6 +205,26 @@
     100% { transform: rotate(0deg); }
   }
 
+  /* WRAPPER PER SCIVOLATA */
+  .pedina-scivola-wrapper {
+    position: relative;
+    z-index: 20;
+    transition: transform 1s cubic-bezier(0.34, 1.2, 0.64, 1);
+    will-change: transform;
+  }
+  .pedina-scivola-wrapper.ritorno {
+    transition: transform 0.5s ease-out;
+  }
+  .pedina-scivola-wrapper.scivolando svg {
+    animation: animScivolata 1s ease-out;
+  }
+  @keyframes animScivolata {
+    0% { transform: rotate(0deg) translateY(0); }
+    40% { transform: rotate(-35deg) translateY(4px); }
+    70% { transform: rotate(-15deg) translateY(2px); }
+    100% { transform: rotate(0deg) translateY(0); }
+  }
+
   .flash-vincitore {
     position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0;
   }
@@ -743,6 +763,8 @@ const CARTE_INIZIALI = 7;
 const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
 const DURATA_ANIM_PALLA = 2400;
+const DURATA_SCIVOLATA = 1000;
+const DURATA_RITORNO = 500;
 
 const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
@@ -1322,6 +1344,80 @@ function nascondiPallaCentro() {
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
 }
 
+/**
+ * SCIVOLATA: il giocatore vincente scivola verso il punto medio tra i 2 avversari
+ * della nuova zona, la palla lo segue, poi ritorna alla posizione originaria.
+ * Solo dopo il ritorno, parte il passaggio verso la nuova coppia.
+ */
+function eseguiScivolataEPassaggio(giocatoreVincenteId, g1Id, g2Id, nuovaZona, nuovaMeta, vincente, callback) {
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"]`);
+  const g1El = document.querySelector(`[data-giocatore-id="${g1Id}"]`);
+  const g2El = document.querySelector(`[data-giocatore-id="${g2Id}"]`);
+
+  if (!pedinaEl || !g1El || !g2El) {
+    if (callback) callback();
+    return;
+  }
+
+  // Posizione iniziale del giocatore vincente (centro)
+  const calcRect = pedinaEl.getBoundingClientRect();
+  const startX = calcRect.left + calcRect.width / 2 - campoRect.left;
+  const startY = calcRect.top + calcRect.height / 2 - campoRect.top;
+
+  // Posizione target: punto medio tra i 2 avversari nella nuova zona
+  const r1 = g1El.getBoundingClientRect();
+  const r2 = g2El.getBoundingClientRect();
+  const targetX = ((r1.left + r1.width / 2) + (r2.left + r2.width / 2)) / 2 - campoRect.left;
+  const targetY = ((r1.top + r1.height / 2) + (r2.top + r2.height / 2)) / 2 - campoRect.top;
+
+  // Spostamento
+  const dx = targetX - startX;
+  const dy = targetY - startY;
+
+  // Crea wrapper attorno alla pedina per animare la scivolata
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pedina-scivola-wrapper scivolando';
+  pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
+  wrapper.appendChild(pedinaEl);
+
+  // Palla attaccata al giocatore (se non c'è già)
+  let pallaAtt = pedinaEl.querySelector('.palla-attaccata');
+  if (!pallaAtt) {
+    pallaAtt = document.createElement('div');
+    pallaAtt.className = 'palla-attaccata';
+    pedinaEl.appendChild(pallaAtt);
+  }
+
+  // Nascondi palla fissa al centro
+  nascondiPallaCentro();
+
+  // FASE 1: scivolata (1s)
+  requestAnimationFrame(() => {
+    wrapper.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+
+  setTimeout(() => {
+    // FASE 2: ritorno (0.5s)
+    wrapper.classList.remove('scivolando');
+    wrapper.classList.add('ritorno');
+    wrapper.style.transform = 'translate(0, 0)';
+
+    setTimeout(() => {
+      // Ripristina il DOM: rimuovi wrapper, rimetti pedina al suo posto
+      if (wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(pedinaEl, wrapper);
+        wrapper.remove();
+      }
+
+      // FASE 3: passaggio verso la nuova coppia
+      animaPallaVersoCoppia(giocatoreVincenteId, g1Id, g2Id, () => {
+        if (callback) callback();
+      });
+    }, DURATA_RITORNO + 50);
+  }, DURATA_SCIVOLATA);
+}
+
 /* Anima la palla dal calciatore al punto medio tra i 2 giocatori indicati */
 function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callback) {
   const calcEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
@@ -1334,18 +1430,14 @@ function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callbac
   const g1Rect = g1El.getBoundingClientRect();
   const g2Rect = g2El.getBoundingClientRect();
 
-  // Punto di partenza: centro esatto del calciatore
   const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
   const y1 = calcRect.top + calcRect.height / 2 - campoRect.top;
 
-  // Punto di arrivo: punto medio tra i 2 giocatori (centro esatto)
   const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
   const y2 = ((g1Rect.top + g1Rect.height / 2) + (g2Rect.top + g2Rect.height / 2)) / 2 - campoRect.top;
 
-  // Rimuovi eventuali palle ferme
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
 
-  // Rimuovi palla attaccata al calciatore
   if (calcEl) {
     const pallaAtt = calcEl.querySelector('.palla-attaccata');
     if (pallaAtt) pallaAtt.remove();
@@ -1689,7 +1781,7 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO — traiettoria singola */
+/* RISOLUZIONE CONTRASTO — scivolata + passaggio */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -1726,12 +1818,6 @@ function risolviContrasto(vincente, motivoFallo) {
   }
 
   const giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
-  const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"] svg`);
-  if (pedinaEl) {
-    pedinaEl.classList.remove('anim-fermo');
-    pedinaEl.classList.add('anim-calcia');
-    setTimeout(() => { pedinaEl.classList.remove('anim-calcia'); pedinaEl.classList.add('anim-fermo'); }, 800);
-  }
 
   const nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
@@ -1742,16 +1828,8 @@ function risolviContrasto(vincente, motivoFallo) {
 
   setTimeout(() => {
     if (g1 && g2) {
-      // Rimuovi palla attaccata al calciatore vincente
-      if (giocatoreVincenteId) {
-        const ped = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"]`);
-        if (ped) {
-          const pallaAtt = ped.querySelector('.palla-attaccata');
-          if (pallaAtt) pallaAtt.remove();
-        }
-      }
-      // Anima la palla DIRETTAMENTE dal calciatore al centro tra i 2 giocatori
-      animaPallaVersoCoppia(giocatoreVincenteId, g1.id, g2.id, () => {
+      // SCIVOLATA + PASSAGGIO
+      eseguiScivolataEPassaggio(giocatoreVincenteId, g1.id, g2.id, nuovaZona, nuovaMeta, vincente, () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
         stato.metaContesa = nuovaMeta;
