@@ -777,9 +777,9 @@ const DURATA_RITORNO = 400;
 const SCIVOLATA_MAX_PX = 18;
 
 /* Percentuali FISSE del punto di arrivo palla nella zona (stabili!) */
-const PALLA_Y_META_SUP = 25;  // centro della metà superiore della zona
-const PALLA_Y_META_INF = 75;  // centro della metà inferiore della zona
-const PALLA_X_CENTRO = 50;    // centro orizzontale della zona
+const PALLA_Y_META_SUP = 25;
+const PALLA_Y_META_INF = 75;
+const PALLA_X_CENTRO = 50;
 
 const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
@@ -1229,13 +1229,11 @@ function mostraPallaNellaZona(zonaId, meta) {
 
   let xPerc, yPerc;
 
-  // Se ho un punto salvato dalle animazioni (percentuali FISSE), usalo
   if (stato.puntoPallaFermo) {
     xPerc = stato.puntoPallaFermo.xPerc;
     yPerc = stato.puntoPallaFermo.yPerc;
     stato.puntoPallaFermo = null;
   } else {
-    // Altrimenti: centro orizzontale della zona, Y in base alla meta
     xPerc = PALLA_X_CENTRO;
     yPerc = meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF;
   }
@@ -1330,7 +1328,7 @@ function renderPanchina() {
   });
 }
 
-/* MONETA */
+/* MONETA — lancia e mostra la palla SOLO sul giocatore (attaccata), niente palla-centro */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
@@ -1342,6 +1340,12 @@ function lanciaMoneta(scelta) {
   const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
+
+  // Assicurati che NON ci sia palla-centro: solo la palla attaccata al giocatore
+  stato.puntoPallaFermo = null;
+  nascondiPallaCentro();
+  stato.pallaInAnimazione = false;  // ← IMPORTANTE: sblocca la palla attaccata
+
   chiudiModale();
   renderCampo(); renderHeader();
   setTimeout(() => avviaContrasto(), 700);
@@ -1354,9 +1358,6 @@ function nascondiPallaCentro() {
 
 /**
  * Calcola il punto di arrivo in PERCENTUALI FISSE della zona di destinazione.
- * - X: centro orizzontale della zona (50%)
- * - Y: 25% se meta='sup', 75% se meta='inf'
- * Queste percentuali sono STABILI, non dipendono da getBoundingClientRect().
  */
 function calcolaPuntoArrivoPerc(meta) {
   return {
@@ -1377,23 +1378,21 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
     return;
   }
 
-  // ===== PASSO 1: CALCOLO PUNTO DI ARRIVO (percentuali FISSE) =====
+  // Blocca la palla attaccata durante l'animazione
+  stato.pallaInAnimazione = true;
+
   const arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
-  // Converti in px assoluti per l'animazione (usando la zona di destinazione reale)
   const zonaDest = document.querySelector(`.zona[data-zona="${nuovaZona}"]`);
   const zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoRect;
   const arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoRect.left);
   const arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoRect.top);
 
-  // Salva subito in percentuali della ZONA (per il render finale)
   stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
 
-  // Posizione iniziale del giocatore vincente
   const calcRect = pedinaEl.getBoundingClientRect();
   const startX = calcRect.left + calcRect.width / 2 - campoRect.left;
   const startY = calcRect.top + calcRect.height / 2 - campoRect.top;
 
-  // Direzione della scivolata: verso il punto di arrivo
   const dxDir = arrivoXPx - startX;
   const dyDir = arrivoYPx - startY;
   const distanza = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
@@ -1402,13 +1401,11 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
   const dx = distanza > 0 ? (dxDir / distanza) * scivolata : 0;
   const dy = distanza > 0 ? (dyDir / distanza) * scivolata : 0;
 
-  // Crea wrapper attorno alla pedina per la scivolata
   const wrapper = document.createElement('div');
   wrapper.className = 'pedina-scivola-wrapper scivolando';
   pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
   wrapper.appendChild(pedinaEl);
 
-  // Palla attaccata al giocatore
   let pallaAtt = pedinaEl.querySelector('.palla-attaccata');
   if (!pallaAtt) {
     pallaAtt = document.createElement('div');
@@ -1418,25 +1415,21 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
 
   nascondiPallaCentro();
 
-  // ===== PASSO 2: SCIVOLATA =====
   requestAnimationFrame(() => {
     wrapper.style.transform = `translate(${dx}px, ${dy}px)`;
   });
 
   setTimeout(() => {
-    // ===== PASSO 3: RITORNO =====
     wrapper.classList.remove('scivolando');
     wrapper.classList.add('ritorno');
     wrapper.style.transform = 'translate(0, 0)';
 
     setTimeout(() => {
-      // Ripristina DOM
       if (wrapper.parentNode) {
         wrapper.parentNode.insertBefore(pedinaEl, wrapper);
         wrapper.remove();
       }
 
-      // ===== PASSO 4: TRAIETTORIA UNICA =====
       const pallaRect = pedinaEl.getBoundingClientRect();
       const partXPx = pallaRect.left + pallaRect.width / 2 - campoRect.left;
       const partYPx = pallaRect.top + pallaRect.height / 2 - campoRect.top;
@@ -1465,6 +1458,7 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
           requestAnimationFrame(anima);
         } else {
           palla.classList.remove('attiva');
+          stato.pallaInAnimazione = false;
           if (callback) callback();
         }
       }
@@ -1488,7 +1482,6 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
   const x2 = aRect.left + aRect.width / 2 - campoRect.left;
   const y2 = aRect.top + aRect.height / 2 - campoRect.top;
 
-  // Arrivo al centro della zona (50%, 50%)
   stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
 
   nascondiPallaCentro();
@@ -1682,22 +1675,33 @@ function confermaCarta() {
   setTimeout(() => { nascondiBannerMano(); setTimeout(() => risolviContrasto(vincitore, null), 300); }, 3600);
 }
 
+/* FALLO — attribuito al giocatore corretto (chi ha commesso il fallo) */
 function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida) {
   const c = stato.contrasto;
   const vincitore = squadraFallosa === 'tu' ? 'cpu' : 'tu';
 
   suonaFischietto('fallo');
 
-  const zona = c.zona;
-  const giocatoriZona = stato.giocatori[squadraFallosa].filter(g => g.zona === zona && !g.portiere && !g.espulso);
-  let giocatoreFalloso = null;
-  if (giocatoriZona.length > 0) {
-    giocatoreFalloso = giocatoriZona[Math.floor(Math.random() * giocatoriZona.length)];
+  // Il giocatore falloso è QUELLO DELLA SQUADRA FALLOSA che era coinvolto nel contrasto:
+  // - Se la squadra fallosa era l'attaccante → il falloso è c.giocatoreAtt
+  // - Se la squadra fallosa era il difensore → il falloso è c.giocatoreDif
+  const giocatoreFallosoId = squadraFallosa === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
+  const giocatoreFalloso = stato.giocatori[squadraFallosa].find(g => g.id === giocatoreFallosoId);
+
+  if (giocatoreFalloso && !giocatoreFalloso.espulso) {
     giocatoreFalloso.falli++;
     stato.statistiche[squadraFallosa].falli++;
     log(`🟨 Fallo di ${giocatoreFalloso.nome} — Falli: ${giocatoreFalloso.falli}`, 'parata');
-    if (giocatoreFalloso.falli === 3) { giocatoreFalloso.ammonito = true; stato.statistiche[squadraFallosa].ammonizioni++; log(`🟨 AMMONIZIONE!`, 'parata'); }
-    if (giocatoreFalloso.falli >= 6) { giocatoreFalloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; log(`🟥 ESPULSIONE!`, 'parata'); }
+    if (giocatoreFalloso.falli === 3) {
+      giocatoreFalloso.ammonito = true;
+      stato.statistiche[squadraFallosa].ammonizioni++;
+      log(`🟨 AMMONIZIONE per ${giocatoreFalloso.nome}!`, 'parata');
+    }
+    if (giocatoreFalloso.falli >= 6) {
+      giocatoreFalloso.espulso = true;
+      stato.statistiche[squadraFallosa].espulsioni++;
+      log(`🟥 ESPULSIONE per ${giocatoreFalloso.nome}!`, 'parata');
+    }
   }
 
   if (squadraFallosa === 'tu') {
@@ -2038,7 +2042,7 @@ function gestisciGoal(attaccante) {
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
-    stato.puntoPallaFermo = null;  // forza il ricalcolo con PALLA_Y_META_*
+    stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 800);
   }, 3200);
