@@ -780,9 +780,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
 const PARTITA_TORNEO = urlParams.get('partita');
 
-/* Punto di arrivo salvato come PERCENTUALI del campo-wrapper */
-let puntoArrivoPalla = null;
-
 /* SUONI */
 let audioCtx = null;
 function initAudio() {
@@ -868,6 +865,8 @@ let stato = {
   zonaPalla: 3, possessore: null, giocatorePalla: null,
   metaContesa: 'sup',
   pallaInAnimazione: false,
+  /* Punto dove la palla si ferma: calcolato UNA VOLTA e usato per il render successivo */
+  puntoPallaFermo: null,
   mazzo: [], scarti: [],
   mani: { tu: [], cpu: [] },
   giocatori: { tu: [], cpu: [] },
@@ -1097,6 +1096,7 @@ function avviaPartita(sqTU, sqCPU, tipo = '1P') {
   stato.logCompleto = [];
   stato.zonaPalla = 3; stato.possessore = null; stato.giocatorePalla = null;
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
+  stato.puntoPallaFermo = null;
   document.getElementById('nome-tu').textContent = SQUADRE[sqTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[sqCPU].nome;
   renderZoneOverlay();
@@ -1223,11 +1223,11 @@ function mostraPallaNellaZona(zonaId, meta) {
 
   let xPerc = 50, yPerc = 50;
 
-  if (puntoArrivoPalla && puntoArrivoPalla.xPerc !== undefined) {
-    // Usa le percentuali salvate direttamente (relative al campo-wrapper)
-    xPerc = puntoArrivoPalla.xPerc;
-    yPerc = puntoArrivoPalla.yPerc;
-    puntoArrivoPalla = null;
+  // Se ho un punto salvato, usalo (priorità assoluta)
+  if (stato.puntoPallaFermo) {
+    xPerc = stato.puntoPallaFermo.xPerc;
+    yPerc = stato.puntoPallaFermo.yPerc;
+    // Non azzero subito: lo azzero solo quando un nuovo render lo sovrascrive
   } else {
     // Fallback: punto medio tra i 2 giocatori nella meta
     const metaEl = zonaEl.querySelector('.' + (meta === 'sup' ? 'meta-sup' : 'meta-inf'));
@@ -1360,9 +1360,12 @@ function nascondiPallaCentro() {
 }
 
 /**
- * SCIVOLATA BREVE + PASSAGGIO
- * Il giocatore scivola di POCHI PIXEL verso la palla (intervento difensivo),
- * poi ritorna, poi la palla parte verso la nuova coppia.
+ * SCIVOLATA BREVE + TRAIETTORIA UNICA
+ * 1) Calcola UNA VOLTA il punto di arrivo (punto medio tra i 2 nuovi giocatori)
+ * 2) Il giocatore vincente scivola di POCHI PIXEL verso la palla (intervento difensivo)
+ * 3) Ritorna alla posizione iniziale
+ * 4) La palla parte dal giocatore e arriva al punto calcolato al passo 1 (traiettoria unica)
+ * 5) Salva il punto in stato.puntoPallaFermo per il render successivo
  */
 function eseguiScivolataEPassaggio(giocatoreVincenteId, g1Id, g2Id, nuovaZona, nuovaMeta, vincente, callback) {
   const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
@@ -1371,32 +1374,44 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, g1Id, g2Id, nuovaZona, n
   const g2El = document.querySelector(`[data-giocatore-id="${g2Id}"]`);
 
   if (!pedinaEl || !g1El || !g2El) {
-    animaPallaVersoCoppia(giocatoreVincenteId, g1Id, g2Id, callback);
+    if (callback) callback();
     return;
   }
 
+  // ===== PASSO 1: CALCOLO UNICO DEL PUNTO DI ARRIVO =====
+  const g1Rect = g1El.getBoundingClientRect();
+  const g2Rect = g2El.getBoundingClientRect();
+  // Punto medio tra i 2 nuovi giocatori (in px relativi al campo)
+  const arrivoXPx = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
+  const arrivoYPx = ((g1Rect.top + g1Rect.height / 2) + (g2Rect.top + g2Rect.height / 2)) / 2 - campoRect.top;
+
+  // Salviamo SUBITO il punto di arrivo in percentuali del campo-wrapper (per il render finale)
+  stato.puntoPallaFermo = {
+    xPerc: (arrivoXPx / campoRect.width) * 100,
+    yPerc: (arrivoYPx / campoRect.height) * 100
+  };
+
+  // Posizione iniziale del giocatore vincente
   const calcRect = pedinaEl.getBoundingClientRect();
   const startX = calcRect.left + calcRect.width / 2 - campoRect.left;
   const startY = calcRect.top + calcRect.height / 2 - campoRect.top;
 
-  const r1 = g1El.getBoundingClientRect();
-  const r2 = g2El.getBoundingClientRect();
-  const pallaX = ((r1.left + r1.width / 2) + (r2.left + r2.width / 2)) / 2 - campoRect.left;
-  const pallaY = ((r1.top + r1.height / 2) + (r2.top + r2.height / 2)) / 2 - campoRect.top;
-
-  const dxDir = pallaX - startX;
-  const dyDir = pallaY - startY;
+  // Direzione della scivolata: verso il punto di arrivo
+  const dxDir = arrivoXPx - startX;
+  const dyDir = arrivoYPx - startY;
   const distanza = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
 
   const scivolata = Math.min(SCIVOLATA_MAX_PX, distanza * 0.35);
   const dx = distanza > 0 ? (dxDir / distanza) * scivolata : 0;
   const dy = distanza > 0 ? (dyDir / distanza) * scivolata : 0;
 
+  // Crea wrapper attorno alla pedina per la scivolata
   const wrapper = document.createElement('div');
   wrapper.className = 'pedina-scivola-wrapper scivolando';
   pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
   wrapper.appendChild(pedinaEl);
 
+  // Palla attaccata al giocatore
   let pallaAtt = pedinaEl.querySelector('.palla-attaccata');
   if (!pallaAtt) {
     pallaAtt = document.createElement('div');
@@ -1406,86 +1421,64 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, g1Id, g2Id, nuovaZona, n
 
   nascondiPallaCentro();
 
+  // ===== PASSO 2: SCIVOLATA =====
   requestAnimationFrame(() => {
     wrapper.style.transform = `translate(${dx}px, ${dy}px)`;
   });
 
   setTimeout(() => {
+    // ===== PASSO 3: RITORNO =====
     wrapper.classList.remove('scivolando');
     wrapper.classList.add('ritorno');
     wrapper.style.transform = 'translate(0, 0)';
 
     setTimeout(() => {
+      // Ripristina DOM (rimuovi wrapper)
       if (wrapper.parentNode) {
         wrapper.parentNode.insertBefore(pedinaEl, wrapper);
         wrapper.remove();
       }
-      animaPallaVersoCoppia(giocatoreVincenteId, g1Id, g2Id, () => {
-        if (callback) callback();
-      });
+
+      // ===== PASSO 4: TRAIETTORIA UNICA =====
+      // La palla parte dalla posizione del giocatore e va DIRETTAMENTE al punto calcolato al passo 1
+      const pallaRect = pedinaEl.getBoundingClientRect();
+      const partXPx = pallaRect.left + pallaRect.width / 2 - campoRect.left;
+      const partYPx = pallaRect.top + pallaRect.height / 2 - campoRect.top;
+
+      // Rimuovi palla attaccata al giocatore
+      const pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
+      if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
+
+      const palla = document.getElementById('palla-volante');
+      palla.style.transition = 'none';
+      palla.style.left = partXPx + 'px';
+      palla.style.top = partYPx + 'px';
+      palla.classList.add('attiva');
+      palla.classList.remove('parabola');
+      void palla.offsetWidth;
+
+      const durata = DURATA_ANIM_PALLA;
+      const inizio = performance.now();
+
+      function anima(now) {
+        const t = Math.min((now - inizio) / durata, 1);
+        const x = partXPx + (arrivoXPx - partXPx) * t;
+        const y = partYPx + (arrivoYPx - partYPx) * t;
+        palla.style.left = x + 'px';
+        palla.style.top = y + 'px';
+        if (t < 1) {
+          requestAnimationFrame(anima);
+        } else {
+          palla.classList.remove('attiva');
+          if (callback) callback();
+        }
+      }
+      requestAnimationFrame(anima);
     }, DURATA_RITORNO + 50);
   }, DURATA_SCIVOLATA);
 }
 
-/* Anima la palla dal calciatore al punto medio tra i 2 giocatori indicati */
-function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callback) {
-  const calcEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
-  const g1El = document.querySelector(`[data-giocatore-id="${idGiocatore1}"]`);
-  const g2El = document.querySelector(`[data-giocatore-id="${idGiocatore2}"]`);
-  if (!calcEl || !g1El || !g2El) { if (callback) callback(); return; }
-
-  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
-  const calcRect = calcEl.getBoundingClientRect();
-  const g1Rect = g1El.getBoundingClientRect();
-  const g2Rect = g2El.getBoundingClientRect();
-
-  const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
-  const y1 = calcRect.top + calcRect.height / 2 - campoRect.top;
-
-  const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
-  const y2 = ((g1Rect.top + g1Rect.height / 2) + (g2Rect.top + g2Rect.height / 2)) / 2 - campoRect.top;
-
-  // SALVA come percentuali del campo-wrapper (valide per qualsiasi zona figlia)
-  puntoArrivoPalla = {
-    xPerc: (x2 / campoRect.width) * 100,
-    yPerc: (y2 / campoRect.height) * 100
-  };
-
-  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
-
-  if (calcEl) {
-    const pallaAtt = calcEl.querySelector('.palla-attaccata');
-    if (pallaAtt) pallaAtt.remove();
-  }
-
-  const palla = document.getElementById('palla-volante');
-  palla.style.transition = 'none';
-  palla.style.left = x1 + 'px';
-  palla.style.top = y1 + 'px';
-  palla.classList.add('attiva');
-  palla.classList.remove('parabola');
-  void palla.offsetWidth;
-
-  const durata = DURATA_ANIM_PALLA;
-  const inizio = performance.now();
-
-  function anima(now) {
-    const t = Math.min((now - inizio) / durata, 1);
-    const x = x1 + (x2 - x1) * t;
-    const y = y1 + (y2 - y1) * t;
-    palla.style.left = x + 'px';
-    palla.style.top = y + 'px';
-    if (t < 1) {
-      requestAnimationFrame(anima);
-    } else {
-      palla.classList.remove('attiva');
-      if (callback) callback();
-    }
-  }
-  requestAnimationFrame(anima);
-}
-
-/* Anima la palla verso il centro di una zona */
+/* Anima la palla verso il centro di una zona (per rinvio portiere) */
 function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
   const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
   const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
@@ -1500,7 +1493,8 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
   const x2 = aRect.left + aRect.width / 2 - campoRect.left;
   const y2 = aRect.top + aRect.height / 2 - campoRect.top;
 
-  puntoArrivoPalla = {
+  // Salva punto di arrivo per il render successivo
+  stato.puntoPallaFermo = {
     xPerc: (x2 / campoRect.width) * 100,
     yPerc: (y2 / campoRect.height) * 100
   };
@@ -1801,7 +1795,7 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO — scivolata breve + passaggio */
+/* RISOLUZIONE CONTRASTO — scivolata breve + traiettoria unica */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -2068,6 +2062,8 @@ function gestisciGoal(attaccante) {
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+    // Reset punto palla fermo per far ricalcolare a renderCampo
+    stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 800);
   }, 3200);
@@ -2108,6 +2104,7 @@ function gestisciPalo(attaccante, difensore) {
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+    stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 400);
   }, 800);
@@ -2121,6 +2118,7 @@ function gestisciAngolo(attaccante, difensore) {
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[attaccante].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+    stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 400);
   }, 800);
@@ -2134,6 +2132,7 @@ function gestisciFuori(attaccante, difensore) {
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+    stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
     setTimeout(() => avanzaMano(), 400);
   }, 800);
@@ -2164,6 +2163,7 @@ function avanzaMano() {
         stato.giocatorePalla = null;
         const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
         if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+        stato.puntoPallaFermo = null;
         renderCampo(); renderHeader();
         setTimeout(() => avviaContrasto(), 500);
       });
