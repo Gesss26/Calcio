@@ -113,9 +113,6 @@ function scegliDivise(sqTU, sqCPU) {
   return { tu: divisaTU, cpu: divisaCPU };
 }
 
-/* =========================================================
-   SVG GIOCATORE (condiviso tra index.html e europei2028.html)
-   ========================================================= */
 function creaGiocatoreSVG(divisa, animazione = 'fermo') {
   const capelli = divisa.capelli;
   const pelle = divisa.pelle;
