@@ -165,7 +165,6 @@
     50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
   }
 
-  /* Palla ferma */
   .palla-centro {
     position: absolute;
     width: 14px; height: 14px;
@@ -832,7 +831,7 @@ let stato = {
   tempo: 1, mano: 1, maxMani: MANI_PER_TEMPO,
   punteggio: { tu: 0, cpu: 0 },
   zonaPalla: 3, possessore: null, giocatorePalla: null,
-  metaContesa: 'sup', // 'sup' o 'inf' — coppia che si contende la palla
+  metaContesa: 'sup',
   pallaInAnimazione: false,
   mazzo: [], scarti: [],
   mani: { tu: [], cpu: [] },
@@ -1062,7 +1061,7 @@ function avviaPartita(sqTU, sqCPU, tipo = '1P') {
   stato.semeGuidaPrecedente = null;
   stato.logCompleto = [];
   stato.zonaPalla = 3; stato.possessore = null; stato.giocatorePalla = null;
-  stato.metaContesa = 'sup';
+  stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
   document.getElementById('nome-tu').textContent = SQUADRE[sqTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[sqCPU].nome;
   renderZoneOverlay();
@@ -1181,44 +1180,36 @@ function renderCampo() {
 
   setTimeout(() => {
     if (!stato.pallaInAnimazione && stato.zonaPalla !== null && stato.possessore) {
-      mostraPallaNellaZona(stato.zonaPalla);
+      mostraPallaNellaZona(stato.zonaPalla, stato.metaContesa);
     }
   }, 50);
 
   renderingCampoInCorso = false;
 }
 
-/* Mostra la palla:
-   - in Z3: al centro della zona (in mezzo ai 4 giocatori)
-   - altrove: tra la coppia di giocatori (sup o inf) di stato.metaContesa */
-function mostraPallaNellaZona(zonaId) {
+/* Mostra la palla nella zona corrente:
+   - Tra i 2 giocatori della coppia scelta (sup o inf)
+   - Se la coppia non ha 2 giocatori, fallback al centro della zona */
+function mostraPallaNellaZona(zonaId, meta) {
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
   const zonaEl = document.querySelector(`.zona[data-zona="${zonaId}"]`);
   if (!zonaEl) return;
 
   let xPerc = 50, yPerc = 50;
 
-  if (zonaId === 3) {
-    // Z3: centro della zona
-    xPerc = 50;
-    yPerc = 50;
-  } else {
-    // Altre zone: tra i 2 giocatori della coppia scelta (sup o inf)
-    const meta = stato.metaContesa;
-    const metaEl = zonaEl.querySelector('.' + (meta === 'sup' ? 'meta-sup' : 'meta-inf'));
-    if (metaEl) {
-      const pedine = metaEl.querySelectorAll('.pedina');
-      if (pedine.length >= 2) {
-        const zonaRect = zonaEl.getBoundingClientRect();
-        const r1 = pedine[0].getBoundingClientRect();
-        const r2 = pedine[1].getBoundingClientRect();
-        const x1 = r1.left + r1.width / 2 - zonaRect.left;
-        const y1 = r1.top + r1.height / 2 - zonaRect.top;
-        const x2 = r2.left + r2.width / 2 - zonaRect.left;
-        const y2 = r2.top + r2.height / 2 - zonaRect.top;
-        xPerc = ((x1 + x2) / 2) / zonaRect.width * 100;
-        yPerc = ((y1 + y2) / 2) / zonaRect.height * 100;
-      }
+  const metaEl = zonaEl.querySelector('.' + (meta === 'sup' ? 'meta-sup' : 'meta-inf'));
+  if (metaEl) {
+    const pedine = metaEl.querySelectorAll('.pedina');
+    if (pedine.length >= 2) {
+      const zonaRect = zonaEl.getBoundingClientRect();
+      const r1 = pedine[0].getBoundingClientRect();
+      const r2 = pedine[1].getBoundingClientRect();
+      const x1 = r1.left + r1.width / 2 - zonaRect.left;
+      const y1 = r1.top + r1.height / 2 - zonaRect.top;
+      const x2 = r2.left + r2.width / 2 - zonaRect.left;
+      const y2 = r2.top + r2.height / 2 - zonaRect.top;
+      xPerc = ((x1 + x2) / 2) / zonaRect.width * 100;
+      yPerc = ((y1 + y2) / 2) / zonaRect.height * 100;
     }
   }
 
@@ -1226,6 +1217,18 @@ function mostraPallaNellaZona(zonaId) {
   palla.className = 'palla-centro';
   palla.style.left = xPerc + '%';
   palla.style.top = yPerc + '%';
+  zonaEl.appendChild(palla);
+}
+
+/* Mostra la palla al centro della Z3 (in mezzo ai 4 giocatori) */
+function mostraPallaCentroZ3() {
+  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
+  const zonaEl = document.querySelector(`.zona[data-zona="3"]`);
+  if (!zonaEl) return;
+  const palla = document.createElement('div');
+  palla.className = 'palla-centro';
+  palla.style.left = '50%';
+  palla.style.top = '50%';
   zonaEl.appendChild(palla);
 }
 
@@ -1320,7 +1323,7 @@ function lanciaMoneta(scelta) {
   log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
   stato.possessore = vince;
   stato.zonaPalla = 3;
-  // In Z3 la coppia è casuale
+  // In Z3 all'inizio: palla al centro (tra i 4 giocatori)
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
   const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
@@ -1335,7 +1338,7 @@ function nascondiPallaCentro() {
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
 }
 
-/* Anima la palla dal calciatore ad un punto specifico (destinazione = 2 giocatori della coppia) */
+/* Anima la palla dal calciatore al punto medio tra i 2 giocatori indicati */
 function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callback) {
   const calcEl = document.querySelector(`[data-giocatore-id="${idCalciatore}"]`);
   const g1El = document.querySelector(`[data-giocatore-id="${idGiocatore1}"]`);
@@ -1425,10 +1428,8 @@ function avviaContrasto() {
   const attaccante = stato.possessore;
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
 
-  // Determina la coppia che si contende la palla
   const metaIdx = stato.metaContesa === 'sup' ? 0 : 1;
 
-  // Giocatori della zona in base alla metà (0 = sup, 1 = inf)
   const attaccantiZona = stato.giocatori[attaccante].filter(g => g.zona === zona && !g.portiere && !g.espulso);
   const difensoriZona = stato.giocatori[difensore].filter(g => g.zona === zona && !g.portiere && !g.espulso);
 
@@ -1732,29 +1733,30 @@ function risolviContrasto(vincente, motivoFallo) {
     setTimeout(() => { pedinaEl.classList.remove('anim-calcia'); pedinaEl.classList.add('anim-fermo'); }, 800);
   }
 
-  const compagniNuovaZona = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
-
-  // Scegli casualmente la coppia (sup o inf) per la nuova zona
-  // Se la nuova zona è Z3, palla va al centro (coppia ancora scelta casualmente per il prossimo contrasto)
+  // Scegli casualmente la coppia (sup o inf) della nuova zona
   const nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
+  // Trova i 2 giocatori della coppia scelta nella nuova zona (per la squadra che ha vinto)
+  const giocatoriNuovaZonaTutti = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
+  const metaIdx = nuovaMeta === 'sup' ? 0 : 1;
+  const g1 = giocatoriNuovaZonaTutti[metaIdx];
+  const g2 = giocatoriNuovaZonaTutti[metaIdx === 0 ? 1 : 0];
+
   setTimeout(() => {
-    if (nuovaZona === 3 || compagniNuovaZona.length < 2) {
-      // Z3 o meno di 2 compagni: anima verso il centro della zona
-      animaPallaVersoZona(c.zona, nuovaZona, 'retta', () => {
+    if (g1 && g2) {
+      // Palla dal calciatore vincente al centro tra i 2 giocatori della coppia
+      animaPallaVersoCoppia(giocatoreVincenteId, g1.id, g2.id, () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
         stato.metaContesa = nuovaMeta;
         stato.giocatorePalla = null;
+        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa in mezzo ai 2 giocatori in Z${nuovaZona} (${nuovaMeta === 'sup' ? 'sopra' : 'sotto'})`);
         renderCampo(); renderHeader();
         setTimeout(() => avanzaMano(), 800);
       });
     } else {
-      // Altre zone: anima verso la coppia scelta
-      // Trova i 2 giocatori della coppia scelta nella nuova zona
-      const g1 = compagniNuovaZona[0];
-      const g2 = compagniNuovaZona[1] || compagniNuovaZona[0];
-      animaPallaVersoCoppia(giocatoreVincenteId, g1.id, g2.id, () => {
+      // Fallback: anima verso il centro della zona
+      animaPallaVersoZona(c.zona, nuovaZona, 'retta', () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
         stato.metaContesa = nuovaMeta;
