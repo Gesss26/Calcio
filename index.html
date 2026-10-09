@@ -1187,9 +1187,6 @@ function renderCampo() {
   renderingCampoInCorso = false;
 }
 
-/* Mostra la palla nella zona corrente:
-   - Tra i 2 giocatori della coppia scelta (sup o inf)
-   - Se la coppia non ha 2 giocatori, fallback al centro della zona */
 function mostraPallaNellaZona(zonaId, meta) {
   document.querySelectorAll('.palla-centro').forEach(el => el.remove());
   const zonaEl = document.querySelector(`.zona[data-zona="${zonaId}"]`);
@@ -1217,18 +1214,6 @@ function mostraPallaNellaZona(zonaId, meta) {
   palla.className = 'palla-centro';
   palla.style.left = xPerc + '%';
   palla.style.top = yPerc + '%';
-  zonaEl.appendChild(palla);
-}
-
-/* Mostra la palla al centro della Z3 (in mezzo ai 4 giocatori) */
-function mostraPallaCentroZ3() {
-  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
-  const zonaEl = document.querySelector(`.zona[data-zona="3"]`);
-  if (!zonaEl) return;
-  const palla = document.createElement('div');
-  palla.className = 'palla-centro';
-  palla.style.left = '50%';
-  palla.style.top = '50%';
   zonaEl.appendChild(palla);
 }
 
@@ -1323,7 +1308,6 @@ function lanciaMoneta(scelta) {
   log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
   stato.possessore = vince;
   stato.zonaPalla = 3;
-  // In Z3 all'inizio: palla al centro (tra i 4 giocatori)
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
   const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
@@ -1350,16 +1334,29 @@ function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callbac
   const g1Rect = g1El.getBoundingClientRect();
   const g2Rect = g2El.getBoundingClientRect();
 
+  // Punto di partenza: centro esatto del calciatore
   const x1 = calcRect.left + calcRect.width / 2 - campoRect.left;
   const y1 = calcRect.top + calcRect.height / 2 - campoRect.top;
+
+  // Punto di arrivo: punto medio tra i 2 giocatori (centro esatto)
   const x2 = ((g1Rect.left + g1Rect.width / 2) + (g2Rect.left + g2Rect.width / 2)) / 2 - campoRect.left;
   const y2 = ((g1Rect.top + g1Rect.height / 2) + (g2Rect.top + g2Rect.height / 2)) / 2 - campoRect.top;
 
-  nascondiPallaCentro();
+  // Rimuovi eventuali palle ferme
+  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
+
+  // Rimuovi palla attaccata al calciatore
+  if (calcEl) {
+    const pallaAtt = calcEl.querySelector('.palla-attaccata');
+    if (pallaAtt) pallaAtt.remove();
+  }
+
   const palla = document.getElementById('palla-volante');
   palla.style.transition = 'none';
-  palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
-  palla.classList.add('attiva'); palla.classList.remove('parabola');
+  palla.style.left = x1 + 'px';
+  palla.style.top = y1 + 'px';
+  palla.classList.add('attiva');
+  palla.classList.remove('parabola');
   void palla.offsetWidth;
 
   const durata = DURATA_ANIM_PALLA;
@@ -1369,9 +1366,14 @@ function animaPallaVersoCoppia(idCalciatore, idGiocatore1, idGiocatore2, callbac
     const t = Math.min((now - inizio) / durata, 1);
     const x = x1 + (x2 - x1) * t;
     const y = y1 + (y2 - y1) * t;
-    palla.style.left = x + 'px'; palla.style.top = y + 'px';
-    if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); if (callback) callback(); }
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+    if (t < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      palla.classList.remove('attiva');
+      if (callback) callback();
+    }
   }
   requestAnimationFrame(anima);
 }
@@ -1687,7 +1689,7 @@ function nascondiBannerMano() {
   banner.style.background = '';
 }
 
-/* RISOLUZIONE CONTRASTO */
+/* RISOLUZIONE CONTRASTO — traiettoria singola */
 function risolviContrasto(vincente, motivoFallo) {
   const c = stato.contrasto;
   flashVincitore(vincente);
@@ -1697,8 +1699,6 @@ function risolviContrasto(vincente, motivoFallo) {
   const gDif = stato.giocatori[c.difensore].find(g => g.id === c.giocatoreDif);
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere && !gDif.espulso) gDif.stamina = Math.max(0, gDif.stamina - 1);
-
-  renderCampo();
 
   document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
@@ -1733,10 +1733,8 @@ function risolviContrasto(vincente, motivoFallo) {
     setTimeout(() => { pedinaEl.classList.remove('anim-calcia'); pedinaEl.classList.add('anim-fermo'); }, 800);
   }
 
-  // Scegli casualmente la coppia (sup o inf) della nuova zona
   const nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
-  // Trova i 2 giocatori della coppia scelta nella nuova zona (per la squadra che ha vinto)
   const giocatoriNuovaZonaTutti = stato.giocatori[vincente].filter(g => g.zona === nuovaZona && !g.portiere && !g.espulso);
   const metaIdx = nuovaMeta === 'sup' ? 0 : 1;
   const g1 = giocatoriNuovaZonaTutti[metaIdx];
@@ -1744,18 +1742,25 @@ function risolviContrasto(vincente, motivoFallo) {
 
   setTimeout(() => {
     if (g1 && g2) {
-      // Palla dal calciatore vincente al centro tra i 2 giocatori della coppia
+      // Rimuovi palla attaccata al calciatore vincente
+      if (giocatoreVincenteId) {
+        const ped = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"]`);
+        if (ped) {
+          const pallaAtt = ped.querySelector('.palla-attaccata');
+          if (pallaAtt) pallaAtt.remove();
+        }
+      }
+      // Anima la palla DIRETTAMENTE dal calciatore al centro tra i 2 giocatori
       animaPallaVersoCoppia(giocatoreVincenteId, g1.id, g2.id, () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
         stato.metaContesa = nuovaMeta;
         stato.giocatorePalla = null;
-        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa in mezzo ai 2 giocatori in Z${nuovaZona} (${nuovaMeta === 'sup' ? 'sopra' : 'sotto'})`);
+        log(`➡️ ${vincente === 'tu' ? 'TU' : 'CPU'} passa in mezzo ai 2 giocatori in Z${nuovaZona}`);
         renderCampo(); renderHeader();
         setTimeout(() => avanzaMano(), 800);
       });
     } else {
-      // Fallback: anima verso il centro della zona
       animaPallaVersoZona(c.zona, nuovaZona, 'retta', () => {
         stato.zonaPalla = nuovaZona;
         stato.possessore = vincente;
