@@ -726,6 +726,7 @@ function riceviRisultato() {
   const urlParams = new URLSearchParams(window.location.search);
   const id = urlParams.get('risultato');
   if (!id) return false;
+  if (!torneo) return false;
   const key = 'torneo_partita_' + id;
   const json = localStorage.getItem(key);
   if (!json) return false;
@@ -975,21 +976,23 @@ try {
   if (localStorage.getItem('europei2028_stato_v2')) localStorage.removeItem('europei2028_stato_v2');
 } catch (e) {}
 
-if (!riceviRisultato()) {
-  const salvato = caricaStato();
-  if (salvato) {
-    torneo = salvato;
-    // Assicurati che le proprietà opzionali esistano
-    if (!torneo.spareggiPartite) torneo.spareggiPartite = {};
-    if (!torneo.spareggiGiocati) torneo.spareggiGiocati = {};
-    if (!torneo.spareggiVincitori) torneo.spareggiVincitori = {};
-    if (!torneo.risultatiGironiFinali) torneo.risultatiGironiFinali = {};
-    if (!torneo.risultatiTabellone) torneo.risultatiTabellone = {};
-    if (!torneo.tabellone) torneo.tabellone = {};
-  } else {
-    torneo = nuovoTorneo();
-  }
+// 1) Carica PRIMA lo stato del torneo (necessario per riceviRisultato)
+const salvato = caricaStato();
+if (salvato) {
+  torneo = salvato;
+  // Assicurati che le proprietà opzionali esistano
+  if (!torneo.spareggiPartite) torneo.spareggiPartite = {};
+  if (!torneo.spareggiGiocati) torneo.spareggiGiocati = {};
+  if (!torneo.spareggiVincitori) torneo.spareggiVincitori = {};
+  if (!torneo.risultatiGironiFinali) torneo.risultatiGironiFinali = {};
+  if (!torneo.risultatiTabellone) torneo.risultatiTabellone = {};
+  if (!torneo.tabellone) torneo.tabellone = {};
+} else {
+  torneo = nuovoTorneo();
 }
+
+// 2) Ora puoi ricevere il risultato (torneo non è più null)
+riceviRisultato();
 
 if (torneo.fase && torneo.fase !== 'scelta' && torneo.fase !== 'fine') {
   simulaTutteLeAltre();

@@ -57,7 +57,7 @@
   .campo-wrapper {
     flex: 0 0 42vh; position: relative; overflow: hidden;
     transition: flex 0.4s ease;
-    background: #1a5a28;
+    background: #1a5a28 url('stadio.jpg') center/cover no-repeat;
   }
   .app.fase-animazione .campo-wrapper { flex: 1; }
   .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
@@ -260,6 +260,30 @@
     100% { transform: scale(1) rotate(0deg); opacity: 1; }
   }
 
+  .moneta-banner {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 97; pointer-events: none; opacity: 0; transition: opacity 0.3s;
+  }
+  .moneta-banner.attivo { opacity: 1; }
+  .moneta-banner.tu { background: radial-gradient(circle, rgba(77,171,247,0.9), rgba(0,0,0,0.85)); }
+  .moneta-banner.cpu { background: radial-gradient(circle, rgba(255,107,107,0.9), rgba(0,0,0,0.85)); }
+  .moneta-banner-text {
+    font-size: 42px; font-weight: 900; color: #fff;
+    text-shadow: 0 0 30px #000, 0 0 60px #000, 0 6px 12px #000;
+    letter-spacing: 4px; font-family: 'Impact', 'Arial Black', sans-serif;
+    animation: monetaPulse 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center; padding: 20px 40px;
+    background: rgba(0,0,0,0.6); border-radius: 20px;
+    border: 4px solid #ffd700;
+  }
+  .moneta-banner.tu .moneta-banner-text { border-color: #4dabf7; color: #4dabf7; text-shadow: 0 0 30px #4dabf7; }
+  .moneta-banner.cpu .moneta-banner-text { border-color: #ff6b6b; color: #ff6b6b; text-shadow: 0 0 30px #ff6b6b; }
+  @keyframes monetaPulse {
+    0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+    60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
   .panchina {
     background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
     padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
@@ -316,7 +340,7 @@
   .info-mano .turno-label { font-size: 12px; color: #aaa; text-align: center; }
 
   .mano-wrapper {
-    display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;
     width: 100%;
   }
   .mano-sezione {
@@ -386,6 +410,33 @@
     border: 1px solid rgba(255,215,0,0.3);
   }
   .info-carte strong { color: #ffd700; }
+
+  .sost-panel {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px;
+    min-width: 200px; min-height: 120px;
+  }
+  .sost-panel .sost-btn {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border: 3px solid #4dabf7; border-radius: 14px;
+    padding: 16px 24px;
+    cursor: pointer; color: #fff; font-weight: bold;
+    font-size: 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .sost-panel .sost-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(77,171,247,0.5);
+    border-color: #ffd700;
+  }
+  .sost-panel .sost-btn:disabled {
+    opacity: 0.4; cursor: not-allowed;
+  }
+  .sost-panel .sost-btn .icona { font-size: 36px; }
+  .sost-panel .sost-btn .testo { font-size: 13px; letter-spacing: 1px; }
 
   button {
     background: #0f3460; color: #fff; border: 2px solid #4dabf7;
@@ -537,9 +588,10 @@
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
+  /* ============ SCHERMATA TIRO ============ */
   .tiro-overlay {
     position: fixed; inset: 0;
-    background: linear-gradient(180deg, #1a3a5c 0%, #0a1a2e 50%, #1a5a28 100%);
+    background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%);
     z-index: 200;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -555,62 +607,83 @@
   }
   .tiro-porta-wrapper {
     position: relative;
-    width: 90%; max-width: 500px;
+    width: 90%; max-width: 640px;
     aspect-ratio: 3 / 2;
     margin: 10px auto;
+    --porta-left: 21%;
+    --porta-top: 34%;
+    --porta-width: 58%;
+    --porta-height: 48%;
   }
-  .tiro-porta-svg {
+  .tiro-porta-sfondo {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
-    display: block;
+    background: url('porta.jpg') center/cover no-repeat;
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9), 0 0 60px rgba(255,215,0,0.15);
   }
   .tiro-griglia {
     position: absolute;
-    top: 8%; left: 5%; right: 5%; bottom: 8%;
+    left: var(--porta-left);
+    top: var(--porta-top);
+    width: var(--porta-width);
+    height: var(--porta-height);
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
-    gap: 2px;
+    gap: 1px;
     pointer-events: none;
+    z-index: 5;
   }
   .tiro-casella {
-    border: 1px solid rgba(255,215,0,0.3);
+    border: 1px solid rgba(255,215,0,0.35);
     display: flex; align-items: center; justify-content: center;
     font-size: 20px; font-weight: 900;
     color: rgba(255,215,0,0.5);
     transition: all 0.3s;
     position: relative;
+    background: rgba(0,0,0,0.05);
   }
   .tiro-casella .numero-casella {
     position: absolute; top: 4px; left: 6px;
-    font-size: 11px; color: rgba(255,215,0,0.6);
+    font-size: 11px; color: rgba(255,215,0,0.7);
+    text-shadow: 0 1px 2px #000;
   }
   .tiro-casella.colpita {
-    background: rgba(255,215,0,0.3);
+    background: rgba(255,215,0,0.4);
     border-color: #ffd700;
-    box-shadow: 0 0 20px rgba(255,215,0,0.8) inset;
+    box-shadow: 0 0 20px rgba(255,215,0,0.8) inset, 0 0 20px rgba(255,215,0,0.6);
   }
   .tiro-portiere {
     position: absolute;
-    width: 33.33%; height: 66.67%;
-    left: 33.33%; top: 25%;
+    width: 20%;
+    height: 40%;
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 10; pointer-events: none;
+    left: calc(var(--porta-left) + var(--porta-width) / 2 - 10%);
+    top: calc(var(--porta-top) + var(--porta-height) / 2 - 20%);
   }
   .tiro-portiere svg { width: 100%; height: 100%; }
   .tiro-palla {
     position: absolute;
-    width: 24px; height: 24px;
+    width: 22px; height: 22px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
     box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
     z-index: 20;
     transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translate(-50%, -50%);
-    left: 50%; bottom: 5%; top: auto;
   }
-  .tiro-palla.iniziale { bottom: 5%; left: 50%; width: 40px; height: 40px; }
-  .tiro-palla.rigore { bottom: 15%; left: 50%; width: 28px; height: 28px; }
+  .tiro-palla.iniziale {
+    left: 50%; bottom: 4%;
+    top: auto;
+    width: 38px; height: 38px;
+  }
+  .tiro-palla.rigore {
+    left: 50%; bottom: 14%;
+    top: auto;
+    width: 26px; height: 26px;
+  }
   .tiro-esito {
     font-size: 42px; font-weight: 900;
     color: #ffd700; text-align: center;
@@ -662,7 +735,6 @@
       Palla <span id="zona-palla">Z3</span>
     </div>
     <div class="topbar-buttons">
-      <button class="btn-icona" id="btn-sost" onclick="apriSostituzioni()">🔄</button>
       <button class="btn-icona" onclick="apriLog()">📋</button>
     </div>
   </div>
@@ -679,7 +751,7 @@
           <rect width="57" height="400" fill="rgba(255,255,255,0.03)"/>
         </pattern>
       </defs>
-      <rect width="800" height="400" fill="url(#erbaGrad)"/>
+      <rect width="800" height="400" fill="url(#erbaGrad)" opacity="0.55"/>
       <rect width="800" height="400" fill="url(#strisce)"/>
       <rect x="20" y="20" width="760" height="360" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="3" rx="4"/>
       <line x1="400" y1="20" x2="400" y2="380" stroke="rgba(255,255,255,0.75)" stroke-width="2"/>
@@ -721,9 +793,11 @@
           <div class="pila-count" id="mazzo-count">0</div>
         </div>
       </div>
-      <div class="mano-sezione cpu">
-        <div class="mano-label">CPU (<span id="count-cpu">7</span> carte)</div>
-        <div class="carte" id="carte-cpu"></div>
+      <div class="sost-panel">
+        <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
+          <div class="icona">🔄</div>
+          <div class="testo">SOSTITUZIONI</div>
+        </button>
       </div>
     </div>
     <div class="info-carte">
@@ -739,6 +813,9 @@
 </div>
 <div class="goal-banner" id="goal-banner">
   <div class="goal-banner-text" id="goal-banner-text">GGGOOOAAALLL</div>
+</div>
+<div class="moneta-banner" id="moneta-banner">
+  <div class="moneta-banner-text" id="moneta-banner-text">TU VINCI IL SORTEGGIO</div>
 </div>
 <div class="banner-mano" id="banner-mano">
   <div class="banner-mano-box">
@@ -764,7 +841,8 @@
 
 <script src="divise.js"></script>
 <script>
-const STAMINA_MAX = 45;
+/* CONFIGURAZIONE */
+const STAMINA_MAX = 20;
 const CARTE_INIZIALI = 7;
 const MINUTI_PER_MANO = 2;
 const MANI_PER_TEMPO = 23;
@@ -773,14 +851,29 @@ const DURATA_SCIVOLATA = 600;
 const DURATA_RITORNO = 400;
 const SCIVOLATA_MAX_PX = 18;
 
+/* Percentuali FISSE del punto di arrivo palla nella zona */
 const PALLA_Y_META_SUP = 25;
 const PALLA_Y_META_INF = 75;
 const PALLA_X_CENTRO = 50;
+
+/* Rettangolo della porta nell'immagine (percentuali del wrapper .tiro-porta-wrapper) */
+const PORTA_LEFT = 21;
+const PORTA_TOP = 34;
+const PORTA_W = 58;
+const PORTA_H = 48;
+
+/* Posizione delle 9 caselle in percentuale DENTRO il rettangolo porta */
+const CASELLE_PERC = {
+  1: { x: 16.6, y: 16.6 }, 2: { x: 50,   y: 16.6 }, 3: { x: 83.3, y: 16.6 },
+  4: { x: 16.6, y: 50   }, 5: { x: 50,   y: 50   }, 6: { x: 83.3, y: 50   },
+  7: { x: 16.6, y: 83.3 }, 8: { x: 50,   y: 83.3 }, 9: { x: 83.3, y: 83.3 }
+};
 
 const urlParams = new URLSearchParams(window.location.search);
 const TORNEO_MODE = urlParams.get('torneo');
 const PARTITA_TORNEO = urlParams.get('partita');
 
+/* SUONI */
 let audioCtx = null;
 function initAudio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; } }
@@ -812,6 +905,63 @@ function suonaFischietto(tipo = 'fallo') {
   osc.stop(ora + durata); lfo.stop(ora + durata);
 }
 
+/* SUONO CALCIO PALLA (thump secco) */
+function suonaCalcio() {
+  initAudio();
+  if (!audioCtx) return;
+  const ora = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(180, ora);
+  osc.frequency.exponentialRampToValueAtTime(50, ora + 0.12);
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.35, ora);
+  gain.gain.exponentialRampToValueAtTime(0.001, ora + 0.18);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(ora); osc.stop(ora + 0.2);
+
+  const bufferSize = Math.floor(audioCtx.sampleRate * 0.05);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 3);
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.25, ora);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, ora + 0.05);
+  noise.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+  noise.start(ora);
+}
+
+/* SUONO SCIVOLATA */
+function suonaScivolata() {
+  initAudio();
+  if (!audioCtx) return;
+  const ora = audioCtx.currentTime;
+  const durata = 0.5;
+  const bufferSize = Math.floor(audioCtx.sampleRate * durata);
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    const t = i / bufferSize;
+    data[i] = (Math.random() * 2 - 1) * (1 - t);
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const filtro = audioCtx.createBiquadFilter();
+  filtro.type = 'bandpass';
+  filtro.frequency.setValueAtTime(1200, ora);
+  filtro.frequency.exponentialRampToValueAtTime(400, ora + durata);
+  filtro.Q.value = 2;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.0, ora);
+  gain.gain.linearRampToValueAtTime(0.22, ora + 0.05);
+  gain.gain.exponentialRampToValueAtTime(0.001, ora + durata);
+  noise.connect(filtro); filtro.connect(gain); gain.connect(audioCtx.destination);
+  noise.start(ora); noise.stop(ora + durata);
+}
+
+/* STATO */
 let stato = {
   modalita: 'menu', tipoPartita: '1P',
   squadraTU: 'italia', squadraCPU: 'francia',
@@ -839,6 +989,7 @@ let selezioneCarta = null;
 let selezioneSost = { campo: null, panchina: null };
 let renderingCampoInCorso = false;
 
+/* ZONE */
 const ZONE_CONFIG = [
   { id: 0, nome: 'Z0', ruolo: 'POR', portiere: true, proprietario: 'tu' },
   { id: 1, nome: 'Z1', ruolo: 'DIF', tu: 2, cpu: 2 },
@@ -853,6 +1004,7 @@ const PANCHINA_CONFIG = [
   { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
 
+/* MAZZO */
 const SEMI = {
   palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
   coppa:      { emoji: '🏆', nome: 'Coppa',      colore: 'rossa' },
@@ -889,12 +1041,14 @@ function pescaUnaCarta(sq) {
 function pescaCarteMano(sq, n) { for (let i = 0; i < n; i++) pescaUnaCarta(sq); }
 function riempiMano(sq) { while (stato.mani[sq].length < CARTE_INIZIALI) { pescaUnaCarta(sq); if (stato.mazzo.length === 0 && stato.scarti.length === 0) break; } }
 
+/* MINUTI */
 function calcolaMinutoParziale() { return Math.min((stato.mano - 1) * MINUTI_PER_MANO, 45); }
 function calcolaMinutoTotale() {
   if (stato.tempo === 1) return calcolaMinutoParziale();
   return Math.min(45 + (stato.mano - 1) * MINUTI_PER_MANO, 90);
 }
 
+/* SEME GUIDA */
 function scegliSemeGuida() {
   const disponibili = SEMI_KEYS.filter(s => s !== stato.semeGuidaPrecedente);
   const scelto = disponibili[Math.floor(Math.random() * disponibili.length)];
@@ -902,6 +1056,7 @@ function scegliSemeGuida() {
   return scelto;
 }
 
+/* LOG */
 function log(msg, classe = '') {
   stato.logCompleto.push({ msg, classe });
   const logBox = document.getElementById('log-box');
@@ -922,6 +1077,7 @@ function apriLog() {
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
+/* GIOCATORI */
 function creaGiocatori(sq) {
   const g = []; let id = 0;
   ZONE_CONFIG.forEach(z => {
@@ -947,6 +1103,7 @@ function creaPanchina(sq) {
   return p;
 }
 
+/* MENU */
 function mostraMenuPrincipale() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML = `
@@ -1268,15 +1425,18 @@ function renderPanchina() {
   });
 }
 
+/* MONETA + PASSAGGIO INIZIALE */
 function lanciaMoneta(scelta) {
   const esito = Math.random() < 0.5 ? 'testa' : 'croce';
   const vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
   log(`🪙 Moneta: ${esito.toUpperCase()}. Vince: ${vince === 'tu' ? 'TU' : 'CPU'}`);
+
   stato.possessore = vince;
   stato.zonaPalla = 3;
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
-  const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere);
+
+  const candidati = stato.giocatori[vince].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
   const scelto = candidati[Math.floor(Math.random() * candidati.length)];
   stato.giocatorePalla = scelto.id;
 
@@ -1286,30 +1446,55 @@ function lanciaMoneta(scelta) {
 
   chiudiModale();
   renderCampo(); renderHeader();
-  setTimeout(() => avviaContrasto(), 700);
+
+  const banner = document.getElementById('moneta-banner');
+  banner.classList.remove('tu', 'cpu', 'attivo');
+  void banner.offsetWidth;
+  banner.classList.add(vince, 'attivo');
+  document.getElementById('moneta-banner-text').textContent =
+    vince === 'tu' ? '🏆 TU VINCI IL SORTEGGIO!' : '🏆 CPU VINCE IL SORTEGGIO!';
+
+  setTimeout(() => {
+    banner.classList.remove('attivo');
+    eseguiPassaggioIniziale(vince);
+  }, 2000);
 }
 
-function nascondiPallaCentro() {
-  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
+function eseguiPassaggioIniziale(squadra) {
+  document.getElementById('app').className = 'app fase-animazione';
+  document.getElementById('carte-panel').classList.add('nascosto');
+  stato.pallaInAnimazione = true;
+
+  const direzione = squadra === 'tu' ? +1 : -1;
+  const nuovaZona = 3 + direzione;
+  const nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
+
+  log(`⚽ ${squadra === 'tu' ? 'TU' : 'CPU'} fa il passaggio in Z${nuovaZona}`);
+
+  const giocatoreVincenteId = stato.giocatorePalla;
+
+  setTimeout(() => {
+    eseguiPassaggioInizialeAnimato(giocatoreVincenteId, nuovaZona, nuovaMeta, squadra, () => {
+      stato.zonaPalla = nuovaZona;
+      stato.possessore = squadra;
+      stato.metaContesa = nuovaMeta;
+      stato.giocatorePalla = null;
+      renderCampo(); renderHeader();
+      setTimeout(() => avviaContrasto(), 800);
+    });
+  }, 400);
 }
 
-function calcolaPuntoArrivoPerc(meta) {
-  return {
-    xPerc: PALLA_X_CENTRO,
-    yPerc: meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF
-  };
-}
-
-function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, callback) {
+function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squadra, callback) {
+  suonaCalcio();
   const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
-  const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"]`);
+  const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreId}"]`);
 
   if (!pedinaEl) {
+    stato.pallaInAnimazione = false;
     if (callback) callback();
     return;
   }
-
-  stato.pallaInAnimazione = true;
 
   const arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
   const zonaDest = document.querySelector(`.zona[data-zona="${nuovaZona}"]`);
@@ -1320,124 +1505,54 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
   stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
 
   const calcRect = pedinaEl.getBoundingClientRect();
-  const startX = calcRect.left + calcRect.width / 2 - campoRect.left;
-  const startY = calcRect.top + calcRect.height / 2 - campoRect.top;
+  const partXPx = calcRect.left + calcRect.width / 2 - campoRect.left;
+  const partYPx = calcRect.top + calcRect.height / 2 - campoRect.top;
 
-  const dxDir = arrivoXPx - startX;
-  const dyDir = arrivoYPx - startY;
-  const distanza = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
-
-  const scivolata = Math.min(SCIVOLATA_MAX_PX, distanza * 0.35);
-  const dx = distanza > 0 ? (dxDir / distanza) * scivolata : 0;
-  const dy = distanza > 0 ? (dyDir / distanza) * scivolata : 0;
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'pedina-scivola-wrapper scivolando';
-  pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
-  wrapper.appendChild(pedinaEl);
-
-  let pallaAtt = pedinaEl.querySelector('.palla-attaccata');
-  if (!pallaAtt) {
-    pallaAtt = document.createElement('div');
-    pallaAtt.className = 'palla-attaccata';
-    pedinaEl.appendChild(pallaAtt);
-  }
+  const pallaAtt = pedinaEl.querySelector('.palla-attaccata');
+  if (pallaAtt) pallaAtt.remove();
 
   nascondiPallaCentro();
 
-  requestAnimationFrame(() => {
-    wrapper.style.transform = `translate(${dx}px, ${dy}px)`;
-  });
-
-  setTimeout(() => {
-    wrapper.classList.remove('scivolando');
-    wrapper.classList.add('ritorno');
-    wrapper.style.transform = 'translate(0, 0)';
-
-    setTimeout(() => {
-      if (wrapper.parentNode) {
-        wrapper.parentNode.insertBefore(pedinaEl, wrapper);
-        wrapper.remove();
-      }
-
-      const pallaRect = pedinaEl.getBoundingClientRect();
-      const partXPx = pallaRect.left + pallaRect.width / 2 - campoRect.left;
-      const partYPx = pallaRect.top + pallaRect.height / 2 - campoRect.top;
-
-      const pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
-      if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
-
-      const palla = document.getElementById('palla-volante');
-      palla.style.transition = 'none';
-      palla.style.left = partXPx + 'px';
-      palla.style.top = partYPx + 'px';
-      palla.classList.add('attiva');
-      palla.classList.remove('parabola');
-      void palla.offsetWidth;
-
-      const durata = DURATA_ANIM_PALLA;
-      const inizio = performance.now();
-
-      function anima(now) {
-        const t = Math.min((now - inizio) / durata, 1);
-        const x = partXPx + (arrivoXPx - partXPx) * t;
-        const y = partYPx + (arrivoYPx - partYPx) * t;
-        palla.style.left = x + 'px';
-        palla.style.top = y + 'px';
-        if (t < 1) {
-          requestAnimationFrame(anima);
-        } else {
-          palla.classList.remove('attiva');
-          stato.pallaInAnimazione = false;
-          if (callback) callback();
-        }
-      }
-      requestAnimationFrame(anima);
-    }, DURATA_RITORNO + 50);
-  }, DURATA_SCIVOLATA);
-}
-
-function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
-  const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
-  const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
-  if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
-
-  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
-  const daRect = zonaElDa.getBoundingClientRect();
-  const aRect = zonaElA.getBoundingClientRect();
-
-  const x1 = daRect.left + daRect.width / 2 - campoRect.left;
-  const y1 = daRect.top + daRect.height / 2 - campoRect.top;
-  const x2 = aRect.left + aRect.width / 2 - campoRect.left;
-  const y2 = aRect.top + aRect.height / 2 - campoRect.top;
-
-  stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
-
-  nascondiPallaCentro();
   const palla = document.getElementById('palla-volante');
   palla.style.transition = 'none';
-  palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
-  palla.classList.add('attiva'); palla.classList.remove('parabola');
+  palla.style.left = partXPx + 'px';
+  palla.style.top = partYPx + 'px';
+  palla.classList.add('attiva');
+  palla.classList.remove('parabola');
   void palla.offsetWidth;
 
   const durata = DURATA_ANIM_PALLA;
-  const altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
   const inizio = performance.now();
-  if (tipo === 'parabola') palla.classList.add('parabola');
 
   function anima(now) {
     const t = Math.min((now - inizio) / durata, 1);
-    const x = x1 + (x2 - x1) * t;
-    const yLineare = y1 + (y2 - y1) * t;
-    const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
-    const y = yLineare + offsetParabolico;
-    palla.style.left = x + 'px'; palla.style.top = y + 'px';
-    if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); palla.classList.remove('parabola'); if (callback) callback(); }
+    const x = partXPx + (arrivoXPx - partXPx) * t;
+    const y = partYPx + (arrivoYPx - partYPx) * t;
+    palla.style.left = x + 'px';
+    palla.style.top = y + 'px';
+    if (t < 1) {
+      requestAnimationFrame(anima);
+    } else {
+      palla.classList.remove('attiva');
+      stato.pallaInAnimazione = false;
+      if (callback) callback();
+    }
   }
   requestAnimationFrame(anima);
 }
 
+function calcolaPuntoArrivoPerc(meta) {
+  return {
+    xPerc: PALLA_X_CENTRO,
+    yPerc: meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF
+  };
+}
+
+function nascondiPallaCentro() {
+  document.querySelectorAll('.palla-centro').forEach(el => el.remove());
+}
+
+/* CONTRASTO */
 function avviaContrasto() {
   document.getElementById('app').className = 'app fase-combattimento';
   document.getElementById('carte-panel').classList.remove('nascosto');
@@ -1491,21 +1606,7 @@ function renderPannelloContrasto() {
   });
   document.getElementById('count-tu').textContent = stato.mani.tu.length;
 
-  const contCpu = document.getElementById('carte-cpu');
-  contCpu.innerHTML = '';
-  stato.mani.cpu.forEach(carta => {
-    const el = document.createElement('div');
-    el.className = 'carta coperta';
-    if (c.cartaCpu && c.cartaCpu.id === carta.id && c.risolto) {
-      el.classList.remove('coperta');
-      el.classList.add(SEMI[carta.seme].colore === 'rossa' ? 'rossa' : 'nera');
-      el.innerHTML = `<div class="valore-alto">${carta.label}</div>
-        <div class="seme-centro">${SEMI[carta.seme].emoji}</div>
-        <div class="valore-basso">${carta.label}</div>`;
-    }
-    contCpu.appendChild(el);
-  });
-  document.getElementById('count-cpu').textContent = stato.mani.cpu.length;
+  document.getElementById('count-cpu') && (document.getElementById('count-cpu').textContent = stato.mani.cpu.length);
 
   renderPilaMazzo();
   document.getElementById('info-mazzo').textContent = stato.mazzo.length;
@@ -1765,6 +1866,150 @@ function risolviContrasto(vincente, motivoFallo) {
   }, 800);
 }
 
+/* SCIVOLATA + PASSAGGIO */
+function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, callback) {
+  suonaScivolata();
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const pedinaEl = document.querySelector(`[data-giocatore-id="${giocatoreVincenteId}"]`);
+
+  if (!pedinaEl) {
+    if (callback) callback();
+    return;
+  }
+
+  stato.pallaInAnimazione = true;
+
+  const arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
+  const zonaDest = document.querySelector(`.zona[data-zona="${nuovaZona}"]`);
+  const zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoRect;
+  const arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoRect.left);
+  const arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoRect.top);
+
+  stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+
+  const calcRect = pedinaEl.getBoundingClientRect();
+  const startX = calcRect.left + calcRect.width / 2 - campoRect.left;
+  const startY = calcRect.top + calcRect.height / 2 - campoRect.top;
+
+  const dxDir = arrivoXPx - startX;
+  const dyDir = arrivoYPx - startY;
+  const distanza = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
+
+  const scivolata = Math.min(SCIVOLATA_MAX_PX, distanza * 0.35);
+  const dx = distanza > 0 ? (dxDir / distanza) * scivolata : 0;
+  const dy = distanza > 0 ? (dyDir / distanza) * scivolata : 0;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'pedina-scivola-wrapper scivolando';
+  pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
+  wrapper.appendChild(pedinaEl);
+
+  let pallaAtt = pedinaEl.querySelector('.palla-attaccata');
+  if (!pallaAtt) {
+    pallaAtt = document.createElement('div');
+    pallaAtt.className = 'palla-attaccata';
+    pedinaEl.appendChild(pallaAtt);
+  }
+
+  nascondiPallaCentro();
+
+  requestAnimationFrame(() => {
+    wrapper.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+
+  setTimeout(() => {
+    wrapper.classList.remove('scivolando');
+    wrapper.classList.add('ritorno');
+    wrapper.style.transform = 'translate(0, 0)';
+
+    setTimeout(() => {
+      if (wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(pedinaEl, wrapper);
+        wrapper.remove();
+      }
+
+      const pallaRect = pedinaEl.getBoundingClientRect();
+      const partXPx = pallaRect.left + pallaRect.width / 2 - campoRect.left;
+      const partYPx = pallaRect.top + pallaRect.height / 2 - campoRect.top;
+
+      const pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
+      if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
+
+      suonaCalcio();
+
+      const palla = document.getElementById('palla-volante');
+      palla.style.transition = 'none';
+      palla.style.left = partXPx + 'px';
+      palla.style.top = partYPx + 'px';
+      palla.classList.add('attiva');
+      palla.classList.remove('parabola');
+      void palla.offsetWidth;
+
+      const durata = DURATA_ANIM_PALLA;
+      const inizio = performance.now();
+
+      function anima(now) {
+        const t = Math.min((now - inizio) / durata, 1);
+        const x = partXPx + (arrivoXPx - partXPx) * t;
+        const y = partYPx + (arrivoYPx - partYPx) * t;
+        palla.style.left = x + 'px';
+        palla.style.top = y + 'px';
+        if (t < 1) {
+          requestAnimationFrame(anima);
+        } else {
+          palla.classList.remove('attiva');
+          stato.pallaInAnimazione = false;
+          if (callback) callback();
+        }
+      }
+      requestAnimationFrame(anima);
+    }, DURATA_RITORNO + 50);
+  }, DURATA_SCIVOLATA);
+}
+
+function animaPallaVersoZona(zonaDa, zonaA, tipo = 'parabola', callback) {
+  const zonaElDa = document.querySelector(`.zona[data-zona="${zonaDa}"]`);
+  const zonaElA = document.querySelector(`.zona[data-zona="${zonaA}"]`);
+  if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
+
+  const campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  const daRect = zonaElDa.getBoundingClientRect();
+  const aRect = zonaElA.getBoundingClientRect();
+
+  const x1 = daRect.left + daRect.width / 2 - campoRect.left;
+  const y1 = daRect.top + daRect.height / 2 - campoRect.top;
+  const x2 = aRect.left + aRect.width / 2 - campoRect.left;
+  const y2 = aRect.top + aRect.height / 2 - campoRect.top;
+
+  stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
+
+  nascondiPallaCentro();
+  suonaCalcio();
+  const palla = document.getElementById('palla-volante');
+  palla.style.transition = 'none';
+  palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
+  palla.classList.add('attiva'); palla.classList.remove('parabola');
+  void palla.offsetWidth;
+
+  const durata = DURATA_ANIM_PALLA;
+  const altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
+  const inizio = performance.now();
+  if (tipo === 'parabola') palla.classList.add('parabola');
+
+  function anima(now) {
+    const t = Math.min((now - inizio) / durata, 1);
+    const x = x1 + (x2 - x1) * t;
+    const yLineare = y1 + (y2 - y1) * t;
+    const offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
+    const y = yLineare + offsetParabolico;
+    palla.style.left = x + 'px'; palla.style.top = y + 'px';
+    if (t < 1) requestAnimationFrame(anima);
+    else { palla.classList.remove('attiva'); palla.classList.remove('parabola'); if (callback) callback(); }
+  }
+  requestAnimationFrame(anima);
+}
+
+/* SCHERMATA TIRO / RIGORE */
 function apriSchermataTiro(attaccante) {
   const difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[attaccante].tiri++;
@@ -1793,21 +2038,9 @@ function apriOverlayTiro(attaccante, difensore, isRigore) {
   const portaWrapper = document.createElement('div');
   portaWrapper.className = 'tiro-porta-wrapper';
 
-  const portaSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  portaSvg.setAttribute('viewBox', '0 0 300 200');
-  portaSvg.setAttribute('class', 'tiro-porta-svg');
-  portaSvg.innerHTML = `
-    <defs>
-      <pattern id="rete" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-        <path d="M 0 0 L 10 10 M 10 0 L 0 10" stroke="rgba(255,255,255,0.25)" stroke-width="0.5" fill="none"/>
-      </pattern>
-    </defs>
-    <rect x="20" y="10" width="260" height="180" fill="url(#rete)"/>
-    <rect x="15" y="5" width="8" height="190" fill="#fff" rx="2"/>
-    <rect x="277" y="5" width="8" height="190" fill="#fff" rx="2"/>
-    <rect x="15" y="5" width="270" height="8" fill="#fff" rx="2"/>
-  `;
-  portaWrapper.appendChild(portaSvg);
+  const sfondo = document.createElement('div');
+  sfondo.className = 'tiro-porta-sfondo';
+  portaWrapper.appendChild(sfondo);
 
   const griglia = document.createElement('div');
   griglia.className = 'tiro-griglia';
@@ -1825,8 +2058,6 @@ function apriOverlayTiro(attaccante, difensore, isRigore) {
   portiere.id = 'tiro-portiere';
   const sqPort = difensore === 'tu' ? stato.squadraTU : stato.squadraCPU;
   portiere.innerHTML = creaGiocatoreSVG(SQUADRE[sqPort].portiere, 'fermo');
-  portiere.style.left = '33.33%';
-  portiere.style.top = '25%';
   portaWrapper.appendChild(portiere);
 
   const palla = document.createElement('div');
@@ -1854,35 +2085,42 @@ function apriOverlayTiro(attaccante, difensore, isRigore) {
 
 function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
   const dadoTiro = Math.floor(Math.random() * 9) + 1;
-  const posizioniCaselle = {
-    1: { x: 22, y: 20 }, 2: { x: 50, y: 20 }, 3: { x: 78, y: 20 },
-    4: { x: 22, y: 50 }, 5: { x: 50, y: 50 }, 6: { x: 78, y: 50 },
-    7: { x: 22, y: 80 }, 8: { x: 50, y: 80 }, 9: { x: 78, y: 80 }
-  };
-  const pos = posizioniCaselle[dadoTiro];
+  const pos = CASELLE_PERC[dadoTiro];
+
   const palla = document.getElementById('tiro-palla');
   if (palla) {
-    palla.classList.remove('iniziale');
-    palla.style.left = pos.x + '%';
-    palla.style.top = pos.y + '%';
+    const xPct = PORTA_LEFT + (pos.x / 100) * PORTA_W;
+    const yPct = PORTA_TOP + (pos.y / 100) * PORTA_H;
+    palla.classList.remove('iniziale', 'rigore');
+    palla.style.left = xPct + '%';
+    palla.style.top = yPct + '%';
+    palla.style.bottom = 'auto';
   }
   document.getElementById('tiro-info').textContent = `FASE 1 — Dado: ${dadoTiro}`;
 
   setTimeout(() => {
     if (dadoTiro === 5 || dadoTiro === 8) {
       const portiere = document.getElementById('tiro-portiere');
-      if (portiere) { portiere.style.left = (pos.x - 16.66) + '%'; portiere.style.top = (pos.y - 22.22) + '%'; }
+      if (portiere) {
+        const xPct = PORTA_LEFT + (pos.x / 100) * PORTA_W - 10;
+        const yPct = PORTA_TOP + (pos.y / 100) * PORTA_H - 20;
+        portiere.style.left = xPct + '%';
+        portiere.style.top = yPct + '%';
+      }
       mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 Il portiere para facilmente!');
       return;
     }
     const dadiPortiere = mescola([1,2,3,4,6,7,9]).slice(0, 3);
     document.getElementById('tiro-info').textContent = `FASE 2 — Il portiere si tuffa...`;
-    const mediaX = dadiPortiere.reduce((sum, n) => sum + posizioniCaselle[n].x, 0) / 3;
-    const mediaY = dadiPortiere.reduce((sum, n) => sum + posizioniCaselle[n].y, 0) / 3;
+
+    const mediaX = dadiPortiere.reduce((sum, n) => sum + CASELLE_PERC[n].x, 0) / 3;
+    const mediaY = dadiPortiere.reduce((sum, n) => sum + CASELLE_PERC[n].y, 0) / 3;
     const portiere = document.getElementById('tiro-portiere');
     if (portiere) {
-      portiere.style.left = (mediaX - 16.66) + '%';
-      portiere.style.top = (mediaY - 22.22) + '%';
+      const xPct = PORTA_LEFT + (mediaX / 100) * PORTA_W - 10;
+      const yPct = PORTA_TOP + (mediaY / 100) * PORTA_H - 20;
+      portiere.style.left = xPct + '%';
+      portiere.style.top = yPct + '%';
     }
     dadiPortiere.forEach(n => {
       const c = document.querySelector(`.tiro-casella[data-numero="${n}"]`);
@@ -1941,6 +2179,7 @@ function mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motiv
   }, 2500);
 }
 
+/* GESTIONE ESITI */
 function mostraGoalBanner(vincente) {
   const banner = document.getElementById('goal-banner');
   banner.classList.remove('tu', 'cpu', 'attivo');
@@ -1957,13 +2196,14 @@ function gestisciGoal(attaccante) {
   mostraGoalBanner(attaccante);
   setTimeout(() => {
     const subito = attaccante === 'tu' ? 'cpu' : 'tu';
-    stato.possessore = subito; stato.zonaPalla = 3;
+    stato.possessore = subito;
+    stato.zonaPalla = 3;
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
-    setTimeout(() => avanzaMano(), 800);
+    setTimeout(() => eseguiPassaggioIniziale(subito), 800);
   }, 3200);
 }
 
@@ -1989,22 +2229,18 @@ function gestisciParata(attaccante, difensore) {
       if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
       log(`🚀 Rinvio del portiere a centrocampo`);
       renderCampo(); renderHeader();
-      setTimeout(() => avanzaMano(), 400);
+      setTimeout(() => eseguiPassaggioIniziale(difensore), 800);
     });
   }, 800);
 }
 
+/* PALO: la palla resta in gioco, stessa coppia di giocatori */
 function gestisciPalo(attaccante, difensore) {
-  log(`🥅 Palo!`);
+  log(`🥅 Palo! La palla resta in Z${stato.zonaPalla} e si rigioca il contrasto tra gli stessi giocatori.`, 'highlight');
   setTimeout(() => {
-    const subito = attaccante === 'tu' ? 'cpu' : 'tu';
-    stato.possessore = subito; stato.zonaPalla = 3;
-    stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
-    const gz = stato.giocatori[subito].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
-    if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
-    setTimeout(() => avanzaMano(), 400);
+    setTimeout(() => avviaContrasto(), 800);
   }, 800);
 }
 
@@ -2018,7 +2254,7 @@ function gestisciAngolo(attaccante, difensore) {
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
-    setTimeout(() => avanzaMano(), 400);
+    setTimeout(() => eseguiPassaggioIniziale(attaccante), 800);
   }, 800);
 }
 
@@ -2032,7 +2268,7 @@ function gestisciFuori(attaccante, difensore) {
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
-    setTimeout(() => avanzaMano(), 400);
+    setTimeout(() => eseguiPassaggioIniziale(subito), 800);
   }, 800);
 }
 
@@ -2044,6 +2280,7 @@ function flashVincitore(squadra) {
   setTimeout(() => flash.classList.remove('attivo'), 600);
 }
 
+/* AVANZAMENTO */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
@@ -2055,14 +2292,14 @@ function avanzaMano() {
       riempiMano('tu'); riempiMano('cpu');
       mostraFinestraFineTempo(() => {
         const perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
-        stato.possessore = perdente; stato.zonaPalla = 3;
+        stato.possessore = perdente;
+        stato.zonaPalla = 3;
         stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
-        stato.giocatorePalla = null;
         const gz = stato.giocatori[perdente].filter(g => g.zona === 3 && !g.portiere && !g.espulso);
         if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
         stato.puntoPallaFermo = null;
         renderCampo(); renderHeader();
-        setTimeout(() => avviaContrasto(), 500);
+        setTimeout(() => eseguiPassaggioIniziale(perdente), 800);
       });
       return;
     } else return finePartita();
@@ -2160,6 +2397,7 @@ function salvaRisultatoTorneo() {
   }, 1500);
 }
 
+/* SOSTITUZIONI */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
@@ -2174,7 +2412,7 @@ function renderModaleSostituzioni() {
   stato.giocatori[sq].filter(g => !g.espulso).forEach(g => {
     const sel = selezioneSost.campo === g.id ? ' style="background:#ffd700;color:#16213e"' : '';
     html += `<div${sel} style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;min-width:70px" onclick="selezionaSostCampo('${g.id}')">
-      <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
+      <div>${g.nome}</div><div>⚡${g.stamina}/20</div></div>`;
   });
   html += `</div></div>`;
   html += `<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700;margin-bottom:8px">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">`;
@@ -2182,7 +2420,7 @@ function renderModaleSostituzioni() {
     const sel = selezioneSost.panchina === g.id ? ' style="background:#ffd700;color:#16213e"' : '';
     const disab = g.entrato ? ' opacity:0.35;cursor:not-allowed' : '';
     html += `<div${sel} style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;min-width:70px${disab}" onclick="selezionaSostPanchina('${g.id}')">
-      <div>${g.nome}</div><div>⚡${g.stamina}/45</div></div>`;
+      <div>${g.nome}</div><div>⚡${g.stamina}/20</div></div>`;
   });
   html += `</div></div><div style="margin-top:14px">`;
   if (selezioneSost.campo && selezioneSost.panchina) html += `<button class="primario" onclick="confermaSostituzione()">CONFERMA</button>`;
@@ -2210,6 +2448,7 @@ function confermaSostituzione() {
   renderCampo(); renderPanchina(); renderModaleSostituzioni();
 }
 
+/* AVVIO */
 if (TORNEO_MODE === 'europei' && PARTITA_TORNEO) {
   const datiPartita = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + PARTITA_TORNEO) || '{}');
   if (datiPartita.sqTU && datiPartita.sqCPU && SQUADRE[datiPartita.sqTU] && SQUADRE[datiPartita.sqCPU]) {
