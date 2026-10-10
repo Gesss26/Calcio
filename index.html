@@ -225,15 +225,16 @@
      percentuali regolate per combaciare con l'erba.
      ================================================== */
   .campo-area {
-    position: absolute;
-    /* Dimensioni e posizione regolate per combaciare con l'erba dello stadio */
-    left: 4%;
-    top: 46%;
-    width: 92%;
-    height: 40%;
-    z-index: 6;
-    pointer-events: none;
-  }
+  position: absolute;
+  /* Stringi la larghezza: prima era 92%, adesso 68% (circa 3/4)
+     e centra orizzontalmente con left a metà */
+  left: 16%;
+  top: 46%;
+  width: 68%;
+  height: 40%;
+  z-index: 6;
+  pointer-events: none;
+}
 
   .zone-overlay {
     position: absolute; inset: 0; z-index: 2;
