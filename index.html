@@ -77,7 +77,6 @@
     overflow: hidden;
   }
 
-  /* PANNELLO CARTE — ALTEZZA +100px */
   .carte-panel {
     position: absolute;
     top: 6px; left: 50%;
@@ -132,7 +131,6 @@
   }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  /* CARTE INGRANDITE */
   .carte { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; }
   .carta {
     width: 52px; height: 100px;
@@ -285,7 +283,6 @@
     position: relative;
   }
 
-  /* PORTIERI — scesi di 20px */
   .portiere-wrapper {
     position: absolute !important;
     top: 50%;
@@ -405,7 +402,6 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* PANCHINA — giocatori stessa dimensione del campo */
   .panchina {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -1423,6 +1419,13 @@ function eseguiPassaggioIniziale(squadra) {
   }, 400);
 }
 
+function calcolaPuntoArrivoPerc(meta) {
+  return {
+    xPerc: PALLA_X_CENTRO,
+    yPerc: meta === 'sup' ? (PALLA_Y_META_SUP + 8) : (PALLA_Y_META_INF - 8)
+  };
+}
+
 function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squadra, callback) {
   suonaCalcio();
   var areaGioco = document.querySelector('.area-gioco');
@@ -1435,13 +1438,32 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
     return;
   }
 
-  var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
+  var arrivoXPx, arrivoYPx;
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
   var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
-  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
-  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
 
-  stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+  var ricevente = null;
+  if (squadra) {
+    var giocatoriZona = stato.giocatori[squadra].filter(function(g) {
+      return g.zona === nuovaZona && !g.portiere && !g.espulso;
+    });
+    if (giocatoriZona.length > 0) {
+      ricevente = document.querySelector('[data-giocatore-id="' + giocatoriZona[0].id + '"]');
+    }
+  }
+
+  if (ricevente) {
+    var recRect = ricevente.getBoundingClientRect();
+    arrivoXPx = recRect.left + recRect.width / 2 - box.left;
+    arrivoYPx = recRect.bottom - box.top - 4;
+    var arrivoPerc = calcolaPuntoArrivoPerc(nuovaMeta);
+    stato.puntoPallaFermo = { xPerc: arrivoPerc.xPerc, yPerc: arrivoPerc.yPerc };
+  } else {
+    var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
+    arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
+    arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
+    stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+  }
 
   var calcRect = pedinaEl.getBoundingClientRect();
   var partXPx = calcRect.left + calcRect.width / 2 - box.left;
@@ -1477,13 +1499,6 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
     }
   }
   requestAnimationFrame(anima);
-}
-
-function calcolaPuntoArrivoPerc(meta) {
-  return {
-    xPerc: PALLA_X_CENTRO,
-    yPerc: meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF
-  };
 }
 
 function nascondiPallaCentro() {
@@ -1786,13 +1801,32 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
 
   stato.pallaInAnimazione = true;
 
-  var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
+  var arrivoXPx, arrivoYPx;
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
   var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
-  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
-  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
 
-  stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+  var ricevente = null;
+  if (vincente) {
+    var giocatoriZona = stato.giocatori[vincente].filter(function(g) {
+      return g.zona === nuovaZona && !g.portiere && !g.espulso;
+    });
+    if (giocatoriZona.length > 0) {
+      ricevente = document.querySelector('[data-giocatore-id="' + giocatoriZona[0].id + '"]');
+    }
+  }
+
+  if (ricevente) {
+    var recRect = ricevente.getBoundingClientRect();
+    arrivoXPx = recRect.left + recRect.width / 2 - box.left;
+    arrivoYPx = recRect.bottom - box.top - 4;
+    var arrivoPerc2 = calcolaPuntoArrivoPerc(nuovaMeta);
+    stato.puntoPallaFermo = { xPerc: arrivoPerc2.xPerc, yPerc: arrivoPerc2.yPerc };
+  } else {
+    var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
+    arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
+    arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
+    stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+  }
 
   var calcRect = pedinaEl.getBoundingClientRect();
   var startX = calcRect.left + calcRect.width / 2 - box.left;

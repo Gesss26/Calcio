@@ -1,108 +1,28 @@
 /* ============================================================
-   DIVISE.JS - Database squadre e generatore SVG giocatori
+   DIVISE.JS - Database squadre, generatore SVG e pattern righe
    ============================================================ */
 
 var SQUADRE = {
-  atalanta: { 
-    nome: 'Atalanta', 
-    casa: { maglia: '#1e3a8a', pantaloncini: '#000000', calzettoni: '#1e3a8a' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  bologna: { 
-    nome: 'Bologna', 
-    casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  cagliari: { 
-    nome: 'Cagliari', 
-    casa: { maglia: '#dc2626', pantaloncini: '#1e3a8a', calzettoni: '#dc2626' }, 
-    portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } 
-  },
-  como: { 
-    nome: 'Como', 
-    casa: { maglia: '#1e40af', pantaloncini: '#ffffff', calzettoni: '#1e40af' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  fiorentina: { 
-    nome: 'Fiorentina', 
-    casa: { maglia: '#7e22ce', pantaloncini: '#ffffff', calzettoni: '#7e22ce' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  frosinone: { 
-    nome: 'Frosinone', 
-    casa: { maglia: '#eab308', pantaloncini: '#1e3a8a', calzettoni: '#eab308' }, 
-    portiere: { maglia: '#dc2626', pantaloncini: '#000000', calzettoni: '#dc2626' } 
-  },
-  genoa: { 
-    nome: 'Genoa', 
-    casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, 
-    portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } 
-  },
-  inter: { 
-    nome: 'Inter', 
-    casa: { maglia: '#1e3a8a', pantaloncini: '#000000', calzettoni: '#1e3a8a' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  juventus: { 
-    nome: 'Juventus', 
-    casa: { maglia: '#000000', pantaloncini: '#ffffff', calzettoni: '#000000' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  lazio: { 
-    nome: 'Lazio', 
-    casa: { maglia: '#87ceeb', pantaloncini: '#ffffff', calzettoni: '#87ceeb' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  lecce: { 
-    nome: 'Lecce', 
-    casa: { maglia: '#eab308', pantaloncini: '#dc2626', calzettoni: '#eab308' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  milan: { 
-    nome: 'AC Milan', 
-    casa: { maglia: '#dc2626', pantaloncini: '#000000', calzettoni: '#dc2626' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  monza: { 
-    nome: 'Monza', 
-    casa: { maglia: '#dc2626', pantaloncini: '#ffffff', calzettoni: '#dc2626' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  napoli: { 
-    nome: 'Napoli', 
-    casa: { maglia: '#1e40af', pantaloncini: '#ffffff', calzettoni: '#1e40af' }, 
-    portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } 
-  },
-  parma: { 
-    nome: 'Parma', 
-    casa: { maglia: '#eab308', pantaloncini: '#1e3a8a', calzettoni: '#eab308' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  roma: { 
-    nome: 'AS Roma', 
-    casa: { maglia: '#991b1b', pantaloncini: '#ffffff', calzettoni: '#991b1b' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  sassuolo: { 
-    nome: 'Sassuolo', 
-    casa: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' }, 
-    portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } 
-  },
-  torino: { 
-    nome: 'Torino', 
-    casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, 
-    portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } 
-  },
-  udinese: { 
-    nome: 'Udinese', 
-    casa: { maglia: '#000000', pantaloncini: '#ffffff', calzettoni: '#000000' }, 
-    portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } 
-  },
-  venezia: { 
-    nome: 'Venezia', 
-    casa: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' }, 
-    portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } 
-  }
+  atalanta:    { nome: 'Atalanta',    casa: { maglia: '#1e3a8a', pantaloncini: '#000000', calzettoni: '#1e3a8a', righe: true, colore2: '#000000' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  bologna:     { nome: 'Bologna',     casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  cagliari:    { nome: 'Cagliari',    casa: { maglia: '#dc2626', pantaloncini: '#1e3a8a', calzettoni: '#dc2626' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } },
+  como:        { nome: 'Como',        casa: { maglia: '#1e40af', pantaloncini: '#ffffff', calzettoni: '#1e40af' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  fiorentina:  { nome: 'Fiorentina',  casa: { maglia: '#7e22ce', pantaloncini: '#ffffff', calzettoni: '#7e22ce' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  frosinone:   { nome: 'Frosinone',   casa: { maglia: '#eab308', pantaloncini: '#1e3a8a', calzettoni: '#eab308' }, portiere: { maglia: '#dc2626', pantaloncini: '#000000', calzettoni: '#dc2626' } },
+  genoa:       { nome: 'Genoa',       casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } },
+  inter:       { nome: 'Inter',       casa: { maglia: '#1e3a8a', pantaloncini: '#000000', calzettoni: '#1e3a8a', righe: true, colore2: '#000000' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  juventus:    { nome: 'Juventus',    casa: { maglia: '#000000', pantaloncini: '#ffffff', calzettoni: '#000000', righe: true, colore2: '#ffffff' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  lazio:       { nome: 'Lazio',       casa: { maglia: '#87ceeb', pantaloncini: '#ffffff', calzettoni: '#87ceeb' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  lecce:       { nome: 'Lecce',       casa: { maglia: '#eab308', pantaloncini: '#dc2626', calzettoni: '#eab308', righe: true, colore2: '#dc2626' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  milan:       { nome: 'AC Milan',    casa: { maglia: '#dc2626', pantaloncini: '#000000', calzettoni: '#dc2626', righe: true, colore2: '#000000' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  monza:       { nome: 'Monza',       casa: { maglia: '#dc2626', pantaloncini: '#ffffff', calzettoni: '#dc2626' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  napoli:      { nome: 'Napoli',      casa: { maglia: '#1e40af', pantaloncini: '#ffffff', calzettoni: '#1e40af' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } },
+  parma:       { nome: 'Parma',       casa: { maglia: '#eab308', pantaloncini: '#1e3a8a', calzettoni: '#eab308', righe: true, colore2: '#1e3a8a' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  roma:        { nome: 'AS Roma',     casa: { maglia: '#991b1b', pantaloncini: '#ffffff', calzettoni: '#991b1b' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  sassuolo:    { nome: 'Sassuolo',    casa: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } },
+  torino:      { nome: 'Torino',      casa: { maglia: '#991b1b', pantaloncini: '#1e3a8a', calzettoni: '#991b1b' }, portiere: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' } },
+  udinese:     { nome: 'Udinese',     casa: { maglia: '#000000', pantaloncini: '#ffffff', calzettoni: '#000000', righe: true, colore2: '#ffffff' }, portiere: { maglia: '#eab308', pantaloncini: '#000000', calzettoni: '#eab308' } },
+  venezia:     { nome: 'Venezia',     casa: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } }
 };
 
 /* ============================================================
@@ -112,8 +32,19 @@ function creaGiocatoreSVG(divisa, animazione) {
   if (!divisa) divisa = { maglia: '#888888', pantaloncini: '#333333', calzettoni: '#888888' };
   
   var animClass = animazione === 'fermo' ? 'anim-fermo' : '';
+  var idPattern = 'righe_' + Math.random().toString(36).substr(2, 9);
   
   var svg = '<svg viewBox="0 0 40 60" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="' + animClass + '">';
+  
+  // DEFINIZIONE PATTERN RIGHE (se la maglia è a righe)
+  if (divisa.righe && divisa.colore2) {
+    svg += '<defs>';
+    svg += '<pattern id="' + idPattern + '" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">';
+    svg += '<rect x="0" y="0" width="4" height="8" fill="' + divisa.maglia + '"/>';
+    svg += '<rect x="4" y="0" width="4" height="8" fill="' + divisa.colore2 + '"/>';
+    svg += '</pattern>';
+    svg += '</defs>';
+  }
   
   // Testa
   svg += '<circle cx="20" cy="10" r="7" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
@@ -123,14 +54,16 @@ function creaGiocatoreSVG(divisa, animazione) {
   svg += '<circle cx="17" cy="10" r="1" fill="#000"/>';
   svg += '<circle cx="23" cy="10" r="1" fill="#000"/>';
   
-  // Maglia
-  svg += '<path d="M 12 18 L 28 18 L 30 38 L 10 38 Z" fill="' + divisa.maglia + '" stroke="#222" stroke-width="1"/>';
+  // Maglia (con pattern se a righe)
+  var fillMaglia = (divisa.righe && divisa.colore2) ? 'url(#' + idPattern + ')' : divisa.maglia;
+  svg += '<path d="M 12 18 L 28 18 L 30 38 L 10 38 Z" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
+  
   // Colletto
   svg += '<path d="M 16 18 L 20 22 L 24 18" fill="none" stroke="#fff" stroke-width="1"/>';
   
-  // Maniche
-  svg += '<rect x="4" y="18" width="8" height="14" rx="3" fill="' + divisa.maglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<rect x="28" y="18" width="8" height="14" rx="3" fill="' + divisa.maglia + '" stroke="#222" stroke-width="1"/>';
+  // Maniche (con pattern se a righe)
+  svg += '<rect x="4" y="18" width="8" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
+  svg += '<rect x="28" y="18" width="8" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
   
   // Mani
   svg += '<circle cx="8" cy="34" r="3" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
