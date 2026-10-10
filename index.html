@@ -77,7 +77,7 @@
     overflow: hidden;
   }
 
-  /* PANNELLO CARTE */
+  /* ============ PANNELLO CARTE — ALTEZZA +1/3 ============ */
   .carte-panel {
     position: absolute;
     top: 6px; left: 50%;
@@ -88,11 +88,11 @@
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255,215,0,0.5);
     border-radius: 12px;
-    padding: 6px 10px;
+    padding: 9px 12px;                 /* era 6px 10px */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 6px;                          /* era 4px */
     z-index: 30;
     box-shadow: 0 8px 32px rgba(0,0,0,0.7);
   }
@@ -100,52 +100,54 @@
 
   .info-mano {
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
-    font-size: 11px;
+    font-size: 12px;                   /* era 11px */
   }
   .info-mano .titolo {
-    font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase;
+    font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase;
   }
   .info-mano .seme-guidatore {
     display: flex; align-items: center; gap: 6px;
-    background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 8px;
+    background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 8px;
     border: 2px solid #ffd700;
   }
   .info-mano .seme-guidatore .label {
-    font-size: 9px; color: #ffd700; text-transform: uppercase;
+    font-size: 10px; color: #ffd700; text-transform: uppercase;
     font-weight: bold;
   }
   .info-mano .seme-guidatore .seme {
-    font-size: 22px; line-height: 1;
+    font-size: 28px; line-height: 1;
   }
-  .info-mano .turno-label { font-size: 11px; color: #aaa; }
+  .info-mano .turno-label { font-size: 12px; color: #aaa; }
 
   .mano-wrapper {
-    display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; justify-content: center;
+    display: flex; align-items: center; gap: 16px; flex-wrap: nowrap; justify-content: center;
     width: 100%;
   }
   .mano-sezione {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 4px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 5px 10px;
   }
   .mano-sezione .mano-label {
-    font-size: 10px; font-weight: bold; text-transform: uppercase;
+    font-size: 11px; font-weight: bold; text-transform: uppercase;
   }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  .carte { display: flex; gap: 4px; flex-wrap: nowrap; justify-content: center; }
+  /* Carte più alte (+1/3): 42x60 → 42x80 */
+  .carte { display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; }
   .carta {
-    width: 42px; height: 60px; background: #fff; color: #222;
+    width: 42px; height: 80px;         /* era 60px */
+    background: #fff; color: #222;
     border-radius: 6px; display: flex; flex-direction: column;
     align-items: center; justify-content: space-between;
-    padding: 2px 3px; cursor: pointer;
+    padding: 4px 4px; cursor: pointer;
     border: 2px solid transparent;
     box-shadow: 0 3px 6px rgba(0,0,0,0.5);
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   }
   .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 11px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 22px; line-height: 1; }
-  .carta .valore-basso { font-size: 11px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta .valore-alto { font-size: 13px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 28px; line-height: 1; }
+  .carta .valore-basso { font-size: 13px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
   .carta.selezionata {
     border-color: #ffd700; background: #fff9c4; transform: translateY(-8px);
     box-shadow: 0 0 16px #ffd700;
@@ -154,44 +156,45 @@
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
 
   .pila-wrapper { display: flex; gap: 12px; align-items: center; }
-  .pila { position: relative; width: 34px; height: 48px; }
+  /* Pila più alta (+1/3): 34x48 → 34x64 */
+  .pila { position: relative; width: 34px; height: 64px; }
   .pila-titolo {
-    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-    font-size: 8px; color: #ffd700; font-weight: bold; white-space: nowrap;
+    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
-    position: absolute; width: 34px; height: 48px; border-radius: 4px;
+    position: absolute; width: 34px; height: 64px; border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
     border: 2px solid #fff;
   }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-count {
-    position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #aaa; white-space: nowrap;
+    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: #aaa; white-space: nowrap;
   }
 
   .info-carte {
-    display: flex; gap: 14px; font-size: 10px; color: #aaa;
-    background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 6px;
+    display: flex; gap: 14px; font-size: 11px; color: #aaa;
+    background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px;
     border: 1px solid rgba(255,215,0,0.3);
   }
   .info-carte strong { color: #ffd700; }
 
   .sost-panel {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 4px 8px;
+    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 6px 10px;
   }
   .sost-panel .sost-btn {
     background: linear-gradient(135deg, #0f3460, #16213e);
     border: 2px solid #4dabf7; border-radius: 10px;
-    padding: 6px 12px;
+    padding: 10px 16px;
     cursor: pointer; color: #fff; font-weight: bold;
-    font-size: 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
     transition: all 0.25s;
   }
   .sost-panel .sost-btn:hover:not(:disabled) {
@@ -199,11 +202,11 @@
     border-color: #ffd700;
   }
   .sost-panel .sost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .sost-panel .sost-btn .icona { font-size: 20px; }
-  .sost-panel .sost-btn .testo { font-size: 9px; }
+  .sost-panel .sost-btn .icona { font-size: 24px; }
+  .sost-panel .sost-btn .testo { font-size: 10px; }
 
   #azioni-container { display: flex; justify-content: center; gap: 8px; }
-  #azioni-container button { padding: 4px 14px; font-size: 11px; }
+  #azioni-container button { padding: 6px 18px; font-size: 12px; }
 
   button {
     background: #0f3460; color: #fff; border: 2px solid #4dabf7;
@@ -215,19 +218,14 @@
   button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
   button.primario:hover:not(:disabled) { background: #fff; }
 
-  /* ==================================================
-     AREA CAMPO — più stretta e centrata
-     ================================================== */
   .campo-area {
     position: absolute;
-    left: 18%;        /* (100-64)/2 = 18 → centrato */
+    left: 18%;
     top: 46%;
-    width: 64%;       /* accorciato per portieri davanti alle porte */
+    width: 64%;
     height: 42%;
     z-index: 6;
     pointer-events: none;
-    /* Padding orizzontale per avvicinare i giocatori al centro
-       e non farli finire fuori dal campo */
     padding: 0 2%;
   }
 
@@ -270,13 +268,12 @@
     display: flex; flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    /* padding orizzontale interno per stringere le file */
     padding: 0 1.5%;
   }
 
   .meta-sup, .meta-inf {
     display: flex; flex-direction: row;
-    justify-content: space-evenly;   /* distribuzione uniforme */
+    justify-content: space-evenly;
     align-items: center;
     flex: 1;
     padding: 2px 4px;
@@ -289,23 +286,16 @@
     position: relative;
   }
 
-  /* Portieri: posizionati DENTRO il campo, davanti alla porta
-     (non al centro esatto della zona, ma spostati verso l'interno) */
+  /* ============ PORTIERI — spostati in alto di 40px ============ */
   .portiere-wrapper {
     position: absolute !important;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, calc(-50% - 40px));
     z-index: 5;
   }
-  /* Portiere TU: spostato verso destra (verso il centro del campo) */
-  .portiere-wrapper.tu {
-    left: 62%;
-  }
-  /* Portiere CPU: spostato verso sinistra (verso il centro del campo) */
-  .portiere-wrapper.cpu {
-    left: 38%;
-  }
+  .portiere-wrapper.tu { left: 62%; }
+  .portiere-wrapper.cpu { left: 38%; }
 
   .info-laterale {
     display: flex; flex-direction: row; gap: 3px;
@@ -785,8 +775,9 @@ var DURATA_SCIVOLATA = 600;
 var DURATA_RITORNO = 400;
 var SCIVOLATA_MAX_PX = 18;
 
-var PALLA_Y_META_SUP = 22;
-var PALLA_Y_META_INF = 78;
+/* Palla all'altezza dei piedi dei giocatori (non della testa) */
+var PALLA_Y_META_SUP = 42;
+var PALLA_Y_META_INF = 58;
 var PALLA_X_CENTRO = 50;
 
 var PORTA_LEFT = 21;
