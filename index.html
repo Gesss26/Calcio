@@ -14,10 +14,27 @@
     overflow: hidden;
     user-select: none;
   }
-  .app { display: flex; flex-direction: column; height: 100vh; transition: all 0.4s ease; }
+  .app { display: flex; flex-direction: column; height: 100vh; position: relative; }
+
+  /* ============ SFONDO STADIO A SCHERMO INTERO ============ */
+  .stadio-sfondo {
+    position: fixed; inset: 0;
+    background: url('Stadio.jpg') center/cover no-repeat;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .stadio-sfondo::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%);
+  }
+
+  /* ============ TOPBAR (sovrapposta) ============ */
   .topbar {
     display: flex; justify-content: center; align-items: center;
-    padding: 6px 14px; background: #16213e; border-bottom: 2px solid #0f3460;
+    padding: 6px 14px; background: rgba(22,33,62,0.85);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px solid #0f3460;
     flex-shrink: 0; position: relative; z-index: 10; min-height: 44px;
   }
   .risultato-wrapper { display: flex; align-items: center; gap: 14px; }
@@ -53,36 +70,187 @@
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .campo-wrapper {
-    flex: 0 0 42vh; position: relative; overflow: hidden;
-    transition: flex 0.4s ease;
-    background: #0a1a2e url('Stadio.jpg') center/cover no-repeat;
+  /* ============ AREA GIOCO (sopra lo stadio) ============ */
+  .area-gioco {
+    position: relative;
+    flex: 1;
+    z-index: 5;
+    overflow: hidden;
   }
-  .app.fase-animazione .campo-wrapper { flex: 1; }
-  .app.fase-combattimento .campo-wrapper { flex: 0 0 42vh; }
 
+  /* ============ PANNELLO CARTE — OVERLAY IN ALTO SULLE TRIBUNA ============ */
+  .carte-panel {
+    position: absolute;
+    top: 4px; left: 50%;
+    transform: translateX(-50%);
+    width: 98%;
+    max-width: 1400px;
+    background: rgba(10,15,30,0.82);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,215,0,0.5);
+    border-radius: 12px;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 30;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .carte-panel.nascosto { display: none; }
+
+  .info-mano {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center;
+    font-size: 11px;
+  }
+  .info-mano .titolo {
+    font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase;
+  }
+  .info-mano .seme-guidatore {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 8px;
+    border: 2px solid #ffd700;
+  }
+  .info-mano .seme-guidatore .label {
+    font-size: 9px; color: #ffd700; text-transform: uppercase;
+    font-weight: bold;
+  }
+  .info-mano .seme-guidatore .seme {
+    font-size: 22px; line-height: 1;
+  }
+  .info-mano .turno-label { font-size: 11px; color: #aaa; }
+
+  .mano-wrapper {
+    display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; justify-content: center;
+    width: 100%;
+  }
+  .mano-sezione {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 4px 8px;
+  }
+  .mano-sezione .mano-label {
+    font-size: 10px; font-weight: bold; text-transform: uppercase;
+  }
+  .mano-sezione.tu .mano-label { color: #4dabf7; }
+  .mano-sezione.cpu .mano-label { color: #ff6b6b; }
+
+  .carte { display: flex; gap: 4px; flex-wrap: nowrap; justify-content: center; }
+  .carta {
+    width: 42px; height: 60px; background: #fff; color: #222;
+    border-radius: 6px; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+    padding: 2px 3px; cursor: pointer;
+    border: 2px solid transparent;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+  }
+  .carta:hover { transform: translateY(-4px); }
+  .carta .valore-alto { font-size: 11px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 22px; line-height: 1; }
+  .carta .valore-basso { font-size: 11px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta.selezionata {
+    border-color: #ffd700; background: #fff9c4; transform: translateY(-8px);
+    box-shadow: 0 0 16px #ffd700;
+  }
+  .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
+  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
+
+  .pila-wrapper { display: flex; gap: 12px; align-items: center; }
+  .pila { position: relative; width: 34px; height: 48px; }
+  .pila-titolo {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 8px; color: #ffd700; font-weight: bold; white-space: nowrap;
+  }
+  .pila-carte { position: relative; width: 100%; height: 100%; }
+  .pila-carta {
+    position: absolute; width: 34px; height: 48px; border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .pila-carta.dietro {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    border: 2px solid #fff;
+  }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-count {
+    position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: #aaa; white-space: nowrap;
+  }
+
+  .info-carte {
+    display: flex; gap: 14px; font-size: 10px; color: #aaa;
+    background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,215,0,0.3);
+  }
+  .info-carte strong { color: #ffd700; }
+
+  .sost-panel {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.35); border-radius: 8px; padding: 4px 8px;
+  }
+  .sost-panel .sost-btn {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border: 2px solid #4dabf7; border-radius: 10px;
+    padding: 6px 12px;
+    cursor: pointer; color: #fff; font-weight: bold;
+    font-size: 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    transition: all 0.25s;
+  }
+  .sost-panel .sost-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4dabf7, #2563eb);
+    border-color: #ffd700;
+  }
+  .sost-panel .sost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .sost-panel .sost-btn .icona { font-size: 20px; }
+  .sost-panel .sost-btn .testo { font-size: 9px; }
+
+  #azioni-container { display: flex; justify-content: center; gap: 8px; }
+  #azioni-container button {
+    padding: 4px 14px;
+    font-size: 11px;
+  }
+
+  button {
+    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
+    cursor: pointer; margin: 2px;
+  }
+  button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  button.primario:hover:not(:disabled) { background: #fff; }
+
+  /* ============ CAMPO ISOMETRICO — combacia con l'erba dello stadio ============ */
   .campo-prospettiva {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     display: flex; align-items: center; justify-content: center;
-    perspective: 900px;
-    perspective-origin: 50% 40%;
-    z-index: 3;
+    perspective: 1400px;
+    perspective-origin: 50% 55%;
+    z-index: 5;
+    pointer-events: none;
   }
   .campo-isometrico {
     position: relative;
-    width: 88%;
-    height: 68%;
-    transform: rotateX(52deg);
+    /* Dimensioni regolate per combaciare con l'erba dello stadio nello sfondo:
+       più stretto, più corto, spostato in basso. */
+    width: 62%;
+    height: 42%;
+    margin-top: 8%;
+    transform: rotateX(58deg);
     transform-style: preserve-3d;
-    transform-origin: 50% 70%;
-    background-color: rgba(45, 138, 62, 0.55);
+    transform-origin: 50% 50%;
+    background-color: rgba(45, 138, 62, 0.0);
     border-radius: 4px;
-    box-shadow: 0 0 40px rgba(0,0,0,0.6) inset;
+    pointer-events: auto;
   }
   .campo-linee {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     pointer-events: none;
+    opacity: 0.9;
   }
 
   .zone-overlay {
@@ -90,23 +258,23 @@
     display: flex; pointer-events: none;
   }
   .zona-overlay {
-    flex: 1; border-right: 1px dashed rgba(255,215,0,0.25);
+    flex: 1; border-right: 1px dashed rgba(255,215,0,0.3);
     position: relative;
     transition: background 0.3s;
   }
   .zona-overlay:last-child { border-right: none; }
   .zona-overlay .zona-num {
     position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: rgba(255,215,0,0.8); font-weight: bold;
+    font-size: 10px; color: rgba(255,215,0,0.85); font-weight: bold;
     text-shadow: 0 1px 3px #000;
   }
   .zona-overlay.attiva {
-    background: rgba(255,215,0,0.14);
-    box-shadow: inset 0 0 30px rgba(255,215,0,0.55);
+    background: rgba(255,215,0,0.18);
+    box-shadow: inset 0 0 40px rgba(255,215,0,0.6);
   }
   .zona-overlay.attiva .zona-num {
     color: #ffd700; font-size: 12px;
-    text-shadow: 0 0 8px #ffd700, 0 0 16px #ffd700;
+    text-shadow: 0 0 8px #ffd700;
   }
 
   .zone {
@@ -149,35 +317,38 @@
 
   .info-laterale {
     display: flex; flex-direction: row; gap: 3px;
-    font-size: 11px; line-height: 1;
+    font-size: 10px; line-height: 1;
     color: #fff;
     text-shadow: 0 1px 3px #000;
     pointer-events: none; font-weight: 900;
     font-family: 'Courier New', monospace;
-    background: rgba(0,0,0,0.6);
-    padding: 2px 5px;
+    background: rgba(0,0,0,0.7);
+    padding: 2px 4px;
     border-radius: 4px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
     white-space: nowrap;
   }
-  .info-laterale .stamina-txt { color: #4ade80; font-size: 12px; }
+  .info-laterale .stamina-txt { color: #4ade80; font-size: 11px; }
   .info-laterale .stamina-txt.medio { color: #fbbf24; }
   .info-laterale .stamina-txt.basso { color: #ef4444; }
-  .info-laterale .falli-txt { color: #ff8a8a; font-size: 13px; font-weight: 900; }
-  .info-laterale .falli-txt.zero { color: #555; font-size: 11px; }
-  .info-laterale .cartellini { font-size: 12px; line-height: 1; }
+  .info-laterale .falli-txt { color: #ff8a8a; font-size: 11px; font-weight: 900; }
+  .info-laterale .falli-txt.zero { color: #555; font-size: 10px; }
+  .info-laterale .cartellini { font-size: 11px; line-height: 1; }
   .info-laterale.ammonito-info { border-color: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6); }
   .info-laterale.espulso-info { border-color: #ff0000; box-shadow: 0 0 6px rgba(255,0,0,0.6); }
 
+  /* ============ PEDINE — VERTICALI, FUORI DAL PIANO DEL CAMPO ============ */
   .pedina {
-    position: relative; width: 30px; height: 38px;
+    position: relative; width: 32px; height: 42px;
     display: flex; align-items: center; justify-content: center;
-    transform: rotateX(-52deg);
+    /* Contro-bilanciamento: le pedine stanno in piedi sopra il piano inclinato */
+    transform: rotateX(-58deg);
     transform-origin: bottom center;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
   }
   .pedina.cpu svg { transform: scaleX(-1); }
-  .pedina.stanco { filter: grayscale(0.6) brightness(0.7); }
-  .pedina.esaurito { filter: grayscale(0.9) brightness(0.35); }
+  .pedina.stanco { filter: grayscale(0.6) brightness(0.7) drop-shadow(0 4px 6px rgba(0,0,0,0.8)); }
+  .pedina.esaurito { filter: grayscale(0.9) brightness(0.35) drop-shadow(0 4px 6px rgba(0,0,0,0.8)); }
   .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
   .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
   .pedina .stamina-bar {
@@ -193,41 +364,36 @@
     width: 12px; height: 12px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.6);
-    z-index: 10; animation: pallaAttaccata 1.2s infinite;
-  }
-  @keyframes pallaAttaccata {
-    0%, 100% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 8px rgba(255,255,255,0.6); }
-    50% { box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 14px rgba(255,215,0,1); }
+    box-shadow: 0 3px 8px rgba(0,0,0,0.9);
+    z-index: 10;
   }
 
   .palla-centro {
     position: absolute;
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.9), 0 0 12px rgba(255,255,255,0.8);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.9);
     z-index: 12; pointer-events: none;
-    transform: translate(-50%, -50%) rotateX(-52deg);
+    transform: translate(-50%, -50%) rotateX(-58deg);
     transform-origin: center;
   }
 
   .palla-volante {
     position: absolute; z-index: 15;
-    width: 14px; height: 14px;
+    width: 16px; height: 16px;
     background: radial-gradient(circle at 30% 30%, #fff, #ddd);
     border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.9), 0 0 16px rgba(255,255,255,0.7);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.9);
     display: none; pointer-events: none;
     transform: translate(-50%, -50%);
   }
   .palla-volante.attiva { display: block; }
-  .palla-volante.parabola { box-shadow: 0 8px 20px rgba(0,0,0,0.9), 0 0 24px rgba(255,215,0,0.8); }
 
   .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
   @keyframes animFermo {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-1.5px); }
+    50% { transform: translateY(-2px); }
   }
   .anim-calcia { animation: animCalcia 0.8s ease-out; }
   @keyframes animCalcia {
@@ -241,7 +407,6 @@
     position: relative;
     z-index: 20;
     transition: transform 0.6s cubic-bezier(0.34, 1.5, 0.64, 1);
-    will-change: transform;
   }
   .pedina-scivola-wrapper.ritorno {
     transition: transform 0.4s ease-out;
@@ -264,6 +429,32 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
+  /* ============ PANCHINA — in basso ============ */
+  .panchina {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(10,10,20,0.9);
+    backdrop-filter: blur(8px);
+    border-top: 2px solid #0f3460;
+    padding: 4px 8px; display: flex; justify-content: space-around; align-items: center;
+    gap: 4px; z-index: 25; min-height: 54px;
+  }
+  .panchina-titolo {
+    font-size: 9px; color: #ffd700; font-weight: bold;
+    writing-mode: vertical-rl; letter-spacing: 2px;
+  }
+  .panchina-giocatore {
+    display: flex; flex-direction: column; align-items: center; padding: 2px;
+  }
+  .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
+  .panchina-giocatore .pedina {
+    transform: scale(0.6); width: 22px; height: 30px;
+  }
+  .panchina-giocatore .panchina-nome {
+    font-size: 7px; color: #ccc; margin-top: 1px; font-weight: bold;
+  }
+
+  /* ============ BANNER E MODALI ============ */
   .goal-banner {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -275,7 +466,6 @@
     font-size: 72px; font-weight: 900; color: #ffd700;
     text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 6px 12px #000;
     letter-spacing: 6px; font-family: 'Impact', 'Arial Black', sans-serif;
-    text-align: center;
   }
 
   .moneta-banner {
@@ -287,7 +477,6 @@
   .moneta-banner.cpu { background: radial-gradient(circle, rgba(255,107,107,0.9), rgba(0,0,0,0.85)); }
   .moneta-banner-text {
     font-size: 42px; font-weight: 900; color: #fff;
-    text-shadow: 0 0 30px #000, 0 0 60px #000;
     letter-spacing: 4px; font-family: 'Impact', 'Arial Black', sans-serif;
     text-align: center; padding: 20px 40px;
     background: rgba(0,0,0,0.6); border-radius: 20px;
@@ -296,151 +485,6 @@
   .moneta-banner.tu .moneta-banner-text { border-color: #4dabf7; color: #4dabf7; }
   .moneta-banner.cpu .moneta-banner-text { border-color: #ff6b6b; color: #ff6b6b; }
 
-  .panchina {
-    background: #1a1a2e; border-top: 2px solid #0f3460; border-bottom: 2px solid #0f3460;
-    padding: 3px 8px; display: flex; justify-content: space-around; align-items: center;
-    gap: 4px; flex-shrink: 0; min-height: 50px;
-  }
-  .panchina-titolo {
-    font-size: 9px; color: #ffd700; font-weight: bold;
-    writing-mode: vertical-rl; letter-spacing: 2px;
-  }
-  .panchina-giocatore {
-    display: flex; flex-direction: column; align-items: center; padding: 2px;
-  }
-  .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
-  .panchina-giocatore .pedina {
-    transform: scale(0.55); width: 22px; height: 30px;
-  }
-  .panchina-giocatore .panchina-nome {
-    font-size: 7px; color: #ccc; margin-top: 1px; font-weight: bold;
-  }
-
-  .carte-panel {
-    flex: 1; background: #16213e; padding: 8px 12px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; overflow-y: auto;
-  }
-  .app.fase-animazione .carte-panel { display: none; }
-  .carte-panel.nascosto { display: none; }
-
-  .info-mano {
-    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;
-  }
-  .info-mano .titolo {
-    font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase;
-  }
-  .info-mano .seme-guidatore {
-    display: flex; align-items: center; gap: 10px;
-    background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 10px;
-    border: 2px solid #ffd700;
-  }
-  .info-mano .seme-guidatore .label {
-    font-size: 10px; color: #ffd700; text-transform: uppercase;
-    font-weight: bold;
-  }
-  .info-mano .seme-guidatore .seme {
-    font-size: 36px; line-height: 1;
-  }
-  .info-mano .turno-label { font-size: 12px; color: #aaa; text-align: center; }
-
-  .mano-wrapper {
-    display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center;
-    width: 100%;
-  }
-  .mano-sezione {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    background: rgba(0,0,0,0.25); border-radius: 10px; padding: 8px 12px;
-    min-width: 260px;
-  }
-  .mano-sezione .mano-label {
-    font-size: 11px; font-weight: bold; text-transform: uppercase;
-  }
-  .mano-sezione.tu .mano-label { color: #4dabf7; }
-  .mano-sezione.cpu .mano-label { color: #ff6b6b; }
-
-  .carte { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
-  .carta {
-    width: 58px; height: 82px; background: #fff; color: #222;
-    border-radius: 8px; display: flex; flex-direction: column;
-    align-items: center; justify-content: space-between;
-    padding: 4px 6px; cursor: pointer;
-    border: 3px solid transparent;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.5);
-    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-    position: relative;
-  }
-  .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 15px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 34px; line-height: 1; }
-  .carta .valore-basso { font-size: 15px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
-  .carta.selezionata {
-    border-color: #ffd700; background: #fff9c4; transform: translateY(-10px);
-    box-shadow: 0 0 24px #ffd700;
-  }
-  .carta.seme-guidatore { box-shadow: 0 0 12px rgba(255,215,0,0.7); }
-  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 24px #4ade80; }
-
-  .pila-wrapper { display: flex; gap: 20px; align-items: center; }
-  .pila { position: relative; width: 44px; height: 62px; }
-  .pila-titolo {
-    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
-  }
-  .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-carta {
-    position: absolute; width: 44px; height: 62px; border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  }
-  .pila-carta.dietro {
-    background: linear-gradient(135deg, #4dabf7, #2563eb);
-    border: 2px solid #fff;
-  }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 24px; }
-  .pila-count {
-    position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: #aaa; white-space: nowrap;
-  }
-
-  .info-carte {
-    display: flex; gap: 20px; font-size: 11px; color: #aaa;
-    background: rgba(0,0,0,0.4); padding: 6px 14px; border-radius: 8px;
-    border: 1px solid rgba(255,215,0,0.3);
-  }
-  .info-carte strong { color: #ffd700; }
-
-  .sost-panel {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.25); border-radius: 10px; padding: 12px;
-    min-width: 200px; min-height: 120px;
-  }
-  .sost-panel .sost-btn {
-    background: linear-gradient(135deg, #0f3460, #16213e);
-    border: 3px solid #4dabf7; border-radius: 14px;
-    padding: 16px 24px;
-    cursor: pointer; color: #fff; font-weight: bold;
-    font-size: 16px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    transition: all 0.25s;
-  }
-  .sost-panel .sost-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #4dabf7, #2563eb);
-    border-color: #ffd700;
-  }
-  .sost-panel .sost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .sost-panel .sost-btn .icona { font-size: 36px; }
-  .sost-panel .sost-btn .testo { font-size: 13px; }
-
-  button {
-    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
-    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold;
-    cursor: pointer; margin: 2px;
-  }
-  button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
-  button:disabled { opacity: 0.4; cursor: not-allowed; }
-  button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
-  button.primario:hover:not(:disabled) { background: #fff; }
-
   .modale {
     position: fixed; inset: 0; background: rgba(0,0,0,0.92);
     display: flex; align-items: center; justify-content: center; z-index: 100;
@@ -448,7 +492,7 @@
   .modale.nascosto { display: none; }
   .modale-box {
     background: #16213e; border: 3px solid #ffd700; border-radius: 14px;
-    padding: 22px; max-width: 700px; width: 100%; max-height: 92vh;
+    padding: 22px; max-width: 700px; width: 90%; max-height: 92vh;
     overflow-y: auto; text-align: center;
   }
   .modale-box h2 { color: #ffd700; margin-bottom: 14px; font-size: 20px; }
@@ -479,12 +523,8 @@
     padding: 18px 28px; min-width: 320px;
     cursor: pointer; color: #fff; font-weight: bold;
     display: flex; align-items: center; gap: 16px;
-    transition: all 0.25s;
   }
-  .menu-btn:hover {
-    background: linear-gradient(135deg, #4dabf7, #2563eb);
-    border-color: #ffd700;
-  }
+  .menu-btn:hover { background: linear-gradient(135deg, #4dabf7, #2563eb); border-color: #ffd700; }
   .menu-btn .icona { font-size: 36px; }
   .menu-btn .testo { display: flex; flex-direction: column; gap: 4px; text-align: left; }
   .menu-btn .testo .titolo { font-size: 16px; }
@@ -542,10 +582,11 @@
   .banner-mano-vs { font-size: 22px; color: #ffd700; font-weight: 900; margin: 0 4px; }
   .banner-mano-seme {
     margin-top: 14px; font-size: 13px; color: #ffd700;
-    letter-spacing: 2px; text-transform: uppercase;
+    text-transform: uppercase;
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
+  /* SCHERMATA TIRO */
   .tiro-overlay {
     position: fixed; inset: 0;
     background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%);
@@ -593,7 +634,6 @@
   .tiro-casella {
     border: 1px solid rgba(255,215,0,0.35);
     display: flex; align-items: center; justify-content: center;
-    color: rgba(255,215,0,0.5);
     position: relative;
   }
   .tiro-casella .numero-casella {
@@ -606,8 +646,7 @@
   }
   .tiro-portiere {
     position: absolute;
-    width: 20%;
-    height: 40%;
+    width: 20%; height: 40%;
     transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     z-index: 10; pointer-events: none;
     left: calc(var(--porta-left) + var(--porta-width) / 2 - 10%);
@@ -623,16 +662,8 @@
     transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform: translate(-50%, -50%);
   }
-  .tiro-palla.iniziale {
-    left: 50%; bottom: 4%;
-    top: auto;
-    width: 38px; height: 38px;
-  }
-  .tiro-palla.rigore {
-    left: 50%; bottom: 14%;
-    top: auto;
-    width: 26px; height: 26px;
-  }
+  .tiro-palla.iniziale { left: 50%; bottom: 4%; top: auto; width: 38px; height: 38px; }
+  .tiro-palla.rigore { left: 50%; bottom: 14%; top: auto; width: 26px; height: 26px; }
   .tiro-esito {
     font-size: 42px; font-weight: 900;
     color: #ffd700; text-align: center;
@@ -651,10 +682,26 @@
   }
 
   .nascosto { display: none !important; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .campo-isometrico { width: 78%; height: 42%; margin-top: 6%; }
+    .carta { width: 34px; height: 48px; }
+    .carta .seme-centro { font-size: 16px; }
+    .carta .valore-alto, .carta .valore-basso { font-size: 9px; }
+  }
+  @media (max-height: 600px) {
+    .carta { width: 34px; height: 48px; }
+    .carta .seme-centro { font-size: 16px; }
+    .carta .valore-alto, .carta .valore-basso { font-size: 9px; }
+    .carte-panel { padding: 4px 8px; }
+  }
 </style>
 </head>
 <body>
-<div class="app fase-animazione" id="app">
+<div class="stadio-sfondo"></div>
+
+<div class="app" id="app">
   <div class="topbar">
     <div class="risultato-wrapper">
       <div class="risultato">
@@ -679,7 +726,45 @@
     </div>
   </div>
 
-  <div class="campo-wrapper" id="campo-wrapper">
+  <div class="area-gioco">
+    <!-- PANNELLO CARTE — OVERLAY IN ALTO SULLE TRIBUNA -->
+    <div class="carte-panel nascosto" id="carte-panel">
+      <div class="info-mano">
+        <div class="titolo" id="titolo-mano">Contrasto</div>
+        <div class="seme-guidatore">
+          <span class="label">Seme</span>
+          <span class="seme" id="seme-guidatore">⚽</span>
+        </div>
+        <div class="turno-label" id="turno-label"></div>
+      </div>
+      <div class="mano-wrapper">
+        <div class="mano-sezione tu">
+          <div class="mano-label">Tu (<span id="count-tu">7</span>)</div>
+          <div class="carte" id="carte-tu"></div>
+        </div>
+        <div class="pila-wrapper">
+          <div class="pila">
+            <div class="pila-titolo">MAZZO</div>
+            <div class="pila-carte" id="mazzo-pila"></div>
+            <div class="pila-count" id="mazzo-count">0</div>
+          </div>
+        </div>
+        <div class="sost-panel">
+          <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
+            <div class="icona">🔄</div>
+            <div class="testo">SOSTITUZIONI</div>
+          </button>
+        </div>
+      </div>
+      <div class="info-carte">
+        <span>Mazzo: <strong id="info-mazzo">52</strong></span>
+        <span>Scarti: <strong id="info-scarti">0</strong></span>
+        <span>Minuto: <strong id="info-minuto">0'</strong></span>
+      </div>
+      <div id="azioni-container"></div>
+    </div>
+
+    <!-- CAMPO ISOMETRICO -->
     <div class="campo-prospettiva">
       <div class="campo-isometrico">
         <svg class="campo-linee" viewBox="0 0 800 500" preserveAspectRatio="none">
@@ -698,47 +783,14 @@
         <div class="zone" id="zone"></div>
       </div>
     </div>
+
     <div class="palla-volante" id="palla-volante"></div>
     <div class="flash-vincitore" id="flash"></div>
   </div>
 
   <div class="panchina" id="panchina"></div>
-  <div class="carte-panel nascosto" id="carte-panel">
-    <div class="info-mano">
-      <div class="titolo" id="titolo-mano">Contrasto</div>
-      <div class="seme-guidatore">
-        <span class="label">Seme guida</span>
-        <span class="seme" id="seme-guidatore">⚽</span>
-      </div>
-      <div class="turno-label" id="turno-label"></div>
-    </div>
-    <div class="mano-wrapper">
-      <div class="mano-sezione tu">
-        <div class="mano-label">Tu (<span id="count-tu">7</span> carte)</div>
-        <div class="carte" id="carte-tu"></div>
-      </div>
-      <div class="pila-wrapper">
-        <div class="pila">
-          <div class="pila-titolo">MAZZO</div>
-          <div class="pila-carte" id="mazzo-pila"></div>
-          <div class="pila-count" id="mazzo-count">0</div>
-        </div>
-      </div>
-      <div class="sost-panel">
-        <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
-          <div class="icona">🔄</div>
-          <div class="testo">SOSTITUZIONI</div>
-        </button>
-      </div>
-    </div>
-    <div class="info-carte">
-      <span>Mazzo: <strong id="info-mazzo">52</strong></span>
-      <span>Scarti: <strong id="info-scarti">0</strong></span>
-      <span>Minuto: <strong id="info-minuto">0'</strong></span>
-    </div>
-    <div id="azioni-container"></div>
-  </div>
 </div>
+
 <div class="goal-banner" id="goal-banner">
   <div class="goal-banner-text" id="goal-banner-text">GGGOOOAAALLL</div>
 </div>
@@ -877,7 +929,7 @@ function suonaScivolata() {
 
 /* STATO */
 var stato = {
-  modalita: 'menu', tipoPartita: '1P',
+  tipoPartita: '1P',
   squadraTU: 'italia', squadraCPU: 'francia',
   divise: { tu: null, cpu: null },
   tempo: 1, mano: 1, maxMani: MANI_PER_TEMPO,
@@ -903,7 +955,6 @@ var selezioneCarta = null;
 var selezioneSost = { campo: null, panchina: null };
 var renderingCampoInCorso = false;
 
-/* ZONE */
 var ZONE_CONFIG = [
   { id: 0, nome: 'Z0', ruolo: 'POR', portiere: true, proprietario: 'tu' },
   { id: 1, nome: 'Z1', ruolo: 'DIF', tu: 2, cpu: 2 },
@@ -918,7 +969,6 @@ var PANCHINA_CONFIG = [
   { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
 ];
 
-/* MAZZO */
 var SEMI = {
   palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
   coppa:      { emoji: '🏆', nome: 'Coppa',      colore: 'rossa' },
@@ -989,14 +1039,6 @@ function scegliSemeGuida() {
 function log(msg, classe) {
   classe = classe || '';
   stato.logCompleto.push({ msg: msg, classe: classe });
-  var logBox = document.getElementById('log-box');
-  if (logBox) {
-    var p = document.createElement('p');
-    if (classe) p.className = classe;
-    p.innerHTML = msg;
-    logBox.appendChild(p);
-    logBox.scrollTop = logBox.scrollHeight;
-  }
 }
 function apriLog() {
   var html = '<h2>📋 Cronaca</h2><div style="background:#0a0a15;border-radius:8px;padding:12px;max-height:60vh;overflow-y:auto;font-size:12px;text-align:left;font-family:monospace">';
@@ -1060,9 +1102,7 @@ function mostraMenuPrincipale() {
 
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
-  var html = '<h2>⚽ Scegli la tua squadra</h2>' +
-    '<p style="font-size:12px;color:#aaa;margin-bottom:8px">La CPU sceglierà casualmente tra le altre nazionali</p>' +
-    '<div class="squadre-griglia">';
+  var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
   var keys = Object.keys(SQUADRE);
   for (var i = 0; i < keys.length; i++) {
     var id = keys[i];
@@ -1145,7 +1185,7 @@ function avviaPartita(sqTU, sqCPU, tipo) {
   chiudiModale();
   document.getElementById('modale-box').innerHTML =
     '<h2>🪙 Lancio della moneta</h2>' +
-    '<p style="font-size:12px;color:#aaa;margin-bottom:12px">Scegli testa o croce per decidere chi inizia</p>' +
+    '<p style="font-size:12px;color:#aaa;margin-bottom:12px">Scegli testa o croce</p>' +
     '<div>' +
       '<button class="primario" onclick="lanciaMoneta(\'testa\')">TESTA</button>' +
       '<button class="primario" onclick="lanciaMoneta(\'croce\')">CROCE</button>' +
@@ -1322,7 +1362,7 @@ function creaPedinaEl(g, animazione) {
   if (g.stamina === 0) el.classList.add('esaurito');
   if (g.ammonito) el.classList.add('ammonito');
   if (g.espulso) el.classList.add('espulso');
-  el.title = g.nome + ' - Stamina ' + g.stamina + '/' + g.staminaMax + ' - Falli: ' + g.falli;
+  el.title = g.nome + ' - Stamina ' + g.stamina + '/' + g.staminaMax;
   var divisa;
   if (g.portiere) {
     var sqId = g.squadra === 'tu' ? stato.squadraTU : stato.squadraCPU;
@@ -1380,7 +1420,6 @@ function renderPanchina() {
   }
 }
 
-/* MONETA */
 function lanciaMoneta(scelta) {
   var esito = Math.random() < 0.5 ? 'testa' : 'croce';
   var vince = esito === scelta ? 'tu' : 'cpu';
@@ -1416,7 +1455,6 @@ function lanciaMoneta(scelta) {
 }
 
 function eseguiPassaggioIniziale(squadra) {
-  document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
   stato.pallaInAnimazione = true;
 
@@ -1442,7 +1480,8 @@ function eseguiPassaggioIniziale(squadra) {
 
 function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squadra, callback) {
   suonaCalcio();
-  var campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  var campoRect = document.getElementById('campo-wrapper') || document.querySelector('.area-gioco');
+  var campoBox = campoRect.getBoundingClientRect();
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreId + '"]');
 
   if (!pedinaEl) {
@@ -1453,15 +1492,15 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
 
   var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
-  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoRect;
-  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoRect.left);
-  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoRect.top);
+  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoBox;
+  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoBox.left);
+  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoBox.top);
 
   stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
 
   var calcRect = pedinaEl.getBoundingClientRect();
-  var partXPx = calcRect.left + calcRect.width / 2 - campoRect.left;
-  var partYPx = calcRect.top + calcRect.height / 2 - campoRect.top;
+  var partXPx = calcRect.left + calcRect.width / 2 - campoBox.left;
+  var partYPx = calcRect.top + calcRect.height / 2 - campoBox.top;
 
   var pallaAtt = pedinaEl.querySelector('.palla-attaccata');
   if (pallaAtt) pallaAtt.remove();
@@ -1473,7 +1512,6 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   palla.style.left = partXPx + 'px';
   palla.style.top = partYPx + 'px';
   palla.classList.add('attiva');
-  palla.classList.remove('parabola');
   void palla.offsetWidth;
 
   var durata = DURATA_ANIM_PALLA;
@@ -1508,9 +1546,7 @@ function nascondiPallaCentro() {
   for (var i = 0; i < els.length; i++) els[i].remove();
 }
 
-/* CONTRASTO */
 function avviaContrasto() {
-  document.getElementById('app').className = 'app fase-combattimento';
   document.getElementById('carte-panel').classList.remove('nascosto');
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
@@ -1628,9 +1664,7 @@ function confermaCarta() {
   if (tuHaSemeInMano && !cpuHaSemeInMano) falloso = 'cpu';
   else if (!tuHaSemeInMano && cpuHaSemeInMano) falloso = 'tu';
 
-  if (falloso) {
-    return eseguiFalloConRecupero(cartaTu, cartaCpu, falloso, c.semeGuida);
-  }
+  if (falloso) return eseguiFalloConRecupero(cartaTu, cartaCpu, falloso, c.semeGuida);
 
   var vincitore;
   if (cartaTu.valore > cartaCpu.valore) vincitore = 'tu';
@@ -1661,31 +1695,20 @@ function confermaCarta() {
 function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida) {
   var c = stato.contrasto;
   var vincitore = squadraFallosa === 'tu' ? 'cpu' : 'tu';
-
   suonaFischietto('fallo');
 
   var giocatoreFallosoId = squadraFallosa === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var giocatoreFalloso = null;
   for (var i = 0; i < stato.giocatori[squadraFallosa].length; i++) {
-    if (stato.giocatori[squadraFallosa][i].id === giocatoreFallosoId) {
-      giocatoreFalloso = stato.giocatori[squadraFallosa][i]; break;
-    }
+    if (stato.giocatori[squadraFallosa][i].id === giocatoreFallosoId) { giocatoreFalloso = stato.giocatori[squadraFallosa][i]; break; }
   }
 
   if (giocatoreFalloso && !giocatoreFalloso.espulso) {
     giocatoreFalloso.falli++;
     stato.statistiche[squadraFallosa].falli++;
-    log('🟨 Fallo di ' + giocatoreFalloso.nome + ' — Falli: ' + giocatoreFalloso.falli, 'parata');
-    if (giocatoreFalloso.falli === 3) {
-      giocatoreFalloso.ammonito = true;
-      stato.statistiche[squadraFallosa].ammonizioni++;
-      log('🟨 AMMONIZIONE per ' + giocatoreFalloso.nome + '!', 'parata');
-    }
-    if (giocatoreFalloso.falli >= 6) {
-      giocatoreFalloso.espulso = true;
-      stato.statistiche[squadraFallosa].espulsioni++;
-      log('🟥 ESPULSIONE per ' + giocatoreFalloso.nome + '!', 'parata');
-    }
+    log('🟨 Fallo di ' + giocatoreFalloso.nome, 'parata');
+    if (giocatoreFalloso.falli === 3) { giocatoreFalloso.ammonito = true; stato.statistiche[squadraFallosa].ammonizioni++; }
+    if (giocatoreFalloso.falli >= 6) { giocatoreFalloso.espulso = true; stato.statistiche[squadraFallosa].espulsioni++; }
   }
 
   if (squadraFallosa === 'tu') {
@@ -1701,7 +1724,6 @@ function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida) {
   c.vincitore = vincitore;
   c.risolto = true;
   c.motivoFallo = squadraFallosa;
-  log('Tu: ' + cartaTu.label + SEMI[cartaTu.seme].emoji + ' | CPU: ' + cartaCpu.label + SEMI[cartaCpu.seme].emoji);
   log('✅ ' + (vincitore === 'tu' ? 'TU' : 'CPU') + ' vince per fallo!', 'highlight');
 
   renderCampo();
@@ -1714,30 +1736,20 @@ function eseguiFalloConRecupero(cartaTu, cartaCpu, squadraFallosa, semeGuida) {
 
 function risolviPareggioConSeme(cartaTu, cartaCpu) {
   var c = stato.contrasto;
-  log('🔁 Pareggio! Si annulla la mano, si pesca 1 carta a testa e si rigioca.', 'highlight');
-
   var idxTu = stato.mani.tu.indexOf(cartaTu);
   if (idxTu > -1) { stato.scarti.push(stato.mani.tu[idxTu]); stato.mani.tu.splice(idxTu, 1); }
   var idxCpu = stato.mani.cpu.indexOf(cartaCpu);
   if (idxCpu > -1) { stato.scarti.push(stato.mani.cpu[idxCpu]); stato.mani.cpu.splice(idxCpu, 1); }
-
   pescaUnaCarta('tu'); pescaUnaCarta('cpu');
 
   selezioneCarta = null;
   c.cartaTu = null; c.cartaCpu = null;
   c.risolto = false; c.vincitore = null; c.motivoFallo = null;
-
   c.semeGuida = scegliSemeGuida();
 
   renderCampo();
-  setTimeout(function() {
-    mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio! Si rigioca con nuovo seme guida');
-  }, 400);
-  setTimeout(function() {
-    nascondiBannerMano();
-    log('🎯 Nuovo contrasto Z' + c.zona + ' — Seme: ' + SEMI[c.semeGuida].emoji + ' ' + SEMI[c.semeGuida].nome, 'highlight');
-    renderPannelloContrasto();
-  }, 3000);
+  setTimeout(function() { mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio!'); }, 400);
+  setTimeout(function() { nascondiBannerMano(); renderPannelloContrasto(); }, 3000);
 }
 
 function scegliCartaCPU() {
@@ -1753,11 +1765,8 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
   var banner = document.getElementById('banner-mano');
   banner.classList.remove('tu', 'cpu', 'attivo');
   void banner.offsetWidth;
-  if (vincitore === 'pareggio') {
-    banner.classList.add('attivo');
-  } else {
-    banner.classList.add(vincitore, 'attivo');
-  }
+  if (vincitore === 'pareggio') banner.classList.add('attivo');
+  else banner.classList.add(vincitore, 'attivo');
   document.getElementById('banner-vincitore').textContent =
     vincitore === 'tu' ? '🏆 TU VINCI!' : vincitore === 'cpu' ? '🏆 CPU VINCE!' : '🤝 PAREGGIO!';
   var elTu = document.getElementById('banner-carta-tu');
@@ -1767,9 +1776,7 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
   document.getElementById('banner-seme').textContent = 'Seme: ' + SEMI[semeGuida].nome + ' ' + SEMI[semeGuida].emoji;
   document.getElementById('banner-motivo').textContent = motivo || '';
 }
-function nascondiBannerMano() {
-  document.getElementById('banner-mano').classList.remove('attivo');
-}
+function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
@@ -1786,13 +1793,12 @@ function risolviContrasto(vincente, motivoFallo) {
   if (gAtt && !gAtt.portiere && !gAtt.espulso) gAtt.stamina = Math.max(0, gAtt.stamina - 1);
   if (gDif && !gDif.portiere && !gDif.espulso) gDif.stamina = Math.max(0, gDif.stamina - 1);
 
-  document.getElementById('app').className = 'app fase-animazione';
   document.getElementById('carte-panel').classList.add('nascosto');
 
   if (motivoFallo) {
     var zona = c.zona;
     if ((vincente === 'tu' && zona === 5) || (vincente === 'cpu' && zona === 1)) {
-      log('🎯 RIGORE per ' + (vincente === 'tu' ? 'TU' : 'CPU') + '!', 'highlight');
+      log('🎯 RIGORE!', 'highlight');
       setTimeout(function() { apriSchermataRigore(vincente); }, 800);
       return;
     }
@@ -1819,7 +1825,6 @@ function risolviContrasto(vincente, motivoFallo) {
       stato.possessore = vincente;
       stato.metaContesa = nuovaMeta;
       stato.giocatorePalla = null;
-      log('➡️ ' + (vincente === 'tu' ? 'TU' : 'CPU') + ' passa in Z' + nuovaZona);
       renderCampo(); renderHeader();
       setTimeout(avanzaMano, 800);
     });
@@ -1828,7 +1833,8 @@ function risolviContrasto(vincente, motivoFallo) {
 
 function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, callback) {
   suonaScivolata();
-  var campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  var areaGioco = document.querySelector('.area-gioco');
+  var campoBox = areaGioco.getBoundingClientRect();
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincenteId + '"]');
 
   if (!pedinaEl) { if (callback) callback(); return; }
@@ -1837,15 +1843,15 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
 
   var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
-  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoRect;
-  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoRect.left);
-  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoRect.top);
+  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : campoBox;
+  var arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - campoBox.left);
+  var arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - campoBox.top);
 
   stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
 
   var calcRect = pedinaEl.getBoundingClientRect();
-  var startX = calcRect.left + calcRect.width / 2 - campoRect.left;
-  var startY = calcRect.top + calcRect.height / 2 - campoRect.top;
+  var startX = calcRect.left + calcRect.width / 2 - campoBox.left;
+  var startY = calcRect.top + calcRect.height / 2 - campoBox.top;
 
   var dxDir = arrivoXPx - startX;
   var dyDir = arrivoYPx - startY;
@@ -1885,8 +1891,8 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
       }
 
       var pallaRect = pedinaEl.getBoundingClientRect();
-      var partXPx = pallaRect.left + pallaRect.width / 2 - campoRect.left;
-      var partYPx = pallaRect.top + pallaRect.height / 2 - campoRect.top;
+      var partXPx = pallaRect.left + pallaRect.width / 2 - campoBox.left;
+      var partYPx = pallaRect.top + pallaRect.height / 2 - campoBox.top;
 
       var pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
       if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
@@ -1898,7 +1904,6 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
       palla.style.left = partXPx + 'px';
       palla.style.top = partYPx + 'px';
       palla.classList.add('attiva');
-      palla.classList.remove('parabola');
       void palla.offsetWidth;
 
       var durata = DURATA_ANIM_PALLA;
@@ -1910,13 +1915,8 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
         var y = partYPx + (arrivoYPx - partYPx) * t;
         palla.style.left = x + 'px';
         palla.style.top = y + 'px';
-        if (t < 1) {
-          requestAnimationFrame(anima);
-        } else {
-          palla.classList.remove('attiva');
-          stato.pallaInAnimazione = false;
-          if (callback) callback();
-        }
+        if (t < 1) requestAnimationFrame(anima);
+        else { palla.classList.remove('attiva'); stato.pallaInAnimazione = false; if (callback) callback(); }
       }
       requestAnimationFrame(anima);
     }, DURATA_RITORNO + 50);
@@ -1929,14 +1929,15 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo, callback) {
   var zonaElA = document.querySelector('.zona[data-zona="' + zonaA + '"]');
   if (!zonaElDa || !zonaElA) { if (callback) callback(); return; }
 
-  var campoRect = document.getElementById('campo-wrapper').getBoundingClientRect();
+  var areaGioco = document.querySelector('.area-gioco');
+  var campoBox = areaGioco.getBoundingClientRect();
   var daRect = zonaElDa.getBoundingClientRect();
   var aRect = zonaElA.getBoundingClientRect();
 
-  var x1 = daRect.left + daRect.width / 2 - campoRect.left;
-  var y1 = daRect.top + daRect.height / 2 - campoRect.top;
-  var x2 = aRect.left + aRect.width / 2 - campoRect.left;
-  var y2 = aRect.top + aRect.height / 2 - campoRect.top;
+  var x1 = daRect.left + daRect.width / 2 - campoBox.left;
+  var y1 = daRect.top + daRect.height / 2 - campoBox.top;
+  var x2 = aRect.left + aRect.width / 2 - campoBox.left;
+  var y2 = aRect.top + aRect.height / 2 - campoBox.top;
 
   stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
 
@@ -1945,7 +1946,7 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo, callback) {
   var palla = document.getElementById('palla-volante');
   palla.style.transition = 'none';
   palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
-  palla.classList.add('attiva'); palla.classList.remove('parabola');
+  palla.classList.add('attiva');
   void palla.offsetWidth;
 
   var durata = DURATA_ANIM_PALLA;
@@ -1960,22 +1961,21 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo, callback) {
     var y = yLineare + offsetParabolico;
     palla.style.left = x + 'px'; palla.style.top = y + 'px';
     if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); palla.classList.remove('parabola'); if (callback) callback(); }
+    else { palla.classList.remove('attiva'); if (callback) callback(); }
   }
   requestAnimationFrame(anima);
 }
 
-/* SCHERMATA TIRO */
 function apriSchermataTiro(attaccante) {
   var difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[attaccante].tiri++;
-  log('🥅 TIRO IN PORTA di ' + (attaccante === 'tu' ? 'TE' : 'CPU') + '!', 'highlight');
+  log('🥅 TIRO IN PORTA!', 'highlight');
   apriOverlayTiro(attaccante, difensore, false);
 }
 function apriSchermataRigore(attaccante) {
   var difensore = attaccante === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[attaccante].tiri++;
-  log('🎯 RIGORE per ' + (attaccante === 'tu' ? 'TU' : 'CPU') + '!', 'highlight');
+  log('🎯 RIGORE!', 'highlight');
   apriOverlayTiro(attaccante, difensore, true);
 }
 
@@ -1988,7 +1988,7 @@ function apriOverlayTiro(attaccante, difensore, isRigore) {
   titolo.className = 'tiro-titolo';
   titolo.textContent = isRigore
     ? (attaccante === 'tu' ? '🎯 IL TUO RIGORE' : '🎯 RIGORE DELLA CPU')
-    : (attaccante === 'tu' ? '🥅 IL TUO TIRO IN PORTA' : '🥅 TIRO DELLA CPU');
+    : (attaccante === 'tu' ? '🥅 IL TUO TIRO' : '🥅 TIRO DELLA CPU');
   overlay.appendChild(titolo);
 
   var portaWrapper = document.createElement('div');
@@ -2045,11 +2045,9 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
 
   var palla = document.getElementById('tiro-palla');
   if (palla) {
-    var xPct = PORTA_LEFT + (pos.x / 100) * PORTA_W;
-    var yPct = PORTA_TOP + (pos.y / 100) * PORTA_H;
     palla.classList.remove('iniziale', 'rigore');
-    palla.style.left = xPct + '%';
-    palla.style.top = yPct + '%';
+    palla.style.left = (PORTA_LEFT + (pos.x / 100) * PORTA_W) + '%';
+    palla.style.top = (PORTA_TOP + (pos.y / 100) * PORTA_H) + '%';
     palla.style.bottom = 'auto';
   }
   document.getElementById('tiro-info').textContent = 'FASE 1 — Dado: ' + dadoTiro;
@@ -2061,7 +2059,7 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
         portiere0.style.left = (PORTA_LEFT + (pos.x / 100) * PORTA_W - 10) + '%';
         portiere0.style.top = (PORTA_TOP + (pos.y / 100) * PORTA_H - 20) + '%';
       }
-      mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 Il portiere para facilmente!');
+      mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 Parata facile!');
       return;
     }
     var dadiPortiere = mescola([1,2,3,4,6,7,9]).slice(0, 3);
@@ -2086,7 +2084,7 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
 
     setTimeout(function() {
       if (dadiPortiere.indexOf(dadoTiro) > -1) {
-        mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 PARATA! Il portiere respinge');
+        mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 PARATA!');
       } else {
         if (isRigore) fase3RigoreConGrafica(dadoTiro, attaccante, difensore);
         else fase3TiroConGrafica(dadoTiro, attaccante, difensore);
@@ -2096,19 +2094,17 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
 }
 
 function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
-  document.getElementById('tiro-info').textContent = 'FASE 3 — Esito finale';
   var dadoEsito = Math.floor(Math.random() * 9) + 1;
   setTimeout(function() {
     var esito, motivo;
     if (dadoEsito === 1) { esito = 'palo'; motivo = '🥅 PALO!'; }
-    else if (dadoEsito === 3 || dadoEsito === 6 || dadoEsito === 9) { esito = 'angolo'; motivo = '🚩 CALCIO D\'ANGOLO!'; }
+    else if (dadoEsito === 3 || dadoEsito === 6 || dadoEsito === 9) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; }
     else { esito = 'parata'; motivo = '🧤 PARATA!'; }
     mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motivo);
   }, 1000);
 }
 
 function fase3RigoreConGrafica(dadoTiro, attaccante, difensore) {
-  document.getElementById('tiro-info').textContent = 'FASE 3 — Tiro di conferma';
   var dadoConferma = Math.floor(Math.random() * 9) + 1;
   setTimeout(function() {
     var esito, motivo;
@@ -2135,20 +2131,18 @@ function mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motiv
   }, 2500);
 }
 
-/* GESTIONE ESITI */
 function mostraGoalBanner(vincente) {
   var banner = document.getElementById('goal-banner');
   banner.classList.remove('tu', 'cpu', 'attivo');
   void banner.offsetWidth;
   banner.classList.add(vincente, 'attivo');
-  document.getElementById('goal-banner-text').textContent = 'GGGOOOAAALLL';
   setTimeout(function() { banner.classList.remove('attivo'); }, 3200);
 }
 
 function gestisciGoal(attaccante) {
   stato.punteggio[attaccante]++;
   stato.statistiche[attaccante].gol++;
-  log('⚽ GOAL! ' + (attaccante === 'tu' ? 'TU' : 'CPU') + '!', 'goal');
+  log('⚽ GOAL!', 'goal');
   mostraGoalBanner(attaccante);
   setTimeout(function() {
     var subito = attaccante === 'tu' ? 'cpu' : 'tu';
@@ -2164,13 +2158,11 @@ function gestisciGoal(attaccante) {
 }
 
 function gestisciParata(attaccante, difensore) {
-  log('🧤 Il portiere para e rinvia!');
+  log('🧤 Parata!');
   var portiereSquadra = difensore;
   var portiere = null;
   for (var i = 0; i < stato.giocatori[portiereSquadra].length; i++) {
-    if (stato.giocatori[portiereSquadra][i].portiere && !stato.giocatori[portiereSquadra][i].espulso) {
-      portiere = stato.giocatori[portiereSquadra][i]; break;
-    }
+    if (stato.giocatori[portiereSquadra][i].portiere) { portiere = stato.giocatori[portiereSquadra][i]; break; }
   }
   var zonaPortiere = portiereSquadra === 'tu' ? 0 : 6;
   if (portiere) {
@@ -2178,10 +2170,7 @@ function gestisciParata(attaccante, difensore) {
     if (pedinaEl) {
       pedinaEl.classList.remove('anim-fermo');
       pedinaEl.classList.add('anim-calcia');
-      setTimeout(function() {
-        pedinaEl.classList.remove('anim-calcia');
-        pedinaEl.classList.add('anim-fermo');
-      }, 800);
+      setTimeout(function() { pedinaEl.classList.remove('anim-calcia'); pedinaEl.classList.add('anim-fermo'); }, 800);
     }
   }
   setTimeout(function() {
@@ -2191,7 +2180,6 @@ function gestisciParata(attaccante, difensore) {
       stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
       var gz = stato.giocatori[difensore].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
       if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
-      log('🚀 Rinvio del portiere a centrocampo');
       renderCampo(); renderHeader();
       setTimeout(function() { eseguiPassaggioIniziale(difensore); }, 800);
     });
@@ -2199,7 +2187,7 @@ function gestisciParata(attaccante, difensore) {
 }
 
 function gestisciPalo(attaccante, difensore) {
-  log('🥅 Palo! La palla resta in Z' + stato.zonaPalla + ' e si rigioca il contrasto.', 'highlight');
+  log('🥅 Palo! Si rigioca nella stessa zona.', 'highlight');
   setTimeout(function() {
     stato.puntoPallaFermo = null;
     renderCampo(); renderHeader();
@@ -2243,14 +2231,13 @@ function flashVincitore(squadra) {
   setTimeout(function() { flash.classList.remove('attivo'); }, 600);
 }
 
-/* AVANZAMENTO */
 function avanzaMano() {
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
       suonaFischietto('fine-tempo');
       stato.tempo = 2; stato.mano = 1;
-      log('⏸️ FINE PRIMO TEMPO. ' + stato.punteggio.tu + ' - ' + stato.punteggio.cpu, 'goal');
+      log('⏸️ FINE PRIMO TEMPO.', 'goal');
       ['tu', 'cpu'].forEach(function(sq) {
         for (var i = 0; i < stato.giocatori[sq].length; i++) stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
       });
@@ -2276,28 +2263,11 @@ function avanzaMano() {
 function mostraFinestraFineTempo(callback) {
   var s = stato.statistiche;
   var html = '<div style="text-align:center;padding:10px">' +
-    '<h2 style="font-size:26px;color:#ffd700;margin-bottom:12px">⏸️ FINE PRIMO TEMPO</h2>' +
+    '<h2 style="color:#ffd700;margin-bottom:12px">⏸️ FINE PRIMO TEMPO</h2>' +
     '<p style="font-size:32px;font-weight:bold;margin:12px 0">' +
-      '<span style="color:#4dabf7">' + SQUADRE[stato.squadraTU].nome + ' ' + stato.punteggio.tu + '</span>' +
-      '<span style="color:#fff;margin:0 12px">-</span>' +
-      '<span style="color:#ff6b6b">' + stato.punteggio.cpu + ' ' + SQUADRE[stato.squadraCPU].nome + '</span>' +
+      '<span style="color:#4dabf7">' + stato.punteggio.tu + '</span> - <span style="color:#ff6b6b">' + stato.punteggio.cpu + '</span>' +
     '</p>' +
-    '<div class="stats-grid" style="margin-top:16px">' +
-      '<div class="stats-card"><h3>' + SQUADRE[stato.squadraTU].nome + '</h3>' +
-        '<div class="stats-row"><span>Gol</span><span class="val">' + s.tu.gol + '</span></div>' +
-        '<div class="stats-row"><span>Tiri</span><span class="val">' + s.tu.tiri + '</span></div>' +
-        '<div class="stats-row"><span>Parate</span><span class="val">' + s.tu.parate + '</span></div>' +
-        '<div class="stats-row"><span>Falli</span><span class="val">' + s.tu.falli + '</span></div>' +
-      '</div>' +
-      '<div class="stats-card"><h3>' + SQUADRE[stato.squadraCPU].nome + '</h3>' +
-        '<div class="stats-row"><span>Gol</span><span class="val">' + s.cpu.gol + '</span></div>' +
-        '<div class="stats-row"><span>Tiri</span><span class="val">' + s.cpu.tiri + '</span></div>' +
-        '<div class="stats-row"><span>Parate</span><span class="val">' + s.cpu.parate + '</span></div>' +
-        '<div class="stats-row"><span>Falli</span><span class="val">' + s.cpu.falli + '</span></div>' +
-      '</div>' +
-    '</div>' +
-    '<p style="font-size:12px;color:#aaa;margin-top:16px">Ripresa tra 3 secondi...</p>' +
-    '</div>';
+    '<p style="font-size:12px;color:#aaa">Ripresa tra 3 secondi...</p></div>';
   document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
   setTimeout(function() {
@@ -2312,7 +2282,6 @@ function finePartita() {
   if (TORNEO_MODE === 'europei') { salvaRisultatoTorneo(); return; }
   var msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!'
            : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
-  var s = stato.statistiche;
   document.getElementById('modale-box').innerHTML =
     '<h2>FINE PARTITA</h2>' +
     '<p style="font-size:36px;font-weight:bold;margin:10px 0">' +
@@ -2337,7 +2306,6 @@ function salvaRisultatoTorneo() {
   }, 1500);
 }
 
-/* SOSTITUZIONI */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
@@ -2348,7 +2316,7 @@ function apriSostituzioni() {
 function renderModaleSostituzioni() {
   var sq = 'tu';
   var html = '<h2>🔄 Sostituzioni</h2>';
-  html += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700;margin-bottom:8px">In campo</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
+  html += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">In campo</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
   var gs = stato.giocatori[sq].filter(function(g) { return !g.espulso; });
   for (var i = 0; i < gs.length; i++) {
     var g = gs[i];
@@ -2357,7 +2325,7 @@ function renderModaleSostituzioni() {
       '<div>' + g.nome + '</div><div>⚡' + g.stamina + '/20</div></div>';
   }
   html += '</div></div>';
-  html += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700;margin-bottom:8px">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
+  html += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
   for (var k = 0; k < stato.panchina[sq].length; k++) {
     var p = stato.panchina[sq][k];
     var sel2 = selezioneSost.panchina === p.id ? ' style="background:#ffd700;color:#16213e"' : '';
@@ -2399,9 +2367,7 @@ function confermaSostituzione() {
   renderCampo(); renderPanchina(); renderModaleSostituzioni();
 }
 
-/* ============================================================
-   AVVIO — con try/catch per mostrare eventuali errori a schermo
-   ============================================================ */
+/* AVVIO */
 try {
   if (TORNEO_MODE === 'europei' && PARTITA_TORNEO) {
     var datiPartita = JSON.parse(localStorage.getItem('torneo_partita_attiva_' + PARTITA_TORNEO) || '{}');
@@ -2417,8 +2383,7 @@ try {
   document.body.innerHTML = '<div style="background:#8B2020;color:#fff;padding:30px;font-family:monospace;font-size:14px;white-space:pre-wrap">' +
     '<h2>ERRORE DI AVVIO</h2>' +
     '<p>' + err.message + '</p>' +
-    '<p>Stack: ' + (err.stack || 'n/d') + '</p>' +
-    '<p>Verifica che divise.js sia caricato correttamente.</p>' +
+    '<p>Verifica che divise.js sia caricato.</p>' +
     '</div>';
 }
 </script>
