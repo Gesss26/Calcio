@@ -16,7 +16,6 @@
   }
   .app { display: flex; flex-direction: column; height: 100vh; position: relative; }
 
-  /* ============ SFONDO STADIO ============ */
   .stadio-sfondo {
     position: fixed; inset: 0;
     background: url('Stadio.jpg') center/cover no-repeat;
@@ -33,7 +32,6 @@
       rgba(10,10,21,0.75) 100%);
   }
 
-  /* ============ TOPBAR ============ */
   .topbar {
     display: flex; justify-content: center; align-items: center;
     padding: 6px 14px;
@@ -72,7 +70,6 @@
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* ============ AREA GIOCO ============ */
   .area-gioco {
     position: relative;
     flex: 1;
@@ -80,7 +77,7 @@
     overflow: hidden;
   }
 
-  /* ============ PANNELLO CARTE (overlay in alto) ============ */
+  /* PANNELLO CARTE */
   .carte-panel {
     position: absolute;
     top: 6px; left: 50%;
@@ -219,22 +216,20 @@
   button.primario:hover:not(:disabled) { background: #fff; }
 
   /* ==================================================
-     AREA CAMPO — SOLO GIOCATORI, NESSUN CAMPO FINTO
-     I giocatori sono posizionati direttamente sopra
-     l'erba dello stadio tramite un contenitore con
-     percentuali regolate per combaciare con l'erba.
+     AREA CAMPO — più stretta e centrata
      ================================================== */
   .campo-area {
-  position: absolute;
-  /* Stringi la larghezza: prima era 92%, adesso 68% (circa 3/4)
-     e centra orizzontalmente con left a metà */
-  left: 16%;
-  top: 46%;
-  width: 68%;
-  height: 40%;
-  z-index: 6;
-  pointer-events: none;
-}
+    position: absolute;
+    left: 18%;        /* (100-64)/2 = 18 → centrato */
+    top: 46%;
+    width: 64%;       /* accorciato per portieri davanti alle porte */
+    height: 42%;
+    z-index: 6;
+    pointer-events: none;
+    /* Padding orizzontale per avvicinare i giocatori al centro
+       e non farli finire fuori dal campo */
+    padding: 0 2%;
+  }
 
   .zone-overlay {
     position: absolute; inset: 0; z-index: 2;
@@ -250,7 +245,6 @@
     font-size: 11px; color: rgba(255,215,0,0.85); font-weight: bold;
     text-shadow: 0 1px 4px #000, 0 0 6px #000;
   }
-  /* Evidenzia la zona della contesa: bagliore dorato verticale */
   .zona-overlay.attiva {
     background: linear-gradient(180deg,
       rgba(255,215,0,0.05) 0%,
@@ -276,10 +270,13 @@
     display: flex; flex-direction: column;
     justify-content: center;
     align-items: stretch;
+    /* padding orizzontale interno per stringere le file */
+    padding: 0 1.5%;
   }
+
   .meta-sup, .meta-inf {
     display: flex; flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-evenly;   /* distribuzione uniforme */
     align-items: center;
     flex: 1;
     padding: 2px 4px;
@@ -292,12 +289,22 @@
     position: relative;
   }
 
+  /* Portieri: posizionati DENTRO il campo, davanti alla porta
+     (non al centro esatto della zona, ma spostati verso l'interno) */
   .portiere-wrapper {
     position: absolute !important;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5;
+  }
+  /* Portiere TU: spostato verso destra (verso il centro del campo) */
+  .portiere-wrapper.tu {
+    left: 62%;
+  }
+  /* Portiere CPU: spostato verso sinistra (verso il centro del campo) */
+  .portiere-wrapper.cpu {
+    left: 38%;
   }
 
   .info-laterale {
@@ -322,12 +329,9 @@
   .info-laterale.ammonito-info { border-color: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6); }
   .info-laterale.espulso-info { border-color: #ff0000; box-shadow: 0 0 6px rgba(255,0,0,0.6); }
 
-  /* ============ GIOCATORI VERTICALI ============ */
   .pedina {
     position: relative; width: 34px; height: 44px;
     display: flex; align-items: center; justify-content: center;
-    /* I giocatori restano DRITTI (verticali) — nessuna rotazione 3D.
-       La prospettiva è simulata solo dal contesto dello sfondo. */
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.85));
   }
   .pedina.cpu svg { transform: scaleX(-1); }
@@ -412,7 +416,6 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ============ PANCHINA ============ */
   .panchina {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -437,7 +440,6 @@
     font-size: 7px; color: #ccc; margin-top: 1px; font-weight: bold;
   }
 
-  /* ============ BANNER E MODALI ============ */
   .goal-banner {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -569,7 +571,6 @@
   }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
-  /* SCHERMATA TIRO */
   .tiro-overlay {
     position: fixed; inset: 0;
     background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%);
@@ -696,7 +697,6 @@
   </div>
 
   <div class="area-gioco">
-    <!-- PANNELLO CARTE -->
     <div class="carte-panel nascosto" id="carte-panel">
       <div class="info-mano">
         <div class="titolo" id="titolo-mano">Contrasto</div>
@@ -733,7 +733,6 @@
       <div id="azioni-container"></div>
     </div>
 
-    <!-- AREA CAMPO: solo giocatori, allineati all'erba dello stadio -->
     <div class="campo-area">
       <div class="zone-overlay" id="zone-overlay"></div>
       <div class="zone" id="zone"></div>
@@ -882,7 +881,6 @@ function suonaScivolata() {
   noise.start(ora); noise.stop(ora + durata);
 }
 
-/* STATO */
 var stato = {
   tipoPartita: '1P',
   squadraTU: 'italia', squadraCPU: 'francia',
