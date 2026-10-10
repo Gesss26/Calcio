@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Serie A 2026/2027</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: #0a0a15;
+    color: #eee;
+    overflow: hidden;
+    user-select: none;
+  }
+  .app { display: flex; flex-direction: column; height: 100vh; overflow-y: auto; }
+  .header {
+    background: linear-gradient(135deg, #16213e, #0f3460);
+    padding: 16px;
+    text-align: center;
+    border-bottom: 3px solid #ffd700;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header h1 { font-size: 22px; color: #ffd700; letter-spacing: 2px; }
+  .header p { font-size: 12px; color: #aaa; margin-top: 4px; }
+  .content { padding: 16px; max-width: 1100px; margin: 0 auto; width: 100%; padding-bottom: 40px; }
+  .fase-titolo {
+    font-size: 16px; color: #ffd700; font-weight: bold;
+    margin: 20px 0 10px; padding: 8px 12px;
+    background: rgba(255,215,0,0.1); border-left: 4px solid #ffd700;
+    border-radius: 4px;
+  }
+  .classifica-box {
+    background: #16213e; border: 2px solid #0f3460; border-radius: 10px;
+    padding: 10px; overflow: hidden; margin-bottom: 16px;
+  }
+  .classifica-box h3 {
+    color: #ffd700; font-size: 14px; text-align: center;
+    margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,215,0,0.3);
+  }
+  .classifica { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .classifica th {
+    color: #ffd700; font-size: 10px; padding: 4px 2px;
+    text-align: center; border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .classifica td { padding: 4px 2px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .classifica td:first-child { text-align: left; font-weight: bold; width: 30px; }
+  .classifica td:nth-child(2) { text-align: left; }
+  .classifica tr.tua { background: rgba(77,171,247,0.25); }
+  .classifica tr.champions td:first-child { color: #4ade80; }
+  .classifica tr.europa td:first-child { color: #fbbf24; }
+  .classifica tr.relegazione td:first-child { color: #ef4444; }
+  .giornata-box {
+    background: #16213e; border: 2px solid #ffd700; border-radius: 10px;
+    padding: 12px; margin: 12px 0;
+  }
+  .giornata-box h3 { color: #ffd700; font-size: 14px; margin-bottom: 8px; }
+  .match-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 12px;
+  }
+  .match-row.tua { background: rgba(77,171,247,0.2); border-radius: 4px; }
+  .match-row .score { color: #ffd700; font-weight: bold; margin: 0 8px; }
+  .match-row .sq { flex: 1; }
+  .match-row .sq.casa { text-align: right; }
+  .match-row .sq.trasf { text-align: left; }
+  .squadre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px; margin-top: 12px;
+  }
+  .squadra-btn {
+    background: #0f3460; border: 2px solid #4dabf7; border-radius: 8px;
+    padding: 8px; cursor: pointer; text-align: center; color: #fff;
+    font-size: 11px; font-weight: bold; transition: all 0.2s;
+  }
+  .squadra-btn:hover { background: #4dabf7; color: #16213e; }
+  .squadra-btn.selezionata { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  .squadra-btn .maglia { width: 40px; height: 52px; margin: 0 auto 4px; }
+  .squadra-btn .maglia svg { width: 100%; height: 100%; }
+  .btn {
+    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: bold;
+    cursor: pointer; margin: 4px;
+  }
+  .btn:hover { background: #4dabf7; color: #0f3460; }
+  .btn.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  .btn.primario:hover { background: #fff; }
+  .torna-menu {
+    position: fixed; top: 10px; left: 10px; z-index: 20;
+    background: #0f3460; border: 2px solid #4dabf7; color: #fff;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold;
+    font-size: 12px;
+  }
+  .torna-menu:hover { background: #4dabf7; color: #0f3460; }
+  .reset-btn {
+    position: fixed; top: 10px; right: 10px; z-index: 20;
+    background: #8B2020; border: 2px solid #ff6b6b; color: #fff;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: bold;
+    font-size: 12px;
+  }
+  .reset-btn:hover { background: #ff6b6b; }
+  .avviso {
+    background: rgba(255,215,0,0.15); border: 1px solid #ffd700;
+    border-radius: 6px; padding: 8px 12px; font-size: 11px; color: #ffd700;
+    margin: 10px 0;
+  }
+  .prossima-partita {
+    background: linear-gradient(135deg, #ffd700, #f59f00);
+    border-radius: 10px; padding: 14px; margin: 14px 0;
+    color: #16213e; text-align: center;
+  }
+  .prossima-partita h3 { font-size: 14px; margin-bottom: 8px; }
+  .prossima-partita .vs { font-size: 20px; font-weight: 900; margin: 8px 0; letter-spacing: 2px; }
+  .prossima-partita .info { font-size: 11px; margin-bottom: 8px; }
+  .prossima-partita .play-big {
+    background: #16213e; color: #ffd700; border: none;
+    padding: 10px 24px; border-radius: 8px; font-weight: bold;
+    font-size: 14px; cursor: pointer;
+  }
+  .prossima-partita .play-big:hover { background: #000; }
+  .giornata-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 8px; margin: 10px 0;
+  }
+  .giornata-nav button {
+    background: #0f3460; color: #fff; border: 2px solid #4dabf7;
+    padding: 6px 14px; border-radius: 8px; font-weight: bold;
+    cursor: pointer; font-size: 12px;
+  }
+  .giornata-nav button:hover:not(:disabled) { background: #4dabf7; color: #16213e; }
+  .giornata-nav button:disabled { opacity: 0.35; cursor: not-allowed; }
+  .giornata-nav .label { color: #ffd700; font-weight: bold; font-size: 13px; }
+</style>
+</head>
+<body>
+<button class="torna-menu" onclick="location.href='index.html'">← Menù</button>
+<button class="reset-btn" onclick="resetCampionato()">🗑 Reset</button>
+<div class="app">
+  <div class="header">
+    <h1>⚽ SERIE A 2026/2027</h1>
+    <p>20 squadre · 38 giornate · 380 partite</p>
+  </div>
+  <div class="content" id="content">
+    <div style="text-align:center;padding:40px;color:#ffd700">Caricamento...</div>
+  </div>
+</div>
+
+<script src="divise.js"></script>
+<script>
+/* ============================================================
+   CALENDARIO SERIE A 2026/2027 — 38 giornate
+   ============================================================ */
+const CALENDARIO_SERIEA = [
+  /* GIORNATA 1 */
+  [
+    { homeTeam: "Udinese", awayTeam: "como", localDate: "2026-08-22", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Inter", awayTeam: "Monza", localDate: "2026-08-22", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Genoa", awayTeam: "Napoli", localDate: "2026-08-22", localTime: "20:45", stadium: "Luigi Ferraris" },
+    { homeTeam: "Parma", awayTeam: "Cagliari", localDate: "2026-08-22", localTime: "20:45", stadium: "Ennio Tardini" },
+    { homeTeam: "Frosinone", awayTeam: "Juventus", localDate: "2026-08-23", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Lecce", localDate: "2026-08-23", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Atalanta", awayTeam: "Sassuolo", localDate: "2026-08-23", localTime: "20:45", stadium: "New Balance Arena" },
+    { homeTeam: "Torino", awayTeam: "AC Milan", localDate: "2026-08-23", localTime: "20:45", stadium: "Olimpico Grande Torino" },
+    { homeTeam: "Bologna", awayTeam: "Lazio", localDate: "2026-08-24", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "AS Roma", awayTeam: "Fiorentina", localDate: "2026-08-24", localTime: "20:45", stadium: "Stadio Olimpico" }
+  ],
+  /* GIORNATA 2 */
+  [
+    { homeTeam: "AC Milan", awayTeam: "Venezia", localDate: "2026-08-28", localTime: "20:45", stadium: "San Siro" },
+    { homeTeam: "Sassuolo", awayTeam: "Torino", localDate: "2026-08-29", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "Fiorentina", awayTeam: "Frosinone", localDate: "2026-08-29", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Monza", awayTeam: "Udinese", localDate: "2026-08-29", localTime: "18:30", stadium: "U-Power Stadium" },
+    { homeTeam: "Juventus", awayTeam: "Parma", localDate: "2026-08-29", localTime: "20:45", stadium: "Allianz Stadium" },
+    { homeTeam: "Napoli", awayTeam: "como", localDate: "2026-08-30", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Lazio", awayTeam: "Genoa", localDate: "2026-08-30", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Cagliari", awayTeam: "Inter", localDate: "2026-08-30", localTime: "20:45", stadium: "Unipol Domus" },
+    { homeTeam: "Lecce", awayTeam: "AS Roma", localDate: "2026-08-31", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "Atalanta", awayTeam: "Bologna", localDate: "2026-08-31", localTime: "20:45", stadium: "New Balance Arena" }
+  ],
+  /* GIORNATA 3 */
+  [
+    { homeTeam: "Genoa", awayTeam: "como", localDate: "2026-09-04", localTime: "20:45", stadium: "Luigi Ferraris" },
+    { homeTeam: "Fiorentina", awayTeam: "Torino", localDate: "2026-09-05", localTime: "15:00", stadium: "Artemio Franchi" },
+    { homeTeam: "Inter", awayTeam: "Napoli", localDate: "2026-09-05", localTime: "18:00", stadium: "San Siro" },
+    { homeTeam: "AS Roma", awayTeam: "Atalanta", localDate: "2026-09-05", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Frosinone", awayTeam: "Venezia", localDate: "2026-09-06", localTime: "15:00", stadium: "Benito Stirpe" },
+    { homeTeam: "Parma", awayTeam: "Monza", localDate: "2026-09-06", localTime: "15:00", stadium: "Ennio Tardini" },
+    { homeTeam: "Bologna", awayTeam: "Sassuolo", localDate: "2026-09-06", localTime: "18:00", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Juventus", awayTeam: "AC Milan", localDate: "2026-09-06", localTime: "20:45", stadium: "Allianz Stadium" },
+    { homeTeam: "Cagliari", awayTeam: "Lecce", localDate: "2026-09-07", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Udinese", awayTeam: "Lazio", localDate: "2026-09-07", localTime: "20:45", stadium: "Bluenergy Stadium" }
+  ],
+  /* GIORNATA 4 */
+  [
+    { homeTeam: "Venezia", awayTeam: "Fiorentina", localDate: "2026-09-11", localTime: "20:45", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Genoa", awayTeam: "Frosinone", localDate: "2026-09-12", localTime: "15:00", stadium: "Luigi Ferraris" },
+    { homeTeam: "Lazio", awayTeam: "AC Milan", localDate: "2026-09-12", localTime: "18:00", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Cagliari", localDate: "2026-09-12", localTime: "20:45", stadium: "New Balance Arena" },
+    { homeTeam: "Lecce", awayTeam: "Monza", localDate: "2026-09-13", localTime: "15:00", stadium: "Via del Mare" },
+    { homeTeam: "Napoli", awayTeam: "Bologna", localDate: "2026-09-13", localTime: "18:00", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Sassuolo", awayTeam: "Juventus", localDate: "2026-09-13", localTime: "20:45", stadium: "Mapei Stadium" },
+    { homeTeam: "Torino", awayTeam: "AS Roma", localDate: "2026-09-14", localTime: "18:30", stadium: "Olimpico Grande Torino" },
+    { homeTeam: "como", awayTeam: "Parma", localDate: "2026-09-14", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Inter", awayTeam: "Udinese", localDate: "2026-09-14", localTime: "20:45", stadium: "San Siro" }
+  ],
+  /* GIORNATA 5 */
+  [
+    { homeTeam: "Monza", awayTeam: "Sassuolo", localDate: "2026-09-18", localTime: "20:45", stadium: "U-Power Stadium" },
+    { homeTeam: "Udinese", awayTeam: "Cagliari", localDate: "2026-09-19", localTime: "15:00", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Bologna", awayTeam: "Torino", localDate: "2026-09-19", localTime: "15:00", stadium: "Renato Dall'Ara" },
+    { homeTeam: "AS Roma", awayTeam: "Inter", localDate: "2026-09-19", localTime: "18:00", stadium: "Stadio Olimpico" },
+    { homeTeam: "Venezia", awayTeam: "Lazio", localDate: "2026-09-19", localTime: "20:45", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Fiorentina", awayTeam: "Napoli", localDate: "2026-09-20", localTime: "12:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Frosinone", awayTeam: "como", localDate: "2026-09-20", localTime: "15:00", stadium: "Benito Stirpe" },
+    { homeTeam: "Parma", awayTeam: "Genoa", localDate: "2026-09-20", localTime: "15:00", stadium: "Ennio Tardini" },
+    { homeTeam: "Juventus", awayTeam: "Atalanta", localDate: "2026-09-20", localTime: "18:00", stadium: "Allianz Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Lecce", localDate: "2026-09-20", localTime: "20:45", stadium: "San Siro" }
+  ],
+  /* GIORNATA 6 */
+  [
+    { homeTeam: "Genoa", awayTeam: "Fiorentina", localDate: "2026-10-10", localTime: "15:00", stadium: "Luigi Ferraris" },
+    { homeTeam: "Inter", awayTeam: "Parma", localDate: "2026-10-10", localTime: "18:00", stadium: "San Siro" },
+    { homeTeam: "Napoli", awayTeam: "Frosinone", localDate: "2026-10-10", localTime: "20:45", stadium: "Maradona" },
+    { homeTeam: "como", awayTeam: "AS Roma", localDate: "2026-10-11", localTime: "12:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Lazio", awayTeam: "Monza", localDate: "2026-10-11", localTime: "15:00", stadium: "Stadio Olimpico" },
+    { homeTeam: "Lecce", awayTeam: "Bologna", localDate: "2026-10-11", localTime: "15:00", stadium: "Via del Mare" },
+    { homeTeam: "Sassuolo", awayTeam: "AC Milan", localDate: "2026-10-11", localTime: "18:00", stadium: "Mapei Stadium" },
+    { homeTeam: "Cagliari", awayTeam: "Juventus", localDate: "2026-10-11", localTime: "20:45", stadium: "Unipol Domus" },
+    { homeTeam: "Atalanta", awayTeam: "Venezia", localDate: "2026-10-12", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Torino", awayTeam: "Udinese", localDate: "2026-10-12", localTime: "20:45", stadium: "Olimpico Grande Torino" }
+  ],
+  /* GIORNATA 7 */
+  [
+    { homeTeam: "Frosinone", awayTeam: "Sassuolo", localDate: "2026-10-16", localTime: "20:45", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Napoli", localDate: "2026-10-17", localTime: "15:00", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Bologna", awayTeam: "Inter", localDate: "2026-10-17", localTime: "18:00", stadium: "Renato Dall'Ara" },
+    { homeTeam: "AS Roma", awayTeam: "Genoa", localDate: "2026-10-17", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Udinese", awayTeam: "Lecce", localDate: "2026-10-18", localTime: "12:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Fiorentina", awayTeam: "como", localDate: "2026-10-18", localTime: "15:00", stadium: "Artemio Franchi" },
+    { homeTeam: "AC Milan", awayTeam: "Atalanta", localDate: "2026-10-18", localTime: "18:00", stadium: "San Siro" },
+    { homeTeam: "Juventus", awayTeam: "Lazio", localDate: "2026-10-18", localTime: "20:45", stadium: "Allianz Stadium" },
+    { homeTeam: "Monza", awayTeam: "Cagliari", localDate: "2026-10-19", localTime: "18:30", stadium: "U-Power Stadium" },
+    { homeTeam: "Parma", awayTeam: "Torino", localDate: "2026-10-19", localTime: "20:45", stadium: "Ennio Tardini" }
+  ],
+  /* GIORNATA 8 */
+  [
+    { homeTeam: "Torino", awayTeam: "Monza", localDate: "2026-10-23", localTime: "20:45", stadium: "Olimpico di Torino" },
+    { homeTeam: "Cagliari", awayTeam: "Bologna", localDate: "2026-10-24", localTime: "15:00", stadium: "Unipol Domus" },
+    { homeTeam: "como", awayTeam: "Sassuolo", localDate: "2026-10-24", localTime: "15:00", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Napoli", awayTeam: "AS Roma", localDate: "2026-10-24", localTime: "18:00", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Lazio", awayTeam: "Parma", localDate: "2026-10-24", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Inter", awayTeam: "Fiorentina", localDate: "2026-10-25", localTime: "12:30", stadium: "San Siro" },
+    { homeTeam: "Genoa", awayTeam: "Venezia", localDate: "2026-10-25", localTime: "15:00", stadium: "Luigi Ferraris" },
+    { homeTeam: "Atalanta", awayTeam: "Frosinone", localDate: "2026-10-25", localTime: "15:00", stadium: "New Balance Arena" },
+    { homeTeam: "Lecce", awayTeam: "Juventus", localDate: "2026-10-25", localTime: "18:00", stadium: "Via del Mare" },
+    { homeTeam: "Udinese", awayTeam: "AC Milan", localDate: "2026-10-25", localTime: "20:45", stadium: "Bluenergy Stadium" }
+  ],
+  /* GIORNATA 9 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Lazio", localDate: "2026-10-27", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Cagliari", localDate: "2026-10-27", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Torino", awayTeam: "como", localDate: "2026-10-27", localTime: "20:45", stadium: "Olimpico di Torino" },
+    { homeTeam: "AC Milan", awayTeam: "Bologna", localDate: "2026-10-28", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Venezia", awayTeam: "Inter", localDate: "2026-10-28", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Udinese", localDate: "2026-10-28", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Genoa", awayTeam: "Juventus", localDate: "2026-10-28", localTime: "20:45", stadium: "Luigi Ferraris" },
+    { homeTeam: "Monza", awayTeam: "Napoli", localDate: "2026-10-28", localTime: "20:45", stadium: "U-Power Stadium" },
+    { homeTeam: "Frosinone", awayTeam: "Lecce", localDate: "2026-10-29", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Fiorentina", awayTeam: "Atalanta", localDate: "2026-10-29", localTime: "20:45", stadium: "Artemio Franchi" }
+  ],
+  /* GIORNATA 10 */
+  [
+    { homeTeam: "Bologna", awayTeam: "Monza", localDate: "2026-10-31", localTime: "15:00", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Udinese", awayTeam: "AS Roma", localDate: "2026-10-31", localTime: "18:00", stadium: "Bluenergy Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Inter", localDate: "2026-10-31", localTime: "20:45", stadium: "San Siro" },
+    { homeTeam: "como", awayTeam: "Venezia", localDate: "2026-11-01", localTime: "12:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Lazio", awayTeam: "Cagliari", localDate: "2026-11-01", localTime: "15:00", stadium: "Stadio Olimpico" },
+    { homeTeam: "Frosinone", awayTeam: "Torino", localDate: "2026-11-01", localTime: "15:00", stadium: "Benito Stirpe" },
+    { homeTeam: "Lecce", awayTeam: "Genoa", localDate: "2026-11-01", localTime: "18:00", stadium: "Via del Mare" },
+    { homeTeam: "Juventus", awayTeam: "Napoli", localDate: "2026-11-01", localTime: "20:45", stadium: "Allianz Stadium" },
+    { homeTeam: "Sassuolo", awayTeam: "Fiorentina", localDate: "2026-11-02", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "Parma", localDate: "2026-11-02", localTime: "20:45", stadium: "New Balance Arena" }
+  ],
+  /* GIORNATA 11 */
+  [
+    { homeTeam: "Venezia", awayTeam: "Udinese", localDate: "2026-11-06", localTime: "20:45", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Cagliari", awayTeam: "Frosinone", localDate: "2026-11-07", localTime: "15:00", stadium: "Unipol Domus" },
+    { homeTeam: "Torino", awayTeam: "Lecce", localDate: "2026-11-07", localTime: "15:00", stadium: "Olimpico di Torino" },
+    { homeTeam: "Parma", awayTeam: "Bologna", localDate: "2026-11-07", localTime: "18:00", stadium: "Ennio Tardini" },
+    { homeTeam: "AS Roma", awayTeam: "Sassuolo", localDate: "2026-11-07", localTime: "20:45", stadium: "Stadio Olimpico" },
+    { homeTeam: "Napoli", awayTeam: "Lazio", localDate: "2026-11-08", localTime: "12:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Genoa", awayTeam: "AC Milan", localDate: "2026-11-08", localTime: "15:00", stadium: "Luigi Ferraris" },
+    { homeTeam: "Monza", awayTeam: "Atalanta", localDate: "2026-11-08", localTime: "15:00", stadium: "U-Power Stadium" },
+    { homeTeam: "Inter", awayTeam: "como", localDate: "2026-11-08", localTime: "18:00", stadium: "San Siro" },
+    { homeTeam: "Fiorentina", awayTeam: "Juventus", localDate: "2026-11-08", localTime: "20:45", stadium: "Artemio Franchi" }
+  ],
+  /* GIORNATA 12 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Lecce", localDate: "2026-11-21", localTime: "15:00", stadium: "Stadio Olimpico" },
+    { homeTeam: "como", awayTeam: "Cagliari", localDate: "2026-11-21", localTime: "15:00", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Parma", awayTeam: "AS Roma", localDate: "2026-11-21", localTime: "18:00", stadium: "Ennio Tardini" },
+    { homeTeam: "Napoli", awayTeam: "Torino", localDate: "2026-11-21", localTime: "20:45", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Sassuolo", awayTeam: "Genoa", localDate: "2026-11-22", localTime: "12:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Frosinone", localDate: "2026-11-22", localTime: "15:00", stadium: "San Siro" },
+    { homeTeam: "Bologna", awayTeam: "Udinese", localDate: "2026-11-22", localTime: "18:00", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Atalanta", awayTeam: "Inter", localDate: "2026-11-22", localTime: "20:45", stadium: "New Balance Arena" },
+    { homeTeam: "Monza", awayTeam: "Fiorentina", localDate: "2026-11-23", localTime: "18:30", stadium: "U-Power Stadium" },
+    { homeTeam: "Juventus", awayTeam: "Venezia", localDate: "2026-11-23", localTime: "20:45", stadium: "Allianz Stadium" }
+  ],
+  /* GIORNATA 13 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Napoli", localDate: "2026-11-29", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "Cagliari", awayTeam: "AC Milan", localDate: "2026-11-29", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Udinese", awayTeam: "Fiorentina", localDate: "2026-11-29", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Monza", localDate: "2026-11-29", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Torino", awayTeam: "Lazio", localDate: "2026-11-29", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Genoa", localDate: "2026-11-29", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Parma", localDate: "2026-11-29", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Bologna", localDate: "2026-11-29", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Lecce", awayTeam: "Atalanta", localDate: "2026-11-29", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Juventus", localDate: "2026-11-29", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 14 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Atalanta", localDate: "2026-12-06", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "AC Milan", awayTeam: "Parma", localDate: "2026-12-06", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Napoli", awayTeam: "Lecce", localDate: "2026-12-06", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Genoa", awayTeam: "Torino", localDate: "2026-12-06", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Juventus", awayTeam: "Udinese", localDate: "2026-12-06", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Bologna", awayTeam: "AS Roma", localDate: "2026-12-06", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Cagliari", localDate: "2026-12-06", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Frosinone", awayTeam: "Inter", localDate: "2026-12-06", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Sassuolo", localDate: "2026-12-06", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Monza", awayTeam: "como", localDate: "2026-12-06", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 15 */
+  [
+    { homeTeam: "Lazio", awayTeam: "AS Roma", localDate: "2026-12-13", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Cagliari", awayTeam: "Venezia", localDate: "2026-12-13", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "AC Milan", localDate: "2026-12-13", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Frosinone", localDate: "2026-12-13", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Juventus", awayTeam: "Monza", localDate: "2026-12-13", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "Genoa", localDate: "2026-12-13", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Inter", awayTeam: "Torino", localDate: "2026-12-13", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Parma", awayTeam: "Fiorentina", localDate: "2026-12-13", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Lecce", awayTeam: "Sassuolo", localDate: "2026-12-13", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Bologna", localDate: "2026-12-13", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 16 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Parma", localDate: "2026-12-20", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "como", localDate: "2026-12-20", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Genoa", awayTeam: "Udinese", localDate: "2026-12-20", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "AS Roma", awayTeam: "Juventus", localDate: "2026-12-20", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Napoli", localDate: "2026-12-20", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Fiorentina", awayTeam: "Bologna", localDate: "2026-12-20", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Cagliari", localDate: "2026-12-20", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Frosinone", awayTeam: "Lazio", localDate: "2026-12-20", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Monza", localDate: "2026-12-20", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Lecce", awayTeam: "Inter", localDate: "2026-12-20", localTime: "18:30", stadium: "Via del Mare" }
+  ],
+  /* GIORNATA 17 */
+  [
+    { homeTeam: "Cagliari", awayTeam: "Genoa", localDate: "2027-01-03", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Udinese", awayTeam: "Atalanta", localDate: "2027-01-03", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Frosinone", localDate: "2027-01-03", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Bologna", awayTeam: "Juventus", localDate: "2027-01-03", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Lazio", localDate: "2027-01-03", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Venezia", localDate: "2027-01-03", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Sassuolo", localDate: "2027-01-03", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Parma", awayTeam: "Napoli", localDate: "2027-01-03", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "como", awayTeam: "Lecce", localDate: "2027-01-03", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "AC Milan", localDate: "2027-01-03", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 18 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Inter", localDate: "2027-01-06", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "Udinese", localDate: "2027-01-06", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Fiorentina", localDate: "2027-01-06", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Napoli", awayTeam: "Cagliari", localDate: "2027-01-06", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Genoa", awayTeam: "Monza", localDate: "2027-01-06", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Juventus", awayTeam: "Torino", localDate: "2027-01-06", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "como", localDate: "2027-01-06", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Frosinone", awayTeam: "Bologna", localDate: "2027-01-06", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "AS Roma", localDate: "2027-01-06", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Lecce", awayTeam: "Parma", localDate: "2027-01-06", localTime: "18:30", stadium: "Via del Mare" }
+  ],
+  /* GIORNATA 19 */
+  [
+    { homeTeam: "Cagliari", awayTeam: "Sassuolo", localDate: "2027-01-10", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Udinese", awayTeam: "Napoli", localDate: "2027-01-10", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "AC Milan", localDate: "2027-01-10", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Bologna", awayTeam: "Genoa", localDate: "2027-01-10", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Lecce", localDate: "2027-01-10", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Atalanta", localDate: "2027-01-10", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Juventus", localDate: "2027-01-10", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Parma", awayTeam: "Venezia", localDate: "2027-01-10", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "como", awayTeam: "Lazio", localDate: "2027-01-10", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Frosinone", localDate: "2027-01-10", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 20 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Bologna", localDate: "2027-01-17", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "Monza", localDate: "2027-01-17", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Torino", localDate: "2027-01-17", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "como", localDate: "2027-01-17", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Fiorentina", localDate: "2027-01-17", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Juventus", awayTeam: "Genoa", localDate: "2027-01-17", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "AS Roma", localDate: "2027-01-17", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Venezia", awayTeam: "Frosinone", localDate: "2027-01-17", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Inter", localDate: "2027-01-17", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Lecce", awayTeam: "Udinese", localDate: "2027-01-17", localTime: "18:30", stadium: "Via del Mare" }
+  ],
+  /* GIORNATA 21 */
+  [
+    { homeTeam: "Genoa", awayTeam: "Parma", localDate: "2027-01-24", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Juventus", awayTeam: "Cagliari", localDate: "2027-01-24", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Udinese", localDate: "2027-01-24", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Bologna", awayTeam: "Atalanta", localDate: "2027-01-24", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Sassuolo", localDate: "2027-01-24", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Inter", awayTeam: "Venezia", localDate: "2027-01-24", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "AC Milan", localDate: "2027-01-24", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Lecce", awayTeam: "Torino", localDate: "2027-01-24", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Napoli", localDate: "2027-01-24", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Lazio", localDate: "2027-01-24", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 22 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Venezia", localDate: "2027-01-31", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "como", localDate: "2027-01-31", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Juventus", localDate: "2027-01-31", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "Parma", localDate: "2027-01-31", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Inter", localDate: "2027-01-31", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Bologna", localDate: "2027-01-31", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Genoa", awayTeam: "Lecce", localDate: "2027-01-31", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Atalanta", awayTeam: "Fiorentina", localDate: "2027-01-31", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Torino", awayTeam: "Frosinone", localDate: "2027-01-31", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Monza", awayTeam: "AS Roma", localDate: "2027-01-31", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 23 */
+  [
+    { homeTeam: "Juventus", awayTeam: "Sassuolo", localDate: "2027-02-07", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Torino", localDate: "2027-02-07", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Lazio", localDate: "2027-02-07", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Bologna", awayTeam: "AC Milan", localDate: "2027-02-07", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Udinese", localDate: "2027-02-07", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Inter", awayTeam: "Cagliari", localDate: "2027-02-07", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Venezia", awayTeam: "Genoa", localDate: "2027-02-07", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Frosinone", localDate: "2027-02-07", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Lecce", awayTeam: "Napoli", localDate: "2027-02-07", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Monza", localDate: "2027-02-07", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 24 */
+  [
+    { homeTeam: "Cagliari", awayTeam: "Lazio", localDate: "2027-02-14", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Juventus", localDate: "2027-02-14", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Venezia", localDate: "2027-02-14", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Genoa", awayTeam: "Atalanta", localDate: "2027-02-14", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "AS Roma", awayTeam: "Parma", localDate: "2027-02-14", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Bologna", awayTeam: "como", localDate: "2027-02-14", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Torino", awayTeam: "Sassuolo", localDate: "2027-02-14", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "AC Milan", localDate: "2027-02-14", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Fiorentina", localDate: "2027-02-14", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Monza", awayTeam: "Lecce", localDate: "2027-02-14", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 25 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Napoli", localDate: "2027-02-21", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "AS Roma", localDate: "2027-02-21", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Genoa", localDate: "2027-02-21", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Udinese", awayTeam: "Parma", localDate: "2027-02-21", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Juventus", awayTeam: "Bologna", localDate: "2027-02-21", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "Monza", localDate: "2027-02-21", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Fiorentina", awayTeam: "Inter", localDate: "2027-02-21", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Venezia", awayTeam: "Cagliari", localDate: "2027-02-21", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Lecce", awayTeam: "Frosinone", localDate: "2027-02-21", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Torino", localDate: "2027-02-21", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 26 */
+  [
+    { homeTeam: "Cagliari", awayTeam: "Udinese", localDate: "2027-02-28", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Genoa", awayTeam: "Lazio", localDate: "2027-02-28", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "AS Roma", awayTeam: "Venezia", localDate: "2027-02-28", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Bologna", awayTeam: "Lecce", localDate: "2027-02-28", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Torino", awayTeam: "Fiorentina", localDate: "2027-02-28", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Atalanta", localDate: "2027-02-28", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Napoli", localDate: "2027-02-28", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Parma", awayTeam: "Sassuolo", localDate: "2027-02-28", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "como", awayTeam: "AC Milan", localDate: "2027-02-28", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Juventus", localDate: "2027-02-28", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 27 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Frosinone", localDate: "2027-03-07", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "Bologna", localDate: "2027-03-07", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Cagliari", localDate: "2027-03-07", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Napoli", awayTeam: "Parma", localDate: "2027-03-07", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Inter", localDate: "2027-03-07", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Juventus", awayTeam: "AS Roma", localDate: "2027-03-07", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Atalanta", awayTeam: "Torino", localDate: "2027-03-07", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Fiorentina", awayTeam: "Venezia", localDate: "2027-03-07", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Lecce", awayTeam: "como", localDate: "2027-03-07", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "Monza", awayTeam: "Genoa", localDate: "2027-03-07", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 28 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Juventus", localDate: "2027-03-14", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "AC Milan", awayTeam: "Sassuolo", localDate: "2027-03-14", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "Fiorentina", localDate: "2027-03-14", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Genoa", awayTeam: "AS Roma", localDate: "2027-03-14", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Bologna", awayTeam: "Napoli", localDate: "2027-03-14", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Torino", awayTeam: "Inter", localDate: "2027-03-14", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Frosinone", awayTeam: "Monza", localDate: "2027-03-14", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Atalanta", localDate: "2027-03-14", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Lecce", localDate: "2027-03-14", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "como", awayTeam: "Udinese", localDate: "2027-03-14", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 29 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Cagliari", localDate: "2027-03-21", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "Napoli", awayTeam: "Venezia", localDate: "2027-03-21", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Torino", localDate: "2027-03-21", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Juventus", awayTeam: "como", localDate: "2027-03-21", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Lecce", localDate: "2027-03-21", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "AC Milan", localDate: "2027-03-21", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Fiorentina", awayTeam: "Genoa", localDate: "2027-03-21", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Inter", awayTeam: "Frosinone", localDate: "2027-03-21", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Parma", awayTeam: "Lazio", localDate: "2027-03-21", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Monza", awayTeam: "Bologna", localDate: "2027-03-21", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 30 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Atalanta", localDate: "2027-04-04", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Monza", localDate: "2027-04-04", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "Napoli", localDate: "2027-04-04", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Genoa", awayTeam: "Inter", localDate: "2027-04-04", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "AS Roma", awayTeam: "Bologna", localDate: "2027-04-04", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Torino", awayTeam: "Juventus", localDate: "2027-04-04", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Frosinone", awayTeam: "Udinese", localDate: "2027-04-04", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Parma", localDate: "2027-04-04", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Lecce", awayTeam: "Lazio", localDate: "2027-04-04", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Fiorentina", localDate: "2027-04-04", localTime: "18:30", stadium: "Giuseppe Sinigaglia" }
+  ],
+  /* GIORNATA 31 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Torino", localDate: "2027-04-11", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Cagliari", awayTeam: "Atalanta", localDate: "2027-04-11", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Sassuolo", localDate: "2027-04-11", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Monza", localDate: "2027-04-11", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Juventus", awayTeam: "Lecce", localDate: "2027-04-11", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Bologna", awayTeam: "Venezia", localDate: "2027-04-11", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "AC Milan", localDate: "2027-04-11", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Inter", awayTeam: "AS Roma", localDate: "2027-04-11", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Genoa", localDate: "2027-04-11", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Parma", awayTeam: "como", localDate: "2027-04-11", localTime: "18:30", stadium: "Ennio Tardini" }
+  ],
+  /* GIORNATA 32 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Lecce", localDate: "2027-04-18", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Napoli", localDate: "2027-04-18", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "AS Roma", awayTeam: "Lazio", localDate: "2027-04-18", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Udinese", localDate: "2027-04-18", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Bologna", awayTeam: "Cagliari", localDate: "2027-04-18", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Fiorentina", awayTeam: "Parma", localDate: "2027-04-18", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Genoa", localDate: "2027-04-18", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Venezia", awayTeam: "Juventus", localDate: "2027-04-18", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "como", awayTeam: "Frosinone", localDate: "2027-04-18", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Inter", localDate: "2027-04-18", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 33 */
+  [
+    { homeTeam: "Lazio", awayTeam: "como", localDate: "2027-04-25", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Cagliari", awayTeam: "Monza", localDate: "2027-04-25", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Udinese", localDate: "2027-04-25", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Genoa", awayTeam: "Sassuolo", localDate: "2027-04-25", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Juventus", awayTeam: "Fiorentina", localDate: "2027-04-25", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Inter", awayTeam: "Bologna", localDate: "2027-04-25", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "AS Roma", localDate: "2027-04-25", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "Torino", localDate: "2027-04-25", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Atalanta", localDate: "2027-04-25", localTime: "18:30", stadium: "Ennio Tardini" },
+    { homeTeam: "Lecce", awayTeam: "AC Milan", localDate: "2027-04-25", localTime: "18:30", stadium: "Via del Mare" }
+  ],
+  /* GIORNATA 34 */
+  [
+    { homeTeam: "Sassuolo", awayTeam: "Frosinone", localDate: "2027-05-02", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Lazio", localDate: "2027-05-02", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Udinese", awayTeam: "Genoa", localDate: "2027-05-02", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "AS Roma", awayTeam: "Napoli", localDate: "2027-05-02", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Juventus", localDate: "2027-05-02", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Bologna", awayTeam: "Fiorentina", localDate: "2027-05-02", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Torino", awayTeam: "Parma", localDate: "2027-05-02", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Lecce", awayTeam: "Cagliari", localDate: "2027-05-02", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Inter", localDate: "2027-05-02", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Venezia", localDate: "2027-05-02", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 35 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Sassuolo", localDate: "2027-05-09", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Napoli", awayTeam: "Monza", localDate: "2027-05-09", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Udinese", awayTeam: "Juventus", localDate: "2027-05-09", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Genoa", awayTeam: "Cagliari", localDate: "2027-05-09", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "Fiorentina", awayTeam: "AS Roma", localDate: "2027-05-09", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Bologna", localDate: "2027-05-09", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Lecce", localDate: "2027-05-09", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Atalanta", localDate: "2027-05-09", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "como", localDate: "2027-05-09", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "AC Milan", localDate: "2027-05-09", localTime: "18:30", stadium: "Ennio Tardini" }
+  ],
+  /* GIORNATA 36 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Udinese", localDate: "2027-05-16", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "Venezia", localDate: "2027-05-16", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "AS Roma", localDate: "2027-05-16", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "Torino", localDate: "2027-05-16", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Genoa", localDate: "2027-05-16", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Juventus", awayTeam: "Inter", localDate: "2027-05-16", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Bologna", awayTeam: "Frosinone", localDate: "2027-05-16", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Lecce", awayTeam: "Fiorentina", localDate: "2027-05-16", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Atalanta", localDate: "2027-05-16", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Parma", localDate: "2027-05-16", localTime: "18:30", stadium: "U-Power Stadium" }
+  ],
+  /* GIORNATA 37 */
+  [
+    { homeTeam: "Udinese", awayTeam: "Sassuolo", localDate: "2027-05-23", localTime: "18:30", stadium: "Bluenergy Stadium" },
+    { homeTeam: "Genoa", awayTeam: "Bologna", localDate: "2027-05-23", localTime: "18:30", stadium: "Luigi Ferraris" },
+    { homeTeam: "AS Roma", awayTeam: "como", localDate: "2027-05-23", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Atalanta", awayTeam: "Lecce", localDate: "2027-05-23", localTime: "18:30", stadium: "New Balance Arena" },
+    { homeTeam: "Fiorentina", awayTeam: "Monza", localDate: "2027-05-23", localTime: "18:30", stadium: "Artemio Franchi" },
+    { homeTeam: "Torino", awayTeam: "Napoli", localDate: "2027-05-23", localTime: "18:30", stadium: "Olimpico di Torino" },
+    { homeTeam: "Inter", awayTeam: "Lazio", localDate: "2027-05-23", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Frosinone", awayTeam: "Cagliari", localDate: "2027-05-23", localTime: "18:30", stadium: "Benito Stirpe" },
+    { homeTeam: "Venezia", awayTeam: "AC Milan", localDate: "2027-05-23", localTime: "18:30", stadium: "Pierluigi Penzo" },
+    { homeTeam: "Parma", awayTeam: "Juventus", localDate: "2027-05-23", localTime: "18:30", stadium: "Ennio Tardini" }
+  ],
+  /* GIORNATA 38 */
+  [
+    { homeTeam: "Lazio", awayTeam: "Fiorentina", localDate: "2027-05-30", localTime: "18:30", stadium: "Stadio Olimpico" },
+    { homeTeam: "Sassuolo", awayTeam: "Inter", localDate: "2027-05-30", localTime: "18:30", stadium: "Mapei Stadium" },
+    { homeTeam: "AC Milan", awayTeam: "Udinese", localDate: "2027-05-30", localTime: "18:30", stadium: "San Siro" },
+    { homeTeam: "Cagliari", awayTeam: "AS Roma", localDate: "2027-05-30", localTime: "18:30", stadium: "Unipol Domus" },
+    { homeTeam: "Napoli", awayTeam: "Atalanta", localDate: "2027-05-30", localTime: "18:30", stadium: "Diego Armando Maradona" },
+    { homeTeam: "Juventus", awayTeam: "Frosinone", localDate: "2027-05-30", localTime: "18:30", stadium: "Allianz Stadium" },
+    { homeTeam: "Bologna", awayTeam: "Parma", localDate: "2027-05-30", localTime: "18:30", stadium: "Renato Dall'Ara" },
+    { homeTeam: "Lecce", awayTeam: "Venezia", localDate: "2027-05-30", localTime: "18:30", stadium: "Via del Mare" },
+    { homeTeam: "como", awayTeam: "Genoa", localDate: "2027-05-30", localTime: "18:30", stadium: "Giuseppe Sinigaglia" },
+    { homeTeam: "Monza", awayTeam: "Torino", localDate: "2027-05-30", localTime: "18:30", stadium: "U-Power Stadium" }
+  ]
+];
+
+/* ============================================================
+   STATO CAMPIONATO
+   ============================================================ */
+const STORAGE_KEY = 'seriea2027_v1';
+const SQUADRE_ORDINE = ['atalanta','bologna','cagliari','como','fiorentina','frosinone','genoa','inter','juventus','lazio','lecce','milan','monza','napoli','parma','roma','sassuolo','torino','udinese','venezia'];
+
+let stato = null;
+
+function nuovoStato() {
+  return {
+    squadraScelta: null,
+    fase: 'scelta',
+    giornataCorrente: 1,
+    risultati: {}
+  };
+}
+
+function salvaStato() {
+  if (!stato) return;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); } catch(e) {}
+}
+function caricaStato() {
+  const s = localStorage.getItem(STORAGE_KEY);
+  if (!s) return null;
+  try { return JSON.parse(s); } catch(e) { return null; }
+}
+function resetCampionato() {
+  if (confirm('Reset campionato? Perderai tutti i progressi.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+}
+
+/* ============ CLASSIFICA ============ */
+function getClassifica() {
+  const tab = {};
+  SQUADRE_ORDINE.forEach(sq => tab[sq] = { squadra: sq, punti: 0, giocate: 0, vinte: 0, pareggi: 0, perse: 0, gf: 0, gs: 0, dr: 0 });
+  for (const key in stato.risultati) {
+    const r = stato.risultati[key];
+    if (!r) continue;
+    const parti = key.split('_');
+    const g = parseInt(parti[0].substring(1));
+    const idx = parseInt(parti[1]);
+    const giornata = CALENDARIO_SERIEA[g - 1];
+    if (!giornata) continue;
+    const partita = giornata[idx];
+    if (!partita) continue;
+    const casa = partita.homeTeam.toLowerCase();
+    const trasf = partita.awayTeam.toLowerCase();
+    const c = tab[casa], t = tab[trasf];
+    if (!c || !t) continue;
+    const gc = r[0], gt = r[1];
+    c.giocate++; t.giocate++;
+    c.gf += gc; c.gs += gt;
+    t.gf += gt; t.gs += gc;
+    if (gc > gt) { c.punti += 3; c.vinte++; t.perse++; }
+    else if (gc < gt) { t.punti += 3; t.vinte++; c.perse++; }
+    else { c.punti++; t.punti++; c.pareggi++; t.pareggi++; }
+    c.dr = c.gf - c.gs;
+    t.dr = t.gf - t.gs;
+  }
+  return Object.values(tab).sort((a, b) => b.punti - a.punti || b.dr - a.dr || b.gf - a.gf);
+}
+
+/* ============ SIMULAZIONE ============ */
+const FORZA = {
+  inter: 90, milan: 88, juventus: 87, napoli: 86, roma: 84, lazio: 82, atalanta: 85,
+  fiorentina: 80, bologna: 78, torino: 74, udinese: 72, genoa: 70, cagliari: 68,
+  como: 66, parma: 64, monza: 63, frosinone: 60, venezia: 58, lecce: 62, sassuolo: 61
+};
+function forza(id) { return FORZA[id] || 65; }
+
+function simula(a, b) {
+  const fa = forza(a), fb = forza(b);
+  const pa = fa / (fa + fb);
+  const ga = Math.random() < pa ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+  const gb = Math.random() < (1 - pa) ? Math.floor(Math.random() * 4) : Math.floor(Math.random() * 2);
+  return [ga, gb];
+}
+
+/* ============ RENDER ============ */
+function render() {
+  const content = document.getElementById('content');
+  if (!stato || stato.fase === 'scelta') return renderScelta(content);
+  return renderCampionato(content);
+}
+
+function renderScelta(content) {
+  let html = '<div class="fase-titolo">Scegli la tua squadra</div>' +
+    '<div class="avviso">Seleziona una squadra di Serie A 2026/2027 per iniziare il campionato.</div>' +
+    '<div class="squadre-grid">';
+  SQUADRE_ORDINE.forEach(id => {
+    const sq = SQUADRE[id];
+    if (!sq) return;
+    html += '<div class="squadra-btn ' + (stato && id === stato.squadraScelta ? 'selezionata' : '') + '" onclick="selezionaSquadra(\'' + id + '\')">' +
+      '<div class="maglia">' + creaGiocatoreSVG(sq.casa, 'fermo') + '</div>' +
+      '<div>' + sq.nome + '</div>' +
+    '</div>';
+  });
+  html += '</div>';
+  if (stato && stato.squadraScelta) {
+    html += '<div style="text-align:center;margin-top:16px">' +
+      '<button class="btn primario" onclick="iniziaCampionato()">INIZIA CAMPIONATO</button>' +
+    '</div>';
+  }
+  content.innerHTML = html;
+}
+
+function selezionaSquadra(id) {
+  if (!stato) stato = nuovoStato();
+  stato.squadraScelta = id;
+  render();
+}
+
+function iniziaCampionato() {
+  stato.fase = 'campionato';
+  stato.giornataCorrente = 1;
+  stato.risultati = {};
+  salvaStato();
+  render();
+}
+
+function renderCampionato(content) {
+  const tua = stato.squadraScelta;
+  const nomeTua = SQUADRE[tua] ? SQUADRE[tua].nome : tua;
+
+  // Trova la prossima partita della squadra scelta
+  let prossima = null;
+  for (let g = 1; g <= 38; g++) {
+    const giornata = CALENDARIO_SERIEA[g - 1];
+    for (let i = 0; i < giornata.length; i++) {
+      const key = 'g' + g + '_' + i;
+      if (stato.risultati[key]) continue;
+      const p = giornata[i];
+      const casa = p.homeTeam.toLowerCase();
+      const trasf = p.awayTeam.toLowerCase();
+      if (casa === tua || trasf === tua) {
+        prossima = { g: g, i: i, casa: casa, trasferta: trasf, partita: p };
+        break;
+      }
+    }
+    if (prossima) break;
+  }
+
+  let html = '<div class="avviso">Squadra: <strong>' + nomeTua + '</strong> · Giornata: <strong>' + stato.giornataCorrente + '</strong>/38</div>';
+
+  if (prossima) {
+    const nomeCasa = SQUADRE[prossima.casa] ? SQUADRE[prossima.casa].nome : prossima.casa;
+    const nomeTrasf = SQUADRE[prossima.trasferta] ? SQUADRE[prossima.trasferta].nome : prossima.trasferta;
+    html += '<div class="prossima-partita">' +
+      '<h3>⚽ PROSSIMA PARTITA — Giornata ' + prossima.g + '</h3>' +
+      '<div class="vs">' + nomeCasa + ' vs ' + nomeTrasf + '</div>' +
+      '<div class="info">' + (prossima.partita.localDate || '') + ' · ' + (prossima.partita.localTime || '') + ' · ' + (prossima.partita.stadium || '') + '</div>' +
+      '<button class="play-big" onclick="giocaPartita(' + prossima.g + ', ' + prossima.i + ')">▶ GIOCA</button>' +
+    '</div>';
+  } else {
+    html += '<div class="prossima-partita" style="background:#16213e;color:#ffd700">' +
+      '<h3>🏆 Campionato terminato</h3>' +
+      '<button class="play-big" onclick="resetCampionato()">NUOVO CAMPIONATO</button>' +
+    '</div>';
+  }
+
+  // Classifica
+  const cls = getClassifica();
+  html += '<div class="classifica-box"><h3>📊 Classifica Serie A</h3><table class="classifica">' +
+    '<tr><th>#</th><th>Squadra</th><th>Pt</th><th>G</th><th>V</th><th>N</th><th>P</th><th>GF</th><th>GS</th><th>DR</th></tr>';
+  cls.forEach((t, idx) => {
+    const sqInfo = SQUADRE[t.squadra];
+    const nomeSq = sqInfo ? sqInfo.nome : t.squadra;
+    const isTua = t.squadra === tua ? 'tua' : '';
+    let pos = '';
+    if (idx < 4) pos = 'champions';
+    else if (idx < 6) pos = 'europa';
+    else if (idx >= 17) pos = 'relegazione';
+    html += '<tr class="' + isTua + ' ' + pos + '">' +
+      '<td>' + (idx + 1) + '</td>' +
+      '<td>' + nomeSq + '</td>' +
+      '<td>' + t.punti + '</td><td>' + t.giocate + '</td><td>' + t.vinte + '</td><td>' + t.pareggi + '</td><td>' + t.perse + '</td>' +
+      '<td>' + t.gf + '</td><td>' + t.gs + '</td><td>' + (t.dr > 0 ? '+' : '') + t.dr + '</td>' +
+    '</tr>';
+  });
+  html += '</table></div>';
+
+  // Giornata corrente
+  html += '<div class="fase-titolo">📅 Giornata ' + stato.giornataCorrente + '</div>';
+  const giornata = CALENDARIO_SERIEA[stato.giornataCorrente - 1] || [];
+  html += '<div class="giornata-box">';
+  giornata.forEach((p, i) => {
+    const key = 'g' + stato.giornataCorrente + '_' + i;
+    const r = stato.risultati[key];
+    const score = r ? (r[0] + '-' + r[1]) : 'Da giocare';
+    const casa = p.homeTeam.toLowerCase();
+    const trasf = p.awayTeam.toLowerCase();
+    const nomeCasa = SQUADRE[casa] ? SQUADRE[casa].nome : p.homeTeam;
+    const nomeTrasf = SQUADRE[trasf] ? SQUADRE[trasf].nome : p.awayTeam;
+    const isTua = (casa === tua || trasf === tua) ? 'tua' : '';
+    html += '<div class="match-row ' + isTua + '">' +
+      '<span class="sq casa">' + nomeCasa + '</span>' +
+      '<span class="score">' + score + '</span>' +
+      '<span class="sq trasf">' + nomeTrasf + '</span>' +
+    '</div>';
+  });
+  html += '</div>';
+
+  // Navigazione giornata
+  html += '<div class="giornata-nav">' +
+    '<button onclick="cambiaGiornata(-1)" ' + (stato.giornataCorrente <= 1 ? 'disabled' : '') + '>◀ Prec</button>' +
+    '<span class="label">Giornata ' + stato.giornataCorrente + ' / 38</span>' +
+    '<button onclick="cambiaGiornata(1)" ' + (stato.giornataCorrente >= 38 ? 'disabled' : '') + '>Succ ▶</button>' +
+  '</div>';
+
+  content.innerHTML = html;
+}
+
+function cambiaGiornata(delta) {
+  stato.giornataCorrente = Math.max(1, Math.min(38, stato.giornataCorrente + delta));
+  salvaStato();
+  render();
+}
+
+/* ============ GIOCO ============ */
+function giocaPartita(g, i) {
+  const partita = CALENDARIO_SERIEA[g - 1][i];
+  const casa = partita.homeTeam.toLowerCase();
+  const trasf = partita.awayTeam.toLowerCase();
+  const tua = stato.squadraScelta;
+
+  const sqTU = casa === tua ? casa : trasf;
+  const sqCPU = casa === tua ? trasf : casa;
+
+  const dati = {
+    sqTU: sqTU,
+    sqCPU: sqCPU,
+    idPartita: 'g' + g + '_' + i,
+    casaOriginale: casa,
+    trasfertaOriginale: trasf
+  };
+  localStorage.setItem('campionato_partita_attiva', JSON.stringify(dati));
+  location.href = 'index.html?torneo=seriea&partita=' + encodeURIComponent(dati.idPartita);
+}
+
+/* Simula tutte le altre partite della giornata (quelle non giocate dall'utente) */
+function simulaRestoGiornata(g) {
+  const giornata = CALENDARIO_SERIEA[g - 1];
+  for (let i = 0; i < giornata.length; i++) {
+    const key = 'g' + g + '_' + i;
+    if (stato.risultati[key]) continue;
+    const p = giornata[i];
+    const c = p.homeTeam.toLowerCase();
+    const t = p.awayTeam.toLowerCase();
+    if (c === stato.squadraScelta || t === stato.squadraScelta) continue;
+    stato.risultati[key] = simula(c, t);
+  }
+}
+
+function riceviRisultato() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('risultato');
+  if (!id) return false;
+  if (!stato) return false;
+  const json = localStorage.getItem('campionato_partita_' + id);
+  if (!json) return false;
+  const risultato = JSON.parse(json);
+  localStorage.removeItem('campionato_partita_' + id);
+
+  const dati = JSON.parse(localStorage.getItem('campionato_partita_attiva') || '{}');
+  if (!dati.casaOriginale) return false;
+
+  const sqTU = dati.sqTU;
+  const golTU = risultato.golTU;
+  const golCPU = risultato.golCPU;
+  const casa = dati.casaOriginale;
+  const trasferta = dati.trasfertaOriginale;
+  const golCasa = casa === sqTU ? golTU : golCPU;
+  const golTrasferta = casa === sqTU ? golCPU : golTU;
+
+  stato.risultati[id] = [golCasa, golTrasferta];
+
+  // Simula tutte le altre partite della stessa giornata
+  const parti = id.split('_');
+  const g = parseInt(parti[0].substring(1));
+  simulaRestoGiornata(g);
+
+  window.history.replaceState({}, document.title, 'seriea2027.html');
+  salvaStato();
+  return true;
+}
+
+/* ============ AVVIO ============ */
+try {
+  const salvato = caricaStato();
+  stato = salvato || nuovoStato();
+
+  const ricevuto = riceviRisultato();
+
+  if (ricevuto) {
+    // Se ho appena ricevuto un risultato, posso anche far avanzare la giornata corrente
+    // (lascia l'utente cliccare Succ per vedere la prossima)
+  }
+
+  render();
+} catch (err) {
+  document.getElementById('content').innerHTML =
+    '<div style="background:#8B2020;color:#fff;padding:30px;font-family:monospace;font-size:14px;white-space:pre-wrap">' +
+    '<h2>ERRORE</h2><p>' + err.message + '</p>' +
+    '<pre>' + (err.stack || '') + '</pre>' +
+    '</div>';
+}
+</script>
+</body>
+</html>
