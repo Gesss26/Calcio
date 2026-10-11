@@ -269,6 +269,13 @@
     padding: 0 1.5%;
   }
 
+  /* Z2 e Z4: i giocatori sono distribuiti più larghi verso i bordi
+     del campo, per dare l'effetto di una formazione distesa. */
+  .zona[data-zona="2"],
+  .zona[data-zona="4"] {
+    padding: 0 5%;
+  }
+
   .meta-sup, .meta-inf {
     display: flex; flex-direction: row;
     justify-content: space-evenly;
@@ -276,6 +283,14 @@
     flex: 1;
     padding: 2px 4px;
     position: relative;
+  }
+
+  /* Nelle zone Z1, Z3, Z5 la coppia inferiore (meta-inf) è spostata
+     in alto di 10px, così i difensori non finiscono nell'area di rigore. */
+  .zona[data-zona="1"] .meta-inf,
+  .zona[data-zona="3"] .meta-inf,
+  .zona[data-zona="5"] .meta-inf {
+    transform: translateY(-10px);
   }
 
   .pedina-wrapper {
@@ -1128,13 +1143,7 @@ function creaPalloneSVG() {
   '</svg>';
 }
 
-/* ============================================================
-   CALCOLA IL PUNTO DI ARRIVO DELLA PALLA
-   = punti AI PIEDI del giocatore della squadra attaccante
-   che si trova nella meta scelta (sup o inf).
-   ============================================================ */
 function calcolaPuntoArrivoPalla(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
-  // Il giocatore attaccante è quello nella meta scelta
   var metaIdx = metaContesa === 'sup' ? 0 : 1;
 
   var attaccantiZona = stato.giocatori[squadraAttaccante].filter(function(g) {
@@ -1166,8 +1175,6 @@ function bloccaCoppiaContrasto() {
     return;
   }
 
-  // Il giocatore attaccante è quello nella meta scelta (sup o inf)
-  // Il difensore è quello nella meta OPPOSTA
   var metaIdx = meta === 'sup' ? 0 : 1;
   var oppostoIdx = 1 - metaIdx;
 
@@ -1187,8 +1194,6 @@ function bloccaCoppiaContrasto() {
     giocatoreAtt: gAtt ? gAtt.id : null,
     giocatoreDif: gDif ? gDif.id : null
   };
-  console.log('[bloccaCoppiaContrasto] Zona', zona, 'meta', meta,
-    'Att:', gAtt ? gAtt.nome : 'NULL', 'Dif:', gDif ? gDif.nome : 'NULL');
 }
 
 function creaGiocatori(sq) {
@@ -2119,9 +2124,9 @@ function risolviContrasto(vincente, motivoFallo) {
     return;
   }
 
+  var difensore = vincente === 'tu' ? 'cpu' : 'tu';
+
   if (motivoFallo) {
-    // Dopo un fallo: la palla va nella nuova zona SENZA passaggio fisico.
-    // Poi si calcola il punto ai piedi della coppia e si blocca.
     var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
     stato.zonaPalla = nuovaZona;
     stato.possessore = vincente;
@@ -2134,7 +2139,6 @@ function risolviContrasto(vincente, motivoFallo) {
     renderCampo();
     renderHeader();
     setTimeout(function() {
-      // Blocco la coppia e calcolo il punto ai piedi
       bloccaCoppiaContrasto();
       var box = document.querySelector('.area-gioco').getBoundingClientRect();
       var punto = calcolaPuntoArrivoPalla(nuovaZona, nuovaMeta, vincente, difensore, box);
@@ -2152,7 +2156,6 @@ function risolviContrasto(vincente, motivoFallo) {
     return;
   }
 
-  // Caso normale: scivolata + passaggio
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta2 = Math.random() < 0.5 ? 'sup' : 'inf';
 
@@ -2817,7 +2820,6 @@ function gestisciPalo(attaccante, difensore) {
     stato.puntoPallaFermo = null;
     stato.puntoPallaPersistente = null;
 
-    // Blocco la coppia originale
     stato.contrastoCoppia = {
       zona: zona,
       meta: azione.meta,
@@ -2828,7 +2830,6 @@ function gestisciPalo(attaccante, difensore) {
     renderCampo(); renderHeader();
 
     setTimeout(function() {
-      // Ricalcolo il punto ai piedi della coppia originale
       var box = document.querySelector('.area-gioco').getBoundingClientRect();
       var dif = azione.attaccante === 'tu' ? 'cpu' : 'tu';
       var punto = calcolaPuntoArrivoPalla(zona, azione.meta, azione.attaccante, dif, box);
