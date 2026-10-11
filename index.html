@@ -1419,13 +1419,62 @@ function eseguiPassaggioIniziale(squadra) {
   }, 400);
 }
 
+/* ============================================================
+   CALCOLO PUNTO DI ARRIVO DELLA PALLA
+   ============================================================ */
+
+/* Fallback percentuale */
 function calcolaPuntoArrivoPerc(meta) {
   return {
     xPerc: PALLA_X_CENTRO,
-    yPerc: meta === 'sup' ? (PALLA_Y_META_SUP + 8) : (PALLA_Y_META_INF - 8)
+    yPerc: meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF
   };
 }
 
+/* Calcola il punto medio (ai piedi) tra i due giocatori che si contenderanno la palla
+   nella zona di destinazione.
+   - Il giocatore della squadra attaccante sta nella meta "metaContesa"
+   - Il giocatore della squadra difensore sta nella meta opposta
+   Restituisce {xPx, yPx} in coordinate relative all'area-gioco, oppure null se i giocatori non sono trovati. */
+function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
+  var attaccanteInSup = (metaContesa === 'sup');
+  var sqInSup = attaccanteInSup ? squadraAttaccante : squadraDifensore;
+  var sqInInf = attaccanteInSup ? squadraDifensore : squadraAttaccante;
+
+  // Trova il giocatore della squadra "sqInSup" in zona "zonaId"
+  var gSup = stato.giocatori[sqInSup].filter(function(g) {
+    return g.zona === zonaId && !g.portiere && !g.espulso;
+  });
+  // Trova il giocatore della squadra "sqInInf" in zona "zonaId"
+  var gInf = stato.giocatori[sqInInf].filter(function(g) {
+    return g.zona === zonaId && !g.portiere && !g.espulso;
+  });
+
+  if (gSup.length === 0 || gInf.length === 0) return null;
+
+  var elSup = document.querySelector('[data-giocatore-id="' + gSup[0].id + '"]');
+  var elInf = document.querySelector('[data-giocatore-id="' + gInf[0].id + '"]');
+  if (!elSup || !elInf) return null;
+
+  var rectSup = elSup.getBoundingClientRect();
+  var rectInf = elInf.getBoundingClientRect();
+
+  // Punto ai PIEDI di ciascun giocatore (parte bassa della pedina)
+  var piediSupX = rectSup.left + rectSup.width / 2 - box.left;
+  var piediSupY = rectSup.bottom - box.top - 2;
+  var piediInfX = rectInf.left + rectInf.width / 2 - box.left;
+  var piediInfY = rectInf.bottom - box.top - 2;
+
+  // Punto medio tra i due piedi
+  return {
+    xPx: (piediSupX + piediInfX) / 2,
+    yPx: (piediSupY + piediInfY) / 2
+  };
+}
+
+/* ============================================================
+   ANIMAZIONE PASSAGGIO INIZIALE
+   ============================================================ */
 function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squadra, callback) {
   suonaCalcio();
   var areaGioco = document.querySelector('.area-gioco');
@@ -1438,26 +1487,20 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
     return;
   }
 
+  var difensore = squadra === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
   var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
 
-  var ricevente = null;
-  if (squadra) {
-    var giocatoriZona = stato.giocatori[squadra].filter(function(g) {
-      return g.zona === nuovaZona && !g.portiere && !g.espulso;
-    });
-    if (giocatoriZona.length > 0) {
-      ricevente = document.querySelector('[data-giocatore-id="' + giocatoriZona[0].id + '"]');
-    }
-  }
+  var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, squadra, difensore, box);
 
-  if (ricevente) {
-    var recRect = ricevente.getBoundingClientRect();
-    arrivoXPx = recRect.left + recRect.width / 2 - box.left;
-    arrivoYPx = recRect.bottom - box.top - 4;
-    var arrivoPerc = calcolaPuntoArrivoPerc(nuovaMeta);
-    stato.puntoPallaFermo = { xPerc: arrivoPerc.xPerc, yPerc: arrivoPerc.yPerc };
+  if (puntoMedio) {
+    arrivoXPx = puntoMedio.xPx;
+    arrivoYPx = puntoMedio.yPx;
+    stato.puntoPallaFermo = {
+      xPerc: (arrivoXPx / zonaDestRect.width) * 100,
+      yPerc: (arrivoYPx / zonaDestRect.height) * 100
+    };
   } else {
     var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
     arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
@@ -1791,6 +1834,9 @@ function risolviContrasto(vincente, motivoFallo) {
   }, 800);
 }
 
+/* ============================================================
+   ANIMAZIONE SCIVOLATA + PASSAGGIO
+   ============================================================ */
 function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, callback) {
   suonaScivolata();
   var areaGioco = document.querySelector('.area-gioco');
@@ -1801,26 +1847,20 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
 
   stato.pallaInAnimazione = true;
 
+  var difensore = vincente === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
   var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
   var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
 
-  var ricevente = null;
-  if (vincente) {
-    var giocatoriZona = stato.giocatori[vincente].filter(function(g) {
-      return g.zona === nuovaZona && !g.portiere && !g.espulso;
-    });
-    if (giocatoriZona.length > 0) {
-      ricevente = document.querySelector('[data-giocatore-id="' + giocatoriZona[0].id + '"]');
-    }
-  }
+  var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, vincente, difensore, box);
 
-  if (ricevente) {
-    var recRect = ricevente.getBoundingClientRect();
-    arrivoXPx = recRect.left + recRect.width / 2 - box.left;
-    arrivoYPx = recRect.bottom - box.top - 4;
-    var arrivoPerc2 = calcolaPuntoArrivoPerc(nuovaMeta);
-    stato.puntoPallaFermo = { xPerc: arrivoPerc2.xPerc, yPerc: arrivoPerc2.yPerc };
+  if (puntoMedio) {
+    arrivoXPx = puntoMedio.xPx;
+    arrivoYPx = puntoMedio.yPx;
+    stato.puntoPallaFermo = {
+      xPerc: (arrivoXPx / zonaDestRect.width) * 100,
+      yPerc: (arrivoYPx / zonaDestRect.height) * 100
+    };
   } else {
     var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
     arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
