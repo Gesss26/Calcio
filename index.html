@@ -1416,11 +1416,11 @@ function eseguiPassaggioIniziale(squadra) {
   stato.metaContesa = nuovaMeta;
   stato.giocatorePalla = null;
 
-  // 2) Ridisegna il campo: ora i giocatori nella nuova zona esistono nel DOM
+  // 2) Ridisegna il campo
   renderCampo();
   renderHeader();
 
-  // 3) Aspetta che il DOM sia pronto, poi anima la palla verso il punto medio
+  // 3) Aspetta che il DOM sia pronto, poi anima la palla
   setTimeout(function() {
     eseguiPassaggioInizialeAnimato(giocatorePartenzaId, nuovaZona, nuovaMeta, squadra, function() {
       setTimeout(avviaContrasto, 800);
@@ -1429,22 +1429,8 @@ function eseguiPassaggioIniziale(squadra) {
 }
 
 /* ============================================================
-   CALCOLO PUNTO DI ARRIVO DELLA PALLA
+   CALCOLO PUNTO DI ARRIVO DELLA PALLA (AI PIEDI DEI CONTENDENTI)
    ============================================================ */
-
-/* Fallback percentuale */
-function calcolaPuntoArrivoPerc(meta) {
-  return {
-    xPerc: PALLA_X_CENTRO,
-    yPerc: meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF
-  };
-}
-
-/* Calcola il punto medio (ai piedi) tra i due giocatori che si contenderanno la palla
-   nella zona di destinazione.
-   - Il giocatore della squadra attaccante sta nella meta "metaContesa"
-   - Il giocatore della squadra difensore sta nella meta opposta
-   Restituisce {xPx, yPx} in coordinate relative all'area-gioco, oppure null se i giocatori non sono trovati. */
 function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
   var attaccanteInSup = (metaContesa === 'sup');
   var sqInSup = attaccanteInSup ? squadraAttaccante : squadraDifensore;
@@ -1458,7 +1444,7 @@ function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadr
   });
 
   if (gSup.length === 0 || gInf.length === 0) {
-    console.log('[calcolaPuntoMedioContesa] Giocatori non trovati. Zona:', zonaId, 'meta:', metaContesa, 'sqInSup:', sqInSup, 'sqInInf:', sqInInf);
+    console.log('[calcolaPuntoMedioContesa] Giocatori non trovati. Zona:', zonaId, 'meta:', metaContesa);
     return null;
   }
 
@@ -1472,11 +1458,13 @@ function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadr
   var rectSup = elSup.getBoundingClientRect();
   var rectInf = elInf.getBoundingClientRect();
 
+  // Coordinate dei PIEDI (bottom del giocatore) relative all'area-gioco
   var piediSupX = rectSup.left + rectSup.width / 2 - box.left;
-  var piediSupY = rectSup.bottom - box.top - 2;
+  var piediSupY = rectSup.bottom - box.top;
   var piediInfX = rectInf.left + rectInf.width / 2 - box.left;
-  var piediInfY = rectInf.bottom - box.top - 2;
+  var piediInfY = rectInf.bottom - box.top;
 
+  // Punto medio tra i due piedi
   var medioX = (piediSupX + piediInfX) / 2;
   var medioY = (piediSupY + piediInfY) / 2;
 
@@ -1506,28 +1494,30 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
 
   var difensore = squadra === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
-  var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
-  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
 
   var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, squadra, difensore, box);
 
   if (puntoMedio) {
     arrivoXPx = puntoMedio.xPx;
     arrivoYPx = puntoMedio.yPx;
+    var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
+    var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
     stato.puntoPallaFermo = {
-      xPerc: (arrivoXPx / zonaDestRect.width) * 100,
-      yPerc: (arrivoYPx / zonaDestRect.height) * 100
+      xPerc: ((arrivoXPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
+      yPerc: ((arrivoYPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
     };
   } else {
-    var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
-    arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
-    arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
-    stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+    var zonaDest2 = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
+    var zonaDestRect2 = zonaDest2 ? zonaDest2.getBoundingClientRect() : box;
+    arrivoXPx = zonaDestRect2.left + zonaDestRect2.width / 2 - box.left;
+    arrivoYPx = zonaDestRect2.top + zonaDestRect2.height / 2 - box.top;
+    stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
   }
 
   var calcRect = pedinaEl.getBoundingClientRect();
+  // Partenza: ai piedi del giocatore che ha la palla
   var partXPx = calcRect.left + calcRect.width / 2 - box.left;
-  var partYPx = calcRect.top + calcRect.height / 2 - box.top;
+  var partYPx = calcRect.bottom - box.top;
 
   var pallaAtt = pedinaEl.querySelector('.palla-attaccata');
   if (pallaAtt) pallaAtt.remove();
@@ -1544,6 +1534,7 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   var durata = DURATA_ANIM_PALLA;
   var inizio = performance.now();
 
+  // Traiettoria lineare
   function anima(now) {
     var t = Math.min((now - inizio) / durata, 1);
     var x = partXPx + (arrivoXPx - partXPx) * t;
@@ -1842,13 +1833,10 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
-  // Aggiorna lo stato PRIMA di disegnare il campo, così i giocatori
-  // nella nuova zona vengono disegnati prima dell'animazione della palla.
+  // Aggiorna lo stato PRIMA di disegnare il campo
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
-  // NON azzeriamo giocatorePalla perché serve ancora per l'animazione
-  // (lo azzeriamo dopo nel callback)
 
   renderCampo();
   renderHeader();
@@ -1881,23 +1869,24 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
 
   var difensore = vincente === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
-  var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
-  var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
 
   var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, vincente, difensore, box);
 
   if (puntoMedio) {
     arrivoXPx = puntoMedio.xPx;
     arrivoYPx = puntoMedio.yPx;
+    var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
+    var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
     stato.puntoPallaFermo = {
-      xPerc: (arrivoXPx / zonaDestRect.width) * 100,
-      yPerc: (arrivoYPx / zonaDestRect.height) * 100
+      xPerc: ((arrivoXPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
+      yPerc: ((arrivoYPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
     };
   } else {
-    var arrivo = calcolaPuntoArrivoPerc(nuovaMeta);
-    arrivoXPx = (arrivo.xPerc / 100) * zonaDestRect.width + (zonaDestRect.left - box.left);
-    arrivoYPx = (arrivo.yPerc / 100) * zonaDestRect.height + (zonaDestRect.top - box.top);
-    stato.puntoPallaFermo = { xPerc: arrivo.xPerc, yPerc: arrivo.yPerc };
+    var zonaDest2 = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
+    var zonaDestRect2 = zonaDest2 ? zonaDest2.getBoundingClientRect() : box;
+    arrivoXPx = zonaDestRect2.left + zonaDestRect2.width / 2 - box.left;
+    arrivoYPx = zonaDestRect2.top + zonaDestRect2.height / 2 - box.top;
+    stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
   }
 
   var calcRect = pedinaEl.getBoundingClientRect();
@@ -1942,8 +1931,9 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
       }
 
       var pallaRect = pedinaEl.getBoundingClientRect();
+      // Partenza: ai piedi del giocatore vincente
       var partXPx = pallaRect.left + pallaRect.width / 2 - box.left;
-      var partYPx = pallaRect.top + pallaRect.height / 2 - box.top;
+      var partYPx = pallaRect.bottom - box.top;
 
       var pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
       if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
@@ -1960,6 +1950,7 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
       var durata = DURATA_ANIM_PALLA;
       var inizio = performance.now();
 
+      // Traiettoria lineare
       function anima(now) {
         var t = Math.min((now - inizio) / durata, 1);
         var x = partXPx + (arrivoXPx - partXPx) * t;
