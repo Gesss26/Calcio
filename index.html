@@ -293,7 +293,30 @@
   .portiere-wrapper.tu { left: 62%; }
   .portiere-wrapper.cpu { left: 38%; }
 
-  .info-laterale {
+  /* === NOME SOPRA LA PEDINA === */
+  .nome-giocatore {
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 1px 3px #000, 0 0 4px #000;
+    background: rgba(0,0,0,0.7);
+    padding: 1px 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.2);
+    white-space: nowrap;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+  }
+  .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
+  .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
+
+  /* === INFO SOTTO LA PEDINA === */
+  .info-sotto {
     display: flex; flex-direction: row; gap: 3px;
     font-size: 10px; line-height: 1;
     color: #fff;
@@ -301,19 +324,20 @@
     pointer-events: none; font-weight: 900;
     font-family: 'Courier New', monospace;
     background: rgba(0,0,0,0.75);
-    padding: 2px 5px;
-    border-radius: 4px;
+    padding: 1px 4px;
+    border-radius: 3px;
     border: 1px solid rgba(255,255,255,0.25);
     white-space: nowrap;
+    margin-top: 2px;
   }
-  .info-laterale .stamina-txt { color: #4ade80; font-size: 11px; }
-  .info-laterale .stamina-txt.medio { color: #fbbf24; }
-  .info-laterale .stamina-txt.basso { color: #ef4444; }
-  .info-laterale .falli-txt { color: #ff8a8a; font-size: 11px; font-weight: 900; }
-  .info-laterale .falli-txt.zero { color: #555; font-size: 10px; }
-  .info-laterale .cartellini { font-size: 11px; line-height: 1; }
-  .info-laterale.ammonito-info { border-color: #ffd700; box-shadow: 0 0 6px rgba(255,215,0,0.6); }
-  .info-laterale.espulso-info { border-color: #ff0000; box-shadow: 0 0 6px rgba(255,0,0,0.6); }
+  .info-sotto .stamina-txt { color: #4ade80; font-size: 10px; }
+  .info-sotto .stamina-txt.medio { color: #fbbf24; }
+  .info-sotto .stamina-txt.basso { color: #ef4444; }
+  .info-sotto .falli-txt { color: #ff8a8a; font-size: 10px; font-weight: 900; }
+  .info-sotto .falli-txt.zero { color: #555; font-size: 9px; }
+  .info-sotto .cartellini { font-size: 10px; line-height: 1; }
+  .info-sotto.ammonito-info { border-color: #ffd700; box-shadow: 0 0 5px rgba(255,215,0,0.6); }
+  .info-sotto.espulso-info { border-color: #ff0000; box-shadow: 0 0 5px rgba(255,0,0,0.6); }
 
   .pedina {
     position: relative; width: 34px; height: 44px;
@@ -334,59 +358,101 @@
   .pedina .stamina-fill.basso { background: #ef4444; }
 
   .pedina .palla-attaccata {
-    position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
-    width: 12px; height: 12px;
-    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.9);
+    position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+    width: 14px; height: 14px;
     z-index: 10;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.8));
   }
+  .pedina .palla-attaccata svg { width: 100%; height: 100%; display: block; }
 
   .palla-centro {
     position: absolute;
-    width: 16px; height: 16px;
-    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.9);
+    width: 18px; height: 18px;
     z-index: 12; pointer-events: none;
     transform: translate(-50%, -50%);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7));
   }
+  .palla-centro svg { width: 100%; height: 100%; display: block; }
 
   .palla-volante {
     position: absolute; z-index: 15;
-    width: 16px; height: 16px;
-    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
-    border-radius: 50%; border: 2px solid #222;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.9);
+    width: 18px; height: 18px;
     display: none; pointer-events: none;
     transform: translate(-50%, -50%);
   }
   .palla-volante.attiva { display: block; }
+  .palla-volante .palla-inner {
+    width: 100%; height: 100%;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
+  }
+  .palla-volante svg { width: 100%; height: 100%; display: block; }
 
   .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
   @keyframes animFermo {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-2px); }
   }
-  .anim-calcia { animation: animCalcia 0.8s ease-out; }
-  @keyframes animCalcia {
-    0% { transform: rotate(0deg); }
-    40% { transform: rotate(-25deg); }
-    70% { transform: rotate(20deg); }
+
+  /* === ANIMAZIONE CALCIO === */
+  @keyframes calciaGamba {
+    0%   { transform: rotate(0deg); }
+    15%  { transform: rotate(-55deg); }
+    35%  { transform: rotate(45deg); }
+    55%  { transform: rotate(30deg); }
     100% { transform: rotate(0deg); }
   }
+  .pedina.pg-in-calcio .pg-gamba-dx {
+    animation: calciaGamba 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+  }
+  @keyframes calciaBusto {
+    0%   { transform: rotate(0deg); }
+    15%  { transform: rotate(-4deg); }
+    35%  { transform: rotate(6deg); }
+    55%  { transform: rotate(3deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .pedina.pg-in-calcio .pg-busto {
+    transform-origin: 20px 38px;
+    animation: calciaBusto 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+  }
+
+  /* === ANIMAZIONE PARATA PORTIERE === */
+  .pg-braccio-sx, .pg-braccio-dx {
+    transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+  }
+  .pedina.pg-in-parata .pg-braccio-sx { transform: rotate(-140deg); }
+  .pedina.pg-in-parata .pg-braccio-dx { transform: rotate(140deg); }
+  .pedina.pg-in-parata.parata-sx .pg-braccio-sx { transform: rotate(-160deg); }
+  .pedina.pg-in-parata.parata-sx .pg-braccio-dx { transform: rotate(75deg); }
+  .pedina.pg-in-parata.parata-dx .pg-braccio-sx { transform: rotate(-75deg); }
+  .pedina.pg-in-parata.parata-dx .pg-braccio-dx { transform: rotate(160deg); }
+  .pedina.pg-in-parata.parata-centro .pg-braccio-sx { transform: rotate(-160deg); }
+  .pedina.pg-in-parata.parata-centro .pg-braccio-dx { transform: rotate(160deg); }
+  .pedina.pg-in-parata.parata-alto .pg-braccio-sx { transform: rotate(-170deg); }
+  .pedina.pg-in-parata.parata-alto .pg-braccio-dx { transform: rotate(170deg); }
+  .pedina.pg-in-parata.parata-basso .pg-braccio-sx { transform: rotate(-60deg); }
+  .pedina.pg-in-parata.parata-basso .pg-braccio-dx { transform: rotate(60deg); }
+
+  .tiro-portiere.pg-salta {
+    animation: portiereSalta 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  @keyframes portiereSalta {
+    0%   { transform: translate(0, 0) scale(1); }
+    40%  { transform: translate(0, -12%) scale(1.05); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+  .tiro-portiere.parata-sx { transform: rotate(-8deg); }
+  .tiro-portiere.parata-dx { transform: rotate(8deg); }
 
   .pedina-scivola-wrapper {
     position: relative;
     z-index: 20;
     transition: transform 0.6s cubic-bezier(0.34, 1.5, 0.64, 1);
   }
-  .pedina-scivola-wrapper.ritorno {
-    transition: transform 0.4s ease-out;
-  }
-  .pedina-scivola-wrapper.scivolando svg {
-    animation: animScivolata 0.6s ease-out;
-  }
+  .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
+  .pedina-scivola-wrapper.scivolando svg { animation: animScivolata 0.6s ease-out; }
   @keyframes animScivolata {
     0% { transform: rotate(0deg) translateY(0); }
     40% { transform: rotate(-35deg) translateY(4px); }
@@ -419,11 +485,7 @@
     display: flex; flex-direction: column; align-items: center; padding: 3px;
   }
   .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
-  .panchina-giocatore .pedina {
-    transform: scale(0.85);
-    width: 30px;
-    height: 40px;
-  }
+  .panchina-giocatore .pedina { transform: scale(0.85); width: 30px; height: 40px; }
   .panchina-giocatore .panchina-nome {
     font-size: 9px; color: #ccc; margin-top: 2px; font-weight: bold;
   }
@@ -508,16 +570,6 @@
     color: #16213e;
   }
   .menu-btn.evidenza .testo .descr { color: #4a3000; }
-
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
-  .stats-card { background: rgba(0,0,0,0.35); border-radius: 8px; padding: 10px; text-align: left; font-size: 12px; }
-  .stats-card h3 {
-    font-size: 13px; color: #ffd700; margin-bottom: 8px;
-    text-align: center; border-bottom: 1px solid rgba(255,215,0,0.3);
-    padding-bottom: 4px;
-  }
-  .stats-row { display: flex; justify-content: space-between; padding: 2px 0; }
-  .stats-row .val { color: #ffd700; font-weight: bold; }
 
   .banner-mano {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -905,10 +957,6 @@ var ZONE_CONFIG = [
   { id: 5, nome: 'Z5', ruolo: 'DIF', tu: 2, cpu: 2 },
   { id: 6, nome: 'Z6', ruolo: 'POR', portiere: true, proprietario: 'cpu' }
 ];
-var PANCHINA_CONFIG = [
-  { ruolo: 'POR', n: 1 }, { ruolo: 'DIF', n: 2 },
-  { ruolo: 'CEN', n: 2 }, { ruolo: 'ATT', n: 2 }
-];
 
 var SEMI = {
   palla:      { emoji: '⚽', nome: 'Palla',      colore: 'nera'  },
@@ -993,29 +1041,93 @@ function apriLog() {
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
+/* SVG PALLONE */
+function creaPalloneSVG() {
+  return '' +
+  '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+    '<defs>' +
+      '<radialGradient id="pallaGrad" cx="35%" cy="30%" r="75%">' +
+        '<stop offset="0%" stop-color="#ffffff"/>' +
+        '<stop offset="60%" stop-color="#f0f0f0"/>' +
+        '<stop offset="100%" stop-color="#c8c8c8"/>' +
+      '</radialGradient>' +
+    '</defs>' +
+    '<circle cx="20" cy="20" r="19" fill="url(#pallaGrad)" stroke="#1a1a1a" stroke-width="1.5"/>' +
+    '<polygon points="20,10 26.5,14.7 24,22.3 16,22.3 13.5,14.7" fill="#1a1a1a"/>' +
+    '<polygon points="32,8 37,14 34,20 28,17 29,10" fill="#1a1a1a" opacity="0.9"/>' +
+    '<polygon points="8,8 3,14 6,20 12,17 11,10" fill="#1a1a1a" opacity="0.9"/>' +
+    '<polygon points="34,26 39,32 34,38 28,35 30,28" fill="#1a1a1a" opacity="0.9"/>' +
+    '<polygon points="6,26 1,32 6,38 12,35 10,28" fill="#1a1a1a" opacity="0.9"/>' +
+    '<g stroke="#1a1a1a" stroke-width="1" fill="none" opacity="0.7">' +
+      '<line x1="20" y1="10" x2="20" y2="4"/>' +
+      '<line x1="26.5" y1="14.7" x2="32" y2="12"/>' +
+      '<line x1="13.5" y1="14.7" x2="8" y2="12"/>' +
+      '<line x1="16" y1="22.3" x2="12" y2="28"/>' +
+      '<line x1="24" y1="22.3" x2="28" y2="28"/>' +
+    '</g>' +
+    '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#ffffff" opacity="0.55"/>' +
+  '</svg>';
+}
+
+/* CREA GIOCATORI DALLE ROSE */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
-  for (var i = 0; i < ZONE_CONFIG.length; i++) {
-    var z = ZONE_CONFIG[i];
-    if (z.portiere) {
-      if (z.proprietario !== sq) continue;
-      g.push({ id: sq + '_' + (id++), squadra: sq, zona: z.id, ruolo: z.ruolo, portiere: true, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false, nome: 'POR' });
-      continue;
+  var squadraId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  var rosa = ROSE[squadraId];
+  if (!rosa) return g;
+
+  var zonaPor = sq === 'tu' ? 0 : 6;
+  g.push({ id: sq + '_' + (id++), squadra: sq, zona: zonaPor, ruolo: 'POR', portiere: true,
+           stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+           nome: rosa.portiere[0] });
+
+  for (var i = 0; i < 2; i++) {
+    g.push({ id: sq + '_' + (id++), squadra: sq, zona: 1, ruolo: 'DIF', portiere: false,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             nome: rosa.difensori[i] || ('DIF' + (i+1)) });
+  }
+  var cen = rosa.centrocampisti;
+  for (var z = 2; z <= 4; z++) {
+    for (var k = 0; k < 2; k++) {
+      var idx = (z - 2) * 2 + k;
+      g.push({ id: sq + '_' + (id++), squadra: sq, zona: z, ruolo: 'CEN', portiere: false,
+               stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+               nome: cen[idx] || ('CEN' + (idx+1)) });
     }
-    var numGiocatori = sq === 'tu' ? z.tu : z.cpu;
-    for (var k = 0; k < numGiocatori; k++) {
-      g.push({ id: sq + '_' + (id++), squadra: sq, zona: z.id, ruolo: z.ruolo, portiere: false, stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false, nome: z.ruolo + (k + 1) });
-    }
+  }
+  for (var j = 0; j < 2; j++) {
+    g.push({ id: sq + '_' + (id++), squadra: sq, zona: 5, ruolo: 'DIF', portiere: false,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             nome: rosa.difensori_alta[j] || ('DIF' + (j+3)) });
   }
   return g;
 }
+
 function creaPanchina(sq) {
   var p = []; var id = 100;
-  for (var i = 0; i < PANCHINA_CONFIG.length; i++) {
-    var cfg = PANCHINA_CONFIG[i];
-    for (var k = 0; k < cfg.n; k++) {
-      p.push({ id: sq + '_pan_' + (id++), squadra: sq, ruolo: cfg.ruolo, portiere: cfg.ruolo === 'POR', stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false, entrato: false, nome: cfg.ruolo + (k + 3) });
-    }
+  var squadraId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  var rosa = ROSE[squadraId];
+  if (!rosa) return p;
+  var pan = rosa.panchina;
+  for (var i = 0; i < pan.por.length; i++) {
+    p.push({ id: sq + '_pan_' + (id++), squadra: sq, ruolo: 'POR', portiere: true,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             entrato: false, nome: pan.por[i] });
+  }
+  for (var j = 0; j < pan.dif.length; j++) {
+    p.push({ id: sq + '_pan_' + (id++), squadra: sq, ruolo: 'DIF', portiere: false,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             entrato: false, nome: pan.dif[j] });
+  }
+  for (var k = 0; k < pan.cen.length; k++) {
+    p.push({ id: sq + '_pan_' + (id++), squadra: sq, ruolo: 'CEN', portiere: false,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             entrato: false, nome: pan.cen[k] });
+  }
+  for (var m = 0; m < pan.att.length; m++) {
+    p.push({ id: sq + '_pan_' + (id++), squadra: sq, ruolo: 'ATT', portiere: false,
+             stamina: STAMINA_MAX, staminaMax: STAMINA_MAX, falli: 0, ammonito: false, espulso: false,
+             entrato: false, nome: pan.att[m] });
   }
   return p;
 }
@@ -1191,8 +1303,9 @@ function renderCampo() {
       if (por) {
         var wrapper = document.createElement('div');
         wrapper.className = 'pedina-wrapper ' + sq + ' portiere-wrapper';
-        wrapper.appendChild(creaInfoLaterale(por));
+        wrapper.appendChild(creaNomeGiocatore(por));
         wrapper.appendChild(creaPedinaEl(por));
+        wrapper.appendChild(creaInfoSotto(por));
         zona.appendChild(wrapper);
       }
       zone.appendChild(zona);
@@ -1207,15 +1320,17 @@ function renderCampo() {
     if (tuGiocatori[0]) {
       var w1 = document.createElement('div');
       w1.className = 'pedina-wrapper tu';
-      w1.appendChild(creaInfoLaterale(tuGiocatori[0]));
+      w1.appendChild(creaNomeGiocatore(tuGiocatori[0]));
       w1.appendChild(creaPedinaEl(tuGiocatori[0]));
+      w1.appendChild(creaInfoSotto(tuGiocatori[0]));
       metaSup.appendChild(w1);
     }
     if (cpuGiocatori[0]) {
       var w2 = document.createElement('div');
       w2.className = 'pedina-wrapper cpu';
-      w2.appendChild(creaInfoLaterale(cpuGiocatori[0]));
+      w2.appendChild(creaNomeGiocatore(cpuGiocatori[0]));
       w2.appendChild(creaPedinaEl(cpuGiocatori[0]));
+      w2.appendChild(creaInfoSotto(cpuGiocatori[0]));
       metaSup.appendChild(w2);
     }
     zona.appendChild(metaSup);
@@ -1225,15 +1340,17 @@ function renderCampo() {
     if (tuGiocatori[1]) {
       var w3 = document.createElement('div');
       w3.className = 'pedina-wrapper tu';
-      w3.appendChild(creaInfoLaterale(tuGiocatori[1]));
+      w3.appendChild(creaNomeGiocatore(tuGiocatori[1]));
       w3.appendChild(creaPedinaEl(tuGiocatori[1]));
+      w3.appendChild(creaInfoSotto(tuGiocatori[1]));
       metaInf.appendChild(w3);
     }
     if (cpuGiocatori[1]) {
       var w4 = document.createElement('div');
       w4.className = 'pedina-wrapper cpu';
-      w4.appendChild(creaInfoLaterale(cpuGiocatori[1]));
+      w4.appendChild(creaNomeGiocatore(cpuGiocatori[1]));
       w4.appendChild(creaPedinaEl(cpuGiocatori[1]));
+      w4.appendChild(creaInfoSotto(cpuGiocatori[1]));
       metaInf.appendChild(w4);
     }
     zona.appendChild(metaInf);
@@ -1243,7 +1360,10 @@ function renderCampo() {
 
   setTimeout(function() {
     if (!stato.pallaInAnimazione && stato.zonaPalla !== null && stato.possessore) {
-      mostraPallaNellaZona(stato.zonaPalla, stato.metaContesa);
+      var pallaEsistente = document.querySelector('.zona[data-zona="' + stato.zonaPalla + '"] .palla-centro');
+      if (!pallaEsistente) {
+        mostraPallaNellaZona(stato.zonaPalla, stato.metaContesa);
+      }
     }
     evidenziaZonaContesa();
   }, 50);
@@ -1256,7 +1376,6 @@ function mostraPallaNellaZona(zonaId, meta) {
   for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
   var zonaEl = document.querySelector('.zona[data-zona="' + zonaId + '"]');
   if (!zonaEl) return;
-
   var xPerc, yPerc;
   if (stato.puntoPallaFermo) {
     xPerc = stato.puntoPallaFermo.xPerc;
@@ -1266,17 +1385,40 @@ function mostraPallaNellaZona(zonaId, meta) {
     xPerc = PALLA_X_CENTRO;
     yPerc = meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF;
   }
-
   var palla = document.createElement('div');
   palla.className = 'palla-centro';
   palla.style.left = xPerc + '%';
   palla.style.top = yPerc + '%';
+  palla.innerHTML = creaPalloneSVG();
   zonaEl.appendChild(palla);
 }
 
-function creaInfoLaterale(g) {
+function creaPallaCentroInZona(zonaId, punto) {
+  var vecchie = document.querySelectorAll('.palla-centro');
+  for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
+  var zonaEl = document.querySelector('.zona[data-zona="' + zonaId + '"]');
+  if (!zonaEl) return;
+  var xPerc = punto ? punto.xPerc : 50;
+  var yPerc = punto ? punto.yPerc : 50;
+  var palla = document.createElement('div');
+  palla.className = 'palla-centro';
+  palla.style.left = xPerc + '%';
+  palla.style.top = yPerc + '%';
+  palla.innerHTML = creaPalloneSVG();
+  zonaEl.appendChild(palla);
+}
+
+function creaNomeGiocatore(g) {
   var el = document.createElement('div');
-  el.className = 'info-laterale ' + g.squadra;
+  el.className = 'nome-giocatore';
+  el.textContent = g.nome;
+  el.title = g.nome + ' (' + g.ruolo + ')';
+  return el;
+}
+
+function creaInfoSotto(g) {
+  var el = document.createElement('div');
+  el.className = 'info-sotto ' + g.squadra;
   if (g.ammonito) el.classList.add('ammonito-info');
   if (g.espulso) el.classList.add('espulso-info');
   var perc = (g.stamina / g.staminaMax) * 100;
@@ -1315,6 +1457,7 @@ function creaPedinaEl(g, animazione) {
   if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
     var palla = document.createElement('div');
     palla.className = 'palla-attaccata';
+    palla.innerHTML = creaPalloneSVG();
     el.appendChild(palla);
   }
   var bar = document.createElement('div');
@@ -1395,9 +1538,6 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
-/* ============================================================
-   PASSAGGIO INIZIALE (dopo la moneta)
-   ============================================================ */
 function eseguiPassaggioIniziale(squadra) {
   document.getElementById('carte-panel').classList.add('nascosto');
   stato.pallaInAnimazione = true;
@@ -1410,17 +1550,14 @@ function eseguiPassaggioIniziale(squadra) {
 
   var giocatorePartenzaId = stato.giocatorePalla;
 
-  // 1) Aggiorna lo stato PRIMA di ridisegnare il campo
   stato.zonaPalla = nuovaZona;
   stato.possessore = squadra;
   stato.metaContesa = nuovaMeta;
   stato.giocatorePalla = null;
 
-  // 2) Ridisegna il campo
   renderCampo();
   renderHeader();
 
-  // 3) Aspetta che il DOM sia pronto, poi anima la palla
   setTimeout(function() {
     eseguiPassaggioInizialeAnimato(giocatorePartenzaId, nuovaZona, nuovaMeta, squadra, function() {
       setTimeout(avviaContrasto, 800);
@@ -1428,9 +1565,6 @@ function eseguiPassaggioIniziale(squadra) {
   }, 100);
 }
 
-/* ============================================================
-   CALCOLO PUNTO DI ARRIVO DELLA PALLA (AI PIEDI DEI CONTENDENTI)
-   ============================================================ */
 function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
   var attaccanteInSup = (metaContesa === 'sup');
   var sqInSup = attaccanteInSup ? squadraAttaccante : squadraDifensore;
@@ -1443,42 +1577,35 @@ function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadr
     return g.zona === zonaId && !g.portiere && !g.espulso;
   });
 
-  if (gSup.length === 0 || gInf.length === 0) {
-    console.log('[calcolaPuntoMedioContesa] Giocatori non trovati. Zona:', zonaId, 'meta:', metaContesa);
-    return null;
-  }
+  if (gSup.length === 0 || gInf.length === 0) return null;
 
   var elSup = document.querySelector('[data-giocatore-id="' + gSup[0].id + '"]');
   var elInf = document.querySelector('[data-giocatore-id="' + gInf[0].id + '"]');
-  if (!elSup || !elInf) {
-    console.log('[calcolaPuntoMedioContesa] Elementi DOM non trovati per:', gSup[0].id, gInf[0].id);
-    return null;
-  }
+  if (!elSup || !elInf) return null;
 
   var rectSup = elSup.getBoundingClientRect();
   var rectInf = elInf.getBoundingClientRect();
 
-  // Coordinate dei PIEDI (bottom del giocatore) relative all'area-gioco
   var piediSupX = rectSup.left + rectSup.width / 2 - box.left;
   var piediSupY = rectSup.bottom - box.top;
   var piediInfX = rectInf.left + rectInf.width / 2 - box.left;
   var piediInfY = rectInf.bottom - box.top;
 
-  // Punto medio tra i due piedi
   var medioX = (piediSupX + piediInfX) / 2;
   var medioY = (piediSupY + piediInfY) / 2;
-
-  console.log('[calcolaPuntoMedioContesa] Zona:', zonaId, 'meta:', metaContesa,
-    'piediSup:', piediSupX.toFixed(1), piediSupY.toFixed(1),
-    'piediInf:', piediInfX.toFixed(1), piediInfY.toFixed(1),
-    'medio:', medioX.toFixed(1), medioY.toFixed(1));
 
   return { xPx: medioX, yPx: medioY };
 }
 
-/* ============================================================
-   ANIMAZIONE PASSAGGIO INIZIALE
-   ============================================================ */
+function animaCalcio(giocatoreId) {
+  var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreId + '"]');
+  if (!pedinaEl) return;
+  pedinaEl.classList.add('pg-in-calcio');
+  setTimeout(function() {
+    pedinaEl.classList.remove('pg-in-calcio');
+  }, 700);
+}
+
 function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squadra, callback) {
   suonaCalcio();
   var areaGioco = document.querySelector('.area-gioco');
@@ -1486,7 +1613,6 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreId + '"]');
 
   if (!pedinaEl) {
-    console.log('[eseguiPassaggioInizialeAnimato] Pedina di partenza non trovata:', giocatoreId);
     stato.pallaInAnimazione = false;
     if (callback) callback();
     return;
@@ -1515,41 +1641,56 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   }
 
   var calcRect = pedinaEl.getBoundingClientRect();
-  // Partenza: ai piedi del giocatore che ha la palla
   var partXPx = calcRect.left + calcRect.width / 2 - box.left;
   var partYPx = calcRect.bottom - box.top;
 
-  var pallaAtt = pedinaEl.querySelector('.palla-attaccata');
-  if (pallaAtt) pallaAtt.remove();
+  animaCalcio(giocatoreId);
 
-  nascondiPallaCentro();
+  setTimeout(function() {
+    var pallaAtt = pedinaEl.querySelector('.palla-attaccata');
+    if (pallaAtt) pallaAtt.remove();
 
-  var palla = document.getElementById('palla-volante');
-  palla.style.transition = 'none';
-  palla.style.left = partXPx + 'px';
-  palla.style.top = partYPx + 'px';
-  palla.classList.add('attiva');
-  void palla.offsetWidth;
+    nascondiPallaCentro();
 
-  var durata = DURATA_ANIM_PALLA;
-  var inizio = performance.now();
+    var palla = document.getElementById('palla-volante');
+    palla.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
+    var pallaInner = palla.querySelector('.palla-inner');
+    palla.style.transition = 'none';
+    palla.style.left = partXPx + 'px';
+    palla.style.top = partYPx + 'px';
+    palla.classList.add('attiva');
+    pallaInner.style.transform = 'rotate(0deg)';
+    void palla.offsetWidth;
 
-  // Traiettoria lineare
-  function anima(now) {
-    var t = Math.min((now - inizio) / durata, 1);
-    var x = partXPx + (arrivoXPx - partXPx) * t;
-    var y = partYPx + (arrivoYPx - partYPx) * t;
-    palla.style.left = x + 'px';
-    palla.style.top = y + 'px';
-    if (t < 1) {
-      requestAnimationFrame(anima);
-    } else {
-      palla.classList.remove('attiva');
-      stato.pallaInAnimazione = false;
-      if (callback) callback();
+    var durata = DURATA_ANIM_PALLA;
+    var inizio = performance.now();
+
+    var dxTot = arrivoXPx - partXPx;
+    var dyTot = arrivoYPx - partYPx;
+    var distanzaTot = Math.sqrt(dxTot * dxTot + dyTot * dyTot);
+    var giriTotali = (distanzaTot / 50) * (dxTot >= 0 ? 1 : -1);
+    var gradiTotali = giriTotali * 360;
+
+    function anima(now) {
+      var t = Math.min((now - inizio) / durata, 1);
+      var eased = t * t * (3 - 2 * t);
+      var x = partXPx + dxTot * eased;
+      var y = partYPx + dyTot * eased;
+      palla.style.left = x + 'px';
+      palla.style.top = y + 'px';
+      pallaInner.style.transform = 'rotate(' + (gradiTotali * eased) + 'deg)';
+      if (t < 1) {
+        requestAnimationFrame(anima);
+      } else {
+        palla.classList.remove('attiva');
+        stato.pallaInAnimazione = false;
+        creaPallaCentroInZona(nuovaZona, stato.puntoPallaFermo);
+        stato.puntoPallaFermo = null;
+        if (callback) callback();
+      }
     }
-  }
-  requestAnimationFrame(anima);
+    requestAnimationFrame(anima);
+  }, 250);
 }
 
 function nascondiPallaCentro() {
@@ -1789,9 +1930,6 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* ============================================================
-   RISOLUZIONE CONTRASTO + SCIVOLATA + PASSAGGIO
-   ============================================================ */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
   flashVincitore(vincente);
@@ -1833,7 +1971,6 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
-  // Aggiorna lo stato PRIMA di disegnare il campo
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
@@ -1844,31 +1981,25 @@ function risolviContrasto(vincente, motivoFallo) {
   setTimeout(function() {
     eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, function() {
       stato.giocatorePalla = null;
-      renderCampo(); renderHeader();
+      renderHeader();
       setTimeout(avanzaMano, 800);
     });
   }, 100);
 }
 
-/* ============================================================
-   ANIMAZIONE SCIVOLATA + PASSAGGIO
-   ============================================================ */
 function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, callback) {
   suonaScivolata();
   var areaGioco = document.querySelector('.area-gioco');
   var box = areaGioco.getBoundingClientRect();
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincenteId + '"]');
 
-  if (!pedinaEl) {
-    console.log('[eseguiScivolataEPassaggio] Pedina non trovata:', giocatoreVincenteId);
-    if (callback) callback();
-    return;
-  }
+  if (!pedinaEl) { if (callback) callback(); return; }
 
   stato.pallaInAnimazione = true;
 
   var difensore = vincente === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
+  var puntoPercArrivo;
 
   var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, vincente, difensore, box);
 
@@ -1877,7 +2008,7 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
     arrivoYPx = puntoMedio.yPx;
     var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
     var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
-    stato.puntoPallaFermo = {
+    puntoPercArrivo = {
       xPerc: ((arrivoXPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
       yPerc: ((arrivoYPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
     };
@@ -1886,7 +2017,7 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
     var zonaDestRect2 = zonaDest2 ? zonaDest2.getBoundingClientRect() : box;
     arrivoXPx = zonaDestRect2.left + zonaDestRect2.width / 2 - box.left;
     arrivoYPx = zonaDestRect2.top + zonaDestRect2.height / 2 - box.top;
-    stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
+    puntoPercArrivo = { xPerc: 50, yPerc: 50 };
   }
 
   var calcRect = pedinaEl.getBoundingClientRect();
@@ -1910,6 +2041,7 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
   if (!pallaAtt) {
     pallaAtt = document.createElement('div');
     pallaAtt.className = 'palla-attaccata';
+    pallaAtt.innerHTML = creaPalloneSVG();
     pedinaEl.appendChild(pallaAtt);
   }
 
@@ -1931,36 +2063,54 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
       }
 
       var pallaRect = pedinaEl.getBoundingClientRect();
-      // Partenza: ai piedi del giocatore vincente
       var partXPx = pallaRect.left + pallaRect.width / 2 - box.left;
       var partYPx = pallaRect.bottom - box.top;
 
-      var pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
-      if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
+      animaCalcio(giocatoreVincenteId);
 
-      suonaCalcio();
+      setTimeout(function() {
+        var pallaAttDaRimuovere = pedinaEl.querySelector('.palla-attaccata');
+        if (pallaAttDaRimuovere) pallaAttDaRimuovere.remove();
 
-      var palla = document.getElementById('palla-volante');
-      palla.style.transition = 'none';
-      palla.style.left = partXPx + 'px';
-      palla.style.top = partYPx + 'px';
-      palla.classList.add('attiva');
-      void palla.offsetWidth;
+        suonaCalcio();
 
-      var durata = DURATA_ANIM_PALLA;
-      var inizio = performance.now();
+        var palla = document.getElementById('palla-volante');
+        palla.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
+        var pallaInner = palla.querySelector('.palla-inner');
+        palla.style.transition = 'none';
+        palla.style.left = partXPx + 'px';
+        palla.style.top = partYPx + 'px';
+        palla.classList.add('attiva');
+        pallaInner.style.transform = 'rotate(0deg)';
+        void palla.offsetWidth;
 
-      // Traiettoria lineare
-      function anima(now) {
-        var t = Math.min((now - inizio) / durata, 1);
-        var x = partXPx + (arrivoXPx - partXPx) * t;
-        var y = partYPx + (arrivoYPx - partYPx) * t;
-        palla.style.left = x + 'px';
-        palla.style.top = y + 'px';
-        if (t < 1) requestAnimationFrame(anima);
-        else { palla.classList.remove('attiva'); stato.pallaInAnimazione = false; if (callback) callback(); }
-      }
-      requestAnimationFrame(anima);
+        var durata = DURATA_ANIM_PALLA;
+        var inizio = performance.now();
+
+        var dxTot = arrivoXPx - partXPx;
+        var dyTot = arrivoYPx - partYPx;
+        var distanzaTot = Math.sqrt(dxTot * dxTot + dyTot * dyTot);
+        var giriTotali = (distanzaTot / 50) * (dxTot >= 0 ? 1 : -1);
+        var gradiTotali = giriTotali * 360;
+
+        function anima(now) {
+          var t = Math.min((now - inizio) / durata, 1);
+          var eased = t * t * (3 - 2 * t);
+          var x = partXPx + dxTot * eased;
+          var y = partYPx + dyTot * eased;
+          palla.style.left = x + 'px';
+          palla.style.top = y + 'px';
+          pallaInner.style.transform = 'rotate(' + (gradiTotali * eased) + 'deg)';
+          if (t < 1) requestAnimationFrame(anima);
+          else {
+            palla.classList.remove('attiva');
+            stato.pallaInAnimazione = false;
+            creaPallaCentroInZona(nuovaZona, puntoPercArrivo);
+            if (callback) callback();
+          }
+        }
+        requestAnimationFrame(anima);
+      }, 250);
     }, DURATA_RITORNO + 50);
   }, DURATA_SCIVOLATA);
 }
@@ -1986,24 +2136,39 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo, callback) {
   nascondiPallaCentro();
   suonaCalcio();
   var palla = document.getElementById('palla-volante');
+  palla.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
+  var pallaInner = palla.querySelector('.palla-inner');
   palla.style.transition = 'none';
   palla.style.left = x1 + 'px'; palla.style.top = y1 + 'px';
   palla.classList.add('attiva');
+  pallaInner.style.transform = 'rotate(0deg)';
   void palla.offsetWidth;
 
   var durata = DURATA_ANIM_PALLA;
   var altezzaArco = tipo === 'parabola' ? Math.max(80, Math.abs(x2 - x1) * 0.4) : 0;
   var inizio = performance.now();
 
+  var dxTot = x2 - x1;
+  var dyTot = y2 - y1;
+  var distanzaTot = Math.sqrt(dxTot * dxTot + dyTot * dyTot);
+  var giriTotali = (distanzaTot / 50) * (dxTot >= 0 ? 1 : -1);
+  var gradiTotali = giriTotali * 360;
+
   function anima(now) {
     var t = Math.min((now - inizio) / durata, 1);
-    var x = x1 + (x2 - x1) * t;
-    var yLineare = y1 + (y2 - y1) * t;
+    var eased = t * t * (3 - 2 * t);
+    var x = x1 + dxTot * eased;
+    var yLineare = y1 + dyTot * eased;
     var offsetParabolico = -Math.sin(Math.PI * t) * altezzaArco;
     var y = yLineare + offsetParabolico;
     palla.style.left = x + 'px'; palla.style.top = y + 'px';
+    pallaInner.style.transform = 'rotate(' + (gradiTotali * eased) + 'deg)';
     if (t < 1) requestAnimationFrame(anima);
-    else { palla.classList.remove('attiva'); if (callback) callback(); }
+    else {
+      palla.classList.remove('attiva');
+      creaPallaCentroInZona(zonaA, { xPerc: 50, yPerc: 50 });
+      if (callback) callback();
+    }
   }
   requestAnimationFrame(anima);
 }
@@ -2094,6 +2259,8 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
   }
   document.getElementById('tiro-info').textContent = 'FASE 1 — Dado: ' + dadoTiro;
 
+  orientaPortiereVerso(dadoTiro);
+
   setTimeout(function() {
     if (dadoTiro === 5 || dadoTiro === 8) {
       var portiere0 = document.getElementById('tiro-portiere');
@@ -2101,6 +2268,7 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
         portiere0.style.left = (PORTA_LEFT + (pos.x / 100) * PORTA_W - 10) + '%';
         portiere0.style.top = (PORTA_TOP + (pos.y / 100) * PORTA_H - 20) + '%';
       }
+      eseguiParataPortiere(5, dadoTiro, true);
       mostraEsitoTiroConGrafica('parata', dadoTiro, attaccante, difensore, '🧤 Parata facile!');
       return;
     }
@@ -2114,11 +2282,8 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
     }
     mediaX /= 3; mediaY /= 3;
 
-    var portiere = document.getElementById('tiro-portiere');
-    if (portiere) {
-      portiere.style.left = (PORTA_LEFT + (mediaX / 100) * PORTA_W - 10) + '%';
-      portiere.style.top = (PORTA_TOP + (mediaY / 100) * PORTA_H - 20) + '%';
-    }
+    eseguiParataPortiereSettore(mediaX, mediaY, dadiPortiere);
+
     for (var k = 0; k < dadiPortiere.length; k++) {
       var c = document.querySelector('.tiro-casella[data-numero="' + dadiPortiere[k] + '"]');
       if (c) c.classList.add('colpita');
@@ -2133,6 +2298,111 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
       }
     }, 1800);
   }, 1200);
+}
+
+function orientaPortiereVerso(casella) {
+  var portiere = document.getElementById('tiro-portiere');
+  if (!portiere) return;
+  var svg = portiere.querySelector('svg');
+  if (!svg) return;
+  var testa = svg.querySelector('.pg-testa');
+  if (!testa) return;
+  testa.style.transform = 'rotate(0deg) translateY(0)';
+  var x = CASELLE_PERC[casella].x;
+  var y = CASELLE_PERC[casella].y;
+  var dx = 0;
+  if (x < 40) dx = -12;
+  else if (x > 60) dx = 12;
+  var dy = 0;
+  if (y < 40) dy = -2;
+  else if (y > 60) dy = 2;
+  testa.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1)';
+  testa.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)';
+  var braccioSx = svg.querySelector('.pg-braccio-sx');
+  var braccioDx = svg.querySelector('.pg-braccio-dx');
+  if (braccioSx) { braccioSx.style.transition = 'transform 0.5s ease-out'; braccioSx.style.transform = 'rotate(' + (dx - 10) + 'deg)'; }
+  if (braccioDx) { braccioDx.style.transition = 'transform 0.5s ease-out'; braccioDx.style.transform = 'rotate(' + (dx + 10) + 'deg)'; }
+}
+
+function eseguiParataPortiereSettore(mediaX, mediaY, dadiPortiere) {
+  var portiere = document.getElementById('tiro-portiere');
+  if (!portiere) return;
+  var targetLeft = PORTA_LEFT + (mediaX / 100) * PORTA_W - 10;
+  var targetTop  = PORTA_TOP + (mediaY / 100) * PORTA_H - 20;
+  var direzione = 'centro';
+  if (mediaX < 40) direzione = 'sx';
+  else if (mediaX > 60) direzione = 'dx';
+  var verticale = '';
+  if (mediaY < 30) verticale = 'alto';
+  else if (mediaY > 70) verticale = 'basso';
+  portiere.style.left = targetLeft + '%';
+  portiere.style.top = targetTop + '%';
+  portiere.classList.remove('parata-sx', 'parata-dx', 'parata-centro', 'parata-alto', 'parata-basso', 'pg-in-parata');
+  portiere.classList.add('pg-in-parata');
+  if (direzione === 'sx') portiere.classList.add('parata-sx');
+  else if (direzione === 'dx') portiere.classList.add('parata-dx');
+  else portiere.classList.add('parata-centro');
+  if (verticale === 'alto') portiere.classList.add('parata-alto');
+  if (verticale === 'basso') portiere.classList.add('parata-basso');
+  portiere.classList.remove('pg-salta');
+  void portiere.offsetWidth;
+  portiere.classList.add('pg-salta');
+  var svg = portiere.querySelector('svg');
+  if (svg) {
+    var braccioSx = svg.querySelector('.pg-braccio-sx');
+    var braccioDx = svg.querySelector('.pg-braccio-dx');
+    var testa = svg.querySelector('.pg-testa');
+    if (braccioSx) {
+      braccioSx.style.transition = 'transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1)';
+      var rotSx = -140;
+      if (direzione === 'sx') rotSx = -160;
+      else if (direzione === 'dx') rotSx = -75;
+      if (verticale === 'alto') rotSx = -170;
+      if (verticale === 'basso') rotSx = -60;
+      braccioSx.style.transform = 'rotate(' + rotSx + 'deg)';
+    }
+    if (braccioDx) {
+      braccioDx.style.transition = 'transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1)';
+      var rotDx = 140;
+      if (direzione === 'sx') rotDx = 75;
+      else if (direzione === 'dx') rotDx = 160;
+      if (verticale === 'alto') rotDx = 170;
+      if (verticale === 'basso') rotDx = 60;
+      braccioDx.style.transform = 'rotate(' + rotDx + 'deg)';
+    }
+    if (testa) {
+      testa.style.transition = 'transform 0.5s ease-out';
+      var rotTesta = 0;
+      if (direzione === 'sx') rotTesta = -14;
+      else if (direzione === 'dx') rotTesta = 14;
+      var dyTesta = 0;
+      if (verticale === 'alto') dyTesta = -3;
+      if (verticale === 'basso') dyTesta = 3;
+      testa.style.transform = 'rotate(' + rotTesta + 'deg) translateY(' + dyTesta + 'px)';
+    }
+  }
+}
+
+function eseguiParataPortiere(casella, dadoTiro, facile) {
+  var portiere = document.getElementById('tiro-portiere');
+  if (!portiere) return;
+  var pos = CASELLE_PERC[casella];
+  var targetLeft = PORTA_LEFT + (pos.x / 100) * PORTA_W - 10;
+  var targetTop  = PORTA_TOP + (pos.y / 100) * PORTA_H - 20;
+  portiere.style.left = targetLeft + '%';
+  portiere.style.top = targetTop + '%';
+  portiere.classList.remove('parata-sx', 'parata-dx', 'parata-centro', 'parata-alto', 'parata-basso');
+  portiere.classList.add('pg-in-parata', 'parata-centro');
+  portiere.classList.remove('pg-salta');
+  void portiere.offsetWidth;
+  portiere.classList.add('pg-salta');
+  var svg = portiere.querySelector('svg');
+  if (svg) {
+    var braccioSx = svg.querySelector('.pg-braccio-sx');
+    var braccioDx = svg.querySelector('.pg-braccio-dx');
+    if (braccioSx) { braccioSx.style.transition = 'transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1)'; braccioSx.style.transform = 'rotate(-160deg)'; }
+    if (braccioDx) { braccioDx.style.transition = 'transform 0.55s cubic-bezier(0.34, 1.3, 0.64, 1)'; braccioDx.style.transform = 'rotate(160deg)'; }
+  }
 }
 
 function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
@@ -2207,14 +2477,18 @@ function gestisciParata(attaccante, difensore) {
     if (stato.giocatori[portiereSquadra][i].portiere) { portiere = stato.giocatori[portiereSquadra][i]; break; }
   }
   var zonaPortiere = portiereSquadra === 'tu' ? 0 : 6;
+
   if (portiere) {
-    var pedinaEl = document.querySelector('[data-giocatore-id="' + portiere.id + '"] svg');
-    if (pedinaEl) {
-      pedinaEl.classList.remove('anim-fermo');
-      pedinaEl.classList.add('anim-calcia');
-      setTimeout(function() { pedinaEl.classList.remove('anim-calcia'); pedinaEl.classList.add('anim-fermo'); }, 800);
+    var portiereEl = document.querySelector('[data-giocatore-id="' + portiere.id + '"]');
+    if (portiereEl) {
+      portiereEl.classList.add('pg-in-parata');
+      portiereEl.style.transition = 'transform 0.6s cubic-bezier(0.34, 1.4, 0.64, 1)';
+      portiereEl.style.transform = 'translateY(-6px)';
+      setTimeout(function() { portiereEl.style.transform = 'translateY(0)'; }, 400);
+      setTimeout(function() { portiereEl.classList.remove('pg-in-parata'); }, 1000);
     }
   }
+
   setTimeout(function() {
     animaPallaVersoZona(zonaPortiere, 3, 'parabola', function() {
       stato.zonaPalla = 3;
