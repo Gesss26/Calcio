@@ -929,6 +929,9 @@ var stato = {
   pallaInAnimazione: false,
   puntoPallaFermo: null,
   puntoPallaPersistente: null,
+  contrastoCoppia: null,
+  ultimaAzioneExtra: false,
+  azioneTiroDaPalo: null,
   mazzo: [], scarti: [],
   mani: { tu: [], cpu: [] },
   giocatori: { tu: [], cpu: [] },
@@ -1039,7 +1042,6 @@ function apriLog() {
 }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 
-/* SVG PALLONE */
 function creaPalloneSVG() {
   return '' +
   '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
@@ -1067,7 +1069,37 @@ function creaPalloneSVG() {
   '</svg>';
 }
 
-/* CREA GIOCATORI DALLE ROSE (definite in divise.js) */
+function bloccaCoppiaContrasto() {
+  var zona = stato.zonaPalla;
+  var meta = stato.metaContesa;
+  var attaccante = stato.possessore;
+  var difensore = attaccante === 'tu' ? 'cpu' : 'tu';
+
+  if (zona === null || zona === undefined) {
+    stato.contrastoCoppia = null;
+    return;
+  }
+
+  var metaIdx = meta === 'sup' ? 0 : 1;
+
+  var attaccantiZona = stato.giocatori[attaccante].filter(function(g) {
+    return g.zona === zona && !g.portiere && !g.espulso;
+  });
+  var difensoriZona = stato.giocatori[difensore].filter(function(g) {
+    return g.zona === zona && !g.portiere && !g.espulso;
+  });
+
+  var gAtt = attaccantiZona[metaIdx] || attaccantiZona[0];
+  var gDif = difensoriZona[metaIdx] || difensoriZona[0];
+
+  stato.contrastoCoppia = {
+    zona: zona,
+    meta: meta,
+    giocatoreAtt: gAtt ? gAtt.id : null,
+    giocatoreDif: gDif ? gDif.id : null
+  };
+}
+
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var squadraId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
@@ -1228,6 +1260,9 @@ function avviaPartita(sqTU, sqCPU, tipo) {
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
   stato.puntoPallaFermo = null;
   stato.puntoPallaPersistente = null;
+  stato.contrastoCoppia = null;
+  stato.ultimaAzioneExtra = false;
+  stato.azioneTiroDaPalo = null;
   document.getElementById('nome-tu').textContent = SQUADRE[sqTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[sqCPU].nome;
   renderZoneOverlay();
@@ -1530,6 +1565,9 @@ function lanciaMoneta(scelta) {
 
   stato.puntoPallaFermo = null;
   stato.puntoPallaPersistente = null;
+  stato.contrastoCoppia = null;
+  stato.ultimaAzioneExtra = false;
+  stato.azioneTiroDaPalo = null;
   nascondiPallaCentro();
   stato.pallaInAnimazione = false;
 
@@ -1562,6 +1600,7 @@ function eseguiPassaggioIniziale(squadra) {
   var giocatorePartenzaId = stato.giocatorePalla;
 
   stato.puntoPallaPersistente = null;
+  stato.contrastoCoppia = null;
   stato.zonaPalla = nuovaZona;
   stato.possessore = squadra;
   stato.metaContesa = nuovaMeta;
@@ -1572,6 +1611,7 @@ function eseguiPassaggioIniziale(squadra) {
 
   setTimeout(function() {
     eseguiPassaggioInizialeAnimato(giocatorePartenzaId, nuovaZona, nuovaMeta, squadra, function() {
+      bloccaCoppiaContrasto();
       setTimeout(avviaContrasto, 800);
     });
   }, 100);
@@ -1726,13 +1766,26 @@ function avviaContrasto() {
   var attaccante = stato.possessore;
   var difensore = attaccante === 'tu' ? 'cpu' : 'tu';
 
-  var metaIdx = stato.metaContesa === 'sup' ? 0 : 1;
+  var giocatoreAtt = null;
+  var giocatoreDif = null;
 
-  var attaccantiZona = stato.giocatori[attaccante].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
-  var difensoriZona = stato.giocatori[difensore].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
+  var coppia = stato.contrastoCoppia;
+  if (coppia && coppia.zona === zona) {
+    for (var i = 0; i < stato.giocatori[attaccante].length; i++) {
+      if (stato.giocatori[attaccante][i].id === coppia.giocatoreAtt) { giocatoreAtt = stato.giocatori[attaccante][i]; break; }
+    }
+    for (var j = 0; j < stato.giocatori[difensore].length; j++) {
+      if (stato.giocatori[difensore][j].id === coppia.giocatoreDif) { giocatoreDif = stato.giocatori[difensore][j]; break; }
+    }
+  }
 
-  var giocatoreAtt = attaccantiZona[metaIdx] || attaccantiZona[0];
-  var giocatoreDif = difensoriZona[metaIdx] || difensoriZona[0];
+  if (!giocatoreAtt || !giocatoreDif) {
+    var metaIdx = stato.metaContesa === 'sup' ? 0 : 1;
+    var attaccantiZona = stato.giocatori[attaccante].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
+    var difensoriZona = stato.giocatori[difensore].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
+    giocatoreAtt = giocatoreAtt || attaccantiZona[metaIdx] || attaccantiZona[0];
+    giocatoreDif = giocatoreDif || difensoriZona[metaIdx] || difensoriZona[0];
+  }
 
   riempiMano('tu'); riempiMano('cpu');
   var semeGuida = scegliSemeGuida();
@@ -1964,18 +2017,39 @@ function risolviContrasto(vincente, motivoFallo) {
 
   document.getElementById('carte-panel').classList.add('nascosto');
 
+  var isRigore = false;
   if (motivoFallo) {
-    var zona = c.zona;
-    if ((vincente === 'tu' && zona === 5) || (vincente === 'cpu' && zona === 1)) {
-      log('🎯 RIGORE!', 'highlight');
-      setTimeout(function() { apriSchermataRigore(vincente); }, 800);
-      return;
-    }
-  } else {
     if ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1)) {
-      setTimeout(function() { apriSchermataTiro(vincente); }, 500);
-      return;
+      isRigore = true;
     }
+  }
+
+  var isTiroInPorta = false;
+  if (!motivoFallo) {
+    if ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1)) {
+      isTiroInPorta = true;
+    }
+  }
+
+  if (isTiroInPorta || isRigore) {
+    stato.azioneTiroDaPalo = {
+      zona: c.zona,
+      giocatoreAtt: c.giocatoreAtt,
+      giocatoreDif: c.giocatoreDif,
+      meta: stato.metaContesa,
+      attaccante: c.attaccante,
+      difensore: c.difensore
+    };
+  }
+
+  if (isRigore) {
+    log('🎯 RIGORE!', 'highlight');
+    setTimeout(function() { apriSchermataRigore(vincente); }, 800);
+    return;
+  }
+  if (isTiroInPorta) {
+    setTimeout(function() { apriSchermataTiro(vincente); }, 500);
+    return;
   }
 
   var direzione = vincente === 'tu' ? 1 : -1;
@@ -1989,6 +2063,7 @@ function risolviContrasto(vincente, motivoFallo) {
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
   stato.puntoPallaPersistente = null;
+  stato.contrastoCoppia = null;
 
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
@@ -2001,6 +2076,7 @@ function risolviContrasto(vincente, motivoFallo) {
     eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, function() {
       stato.giocatorePalla = null;
       renderHeader();
+      bloccaCoppiaContrasto();
       setTimeout(avanzaMano, 800);
     });
   }, 100);
@@ -2475,11 +2551,48 @@ function mostraGoalBanner(vincente) {
   setTimeout(function() { banner.classList.remove('attivo'); }, 3200);
 }
 
+function fineTempoOPartita() {
+  // Funzione helper: chiude il tempo (se primo) o la partita
+  if (stato.tempo === 1) {
+    suonaFischietto('fine-tempo');
+    stato.tempo = 2; stato.mano = 1;
+    stato.ultimaAzioneExtra = false;
+    stato.azioneTiroDaPalo = null;
+    log('⏸️ FINE PRIMO TEMPO.', 'goal');
+    ['tu', 'cpu'].forEach(function(sq) {
+      for (var i = 0; i < stato.giocatori[sq].length; i++) stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
+    });
+    riempiMano('tu'); riempiMano('cpu');
+    mostraFinestraFineTempo(function() {
+      var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
+      stato.possessore = perdente;
+      stato.zonaPalla = 3;
+      stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
+      var gz = stato.giocatori[perdente].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
+      if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+      stato.puntoPallaFermo = null;
+      stato.puntoPallaPersistente = null;
+      stato.contrastoCoppia = null;
+      renderCampo(); renderHeader();
+      setTimeout(function() { eseguiPassaggioIniziale(perdente); }, 800);
+    });
+  } else {
+    finePartita();
+  }
+}
+
 function gestisciGoal(attaccante) {
   stato.punteggio[attaccante]++;
   stato.statistiche[attaccante].gol++;
   log('⚽ GOAL!', 'goal');
   mostraGoalBanner(attaccante);
+
+  if (stato.ultimaAzioneExtra) {
+    stato.ultimaAzioneExtra = false;
+    setTimeout(fineTempoOPartita, 3200);
+    return;
+  }
+
   setTimeout(function() {
     var subito = attaccante === 'tu' ? 'cpu' : 'tu';
     stato.possessore = subito;
@@ -2489,6 +2602,7 @@ function gestisciGoal(attaccante) {
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     stato.puntoPallaPersistente = null;
+    stato.contrastoCoppia = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(subito); }, 800);
   }, 3200);
@@ -2514,34 +2628,80 @@ function gestisciParata(attaccante, difensore) {
     }
   }
 
+  if (stato.ultimaAzioneExtra) {
+    stato.ultimaAzioneExtra = false;
+    setTimeout(fineTempoOPartita, 800);
+    return;
+  }
+
   setTimeout(function() {
     animaPallaVersoZona(zonaPortiere, 3, 'parabola', function() {
-      // La palla è arrivata in Z3 e si ferma al centro per il contrasto
-      // Il portiere NON fa un passaggio in avanti: la palla va a terra e si contende
       stato.zonaPalla = 3;
       stato.possessore = difensore;
       stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
       stato.giocatorePalla = null;
       stato.puntoPallaFermo = null;
       stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
+      stato.contrastoCoppia = null;
       renderCampo(); renderHeader();
+      bloccaCoppiaContrasto();
       setTimeout(avviaContrasto, 800);
     });
   }, 800);
 }
 
 function gestisciPalo(attaccante, difensore) {
-  log('🥅 Palo! Si rigioca nella stessa zona.', 'highlight');
+  log('🥅 Palo! Si ritorna nella zona del tiro.', 'highlight');
+
+  var azione = stato.azioneTiroDaPalo;
+  if (!azione) {
+    setTimeout(function() {
+      stato.zonaPalla = 3;
+      stato.possessore = attaccante;
+      stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
+      stato.puntoPallaFermo = null;
+      stato.puntoPallaPersistente = null;
+      stato.contrastoCoppia = null;
+      renderCampo(); renderHeader();
+      bloccaCoppiaContrasto();
+      setTimeout(avviaContrasto, 800);
+    }, 800);
+    return;
+  }
+
   setTimeout(function() {
+    var zona = azione.zona;
+    stato.zonaPalla = zona;
+    stato.possessore = azione.attaccante;
+    stato.metaContesa = azione.meta;
+    stato.giocatorePalla = null;
     stato.puntoPallaFermo = null;
-    stato.puntoPallaPersistente = null;
+    stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
+
+    stato.contrastoCoppia = {
+      zona: zona,
+      meta: azione.meta,
+      giocatoreAtt: azione.giocatoreAtt,
+      giocatoreDif: azione.giocatoreDif
+    };
+
     renderCampo(); renderHeader();
-    setTimeout(avviaContrasto, 800);
+
+    setTimeout(function() {
+      avviaContrasto();
+    }, 800);
   }, 800);
 }
 
 function gestisciAngolo(attaccante, difensore) {
   log('🚩 Angolo!');
+
+  if (stato.ultimaAzioneExtra) {
+    stato.ultimaAzioneExtra = false;
+    setTimeout(fineTempoOPartita, 800);
+    return;
+  }
+
   setTimeout(function() {
     stato.zonaPalla = 3;
     stato.possessore = attaccante;
@@ -2550,6 +2710,7 @@ function gestisciAngolo(attaccante, difensore) {
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     stato.puntoPallaPersistente = null;
+    stato.contrastoCoppia = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(attaccante); }, 800);
   }, 800);
@@ -2557,6 +2718,13 @@ function gestisciAngolo(attaccante, difensore) {
 
 function gestisciFuori(attaccante, difensore) {
   log('❌ Fuori!');
+
+  if (stato.ultimaAzioneExtra) {
+    stato.ultimaAzioneExtra = false;
+    setTimeout(fineTempoOPartita, 800);
+    return;
+  }
+
   setTimeout(function() {
     var subito = attaccante === 'tu' ? 'cpu' : 'tu';
     stato.possessore = subito; stato.zonaPalla = 3;
@@ -2565,6 +2733,7 @@ function gestisciFuori(attaccante, difensore) {
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
     stato.puntoPallaPersistente = null;
+    stato.contrastoCoppia = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(subito); }, 800);
   }, 800);
@@ -2579,11 +2748,29 @@ function flashVincitore(squadra) {
 }
 
 function avanzaMano() {
+  // Se siamo all'ultima mano e c'è un'azione extra da fare, la lascio finire
+  if (stato.mano >= stato.maxMani && !stato.ultimaAzioneExtra) {
+    var zona = stato.zonaPalla;
+    var attaccante = stato.possessore;
+    var zonaTiro = attaccante === 'tu' ? 5 : 1;
+    if (zona === zonaTiro) {
+      // L'attaccante è già in zona tiro: l'azione extra si sta già svolgendo
+      // (il contrasto è in corso o sta per avvenire)
+      stato.ultimaAzioneExtra = true;
+      log('⏱️ Ultima azione: si lascia finire il contrasto in Z' + zona, 'highlight');
+      // Non incremento la mano, non chiudo il tempo
+      // Il flusso continua con avviaContrasto (già in corso)
+      return;
+    }
+  }
+
   stato.mano++;
   if (stato.mano > stato.maxMani) {
     if (stato.tempo === 1) {
       suonaFischietto('fine-tempo');
       stato.tempo = 2; stato.mano = 1;
+      stato.ultimaAzioneExtra = false;
+      stato.azioneTiroDaPalo = null;
       log('⏸️ FINE PRIMO TEMPO.', 'goal');
       ['tu', 'cpu'].forEach(function(sq) {
         for (var i = 0; i < stato.giocatori[sq].length; i++) stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
@@ -2598,11 +2785,18 @@ function avanzaMano() {
         if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
         stato.puntoPallaFermo = null;
         stato.puntoPallaPersistente = null;
+        stato.contrastoCoppia = null;
         renderCampo(); renderHeader();
         setTimeout(function() { eseguiPassaggioIniziale(perdente); }, 800);
       });
       return;
-    } else return finePartita();
+    } else {
+      // Fine secondo tempo: se c'è azione extra, la gestiamo dopo
+      if (stato.ultimaAzioneExtra) {
+        return;
+      }
+      return finePartita();
+    }
   }
   renderHeader(); renderCampo();
   setTimeout(avviaContrasto, 800);
