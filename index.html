@@ -1395,6 +1395,9 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
+/* ============================================================
+   PASSAGGIO INIZIALE (dopo la moneta)
+   ============================================================ */
 function eseguiPassaggioIniziale(squadra) {
   document.getElementById('carte-panel').classList.add('nascosto');
   stato.pallaInAnimazione = true;
@@ -1405,18 +1408,24 @@ function eseguiPassaggioIniziale(squadra) {
 
   log('⚽ ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' fa il passaggio in Z' + nuovaZona);
 
-  var giocatoreVincenteId = stato.giocatorePalla;
+  var giocatorePartenzaId = stato.giocatorePalla;
 
+  // 1) Aggiorna lo stato PRIMA di ridisegnare il campo
+  stato.zonaPalla = nuovaZona;
+  stato.possessore = squadra;
+  stato.metaContesa = nuovaMeta;
+  stato.giocatorePalla = null;
+
+  // 2) Ridisegna il campo: ora i giocatori nella nuova zona esistono nel DOM
+  renderCampo();
+  renderHeader();
+
+  // 3) Aspetta che il DOM sia pronto, poi anima la palla verso il punto medio
   setTimeout(function() {
-    eseguiPassaggioInizialeAnimato(giocatoreVincenteId, nuovaZona, nuovaMeta, squadra, function() {
-      stato.zonaPalla = nuovaZona;
-      stato.possessore = squadra;
-      stato.metaContesa = nuovaMeta;
-      stato.giocatorePalla = null;
-      renderCampo(); renderHeader();
+    eseguiPassaggioInizialeAnimato(giocatorePartenzaId, nuovaZona, nuovaMeta, squadra, function() {
       setTimeout(avviaContrasto, 800);
     });
-  }, 400);
+  }, 100);
 }
 
 /* ============================================================
@@ -1441,35 +1450,42 @@ function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadr
   var sqInSup = attaccanteInSup ? squadraAttaccante : squadraDifensore;
   var sqInInf = attaccanteInSup ? squadraDifensore : squadraAttaccante;
 
-  // Trova il giocatore della squadra "sqInSup" in zona "zonaId"
   var gSup = stato.giocatori[sqInSup].filter(function(g) {
     return g.zona === zonaId && !g.portiere && !g.espulso;
   });
-  // Trova il giocatore della squadra "sqInInf" in zona "zonaId"
   var gInf = stato.giocatori[sqInInf].filter(function(g) {
     return g.zona === zonaId && !g.portiere && !g.espulso;
   });
 
-  if (gSup.length === 0 || gInf.length === 0) return null;
+  if (gSup.length === 0 || gInf.length === 0) {
+    console.log('[calcolaPuntoMedioContesa] Giocatori non trovati. Zona:', zonaId, 'meta:', metaContesa, 'sqInSup:', sqInSup, 'sqInInf:', sqInInf);
+    return null;
+  }
 
   var elSup = document.querySelector('[data-giocatore-id="' + gSup[0].id + '"]');
   var elInf = document.querySelector('[data-giocatore-id="' + gInf[0].id + '"]');
-  if (!elSup || !elInf) return null;
+  if (!elSup || !elInf) {
+    console.log('[calcolaPuntoMedioContesa] Elementi DOM non trovati per:', gSup[0].id, gInf[0].id);
+    return null;
+  }
 
   var rectSup = elSup.getBoundingClientRect();
   var rectInf = elInf.getBoundingClientRect();
 
-  // Punto ai PIEDI di ciascun giocatore (parte bassa della pedina)
   var piediSupX = rectSup.left + rectSup.width / 2 - box.left;
   var piediSupY = rectSup.bottom - box.top - 2;
   var piediInfX = rectInf.left + rectInf.width / 2 - box.left;
   var piediInfY = rectInf.bottom - box.top - 2;
 
-  // Punto medio tra i due piedi
-  return {
-    xPx: (piediSupX + piediInfX) / 2,
-    yPx: (piediSupY + piediInfY) / 2
-  };
+  var medioX = (piediSupX + piediInfX) / 2;
+  var medioY = (piediSupY + piediInfY) / 2;
+
+  console.log('[calcolaPuntoMedioContesa] Zona:', zonaId, 'meta:', metaContesa,
+    'piediSup:', piediSupX.toFixed(1), piediSupY.toFixed(1),
+    'piediInf:', piediInfX.toFixed(1), piediInfY.toFixed(1),
+    'medio:', medioX.toFixed(1), medioY.toFixed(1));
+
+  return { xPx: medioX, yPx: medioY };
 }
 
 /* ============================================================
@@ -1482,6 +1498,7 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreId + '"]');
 
   if (!pedinaEl) {
+    console.log('[eseguiPassaggioInizialeAnimato] Pedina di partenza non trovata:', giocatoreId);
     stato.pallaInAnimazione = false;
     if (callback) callback();
     return;
@@ -1781,6 +1798,9 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
+/* ============================================================
+   RISOLUZIONE CONTRASTO + SCIVOLATA + PASSAGGIO
+   ============================================================ */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
   flashVincitore(vincente);
@@ -1822,16 +1842,24 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
+  // Aggiorna lo stato PRIMA di disegnare il campo, così i giocatori
+  // nella nuova zona vengono disegnati prima dell'animazione della palla.
+  stato.zonaPalla = nuovaZona;
+  stato.possessore = vincente;
+  stato.metaContesa = nuovaMeta;
+  // NON azzeriamo giocatorePalla perché serve ancora per l'animazione
+  // (lo azzeriamo dopo nel callback)
+
+  renderCampo();
+  renderHeader();
+
   setTimeout(function() {
     eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vincente, function() {
-      stato.zonaPalla = nuovaZona;
-      stato.possessore = vincente;
-      stato.metaContesa = nuovaMeta;
       stato.giocatorePalla = null;
       renderCampo(); renderHeader();
       setTimeout(avanzaMano, 800);
     });
-  }, 800);
+  }, 100);
 }
 
 /* ============================================================
@@ -1843,7 +1871,11 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
   var box = areaGioco.getBoundingClientRect();
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincenteId + '"]');
 
-  if (!pedinaEl) { if (callback) callback(); return; }
+  if (!pedinaEl) {
+    console.log('[eseguiScivolataEPassaggio] Pedina non trovata:', giocatoreVincenteId);
+    if (callback) callback();
+    return;
+  }
 
   stato.pallaInAnimazione = true;
 
