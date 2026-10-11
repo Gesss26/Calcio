@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Calcio a Carte</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -293,7 +294,6 @@
   .portiere-wrapper.tu { left: 62%; }
   .portiere-wrapper.cpu { left: 38%; }
 
-  /* === NOME SOPRA LA PEDINA === */
   .nome-giocatore {
     font-size: 9px;
     font-weight: 900;
@@ -315,7 +315,6 @@
   .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
   .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
 
-  /* === INFO SOTTO LA PEDINA === */
   .info-sotto {
     display: flex; flex-direction: row; gap: 3px;
     font-size: 10px; line-height: 1;
@@ -395,7 +394,6 @@
     50% { transform: translateY(-2px); }
   }
 
-  /* === ANIMAZIONE CALCIO === */
   @keyframes calciaGamba {
     0%   { transform: rotate(0deg); }
     15%  { transform: rotate(-55deg); }
@@ -418,7 +416,6 @@
     animation: calciaBusto 0.7s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
   }
 
-  /* === ANIMAZIONE PARATA PORTIERE === */
   .pg-braccio-sx, .pg-braccio-dx {
     transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
   }
@@ -1991,7 +1988,6 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
-  // La palla cambia zona: azzero il punto persistente
   stato.puntoPallaPersistente = null;
 
   stato.zonaPalla = nuovaZona;
@@ -2520,13 +2516,16 @@ function gestisciParata(attaccante, difensore) {
 
   setTimeout(function() {
     animaPallaVersoZona(zonaPortiere, 3, 'parabola', function() {
+      // La palla è arrivata in Z3 e si ferma al centro per il contrasto
+      // Il portiere NON fa un passaggio in avanti: la palla va a terra e si contende
       stato.zonaPalla = 3;
       stato.possessore = difensore;
       stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
-      var gz = stato.giocatori[difensore].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
-      if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
+      stato.giocatorePalla = null;
+      stato.puntoPallaFermo = null;
+      stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
       renderCampo(); renderHeader();
-      setTimeout(function() { eseguiPassaggioIniziale(difensore); }, 800);
+      setTimeout(avviaContrasto, 800);
     });
   }, 800);
 }
