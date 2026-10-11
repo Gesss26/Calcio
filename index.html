@@ -702,7 +702,6 @@
     min-height: 20px;
   }
 
-  /* === DADI DEL TIRO === */
   .tiro-dadi-info {
     display: flex;
     flex-direction: column;
@@ -1129,6 +1128,33 @@ function creaPalloneSVG() {
   '</svg>';
 }
 
+/* ============================================================
+   CALCOLA IL PUNTO DI ARRIVO DELLA PALLA
+   = punti AI PIEDI del giocatore della squadra attaccante
+   che si trova nella meta scelta (sup o inf).
+   ============================================================ */
+function calcolaPuntoArrivoPalla(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
+  // Il giocatore attaccante è quello nella meta scelta
+  var metaIdx = metaContesa === 'sup' ? 0 : 1;
+
+  var attaccantiZona = stato.giocatori[squadraAttaccante].filter(function(g) {
+    return g.zona === zonaId && !g.portiere && !g.espulso;
+  });
+
+  var gAtt = attaccantiZona[metaIdx] || attaccantiZona[0];
+  if (!gAtt) return null;
+
+  var elAtt = document.querySelector('[data-giocatore-id="' + gAtt.id + '"]');
+  if (!elAtt) return null;
+
+  var rectAtt = elAtt.getBoundingClientRect();
+
+  return {
+    xPx: rectAtt.left + rectAtt.width / 2 - box.left,
+    yPx: rectAtt.bottom - box.top
+  };
+}
+
 function bloccaCoppiaContrasto() {
   var zona = stato.zonaPalla;
   var meta = stato.metaContesa;
@@ -1140,7 +1166,10 @@ function bloccaCoppiaContrasto() {
     return;
   }
 
+  // Il giocatore attaccante è quello nella meta scelta (sup o inf)
+  // Il difensore è quello nella meta OPPOSTA
   var metaIdx = meta === 'sup' ? 0 : 1;
+  var oppostoIdx = 1 - metaIdx;
 
   var attaccantiZona = stato.giocatori[attaccante].filter(function(g) {
     return g.zona === zona && !g.portiere && !g.espulso;
@@ -1150,7 +1179,7 @@ function bloccaCoppiaContrasto() {
   });
 
   var gAtt = attaccantiZona[metaIdx] || attaccantiZona[0];
-  var gDif = difensoriZona[metaIdx] || difensoriZona[0];
+  var gDif = difensoriZona[oppostoIdx] || difensoriZona[0];
 
   stato.contrastoCoppia = {
     zona: zona,
@@ -1158,6 +1187,8 @@ function bloccaCoppiaContrasto() {
     giocatoreAtt: gAtt ? gAtt.id : null,
     giocatoreDif: gDif ? gDif.id : null
   };
+  console.log('[bloccaCoppiaContrasto] Zona', zona, 'meta', meta,
+    'Att:', gAtt ? gAtt.nome : 'NULL', 'Dif:', gDif ? gDif.nome : 'NULL');
 }
 
 function creaGiocatori(sq) {
@@ -1677,38 +1708,6 @@ function eseguiPassaggioIniziale(squadra) {
   }, 100);
 }
 
-function calcolaPuntoMedioContesa(zonaId, metaContesa, squadraAttaccante, squadraDifensore, box) {
-  var attaccanteInSup = (metaContesa === 'sup');
-  var sqInSup = attaccanteInSup ? squadraAttaccante : squadraDifensore;
-  var sqInInf = attaccanteInSup ? squadraDifensore : squadraAttaccante;
-
-  var gSup = stato.giocatori[sqInSup].filter(function(g) {
-    return g.zona === zonaId && !g.portiere && !g.espulso;
-  });
-  var gInf = stato.giocatori[sqInInf].filter(function(g) {
-    return g.zona === zonaId && !g.portiere && !g.espulso;
-  });
-
-  if (gSup.length === 0 || gInf.length === 0) return null;
-
-  var elSup = document.querySelector('[data-giocatore-id="' + gSup[0].id + '"]');
-  var elInf = document.querySelector('[data-giocatore-id="' + gInf[0].id + '"]');
-  if (!elSup || !elInf) return null;
-
-  var rectSup = elSup.getBoundingClientRect();
-  var rectInf = elInf.getBoundingClientRect();
-
-  var piediSupX = rectSup.left + rectSup.width / 2 - box.left;
-  var piediSupY = rectSup.bottom - box.top;
-  var piediInfX = rectInf.left + rectInf.width / 2 - box.left;
-  var piediInfY = rectInf.bottom - box.top;
-
-  var medioX = (piediSupX + piediInfX) / 2;
-  var medioY = (piediSupY + piediInfY) / 2;
-
-  return { xPx: medioX, yPx: medioY };
-}
-
 function animaCalcio(giocatoreId) {
   var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreId + '"]');
   if (!pedinaEl) return;
@@ -1734,11 +1733,11 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
   var arrivoXPx, arrivoYPx;
   var puntoPercArrivo;
 
-  var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, squadra, difensore, box);
+  var puntoArrivo = calcolaPuntoArrivoPalla(nuovaZona, nuovaMeta, squadra, difensore, box);
 
-  if (puntoMedio) {
-    arrivoXPx = puntoMedio.xPx;
-    arrivoYPx = puntoMedio.yPx;
+  if (puntoArrivo) {
+    arrivoXPx = puntoArrivo.xPx;
+    arrivoYPx = puntoArrivo.yPx;
     var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
     var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
     puntoPercArrivo = {
@@ -1841,10 +1840,11 @@ function avviaContrasto() {
 
   if (!giocatoreAtt || !giocatoreDif) {
     var metaIdx = stato.metaContesa === 'sup' ? 0 : 1;
+    var oppostoIdx = 1 - metaIdx;
     var attaccantiZona = stato.giocatori[attaccante].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
     var difensoriZona = stato.giocatori[difensore].filter(function(g) { return g.zona === zona && !g.portiere && !g.espulso; });
     giocatoreAtt = giocatoreAtt || attaccantiZona[metaIdx] || attaccantiZona[0];
-    giocatoreDif = giocatoreDif || difensoriZona[metaIdx] || difensoriZona[0];
+    giocatoreDif = giocatoreDif || difensoriZona[oppostoIdx] || difensoriZona[0];
   }
 
   riempiMano('tu'); riempiMano('cpu');
@@ -2119,27 +2119,40 @@ function risolviContrasto(vincente, motivoFallo) {
     return;
   }
 
-  // === CASO FALLO: la palla va nella nuova zona SENZA passaggio fisico ===
   if (motivoFallo) {
+    // Dopo un fallo: la palla va nella nuova zona SENZA passaggio fisico.
+    // Poi si calcola il punto ai piedi della coppia e si blocca.
     var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
     stato.zonaPalla = nuovaZona;
     stato.possessore = vincente;
     stato.metaContesa = nuovaMeta;
     stato.giocatorePalla = null;
-    stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
-    stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
+    stato.puntoPallaFermo = null;
+    stato.puntoPallaPersistente = null;
     stato.contrastoCoppia = null;
 
     renderCampo();
     renderHeader();
     setTimeout(function() {
+      // Blocco la coppia e calcolo il punto ai piedi
       bloccaCoppiaContrasto();
+      var box = document.querySelector('.area-gioco').getBoundingClientRect();
+      var punto = calcolaPuntoArrivoPalla(nuovaZona, nuovaMeta, vincente, difensore, box);
+      if (punto) {
+        var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
+        var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
+        stato.puntoPallaPersistente = {
+          xPerc: ((punto.xPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
+          yPerc: ((punto.yPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
+        };
+        creaPallaCentroInZona(nuovaZona, stato.puntoPallaPersistente);
+      }
       setTimeout(avanzaMano, 800);
     }, 300);
     return;
   }
 
-  // === CASO NORMALE: scivolata + passaggio ===
+  // Caso normale: scivolata + passaggio
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta2 = Math.random() < 0.5 ? 'sup' : 'inf';
 
@@ -2177,11 +2190,11 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
   var arrivoXPx, arrivoYPx;
   var puntoPercArrivo;
 
-  var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, vincente, difensore, box);
+  var puntoArrivo = calcolaPuntoArrivoPalla(nuovaZona, nuovaMeta, vincente, difensore, box);
 
-  if (puntoMedio) {
-    arrivoXPx = puntoMedio.xPx;
-    arrivoYPx = puntoMedio.yPx;
+  if (puntoArrivo) {
+    arrivoXPx = puntoArrivo.xPx;
+    arrivoYPx = puntoArrivo.yPx;
     var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
     var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
     puntoPercArrivo = {
@@ -2481,13 +2494,11 @@ function eseguiTiroConGrafica(attaccante, difensore, isRigore) {
       return;
     }
 
-    // Il portiere tira 2 dadi
     var dadiPortiere = mescola([1,2,3,4,6,7,9]).slice(0, 2);
     document.getElementById('tiro-info').textContent = 'FASE 2 — Il portiere si tuffa...';
 
     mostraDadiTiro(dadoTiro, dadiPortiere[0], dadiPortiere[1]);
 
-    // Controlla se uno dei 2 dadi del portiere corrisponde a quello dell'attaccante
     var matchIdx = dadiPortiere.indexOf(dadoTiro);
     var settorePortiere;
     if (matchIdx > -1) {
@@ -2755,11 +2766,25 @@ function gestisciParata(attaccante, difensore) {
       stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
       stato.giocatorePalla = null;
       stato.puntoPallaFermo = null;
-      stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
+      stato.puntoPallaPersistente = null;
       stato.contrastoCoppia = null;
       renderCampo(); renderHeader();
-      bloccaCoppiaContrasto();
-      setTimeout(avviaContrasto, 800);
+      setTimeout(function() {
+        bloccaCoppiaContrasto();
+        var box = document.querySelector('.area-gioco').getBoundingClientRect();
+        var dif = difensore === 'tu' ? 'cpu' : 'tu';
+        var punto = calcolaPuntoArrivoPalla(3, stato.metaContesa, difensore, dif, box);
+        if (punto) {
+          var zonaDest = document.querySelector('.zona[data-zona="3"]');
+          var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
+          stato.puntoPallaPersistente = {
+            xPerc: ((punto.xPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
+            yPerc: ((punto.yPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
+          };
+          creaPallaCentroInZona(3, stato.puntoPallaPersistente);
+        }
+        setTimeout(avviaContrasto, 800);
+      }, 300);
     });
   }, 800);
 }
@@ -2790,8 +2815,9 @@ function gestisciPalo(attaccante, difensore) {
     stato.metaContesa = azione.meta;
     stato.giocatorePalla = null;
     stato.puntoPallaFermo = null;
-    stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
+    stato.puntoPallaPersistente = null;
 
+    // Blocco la coppia originale
     stato.contrastoCoppia = {
       zona: zona,
       meta: azione.meta,
@@ -2802,8 +2828,21 @@ function gestisciPalo(attaccante, difensore) {
     renderCampo(); renderHeader();
 
     setTimeout(function() {
+      // Ricalcolo il punto ai piedi della coppia originale
+      var box = document.querySelector('.area-gioco').getBoundingClientRect();
+      var dif = azione.attaccante === 'tu' ? 'cpu' : 'tu';
+      var punto = calcolaPuntoArrivoPalla(zona, azione.meta, azione.attaccante, dif, box);
+      if (punto) {
+        var zonaDest = document.querySelector('.zona[data-zona="' + zona + '"]');
+        var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
+        stato.puntoPallaPersistente = {
+          xPerc: ((punto.xPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
+          yPerc: ((punto.yPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
+        };
+        creaPallaCentroInZona(zona, stato.puntoPallaPersistente);
+      }
       avviaContrasto();
-    }, 800);
+    }, 300);
   }, 800);
 }
 
