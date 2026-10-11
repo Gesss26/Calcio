@@ -931,6 +931,7 @@ var stato = {
   metaContesa: 'sup',
   pallaInAnimazione: false,
   puntoPallaFermo: null,
+  puntoPallaPersistente: null,
   mazzo: [], scarti: [],
   mani: { tu: [], cpu: [] },
   giocatori: { tu: [], cpu: [] },
@@ -1069,7 +1070,7 @@ function creaPalloneSVG() {
   '</svg>';
 }
 
-/* CREA GIOCATORI DALLE ROSE */
+/* CREA GIOCATORI DALLE ROSE (definite in divise.js) */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var squadraId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
@@ -1229,6 +1230,7 @@ function avviaPartita(sqTU, sqCPU, tipo) {
   stato.zonaPalla = 3; stato.possessore = null; stato.giocatorePalla = null;
   stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
   stato.puntoPallaFermo = null;
+  stato.puntoPallaPersistente = null;
   document.getElementById('nome-tu').textContent = SQUADRE[sqTU].nome;
   document.getElementById('nome-cpu').textContent = SQUADRE[sqCPU].nome;
   renderZoneOverlay();
@@ -1380,7 +1382,9 @@ function mostraPallaNellaZona(zonaId, meta) {
   if (stato.puntoPallaFermo) {
     xPerc = stato.puntoPallaFermo.xPerc;
     yPerc = stato.puntoPallaFermo.yPerc;
-    stato.puntoPallaFermo = null;
+  } else if (stato.puntoPallaPersistente) {
+    xPerc = stato.puntoPallaPersistente.xPerc;
+    yPerc = stato.puntoPallaPersistente.yPerc;
   } else {
     xPerc = PALLA_X_CENTRO;
     yPerc = meta === 'sup' ? PALLA_Y_META_SUP : PALLA_Y_META_INF;
@@ -1398,8 +1402,17 @@ function creaPallaCentroInZona(zonaId, punto) {
   for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
   var zonaEl = document.querySelector('.zona[data-zona="' + zonaId + '"]');
   if (!zonaEl) return;
-  var xPerc = punto ? punto.xPerc : 50;
-  var yPerc = punto ? punto.yPerc : 50;
+  var xPerc, yPerc;
+  if (punto) {
+    xPerc = punto.xPerc;
+    yPerc = punto.yPerc;
+  } else if (stato.puntoPallaPersistente) {
+    xPerc = stato.puntoPallaPersistente.xPerc;
+    yPerc = stato.puntoPallaPersistente.yPerc;
+  } else {
+    xPerc = 50;
+    yPerc = 50;
+  }
   var palla = document.createElement('div');
   palla.className = 'palla-centro';
   palla.style.left = xPerc + '%';
@@ -1519,6 +1532,7 @@ function lanciaMoneta(scelta) {
   stato.giocatorePalla = scelto.id;
 
   stato.puntoPallaFermo = null;
+  stato.puntoPallaPersistente = null;
   nascondiPallaCentro();
   stato.pallaInAnimazione = false;
 
@@ -1550,6 +1564,7 @@ function eseguiPassaggioIniziale(squadra) {
 
   var giocatorePartenzaId = stato.giocatorePalla;
 
+  stato.puntoPallaPersistente = null;
   stato.zonaPalla = nuovaZona;
   stato.possessore = squadra;
   stato.metaContesa = nuovaMeta;
@@ -1620,6 +1635,7 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
 
   var difensore = squadra === 'tu' ? 'cpu' : 'tu';
   var arrivoXPx, arrivoYPx;
+  var puntoPercArrivo;
 
   var puntoMedio = calcolaPuntoMedioContesa(nuovaZona, nuovaMeta, squadra, difensore, box);
 
@@ -1628,7 +1644,7 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
     arrivoYPx = puntoMedio.yPx;
     var zonaDest = document.querySelector('.zona[data-zona="' + nuovaZona + '"]');
     var zonaDestRect = zonaDest ? zonaDest.getBoundingClientRect() : box;
-    stato.puntoPallaFermo = {
+    puntoPercArrivo = {
       xPerc: ((arrivoXPx + box.left - zonaDestRect.left) / zonaDestRect.width) * 100,
       yPerc: ((arrivoYPx + box.top - zonaDestRect.top) / zonaDestRect.height) * 100
     };
@@ -1637,8 +1653,13 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
     var zonaDestRect2 = zonaDest2 ? zonaDest2.getBoundingClientRect() : box;
     arrivoXPx = zonaDestRect2.left + zonaDestRect2.width / 2 - box.left;
     arrivoYPx = zonaDestRect2.top + zonaDestRect2.height / 2 - box.top;
-    stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
+    puntoPercArrivo = { xPerc: 50, yPerc: 50 };
   }
+
+  stato.puntoPallaPersistente = {
+    xPerc: puntoPercArrivo.xPerc,
+    yPerc: puntoPercArrivo.yPerc
+  };
 
   var calcRect = pedinaEl.getBoundingClientRect();
   var partXPx = calcRect.left + calcRect.width / 2 - box.left;
@@ -1684,8 +1705,7 @@ function eseguiPassaggioInizialeAnimato(giocatoreId, nuovaZona, nuovaMeta, squad
       } else {
         palla.classList.remove('attiva');
         stato.pallaInAnimazione = false;
-        creaPallaCentroInZona(nuovaZona, stato.puntoPallaFermo);
-        stato.puntoPallaFermo = null;
+        creaPallaCentroInZona(nuovaZona, puntoPercArrivo);
         if (callback) callback();
       }
     }
@@ -1971,6 +1991,9 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincenteId = vincente === c.attaccante ? c.giocatoreAtt : c.giocatoreDif;
   var nuovaMeta = Math.random() < 0.5 ? 'sup' : 'inf';
 
+  // La palla cambia zona: azzero il punto persistente
+  stato.puntoPallaPersistente = null;
+
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
@@ -2019,6 +2042,11 @@ function eseguiScivolataEPassaggio(giocatoreVincenteId, nuovaZona, nuovaMeta, vi
     arrivoYPx = zonaDestRect2.top + zonaDestRect2.height / 2 - box.top;
     puntoPercArrivo = { xPerc: 50, yPerc: 50 };
   }
+
+  stato.puntoPallaPersistente = {
+    xPerc: puntoPercArrivo.xPerc,
+    yPerc: puntoPercArrivo.yPerc
+  };
 
   var calcRect = pedinaEl.getBoundingClientRect();
   var startX = calcRect.left + calcRect.width / 2 - box.left;
@@ -2131,7 +2159,7 @@ function animaPallaVersoZona(zonaDa, zonaA, tipo, callback) {
   var x2 = aRect.left + aRect.width / 2 - box.left;
   var y2 = aRect.top + aRect.height / 2 - box.top;
 
-  stato.puntoPallaFermo = { xPerc: 50, yPerc: 50 };
+  stato.puntoPallaPersistente = { xPerc: 50, yPerc: 50 };
 
   nascondiPallaCentro();
   suonaCalcio();
@@ -2464,6 +2492,7 @@ function gestisciGoal(attaccante) {
     var gz = stato.giocatori[subito].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
+    stato.puntoPallaPersistente = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(subito); }, 800);
   }, 3200);
@@ -2506,6 +2535,7 @@ function gestisciPalo(attaccante, difensore) {
   log('🥅 Palo! Si rigioca nella stessa zona.', 'highlight');
   setTimeout(function() {
     stato.puntoPallaFermo = null;
+    stato.puntoPallaPersistente = null;
     renderCampo(); renderHeader();
     setTimeout(avviaContrasto, 800);
   }, 800);
@@ -2520,6 +2550,7 @@ function gestisciAngolo(attaccante, difensore) {
     var gz = stato.giocatori[attaccante].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
+    stato.puntoPallaPersistente = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(attaccante); }, 800);
   }, 800);
@@ -2534,6 +2565,7 @@ function gestisciFuori(attaccante, difensore) {
     var gz = stato.giocatori[subito].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
     if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
     stato.puntoPallaFermo = null;
+    stato.puntoPallaPersistente = null;
     renderCampo(); renderHeader();
     setTimeout(function() { eseguiPassaggioIniziale(subito); }, 800);
   }, 800);
@@ -2566,6 +2598,7 @@ function avanzaMano() {
         var gz = stato.giocatori[perdente].filter(function(g) { return g.zona === 3 && !g.portiere && !g.espulso; });
         if (gz.length > 0) stato.giocatorePalla = gz[Math.floor(Math.random() * gz.length)].id;
         stato.puntoPallaFermo = null;
+        stato.puntoPallaPersistente = null;
         renderCampo(); renderHeader();
         setTimeout(function() { eseguiPassaggioIniziale(perdente); }, 800);
       });
