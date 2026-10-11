@@ -190,6 +190,11 @@ var ROSE = {
    - .pg-braccio-dx   (braccio destro, per parata)
    - .pg-gamba-sx     (gamba sinistra, statica)
    - .pg-gamba-dx     (gamba destra, animata per il calcio)
+   
+   IMPORTANTE: il pivot (transform-origin) dei bracci è alla SPALLA,
+   e il braccio è disegnato VERSO IL BASSO dal pivot. In questo modo
+   ruotandolo verso l'alto (rotate -140/-160 gradi per il sx e
+   140/160 per il dx) il braccio si solleva in modo naturale.
    ============================================================ */
 function creaGiocatoreSVG(divisa, animazione) {
   if (!divisa) divisa = { maglia: '#888888', pantaloncini: '#333333', calzettoni: '#888888' };
@@ -224,15 +229,21 @@ function creaGiocatoreSVG(divisa, animazione) {
   svg += '</g>';
   
   // BRACCIO SINISTRO
+  // Pivot alla spalla sinistra (12, 20). Braccio disegnato verso il basso.
+  // A riposo: rect da (8, 20) a (15, 34), mano in (11.5, 35)
+  // Rotazione -160°: il braccio si solleva verso l'alto-sinistra
   svg += '<g class="pg-braccio-sx" style="transform-origin: 12px 20px;">';
-  svg += '<rect x="4" y="18" width="8" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<circle cx="8" cy="34" r="3" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
+  svg += '<rect x="8" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
+  svg += '<circle cx="11.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
   svg += '</g>';
   
   // BRACCIO DESTRO
+  // Pivot alla spalla destra (28, 20). Braccio disegnato verso il basso.
+  // A riposo: rect da (25, 20) a (32, 34), mano in (28.5, 35)
+  // Rotazione +160°: il braccio si solleva verso l'alto-destra
   svg += '<g class="pg-braccio-dx" style="transform-origin: 28px 20px;">';
-  svg += '<rect x="28" y="18" width="8" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<circle cx="32" cy="34" r="3" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
+  svg += '<rect x="25" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
+  svg += '<circle cx="28.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
   svg += '</g>';
   
   // PANTALONCINI
