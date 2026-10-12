@@ -269,7 +269,19 @@
     padding: 0 1.5%;
   }
 
-    /* Z2 e Z4: coppia sup alzata di 30px, coppia inf abbassata di 30px */
+  .meta-sup, .meta-inf {
+    display: flex; flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 2px 4px;
+    gap: 12px;
+    position: relative;
+  }
+
+  /* Z2 e Z4: coppia sup alzata di 30px, coppia inf abbassata di 30px.
+     Questo allontana verticalmente le due coppie senza spostarle
+     verso il bordo del campo. */
   .zona[data-zona="2"] .meta-sup,
   .zona[data-zona="4"] .meta-sup {
     transform: translateY(-30px);
@@ -277,15 +289,6 @@
   .zona[data-zona="2"] .meta-inf,
   .zona[data-zona="4"] .meta-inf {
     transform: translateY(30px);
-  }
-
-  .meta-sup, .meta-inf {
-    display: flex; flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    flex: 1;
-    padding: 2px 4px;
-    position: relative;
   }
 
   .pedina-wrapper {
@@ -453,7 +456,6 @@
   .tiro-portiere.parata-sx { transform: rotate(-8deg); }
   .tiro-portiere.parata-dx { transform: rotate(8deg); }
 
-  /* Wrapper per scivolata */
   .pedina-scivola-wrapper {
     position: relative;
     z-index: 20;
@@ -916,7 +918,7 @@ var MANI_PER_TEMPO = 23;
 var DURATA_ANIM_PALLA = 2400;
 var DURATA_SCIVOLATA = 600;
 var DURATA_RITORNO = 400;
-var SCIVOLATA_MAX_PX = 18;
+var SCIVOLATA_MAX_PX = 25;
 
 var PALLA_Y_META_SUP = 42;
 var PALLA_Y_META_INF = 58;
@@ -2135,7 +2137,7 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* RISOLUZIONE CONTRASTO - con scivolata corretta */
+/* RISOLUZIONE CONTRASTO */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
   flashVincitore(vincente);
@@ -2235,56 +2237,44 @@ function risolviContrasto(vincente, motivoFallo) {
 
   var giocatoreVincente = (vincente === possessorePrima) ? gPoss : gAvv;
   var haRubatoPalla = (vincente !== possessorePrima);
-
-  // Salvo il vecchio possessore per la scivolata
   var vecchioPossessore = gPoss;
 
-  // Aggiorno stato
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
   stato.giocatorePalla = compagnoScelto.id;
   stato.contrastoCoppia = null;
 
-  // Prima di aggiornare il campo, se ha rubato, faccio la scivolata visiva
+  // Se ha rubato palla, fai la scivolata visiva
   if (haRubatoPalla && giocatoreVincente) {
     suonaScivolata();
-
-    // La scivolata: il giocatore vincente (difensore) si sposta verso la palla
-    // (cioè verso la posizione del vecchio possessore) e ritorna
     var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincente.id + '"]');
     if (pedinaEl && vecchioPossessore) {
       var elVecchio = document.querySelector('[data-giocatore-id="' + vecchioPossessore.id + '"]');
-      var areaGioco = document.querySelector('.area-gioco');
-      var boxAG = areaGioco.getBoundingClientRect();
 
       if (elVecchio) {
         var rectVin = pedinaEl.getBoundingClientRect();
         var rectVec = elVecchio.getBoundingClientRect();
 
-        // Calcolo lo spostamento verso il vecchio possessore (limato a max 30px)
         var dxDir = (rectVec.left + rectVec.width / 2) - (rectVin.left + rectVin.width / 2);
         var dyDir = (rectVec.top + rectVec.height / 2) - (rectVin.top + rectVin.height / 2);
         var dist = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
-        var maxSpost = 25;
+        var maxSpost = SCIVOLATA_MAX_PX;
         var dxSciv = 0, dySciv = 0;
         if (dist > 0) {
           dxSciv = (dxDir / dist) * Math.min(maxSpost, dist);
           dySciv = (dyDir / dist) * Math.min(maxSpost, dist);
         }
 
-        // Wrapper per scivolata
         var wrapper = document.createElement('div');
         wrapper.className = 'pedina-scivola-wrapper scivolando';
         pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
         wrapper.appendChild(pedinaEl);
 
-        // Sposto verso il vecchio possessore
         requestAnimationFrame(function() {
           wrapper.style.transform = 'translate(' + dxSciv + 'px, ' + dySciv + 'px)';
         });
 
-        // Dopo DURATA_SCIVOLATA torno indietro
         setTimeout(function() {
           wrapper.classList.remove('scivolando');
           wrapper.classList.add('ritorno');
@@ -2313,14 +2303,13 @@ function risolviContrasto(vincente, motivoFallo) {
       return;
     }
 
-    // Animazione palla dal giocatore vincente al compagno
     animaPallaInZona(giocatoreVincente, compagnoScelto, function() {
       stato.possessore = vincente;
       stato.giocatorePalla = compagnoScelto.id;
       bloccaCoppiaContrasto();
       setTimeout(avviaContrasto, 800);
     });
-  }, DURATA_SCIVOLATA + DURATA_RITORNO + 200);
+  }, haRubatoPalla ? (DURATA_SCIVOLATA + DURATA_RITORNO + 200) : 400);
 }
 
 /* TIRO IN PORTA */
