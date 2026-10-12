@@ -269,15 +269,14 @@
     padding: 0 1.5%;
   }
 
-  /* Z2 e Z4: sposta i wrapper verso l'esterno del campo di 20px
-     (TU a sinistra, CPU a destra) */
-  .zona[data-zona="2"] .pedina-wrapper.tu,
-  .zona[data-zona="4"] .pedina-wrapper.tu {
-    transform: translateX(-20px);
+    /* Z2 e Z4: coppia sup alzata di 30px, coppia inf abbassata di 30px */
+  .zona[data-zona="2"] .meta-sup,
+  .zona[data-zona="4"] .meta-sup {
+    transform: translateY(-30px);
   }
-  .zona[data-zona="2"] .pedina-wrapper.cpu,
-  .zona[data-zona="4"] .pedina-wrapper.cpu {
-    transform: translateX(20px);
+  .zona[data-zona="2"] .meta-inf,
+  .zona[data-zona="4"] .meta-inf {
+    transform: translateY(30px);
   }
 
   .meta-sup, .meta-inf {
