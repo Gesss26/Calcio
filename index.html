@@ -266,13 +266,18 @@
     display: flex; flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    padding: 0 2.5%;
+    padding: 0 1.5%;
   }
 
-  /* Z2 e Z4: padding orizzontale più largo (giocatori più vicini ai bordi) */
-  .zona[data-zona="2"],
-  .zona[data-zona="4"] {
-    padding: 0 9%;
+  /* Z2 e Z4: sposta i wrapper verso l'esterno del campo di 20px
+     (TU a sinistra, CPU a destra) */
+  .zona[data-zona="2"] .pedina-wrapper.tu,
+  .zona[data-zona="4"] .pedina-wrapper.tu {
+    transform: translateX(-20px);
+  }
+  .zona[data-zona="2"] .pedina-wrapper.cpu,
+  .zona[data-zona="4"] .pedina-wrapper.cpu {
+    transform: translateX(20px);
   }
 
   .meta-sup, .meta-inf {
@@ -449,13 +454,17 @@
   .tiro-portiere.parata-sx { transform: rotate(-8deg); }
   .tiro-portiere.parata-dx { transform: rotate(8deg); }
 
+  /* Wrapper per scivolata */
   .pedina-scivola-wrapper {
     position: relative;
     z-index: 20;
     transition: transform 0.6s cubic-bezier(0.34, 1.5, 0.64, 1);
+    display: contents;
   }
   .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
-  .pedina-scivola-wrapper.scivolando svg { animation: animScivolata 0.6s ease-out; }
+  .pedina-scivola-wrapper.scivolando .pedina svg {
+    animation: animScivolata 0.6s ease-out;
+  }
   @keyframes animScivolata {
     0% { transform: rotate(0deg) translateY(0); }
     40% { transform: rotate(-35deg) translateY(4px); }
@@ -1472,7 +1481,7 @@ function evidenziaZonaContesa() {
   if (el) el.classList.add('attiva');
 }
 
-/* RENDER CAMPO - La palla è SEMPRE ai piedi del giocatore */
+/* RENDER CAMPO */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -1548,11 +1557,10 @@ function renderCampo() {
     zone.appendChild(zona);
   }
 
-  // Palla ai piedi del giocatore con possesso (o del possessore attivo)
+  // Palla ai piedi del giocatore con possesso
   if (!stato.pallaInAnimazione && stato.zonaPalla !== null && stato.possessore) {
     var giocatoreId = stato.giocatorePalla;
     if (!giocatoreId) {
-      // Cerco il possessore nella coppia attiva
       var coppia = getCoppiaAttiva(stato.zonaPalla, stato.metaContesa);
       var g = stato.possessore === 'tu' ? coppia.tu : coppia.cpu;
       if (g) {
@@ -1569,7 +1577,6 @@ function renderCampo() {
   renderingCampoInCorso = false;
 }
 
-/* Crea la palla ai piedi del giocatore specificato nella zona */
 function creaPallaAiPiedi(zonaId, giocatoreId) {
   var vecchie = document.querySelectorAll('.palla-centro');
   for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
@@ -2129,7 +2136,7 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* RISOLUZIONE CONTRASTO */
+/* RISOLUZIONE CONTRASTO - con scivolata corretta */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
   flashVincitore(vincente);
@@ -2230,11 +2237,70 @@ function risolviContrasto(vincente, motivoFallo) {
   var giocatoreVincente = (vincente === possessorePrima) ? gPoss : gAvv;
   var haRubatoPalla = (vincente !== possessorePrima);
 
+  // Salvo il vecchio possessore per la scivolata
+  var vecchioPossessore = gPoss;
+
+  // Aggiorno stato
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
   stato.giocatorePalla = compagnoScelto.id;
   stato.contrastoCoppia = null;
+
+  // Prima di aggiornare il campo, se ha rubato, faccio la scivolata visiva
+  if (haRubatoPalla && giocatoreVincente) {
+    suonaScivolata();
+
+    // La scivolata: il giocatore vincente (difensore) si sposta verso la palla
+    // (cioè verso la posizione del vecchio possessore) e ritorna
+    var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincente.id + '"]');
+    if (pedinaEl && vecchioPossessore) {
+      var elVecchio = document.querySelector('[data-giocatore-id="' + vecchioPossessore.id + '"]');
+      var areaGioco = document.querySelector('.area-gioco');
+      var boxAG = areaGioco.getBoundingClientRect();
+
+      if (elVecchio) {
+        var rectVin = pedinaEl.getBoundingClientRect();
+        var rectVec = elVecchio.getBoundingClientRect();
+
+        // Calcolo lo spostamento verso il vecchio possessore (limato a max 30px)
+        var dxDir = (rectVec.left + rectVec.width / 2) - (rectVin.left + rectVin.width / 2);
+        var dyDir = (rectVec.top + rectVec.height / 2) - (rectVin.top + rectVin.height / 2);
+        var dist = Math.sqrt(dxDir * dxDir + dyDir * dyDir);
+        var maxSpost = 25;
+        var dxSciv = 0, dySciv = 0;
+        if (dist > 0) {
+          dxSciv = (dxDir / dist) * Math.min(maxSpost, dist);
+          dySciv = (dyDir / dist) * Math.min(maxSpost, dist);
+        }
+
+        // Wrapper per scivolata
+        var wrapper = document.createElement('div');
+        wrapper.className = 'pedina-scivola-wrapper scivolando';
+        pedinaEl.parentNode.insertBefore(wrapper, pedinaEl);
+        wrapper.appendChild(pedinaEl);
+
+        // Sposto verso il vecchio possessore
+        requestAnimationFrame(function() {
+          wrapper.style.transform = 'translate(' + dxSciv + 'px, ' + dySciv + 'px)';
+        });
+
+        // Dopo DURATA_SCIVOLATA torno indietro
+        setTimeout(function() {
+          wrapper.classList.remove('scivolando');
+          wrapper.classList.add('ritorno');
+          wrapper.style.transform = 'translate(0, 0)';
+
+          setTimeout(function() {
+            if (wrapper.parentNode) {
+              wrapper.parentNode.insertBefore(pedinaEl, wrapper);
+              wrapper.remove();
+            }
+          }, DURATA_RITORNO);
+        }, DURATA_SCIVOLATA);
+      }
+    }
+  }
 
   renderCampo();
   renderHeader();
@@ -2248,22 +2314,14 @@ function risolviContrasto(vincente, motivoFallo) {
       return;
     }
 
-    if (haRubatoPalla) {
-      suonaScivolata();
-      var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincente.id + '"]');
-      if (pedinaEl) {
-        pedinaEl.classList.add('pg-in-calcio');
-        setTimeout(function() { pedinaEl.classList.remove('pg-in-calcio'); }, 700);
-      }
-    }
-
+    // Animazione palla dal giocatore vincente al compagno
     animaPallaInZona(giocatoreVincente, compagnoScelto, function() {
       stato.possessore = vincente;
       stato.giocatorePalla = compagnoScelto.id;
       bloccaCoppiaContrasto();
       setTimeout(avviaContrasto, 800);
     });
-  }, 400);
+  }, DURATA_SCIVOLATA + DURATA_RITORNO + 200);
 }
 
 /* TIRO IN PORTA */
