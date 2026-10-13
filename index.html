@@ -324,7 +324,7 @@
   .portiere-wrapper.tu { left: 62%; }
   .portiere-wrapper.cpu { left: 38%; }
 
-  /* MODIFICA: nomi completi, niente ellipsis */
+  /* Nomi completi, niente ellipsis */
   .nome-giocatore {
     font-size: 10px;
     font-weight: 900;
@@ -812,15 +812,6 @@
     color: #aaa;
     margin-bottom: 16px;
     line-height: 1.5;
-  }
-
-  /* Badge direzione attacco */
-  .badge-direzione {
-    position: absolute; top: 6px; right: 12px;
-    font-size: 10px; color: #ffd700; font-weight: bold;
-    background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 5px;
-    border: 1px solid rgba(255,215,0,0.4);
-    z-index: 20;
   }
 </style>
 </head>
@@ -1613,16 +1604,6 @@ function direzionePerSquadra(sq) {
   return -dirTU;
 }
 
-function zonaAvanzata(sq, zonaAttuale) {
-  // Restituisce la zona "successiva" nella direzione di attacco
-  return zonaAttuale + direzionePerSquadra(sq);
-}
-
-function zonaPortaAvversaria(sq) {
-  // Zona in cui si tira in porta: Z5 se attacca verso destra, Z1 se verso sinistra
-  return direzionePerSquadra(sq) > 0 ? 5 : 1;
-}
-
 /* CREAZIONE GIOCATORI */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
@@ -2088,8 +2069,7 @@ function avviaPartitaDaSetup() {
 
 /* ============================================================
    AVVIO PARTITA
-   casaSquadra = id squadra che gioca in casa (per determinare
-   chi attacca da sinistra a destra nel 1° tempo)
+   casaSquadra = id della squadra di casa (per direzione attacco)
    ============================================================ */
 function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   tipo = tipo || '1P';
@@ -2117,13 +2097,11 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   stato.ultimaAzioneExtra = false;
   stato.azioneTiroDaPalo = null;
 
-  // DIREZIONE ATTACCO: se TU è la squadra di casa, attacca verso destra.
-  // Altrimenti (TU in trasferta) attacca verso sinistra.
+  // DIREZIONE ATTACCO: TU in casa → attacca verso destra.
+  // TU in trasferta → attacca verso sinistra.
   if (casaSquadra && casaSquadra !== sqTU) {
-    // TU è in trasferta → attacca verso sinistra (Z1)
     stato.direzioneAttaccoTU = -1;
   } else {
-    // TU in casa o partita amichevole → attacca verso destra (Z5)
     stato.direzioneAttaccoTU = 1;
   }
 
@@ -2212,8 +2190,9 @@ function eseguiCalcioIniziale(squadra) {
     });
 
     if (compagni.length === 0) {
-      // Nessun compagno: passo al contrasto (che consumerà la mano)
+      // Nessun compagno: consuma la mano e vai al contrasto
       stato.mano++;
+      renderHeader();
       setTimeout(function() {
         bloccaCoppiaContrasto();
         setTimeout(avviaContrasto, 800);
@@ -2236,11 +2215,10 @@ function eseguiCalcioIniziale(squadra) {
       animaPallaInZona(giocatoreBattitore, compagnoScelto, function() {
         stato.possessore = squadra;
         stato.giocatorePalla = compagnoScelto.id;
-        // MODIFICA: assegna i 2 minuti, perché salta il contrasto
+        // Assegna i 2 minuti, perché salta il contrasto
         stato.mano++;
         renderHeader();
         bloccaCoppiaContrasto();
-        // Poi si passa direttamente al contrasto nella nuova zona
         setTimeout(avviaContrasto, 800);
       });
     }, 200);
@@ -2542,9 +2520,7 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
 /* ============================================================
-   RISOLUZIONE CONTRASTO
-   MODIFICATO: la direzione di attacco dipende da
-   stato.direzioneAttaccoTU (che si inverte al 2° tempo)
+   RISOLUZIONE CONTRASTO — usa la direzione di attacco
    ============================================================ */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
@@ -2593,13 +2569,11 @@ function risolviContrasto(vincente, motivoFallo) {
 
   stato.mano++;
 
-  // DIREZIONE DI ATTACCO: dipende dal giocatore che ha vinto il contrasto
+  // DIREZIONE DI ATTACCO
   var direzione = direzionePerSquadra(vincente);
   var nuovaZona = c.zona + direzione;
 
-  // Zona porta avversaria
-  var zonaPortaAvversaria = direzione > 0 ? 6 : 0;  // Z6 (POR CPU) o Z0 (POR TU)
-  var zonaTiro = direzione > 0 ? 5 : 1;              // Z5 (attacco dx) o Z1 (attacco sx)
+  var zonaTiro = direzione > 0 ? 5 : 1;
 
   var isTiroInPorta = false;
   if (!motivoFallo && c.zona === zonaTiro) {
@@ -2632,7 +2606,6 @@ function risolviContrasto(vincente, motivoFallo) {
     return;
   }
 
-  // Se il vincente esce dal campo (nuovaZona < 0 o > 6), è un tiro in porta
   if (nuovaZona < 0 || nuovaZona > 6) {
     setTimeout(function() { apriSchermataTiro(vincente); }, 500);
     return;
@@ -3106,7 +3079,6 @@ function gestisciParata(attaccante, difensore) {
     if (stato.giocatori[portiereSquadra][i].portiere) { portiere = stato.giocatori[portiereSquadra][i]; break; }
   }
 
-  // Il portiere rinvia al centrocampista in Z3 (indipendentemente dalla direzione)
   var compagni = stato.giocatori[difensore].filter(function(g) {
     return g.zona === 3 && !g.portiere && !g.espulso;
   });
@@ -3249,7 +3221,6 @@ function gestisciPalo(attaccante, difensore) {
 function gestisciAngolo(attaccante, difensore) {
   log('🚩 Angolo!');
   setTimeout(function() {
-    // L'angolo viene battuto nella zona di attacco
     var zonaAngolo = direzionePerSquadra(attaccante) > 0 ? 5 : 1;
     stato.zonaPalla = zonaAngolo;
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
@@ -3395,14 +3366,14 @@ function flashVincitore(squadra) {
 
 /* ============================================================
    FINE TEMPO / FINE PARTITA
-   MODIFICATO: al 2° tempo inverte la direzione di attacco TU
+   Al 2° tempo inverte la direzione di attacco di TU
    ============================================================ */
 function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2;
     stato.mano = 1;
-    // MODIFICA: cambia campo! Inverte la direzione di attacco
+    // CAMBIO CAMPO: inverte la direzione di attacco di TU
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     log('🔄 CAMBIO CAMPO: ora TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'), 'highlight');
@@ -3460,11 +3431,7 @@ function finePartita() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* ============================================================
-   SALVA RISULTATO TORNEO
-   MODIFICATO: salva anche i metadati (casa, trasferta, sqTU)
-   così riceviRisultato può ricostruire l'ordine gol
-   ============================================================ */
+/* Salva il risultato con metadati (casa, trasferta, sqTU) */
 function salvaRisultatoTorneo() {
   var risultato = {
     golTU: stato.punteggio.tu,
@@ -3546,25 +3513,26 @@ function confermaSostituzione() {
 
 /* ============================================================
    AVVIO
-   MODIFICATO: ora i dati partita vengono dall'URL, non più
-   da localStorage. Fix del bug "3ª partita → menu principale".
+   I dati partita vengono dall'URL (già normalizzati da seriea2027.html)
    ============================================================ */
 try {
   inizializzaAmmonizioni();
   if (TORNEO_MODE === 'seriea' && PARTITA_TORNEO && URL_SQ_TU && URL_SQ_CPU) {
-    // Controllo che le squadre esistano
     if (SQUADRE[URL_SQ_TU] && SQUADRE[URL_SQ_CPU]) {
       avviaPartita(URL_SQ_TU, URL_SQ_CPU, '1P', URL_CASA);
     } else {
+      console.error('Squadre non valide:', URL_SQ_TU, URL_SQ_CPU);
       mostraMenuPrincipale();
     }
   } else {
     mostraMenuPrincipale();
   }
 } catch (err) {
+  console.error('Errore avvio:', err);
   document.body.innerHTML = '<div style="background:#8B2020;color:#fff;padding:30px;font-family:monospace;font-size:14px;white-space:pre-wrap">' +
     '<h2>ERRORE DI AVVIO</h2>' +
     '<p>' + err.message + '</p>' +
+    '<pre>' + (err.stack || '') + '</pre>' +
     '<p>Verifica che divise.js e ammonizioni.js siano caricati.</p>' +
     '</div>';
 }

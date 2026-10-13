@@ -221,6 +221,20 @@
 <script src="ammonizioni.js"></script>
 <script>
 /* ============================================================
+   MAPPA NOMI — normalizza i nomi del calendario alle chiavi SQUADRE
+   ============================================================ */
+const MAPPA_NOMI = {
+  'ac milan': 'milan',
+  'as roma': 'roma'
+};
+
+function normalizzaNome(nome) {
+  if (!nome) return '';
+  const n = nome.toLowerCase().trim();
+  return MAPPA_NOMI[n] || n;
+}
+
+/* ============================================================
    CALENDARIO SERIE A 2026/2027
    ============================================================ */
 const CALENDARIO_SERIEA = [
@@ -765,13 +779,6 @@ function aggiornaAmmonizione(sqId, nomeGiocatore, delta) {
   }
 }
 
-function resetAmmonizioniGiocatore(sqId, nomeGiocatore) {
-  var g = getGiocatoreAmm(sqId, nomeGiocatore);
-  if (!g) return;
-  g.gialli = 0;
-  g.squalificato = false;
-}
-
 function resetSqualificheDopoPartita(sqGiocata) {
   var sqId = sqGiocata;
   if (!ammonizioniCampionato.squadre[sqId]) return;
@@ -913,7 +920,7 @@ function simulaAmmonizioniPartita(sqCasaId, sqTrasfId) {
 }
 
 /* ============================================================
-   CLASSIFICA
+   CLASSIFICA — usa normalizzaNome
    ============================================================ */
 function getClassifica() {
   const tab = {};
@@ -928,8 +935,8 @@ function getClassifica() {
     if (!giornata) continue;
     const partita = giornata[idx];
     if (!partita) continue;
-    const casa = partita.homeTeam.toLowerCase();
-    const trasf = partita.awayTeam.toLowerCase();
+    const casa = normalizzaNome(partita.homeTeam);
+    const trasf = normalizzaNome(partita.awayTeam);
     const c = tab[casa], t = tab[trasf];
     if (!c || !t) continue;
     const gc = r[0], gt = r[1];
@@ -1018,8 +1025,8 @@ function renderCampionato(content) {
       const key = 'g' + g + '_' + i;
       if (stato.risultati[key]) continue;
       const p = giornata[i];
-      const casa = p.homeTeam.toLowerCase();
-      const trasf = p.awayTeam.toLowerCase();
+      const casa = normalizzaNome(p.homeTeam);
+      const trasf = normalizzaNome(p.awayTeam);
       if (casa === tua || trasf === tua) {
         prossima = { g: g, i: i, casa: casa, trasferta: trasf, partita: p };
         break;
@@ -1074,8 +1081,8 @@ function renderCampionato(content) {
     const key = 'g' + stato.giornataCorrente + '_' + i;
     const r = stato.risultati[key];
     const score = r ? (r[0] + '-' + r[1]) : 'Da giocare';
-    const casa = p.homeTeam.toLowerCase();
-    const trasf = p.awayTeam.toLowerCase();
+    const casa = normalizzaNome(p.homeTeam);
+    const trasf = normalizzaNome(p.awayTeam);
     const nomeCasa = SQUADRE[casa] ? SQUADRE[casa].nome : p.homeTeam;
     const nomeTrasf = SQUADRE[trasf] ? SQUADRE[trasf].nome : p.awayTeam;
     const isTua = (casa === tua || trasf === tua) ? 'tua' : '';
@@ -1103,12 +1110,12 @@ function cambiaGiornata(delta) {
 }
 
 /* ============================================================
-   GIOCO — MODIFICATO: passa i dati via URL (fix bug 3ª partita)
+   GIOCO — passa i dati via URL, con nomi NORMALIZZATI
    ============================================================ */
 function giocaPartita(g, i) {
   const partita = CALENDARIO_SERIEA[g - 1][i];
-  const casa = partita.homeTeam.toLowerCase();
-  const trasf = partita.awayTeam.toLowerCase();
+  const casa = normalizzaNome(partita.homeTeam);
+  const trasf = normalizzaNome(partita.awayTeam);
   const tua = stato.squadraScelta;
 
   const sqTU = casa === tua ? casa : trasf;
@@ -1116,8 +1123,6 @@ function giocaPartita(g, i) {
 
   const idPartita = 'g' + g + '_' + i;
 
-  // MODIFICA: passo tutto via URL, niente più localStorage
-  // per i dati della partita attiva
   const params = new URLSearchParams({
     torneo: 'seriea',
     partita: idPartita,
@@ -1135,8 +1140,8 @@ function simulaRestoGiornata(g) {
     const key = 'g' + g + '_' + i;
     if (stato.risultati[key]) continue;
     const p = giornata[i];
-    const c = p.homeTeam.toLowerCase();
-    const t = p.awayTeam.toLowerCase();
+    const c = normalizzaNome(p.homeTeam);
+    const t = normalizzaNome(p.awayTeam);
     if (c === stato.squadraScelta || t === stato.squadraScelta) continue;
     stato.risultati[key] = simula(c, t);
     simulaAmmonizioniPartita(c, t);
@@ -1146,8 +1151,6 @@ function simulaRestoGiornata(g) {
 
 /* ============================================================
    RICEZIONE RISULTATO
-   MODIFICATO: legge casa/trasferta/sqTU dal risultato stesso
-   (li scrive index.html al momento del salvataggio)
    ============================================================ */
 function riceviRisultato() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -1159,7 +1162,6 @@ function riceviRisultato() {
   const risultato = JSON.parse(json);
   localStorage.removeItem('campionato_partita_' + id);
 
-  // MODIFICA: leggo i metadati dal risultato salvato
   const casa = risultato.casaOriginale;
   const trasferta = risultato.trasfertaOriginale;
   const sqTU = risultato.sqTU;
@@ -1182,8 +1184,8 @@ function riceviRisultato() {
   const giornata = CALENDARIO_SERIEA[g - 1];
   for (let i = 0; i < giornata.length; i++) {
     const p = giornata[i];
-    const c = p.homeTeam.toLowerCase();
-    const t = p.awayTeam.toLowerCase();
+    const c = normalizzaNome(p.homeTeam);
+    const t = normalizzaNome(p.awayTeam);
     if (c !== sqTU) resetSqualificheDopoPartita(c);
     if (t !== sqTU) resetSqualificheDopoPartita(t);
   }
