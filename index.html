@@ -1107,7 +1107,6 @@ function suonaScivolata() {
   noise.start(ora); noise.stop(ora + durata);
 }
 
-/* SUONO PALO: doppio colpo metallico secco + lieve rimbombo */
 function suonaPalo() {
   initAudio();
   if (!audioCtx) return;
@@ -1146,7 +1145,6 @@ function suonaPalo() {
   osc3.start(ora); osc3.stop(ora + 0.55);
 }
 
-/* SUONO FUORI: sibilo del pallone + boato/ohhh del pubblico */
 function suonaFuori() {
   initAudio();
   if (!audioCtx) return;
@@ -1206,8 +1204,6 @@ function suonaFuori() {
 /* ============================================================
    SUONI DEL PUBBLICO
    ============================================================ */
-
-/* Rumore rosa (più naturale del bianco) per simulare la folla */
 function creaBufferRumoreRosa(durataSecondi) {
   if (!audioCtx) return null;
   var sampleRate = audioCtx.sampleRate;
@@ -1215,7 +1211,6 @@ function creaBufferRumoreRosa(durataSecondi) {
   var buffer = audioCtx.createBuffer(1, bufferSize, sampleRate);
   var data = buffer.getChannelData(0);
 
-  // Rumore bianco + filtro passa-basso semplice (media mobile)
   var b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
   for (var i = 0; i < bufferSize; i++) {
     var white = Math.random() * 2 - 1;
@@ -1231,7 +1226,6 @@ function creaBufferRumoreRosa(durataSecondi) {
   return buffer;
 }
 
-/* Tifosi che esultano per un gol: 3 secondi di boato crescente e festoso */
 function suonaEsultanza() {
   initAudio();
   if (!audioCtx) return;
@@ -1245,7 +1239,6 @@ function suonaEsultanza() {
   noise.buffer = buffer;
   noise.loop = false;
 
-  // Filtro per rendere il boato più "corposo"
   var filtro = audioCtx.createBiquadFilter();
   filtro.type = 'bandpass';
   filtro.frequency.setValueAtTime(500, ora);
@@ -1262,7 +1255,6 @@ function suonaEsultanza() {
   noise.connect(filtro); filtro.connect(gain); gain.connect(audioCtx.destination);
   noise.start(ora); noise.stop(ora + durata);
 
-  // Aggiungo un "ohhh" collettivo (due sine) che sale e si fonde col boato
   var osc1 = audioCtx.createOscillator();
   osc1.type = 'sine';
   osc1.frequency.setValueAtTime(280, ora);
@@ -1286,7 +1278,6 @@ function suonaEsultanza() {
   osc1.stop(ora + durata); osc2.stop(ora + durata);
 }
 
-/* Tifosi in tensione (zona Z1/Z5): boato medio, cupo, incalzante */
 function suonaTensione() {
   initAudio();
   if (!audioCtx) return;
@@ -1318,8 +1309,7 @@ function suonaTensione() {
 }
 
 /* ============================================================
-   SOTTOFONDO: rumore continuo dello stadio.
-   Il volume cambia in base alla zona della palla.
+   SOTTOFONDO
    ============================================================ */
 var sottofondo = {
   source: null,
@@ -1333,7 +1323,6 @@ function avviaSottofondo() {
   initAudio();
   if (!audioCtx || sottofondo.attivo) return;
 
-  // Rumore rosa lungo (4 secondi) che metto in loop
   var buffer = creaBufferRumoreRosa(4.0);
   if (!buffer) return;
 
@@ -1374,22 +1363,18 @@ function fermaSottofondo() {
   } catch(e) {}
 }
 
-/* Aggiorna il volume del sottofondo in base alla zona della palla */
 function aggiornaSottofondoPerZona(zona) {
   if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return;
   var ora = audioCtx.currentTime;
   var target;
 
   if (zona === 1 || zona === 5) {
-    // Zona calda: tifosi più intensi
     target = 0.14;
     sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora + 0.6);
   } else if (zona === 0 || zona === 6) {
-    // Zona portieri: più silenzioso
     target = 0.05;
     sottofondo.filtro.frequency.linearRampToValueAtTime(400, ora + 0.6);
   } else {
-    // Zona neutra (Z2, Z3, Z4): volume basso
     target = 0.04;
     sottofondo.filtro.frequency.linearRampToValueAtTime(500, ora + 0.6);
   }
@@ -2091,8 +2076,7 @@ function avviaPartita(sqTU, sqCPU, tipo) {
 
 /* MONETA E CALCIO D'INIZIO */
 function lanciaMoneta(scelta) {
-  initAudio(); // sblocca l'audio al primo click
-  // Avvia anche il sottofondo dello stadio
+  initAudio();
   avviaSottofondo();
   setTimeout(function() { aggiornaSottofondoPerZona(stato.zonaPalla); }, 500);
 
@@ -2230,6 +2214,12 @@ function animaPallaInZona(giocatoreDa, giocatoreA, callback) {
 
 /* CONTRASTO */
 function avviaContrasto() {
+  // FIX: controllo fine tempo / fine partita
+  if (stato.mano > stato.maxMani) {
+    fineTempoOPartita();
+    return;
+  }
+
   document.getElementById('carte-panel').classList.remove('nascosto');
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
@@ -2239,7 +2229,6 @@ function avviaContrasto() {
   var difensore = possessore === 'tu' ? 'cpu' : 'tu';
   var meta = stato.metaContesa;
 
-  // Suono dei tifosi in tensione se la palla è in Z1 o Z5
   if (zona === 1 || zona === 5) {
     suonaTensione();
   }
@@ -2590,7 +2579,6 @@ function risolviContrasto(vincente, motivoFallo) {
   stato.giocatorePalla = compagnoScelto.id;
   stato.contrastoCoppia = null;
 
-  // Aggiorna il sottofondo in base alla nuova zona
   aggiornaSottofondoPerZona(nuovaZona);
 
   var delayPrimaDiRender = haRubatoPalla ? (DURATA_SCIVOLATA + DURATA_RITORNO) : 0;
@@ -2981,12 +2969,10 @@ function gestisciGoal(attaccante) {
   log('⚽ GOAL!', 'goal');
   mostraGoalBanner(attaccante);
 
-  // Esultanza dei tifosi per 3 secondi
   suonaEsultanza();
 
   setTimeout(function() {
     var subito = attaccante === 'tu' ? 'cpu' : 'tu';
-    // Calcio d'inizio automatico per chi ha subito il gol
     eseguiCalcioIniziale(subito);
   }, 3200);
 }
@@ -3285,12 +3271,15 @@ function flashVincitore(squadra) {
   setTimeout(function() { flash.classList.remove('attivo'); }, 600);
 }
 
-/* FINE TEMPO / PARTITA */
+/* ============================================================
+   FINE TEMPO / FINE PARTITA
+   ============================================================ */
 function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
-    stato.tempo = 2; stato.mano = 1;
-    log('⏸️ FINE PRIMO TEMPO.', 'goal');
+    stato.tempo = 2;
+    stato.mano = 1;
+    log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     ['tu', 'cpu'].forEach(function(sq) {
       for (var i = 0; i < stato.giocatori[sq].length; i++) {
         stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
@@ -3299,6 +3288,7 @@ function fineTempoOPartita() {
       }
     });
     riempiMano('tu'); riempiMano('cpu');
+    renderHeader();
     mostraFinestraFineTempo(function() {
       var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
       eseguiCalcioIniziale(perdente);
