@@ -279,13 +279,18 @@
     position: relative;
   }
 
+  /* ============================================================
+     MODIFICA: tutti i giocatori della fascia inf salgono di 20px,
+     così quelli di sinistra e destra (Z1 e Z5) risultano in area
+     di rigore. Z2 e Z4 mantengono la coppia sup alzata di 30px.
+     ============================================================ */
+  .meta-inf {
+    transform: translateY(-20px);
+  }
+
   .zona[data-zona="2"] .meta-sup,
   .zona[data-zona="4"] .meta-sup {
     transform: translateY(-30px);
-  }
-  .zona[data-zona="2"] .meta-inf,
-  .zona[data-zona="4"] .meta-inf {
-    transform: translateY(30px);
   }
 
   .pedina-wrapper {
