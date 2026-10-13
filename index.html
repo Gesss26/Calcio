@@ -279,7 +279,6 @@
     position: relative;
   }
 
-  /* Z2 e Z4: coppia sup alzata di 30px, coppia inf abbassata di 30px */
   .zona[data-zona="2"] .meta-sup,
   .zona[data-zona="4"] .meta-sup {
     transform: translateY(-30px);
@@ -2155,7 +2154,6 @@ function risolviContrasto(vincente, motivoFallo) {
 
   document.getElementById('carte-panel').classList.add('nascosto');
 
-  // FIX 1: fischietto al fallo
   if (motivoFallo) {
     suonaFischietto('fallo');
     var sqFallosa = motivoFallo;
@@ -2238,7 +2236,6 @@ function risolviContrasto(vincente, motivoFallo) {
   var haRubatoPalla = (vincente !== possessorePrima);
   var vecchioPossessore = gPoss;
 
-  // FIX 2: scivolata PRIMA di renderCampo (così la pedina è ancora quella vecchia)
   if (haRubatoPalla && giocatoreVincente) {
     suonaScivolata();
     var pedinaEl = document.querySelector('[data-giocatore-id="' + giocatoreVincente.id + '"]');
@@ -2278,7 +2275,6 @@ function risolviContrasto(vincente, motivoFallo) {
     }
   }
 
-  // Aggiorno stato
   stato.zonaPalla = nuovaZona;
   stato.possessore = vincente;
   stato.metaContesa = nuovaMeta;
@@ -2570,24 +2566,80 @@ function eseguiParataPortiere(casella, dadoTiro, facile) {
   }
 }
 
+/* ============================================================
+   FASE 3 — L'ESITO (solo se il portiere NON ha parato)
+   Nuova logica: 1 palo, 1 angolo, 2 fuori, 5 goal.
+   Le caselle che danno palo/angolo/fuori vengono rimescolate
+   ad ogni tiro, così non si possono prevedere.
+   ============================================================ */
+
+/* Helper per mostrare il dado della fase 3 */
+function mostraDadoFase3(dadoEsito) {
+  var cont = document.getElementById('tiro-dadi-info');
+  if (!cont) return;
+  var html = '<div class="tiro-dadi-riga">';
+  html += '<span class="tiro-dado-label">🎲 Esito:</span>';
+  html += '<div class="tiro-dado">' + dadoEsito + '</div>';
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+/* Fase 3 — tiro normale */
 function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
+  // Estraggo casualmente 4 caselle "sfortunate" distinte tra 1 e 9:
+  // 1 -> palo, 1 -> angolo, 2 -> fuori. Le altre 5 -> GOAL.
+  var caselle = mescola([1,2,3,4,5,6,7,8,9]);
+  var casellaPalo   = caselle[0];
+  var casellaAngolo = caselle[1];
+  var casellaFuori1 = caselle[2];
+  var casellaFuori2 = caselle[3];
+
+  var infoEl = document.getElementById('tiro-info');
+  if (infoEl) infoEl.textContent = 'FASE 3 — Esito del tiro...';
+
   var dadoEsito = Math.floor(Math.random() * 9) + 1;
+  mostraDadoFase3(dadoEsito);
+
   setTimeout(function() {
     var esito, motivo;
-    if (dadoEsito === 1) { esito = 'palo'; motivo = '🥅 PALO!'; }
-    else if (dadoEsito === 3 || dadoEsito === 6 || dadoEsito === 9) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; }
-    else { esito = 'parata'; motivo = '🧤 PARATA!'; }
+    if (dadoEsito === casellaPalo) {
+      esito = 'palo';   motivo = '🥅 PALO!';
+    } else if (dadoEsito === casellaAngolo) {
+      esito = 'angolo'; motivo = '🚩 ANGOLO!';
+    } else if (dadoEsito === casellaFuori1 || dadoEsito === casellaFuori2) {
+      esito = 'fuori';  motivo = '❌ FUORI!';
+    } else {
+      esito = 'goal';   motivo = '⚽ GOAL!';
+    }
     mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motivo);
   }, 1000);
 }
 
+/* Fase 3 — rigore */
 function fase3RigoreConGrafica(dadoTiro, attaccante, difensore) {
-  var dadoConferma = Math.floor(Math.random() * 9) + 1;
+  var caselle = mescola([1,2,3,4,5,6,7,8,9]);
+  var casellaPalo   = caselle[0];
+  var casellaAngolo = caselle[1];
+  var casellaFuori1 = caselle[2];
+  var casellaFuori2 = caselle[3];
+
+  var infoEl = document.getElementById('tiro-info');
+  if (infoEl) infoEl.textContent = 'FASE 3 — Esito del rigore...';
+
+  var dadoEsito = Math.floor(Math.random() * 9) + 1;
+  mostraDadoFase3(dadoEsito);
+
   setTimeout(function() {
     var esito, motivo;
-    if (dadoConferma === 9) { esito = 'palo'; motivo = '🥅 PALO!'; }
-    else if (dadoConferma === 1) { esito = 'fuori'; motivo = '❌ FUORI!'; }
-    else { esito = 'goal'; motivo = '⚽ GOAL!'; }
+    if (dadoEsito === casellaPalo) {
+      esito = 'palo';   motivo = '🥅 PALO!';
+    } else if (dadoEsito === casellaAngolo) {
+      esito = 'angolo'; motivo = '🚩 ANGOLO!';
+    } else if (dadoEsito === casellaFuori1 || dadoEsito === casellaFuori2) {
+      esito = 'fuori';  motivo = '❌ FUORI!';
+    } else {
+      esito = 'goal';   motivo = '⚽ GOAL!';
+    }
     mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motivo);
   }, 1200);
 }
@@ -2596,6 +2648,9 @@ function mostraEsitoTiroConGrafica(esito, dadoTiro, attaccante, difensore, motiv
   var esitoEl = document.getElementById('tiro-esito');
   esitoEl.textContent = motivo;
   esitoEl.classList.add(esito);
+
+  var infoEl = document.getElementById('tiro-info');
+  if (infoEl) infoEl.textContent = 'ESITO: ' + motivo;
 
   setTimeout(function() {
     var overlay = document.getElementById('tiro-overlay');
@@ -2640,7 +2695,6 @@ function gestisciGoal(attaccante) {
   }, 3200);
 }
 
-/* FIX 3: gestisciParata con animazione palla dal portiere al compagno */
 function gestisciParata(attaccante, difensore) {
   log('🧤 Parata!');
 
@@ -2655,7 +2709,6 @@ function gestisciParata(attaccante, difensore) {
   });
 
   if (compagni.length === 0) {
-    // fallback: palla direttamente in Z3 al centro
     setTimeout(function() {
       stato.zonaPalla = 3;
       stato.metaContesa = 'inf';
@@ -2672,7 +2725,6 @@ function gestisciParata(attaccante, difensore) {
   var idxScelto = compagni.indexOf(scelto);
   var nuovaMeta = idxScelto === 0 ? 'sup' : 'inf';
 
-  // Aggiorno stato
   stato.zonaPalla = 3;
   stato.metaContesa = nuovaMeta;
   stato.possessore = difensore;
@@ -2681,17 +2733,14 @@ function gestisciParata(attaccante, difensore) {
   stato.puntoPallaFermo = null;
   stato.contrastoCoppia = null;
 
-  // renderCampo per mostrare il compagno in Z3
   renderCampo();
   renderHeader();
 
-  // Nascondo la palla ai piedi del compagno per farla apparire in volo
   var palleCentro = document.querySelectorAll('.palla-centro');
   for (var p = 0; p < palleCentro.length; p++) palleCentro[p].remove();
   var pallaAtt = document.querySelector('[data-giocatore-id="' + scelto.id + '"] .palla-attaccata');
   if (pallaAtt) pallaAtt.remove();
 
-  // Animo la palla dal portiere al compagno
   if (portiere) {
     var elPortiere = document.querySelector('[data-giocatore-id="' + portiere.id + '"]');
     var elCompagno = document.querySelector('[data-giocatore-id="' + scelto.id + '"]');
@@ -2749,7 +2798,6 @@ function gestisciParata(attaccante, difensore) {
     }
   }
 
-  // Fallback
   setTimeout(function() {
     creaPallaAiPiedi(3, scelto.id);
     bloccaCoppiaContrasto();
