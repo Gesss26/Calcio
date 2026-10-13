@@ -154,26 +154,40 @@
   .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
 
-  .pila-wrapper { display: flex; gap: 12px; align-items: center; }
-  .pila { position: relative; width: 42px; height: 80px; }
+  .pile-wrapper { display: flex; gap: 28px; align-items: center; }
+  .pila { position: relative; width: 48px; height: 88px; }
   .pila-titolo {
-    position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: #ffd700; font-weight: bold; white-space: nowrap;
+    position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; color: #ffd700; font-weight: 900; white-space: nowrap;
+    text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9);
+    letter-spacing: 1.5px;
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
-    position: absolute; width: 42px; height: 80px; border-radius: 4px;
+    position: absolute; width: 48px; height: 88px; border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   .pila-carta.dietro {
     background: linear-gradient(135deg, #4dabf7, #2563eb);
     border: 2px solid #fff;
   }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count {
-    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 10px; color: #aaa; white-space: nowrap;
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.scarto {
+    background: linear-gradient(135deg, #f59f00, #b45309);
+    border: 2px solid #fff;
   }
+  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-count {
+    position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+    font-size: 16px; color: #ffd700; font-weight: 900; white-space: nowrap;
+    background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px;
+    border: 2px solid rgba(255,215,0,0.6);
+    text-shadow: 0 1px 2px #000;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+  .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
+  .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
   .info-carte {
     display: flex; gap: 14px; font-size: 11px; color: #aaa;
@@ -279,15 +293,16 @@
     position: relative;
   }
 
-  /* ============================================================
-     MODIFICA: tutti i giocatori della fascia inf salgono di 20px,
-     così quelli di sinistra e destra (Z1 e Z5) risultano in area
-     di rigore. Z2 e Z4 mantengono la coppia sup alzata di 30px.
-     ============================================================ */
+  /* Tutti i .meta-inf salgono di 20px (per area rigore) */
   .meta-inf {
     transform: translateY(-20px);
   }
-
+  /* Z2 e Z4: la coppia inf scende di 30px (torna in basso) */
+  .zona[data-zona="2"] .meta-inf,
+  .zona[data-zona="4"] .meta-inf {
+    transform: translateY(30px);
+  }
+  /* Z2 e Z4: la coppia sup sale di 30px */
   .zona[data-zona="2"] .meta-sup,
   .zona[data-zona="4"] .meta-sup {
     transform: translateY(-30px);
@@ -309,19 +324,17 @@
   .portiere-wrapper.tu { left: 62%; }
   .portiere-wrapper.cpu { left: 38%; }
 
+  /* MODIFICA: nomi completi, niente ellipsis */
   .nome-giocatore {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
     color: #fff;
-    text-shadow: 0 1px 3px #000, 0 0 4px #000;
-    background: rgba(0,0,0,0.7);
-    padding: 1px 4px;
+    text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000;
+    background: rgba(0,0,0,0.8);
+    padding: 2px 6px;
     border-radius: 3px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
     white-space: nowrap;
-    max-width: 60px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     text-align: center;
     font-family: 'Segoe UI', sans-serif;
     letter-spacing: 0.3px;
@@ -800,6 +813,15 @@
     margin-bottom: 16px;
     line-height: 1.5;
   }
+
+  /* Badge direzione attacco */
+  .badge-direzione {
+    position: absolute; top: 6px; right: 12px;
+    font-size: 10px; color: #ffd700; font-weight: bold;
+    background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 5px;
+    border: 1px solid rgba(255,215,0,0.4);
+    z-index: 20;
+  }
 </style>
 </head>
 <body>
@@ -823,7 +845,7 @@
     </div>
     <div class="info-top">
       Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/46<br>
-      Palla <span id="zona-palla">Z3</span>
+      Palla <span id="zona-palla">Z3</span> · <span id="attacco-lato">→</span>
     </div>
     <div class="topbar-buttons">
       <button class="btn-icona" onclick="apriLog()">📋</button>
@@ -846,11 +868,16 @@
           <div class="mano-label">Tu (<span id="count-tu">7</span>)</div>
           <div class="carte" id="carte-tu"></div>
         </div>
-        <div class="pila-wrapper">
+        <div class="pile-wrapper">
           <div class="pila">
             <div class="pila-titolo">MAZZO</div>
             <div class="pila-carte" id="mazzo-pila"></div>
-            <div class="pila-count" id="mazzo-count">0</div>
+            <div class="pila-count mazzo" id="mazzo-count">0</div>
+          </div>
+          <div class="pila">
+            <div class="pila-titolo">SCARTI</div>
+            <div class="pila-carte" id="scarti-pila"></div>
+            <div class="pila-count scarto" id="scarti-count">0</div>
           </div>
         </div>
         <div class="sost-panel">
@@ -921,10 +948,6 @@ var DURATA_SCIVOLATA = 600;
 var DURATA_RITORNO = 400;
 var SCIVOLATA_MAX_PX = 25;
 
-var PALLA_Y_META_SUP = 42;
-var PALLA_Y_META_INF = 58;
-var PALLA_X_CENTRO = 50;
-
 var PORTA_LEFT = 21;
 var PORTA_TOP = 34;
 var PORTA_W = 58;
@@ -939,6 +962,10 @@ var CASELLE_PERC = {
 var urlParams = new URLSearchParams(window.location.search);
 var TORNEO_MODE = urlParams.get('torneo');
 var PARTITA_TORNEO = urlParams.get('partita');
+var URL_SQ_TU = urlParams.get('sqTU');
+var URL_SQ_CPU = urlParams.get('sqCPU');
+var URL_CASA = urlParams.get('casa');
+var URL_TRASFERTA = urlParams.get('trasferta');
 
 /* AMMONIZIONI */
 var ammonizioni = null;
@@ -1411,6 +1438,8 @@ var stato = {
   turno: 'tu', monetaVinta: null,
   partitaFinita: false, sostBloccate: false,
   semeGuidaPrecedente: null,
+  // DIREZIONE ATTACCO: +1 = TU attacca verso destra (Z5), -1 = verso sinistra (Z1)
+  direzioneAttaccoTU: 1,
   statistiche: {
     tu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 },
     cpu: { gol: 0, tiri: 0, parate: 0, angoli: 0, pali: 0, contese: 0, vinte: 0, falli: 0, ammonizioni: 0, espulsioni: 0, sostituzioni: 0 }
@@ -1573,6 +1602,25 @@ function bloccaCoppiaContrasto() {
     giocatoreAvv: gAvv ? gAvv.id : null,
     possessore: possessore
   };
+}
+
+/* ============================================================
+   DIREZIONE DI ATTACCO
+   ============================================================ */
+function direzionePerSquadra(sq) {
+  var dirTU = stato.direzioneAttaccoTU;
+  if (sq === 'tu') return dirTU;
+  return -dirTU;
+}
+
+function zonaAvanzata(sq, zonaAttuale) {
+  // Restituisce la zona "successiva" nella direzione di attacco
+  return zonaAttuale + direzionePerSquadra(sq);
+}
+
+function zonaPortaAvversaria(sq) {
+  // Zona in cui si tira in porta: Z5 se attacca verso destra, Z1 se verso sinistra
+  return direzionePerSquadra(sq) > 0 ? 5 : 1;
 }
 
 /* CREAZIONE GIOCATORI */
@@ -1742,6 +1790,12 @@ function renderHeader() {
   document.getElementById('zona-palla').textContent = 'Z' + stato.zonaPalla;
   var infoMinuto = document.getElementById('info-minuto');
   if (infoMinuto) infoMinuto.textContent = parziale + "' | " + totale + "'";
+
+  // Badge direzione attacco TU
+  var elAtt = document.getElementById('attacco-lato');
+  if (elAtt) {
+    elAtt.textContent = stato.direzioneAttaccoTU > 0 ? '→' : '←';
+  }
 }
 
 function renderZoneOverlay() {
@@ -2032,7 +2086,12 @@ function avviaPartitaDaSetup() {
   avviaPartita(stato.squadraTU, stato.squadraCPU, stato.tipoPartita);
 }
 
-function avviaPartita(sqTU, sqCPU, tipo) {
+/* ============================================================
+   AVVIO PARTITA
+   casaSquadra = id squadra che gioca in casa (per determinare
+   chi attacca da sinistra a destra nel 1° tempo)
+   ============================================================ */
+function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   tipo = tipo || '1P';
   stato.tipoPartita = tipo;
   stato.squadraTU = sqTU;
@@ -2058,6 +2117,16 @@ function avviaPartita(sqTU, sqCPU, tipo) {
   stato.ultimaAzioneExtra = false;
   stato.azioneTiroDaPalo = null;
 
+  // DIREZIONE ATTACCO: se TU è la squadra di casa, attacca verso destra.
+  // Altrimenti (TU in trasferta) attacca verso sinistra.
+  if (casaSquadra && casaSquadra !== sqTU) {
+    // TU è in trasferta → attacca verso sinistra (Z1)
+    stato.direzioneAttaccoTU = -1;
+  } else {
+    // TU in casa o partita amichevole → attacca verso destra (Z5)
+    stato.direzioneAttaccoTU = 1;
+  }
+
   applicaSqualifiche('tu');
   applicaSqualifiche('cpu');
 
@@ -2077,6 +2146,7 @@ function avviaPartita(sqTU, sqCPU, tipo) {
     '</div>';
   document.getElementById('modale').classList.remove('nascosto');
   log('🎮 ' + SQUADRE[sqTU].nome + ' vs ' + SQUADRE[sqCPU].nome);
+  log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'));
 }
 
 /* MONETA E CALCIO D'INIZIO */
@@ -2104,6 +2174,11 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
+/* ============================================================
+   CALCIO D'INIZIO AUTOMATICO
+   Salta il contrasto e fa il passaggio in avanti automatico,
+   assegnando i 2 minuti come se fosse un turno giocato.
+   ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   document.getElementById('carte-panel').classList.add('nascosto');
   stato.pallaInAnimazione = true;
@@ -2126,15 +2201,26 @@ function eseguiCalcioIniziale(squadra) {
   aggiornaSottofondoPerZona(3);
 
   setTimeout(function() {
-    var direzione = squadra === 'tu' ? 1 : -1;
+    // La squadra che batte passa in avanti nella direzione di attacco
+    var direzione = direzionePerSquadra(squadra);
     var nuovaZona = 3 + direzione;
+    if (nuovaZona < 1) nuovaZona = 1;
+    if (nuovaZona > 5) nuovaZona = 5;
+
     var compagni = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g) {
       return g.zona === nuovaZona && !g.portiere && !g.espulso;
     });
+
     if (compagni.length === 0) {
-      setTimeout(avviaContrasto, 500);
+      // Nessun compagno: passo al contrasto (che consumerà la mano)
+      stato.mano++;
+      setTimeout(function() {
+        bloccaCoppiaContrasto();
+        setTimeout(avviaContrasto, 800);
+      }, 300);
       return;
     }
+
     var compagnoScelto = compagni[Math.floor(Math.random() * compagni.length)];
     var nuovaMeta = (compagni.indexOf(compagnoScelto) === 0) ? 'sup' : 'inf';
 
@@ -2150,7 +2236,11 @@ function eseguiCalcioIniziale(squadra) {
       animaPallaInZona(giocatoreBattitore, compagnoScelto, function() {
         stato.possessore = squadra;
         stato.giocatorePalla = compagnoScelto.id;
+        // MODIFICA: assegna i 2 minuti, perché salta il contrasto
+        stato.mano++;
+        renderHeader();
         bloccaCoppiaContrasto();
+        // Poi si passa direttamente al contrasto nella nuova zona
         setTimeout(avviaContrasto, 800);
       });
     }, 200);
@@ -2219,7 +2309,7 @@ function animaPallaInZona(giocatoreDa, giocatoreA, callback) {
 
 /* CONTRASTO */
 function avviaContrasto() {
-  // FIX: controllo fine tempo / fine partita
+  // Controllo fine tempo / fine partita
   if (stato.mano > stato.maxMani) {
     fineTempoOPartita();
     return;
@@ -2297,6 +2387,7 @@ function renderPannelloContrasto() {
   document.getElementById('count-tu').textContent = stato.mani.tu.length;
 
   renderPilaMazzo();
+  renderPilaScarti();
   document.getElementById('info-mazzo').textContent = stato.mazzo.length;
   document.getElementById('info-scarti').textContent = stato.scarti.length;
   var parziale = calcolaMinutoParziale();
@@ -2331,6 +2422,20 @@ function renderPilaMazzo() {
     mazzoPila.appendChild(el);
   }
   document.getElementById('mazzo-count').textContent = stato.mazzo.length + ' carte';
+}
+
+function renderPilaScarti() {
+  var scartiPila = document.getElementById('scarti-pila');
+  if (!scartiPila) return;
+  scartiPila.innerHTML = '';
+  var num = Math.min(stato.scarti.length, 4);
+  for (var i = 0; i < num; i++) {
+    var el = document.createElement('div');
+    el.className = 'pila-carta scarto';
+    el.style.left = (i * 2) + 'px'; el.style.top = (i * 2) + 'px';
+    scartiPila.appendChild(el);
+  }
+  document.getElementById('scarti-count').textContent = stato.scarti.length + ' carte';
 }
 
 function selezionaCartaTu(idx) {
@@ -2436,7 +2541,11 @@ function mostraBannerMano(vincitore, cartaTu, cartaCpu, semeGuida, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* RISOLUZIONE CONTRASTO */
+/* ============================================================
+   RISOLUZIONE CONTRASTO
+   MODIFICATO: la direzione di attacco dipende da
+   stato.direzioneAttaccoTU (che si inverte al 2° tempo)
+   ============================================================ */
 function risolviContrasto(vincente, motivoFallo) {
   var c = stato.contrasto;
   flashVincitore(vincente);
@@ -2484,15 +2593,20 @@ function risolviContrasto(vincente, motivoFallo) {
 
   stato.mano++;
 
-  var direzione = vincente === 'tu' ? 1 : -1;
+  // DIREZIONE DI ATTACCO: dipende dal giocatore che ha vinto il contrasto
+  var direzione = direzionePerSquadra(vincente);
   var nuovaZona = c.zona + direzione;
 
+  // Zona porta avversaria
+  var zonaPortaAvversaria = direzione > 0 ? 6 : 0;  // Z6 (POR CPU) o Z0 (POR TU)
+  var zonaTiro = direzione > 0 ? 5 : 1;              // Z5 (attacco dx) o Z1 (attacco sx)
+
   var isTiroInPorta = false;
-  if (!motivoFallo && ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1))) {
+  if (!motivoFallo && c.zona === zonaTiro) {
     isTiroInPorta = true;
   }
   var isRigore = false;
-  if (motivoFallo && ((vincente === 'tu' && c.zona === 5) || (vincente === 'cpu' && c.zona === 1))) {
+  if (motivoFallo && c.zona === zonaTiro) {
     isRigore = true;
   }
 
@@ -2518,6 +2632,7 @@ function risolviContrasto(vincente, motivoFallo) {
     return;
   }
 
+  // Se il vincente esce dal campo (nuovaZona < 0 o > 6), è un tiro in porta
   if (nuovaZona < 0 || nuovaZona > 6) {
     setTimeout(function() { apriSchermataTiro(vincente); }, 500);
     return;
@@ -2991,6 +3106,7 @@ function gestisciParata(attaccante, difensore) {
     if (stato.giocatori[portiereSquadra][i].portiere) { portiere = stato.giocatori[portiereSquadra][i]; break; }
   }
 
+  // Il portiere rinvia al centrocampista in Z3 (indipendentemente dalla direzione)
   var compagni = stato.giocatori[difensore].filter(function(g) {
     return g.zona === 3 && !g.portiere && !g.espulso;
   });
@@ -3133,7 +3249,8 @@ function gestisciPalo(attaccante, difensore) {
 function gestisciAngolo(attaccante, difensore) {
   log('🚩 Angolo!');
   setTimeout(function() {
-    var zonaAngolo = attaccante === 'tu' ? 5 : 1;
+    // L'angolo viene battuto nella zona di attacco
+    var zonaAngolo = direzionePerSquadra(attaccante) > 0 ? 5 : 1;
     stato.zonaPalla = zonaAngolo;
     stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf';
     stato.possessore = attaccante;
@@ -3278,13 +3395,18 @@ function flashVincitore(squadra) {
 
 /* ============================================================
    FINE TEMPO / FINE PARTITA
+   MODIFICATO: al 2° tempo inverte la direzione di attacco TU
    ============================================================ */
 function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2;
     stato.mano = 1;
+    // MODIFICA: cambia campo! Inverte la direzione di attacco
+    stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
+    log('🔄 CAMBIO CAMPO: ora TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'), 'highlight');
+
     ['tu', 'cpu'].forEach(function(sq) {
       for (var i = 0; i < stato.giocatori[sq].length; i++) {
         stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
@@ -3309,6 +3431,7 @@ function mostraFinestraFineTempo(callback) {
     '<p style="font-size:32px;font-weight:bold;margin:12px 0">' +
       '<span style="color:#4dabf7">' + stato.punteggio.tu + '</span> - <span style="color:#ff6b6b">' + stato.punteggio.cpu + '</span>' +
     '</p>' +
+    '<p style="font-size:14px;color:#ffd700;margin:8px 0">🔄 Cambio campo!</p>' +
     '<p style="font-size:12px;color:#aaa">Ripresa tra 3 secondi...</p></div>';
   document.getElementById('modale-box').innerHTML = html;
   document.getElementById('modale').classList.remove('nascosto');
@@ -3337,10 +3460,19 @@ function finePartita() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
+/* ============================================================
+   SALVA RISULTATO TORNEO
+   MODIFICATO: salva anche i metadati (casa, trasferta, sqTU)
+   così riceviRisultato può ricostruire l'ordine gol
+   ============================================================ */
 function salvaRisultatoTorneo() {
   var risultato = {
     golTU: stato.punteggio.tu,
     golCPU: stato.punteggio.cpu,
+    sqTU: stato.squadraTU,
+    sqCPU: stato.squadraCPU,
+    casaOriginale: URL_CASA || stato.squadraTU,
+    trasfertaOriginale: URL_TRASFERTA || stato.squadraCPU,
     statistiche: JSON.parse(JSON.stringify(stato.statistiche))
   };
   var key = 'campionato_partita_' + PARTITA_TORNEO;
@@ -3412,13 +3544,17 @@ function confermaSostituzione() {
   renderCampo(); renderPanchina(); renderModaleSostituzioni();
 }
 
-/* AVVIO */
+/* ============================================================
+   AVVIO
+   MODIFICATO: ora i dati partita vengono dall'URL, non più
+   da localStorage. Fix del bug "3ª partita → menu principale".
+   ============================================================ */
 try {
   inizializzaAmmonizioni();
-  if (TORNEO_MODE === 'seriea' && PARTITA_TORNEO) {
-    var datiPartita = JSON.parse(localStorage.getItem('campionato_partita_attiva') || '{}');
-    if (datiPartita.sqTU && datiPartita.sqCPU && SQUADRE[datiPartita.sqTU] && SQUADRE[datiPartita.sqCPU]) {
-      avviaPartita(datiPartita.sqTU, datiPartita.sqCPU, '1P');
+  if (TORNEO_MODE === 'seriea' && PARTITA_TORNEO && URL_SQ_TU && URL_SQ_CPU) {
+    // Controllo che le squadre esistano
+    if (SQUADRE[URL_SQ_TU] && SQUADRE[URL_SQ_CPU]) {
+      avviaPartita(URL_SQ_TU, URL_SQ_CPU, '1P', URL_CASA);
     } else {
       mostraMenuPrincipale();
     }
