@@ -1024,13 +1024,20 @@ function resetAmmonizioniTutte() {
   alert('✅ Ammonizioni azzerate');
 }
 
-/* SUONI */
+/* ============================================================
+   SUONI
+   ============================================================ */
 var audioCtx = null;
 function initAudio() {
   if (!audioCtx) {
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { audioCtx = null; }
   }
+  // Sblocca il contesto su mobile
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 }
+
 function suonaFischietto(tipo) {
   tipo = tipo || 'fallo';
   initAudio();
@@ -1099,6 +1106,107 @@ function suonaScivolata() {
   gain.gain.exponentialRampToValueAtTime(0.001, ora + durata);
   noise.connect(filtro); filtro.connect(gain); gain.connect(audioCtx.destination);
   noise.start(ora); noise.stop(ora + durata);
+}
+
+/* SUONO PALO: doppio colpo metallico secco + lieve rimbombo */
+function suonaPalo() {
+  initAudio();
+  if (!audioCtx) return;
+  var ora = audioCtx.currentTime;
+
+  // Primo colpo: onda triangolare acuta che cala rapidamente
+  var osc1 = audioCtx.createOscillator();
+  osc1.type = 'triangle';
+  osc1.frequency.setValueAtTime(1400, ora);
+  osc1.frequency.exponentialRampToValueAtTime(600, ora + 0.08);
+  var gain1 = audioCtx.createGain();
+  gain1.gain.setValueAtTime(0.5, ora);
+  gain1.gain.exponentialRampToValueAtTime(0.001, ora + 0.25);
+  osc1.connect(gain1); gain1.connect(audioCtx.destination);
+  osc1.start(ora); osc1.stop(ora + 0.3);
+
+  // Secondo colpo metallico leggermente ritardato
+  var osc2 = audioCtx.createOscillator();
+  osc2.type = 'square';
+  osc2.frequency.setValueAtTime(1800, ora + 0.03);
+  osc2.frequency.exponentialRampToValueAtTime(800, ora + 0.1);
+  var gain2 = audioCtx.createGain();
+  gain2.gain.setValueAtTime(0.0, ora);
+  gain2.gain.linearRampToValueAtTime(0.35, ora + 0.03);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ora + 0.28);
+  osc2.connect(gain2); gain2.connect(audioCtx.destination);
+  osc2.start(ora + 0.03); osc2.stop(ora + 0.3);
+
+  // Rimbombo basso
+  var osc3 = audioCtx.createOscillator();
+  osc3.type = 'sine';
+  osc3.frequency.setValueAtTime(120, ora);
+  osc3.frequency.exponentialRampToValueAtTime(60, ora + 0.4);
+  var gain3 = audioCtx.createGain();
+  gain3.gain.setValueAtTime(0.0, ora);
+  gain3.gain.linearRampToValueAtTime(0.2, ora + 0.02);
+  gain3.gain.exponentialRampToValueAtTime(0.001, ora + 0.5);
+  osc3.connect(gain3); gain3.connect(audioCtx.destination);
+  osc3.start(ora); osc3.stop(ora + 0.55);
+}
+
+/* SUONO FUORI: sibilo del pallone + boato/ohhh del pubblico */
+function suonaFuori() {
+  initAudio();
+  if (!audioCtx) return;
+  var ora = audioCtx.currentTime;
+
+  // Sibilo (rumore bianco filtrato in discesa)
+  var durata = 0.6;
+  var bufferSize = Math.floor(audioCtx.sampleRate * durata);
+  var buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  var data = buffer.getChannelData(0);
+  for (var i = 0; i < bufferSize; i++) {
+    var t = i / bufferSize;
+    data[i] = (Math.random() * 2 - 1) * (1 - t * 0.8);
+  }
+  var noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  var filtro = audioCtx.createBiquadFilter();
+  filtro.type = 'highpass';
+  filtro.frequency.setValueAtTime(2500, ora);
+  filtro.frequency.exponentialRampToValueAtTime(800, ora + durata);
+  var gainN = audioCtx.createGain();
+  gainN.gain.setValueAtTime(0.0, ora);
+  gainN.gain.linearRampToValueAtTime(0.18, ora + 0.05);
+  gainN.gain.exponentialRampToValueAtTime(0.001, ora + durata);
+  noise.connect(filtro); filtro.connect(gainN); gainN.connect(audioCtx.destination);
+  noise.start(ora); noise.stop(ora + durata);
+
+  // "Ohhh" del pubblico: due sine che scendono leggermente, con vibrato
+  var osc1 = audioCtx.createOscillator();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(320, ora + 0.15);
+  osc1.frequency.linearRampToValueAtTime(260, ora + 0.9);
+  var osc2 = audioCtx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(480, ora + 0.15);
+  osc2.frequency.linearRampToValueAtTime(390, ora + 0.9);
+
+  var lfo = audioCtx.createOscillator();
+  lfo.type = 'sine';
+  lfo.frequency.setValueAtTime(5, ora);
+  var lfoGain = audioCtx.createGain();
+  lfoGain.gain.setValueAtTime(8, ora);
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc1.frequency);
+  lfoGain.connect(osc2.frequency);
+
+  var gainO = audioCtx.createGain();
+  gainO.gain.setValueAtTime(0.0, ora);
+  gainO.gain.linearRampToValueAtTime(0.0, ora + 0.1);
+  gainO.gain.linearRampToValueAtTime(0.12, ora + 0.35);
+  gainO.gain.linearRampToValueAtTime(0.0, ora + 1.1);
+  osc1.connect(gainO); osc2.connect(gainO);
+  gainO.connect(audioCtx.destination);
+
+  osc1.start(ora + 0.1); osc2.start(ora + 0.1); lfo.start(ora);
+  osc1.stop(ora + 1.15); osc2.stop(ora + 1.15); lfo.stop(ora + 1.15);
 }
 
 /* STATO */
@@ -1794,6 +1902,7 @@ function avviaPartita(sqTU, sqCPU, tipo) {
 
 /* MONETA E CALCIO D'INIZIO */
 function lanciaMoneta(scelta) {
+  initAudio(); // sblocca l'audio al primo click
   var esito = Math.random() < 0.5 ? 'testa' : 'croce';
   var vince = esito === scelta ? 'tu' : 'cpu';
   stato.monetaVinta = vince;
@@ -2568,7 +2677,7 @@ function eseguiParataPortiere(casella, dadoTiro, facile) {
 
 /* ============================================================
    FASE 3 — L'ESITO (solo se il portiere NON ha parato)
-   Nuova logica: 1 palo, 1 angolo, 2 fuori, 5 goal.
+   Nuova logica: 1 palo, 1 angolo, 1 fuori, 6 goal.
    Le caselle che danno palo/angolo/fuori vengono rimescolate
    ad ogni tiro, così non si possono prevedere.
    ============================================================ */
@@ -2586,13 +2695,11 @@ function mostraDadoFase3(dadoEsito) {
 
 /* Fase 3 — tiro normale */
 function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
-  // Estraggo casualmente 4 caselle "sfortunate" distinte tra 1 e 9:
-  // 1 -> palo, 1 -> angolo, 2 -> fuori. Le altre 5 -> GOAL.
+  // 1 palo, 1 angolo, 1 fuori. Le altre 6 -> GOAL.
   var caselle = mescola([1,2,3,4,5,6,7,8,9]);
   var casellaPalo   = caselle[0];
   var casellaAngolo = caselle[1];
-  var casellaFuori1 = caselle[2];
-  var casellaFuori2 = caselle[3];
+  var casellaFuori  = caselle[2];
 
   var infoEl = document.getElementById('tiro-info');
   if (infoEl) infoEl.textContent = 'FASE 3 — Esito del tiro...';
@@ -2604,10 +2711,12 @@ function fase3TiroConGrafica(dadoTiro, attaccante, difensore) {
     var esito, motivo;
     if (dadoEsito === casellaPalo) {
       esito = 'palo';   motivo = '🥅 PALO!';
+      suonaPalo();
     } else if (dadoEsito === casellaAngolo) {
       esito = 'angolo'; motivo = '🚩 ANGOLO!';
-    } else if (dadoEsito === casellaFuori1 || dadoEsito === casellaFuori2) {
+    } else if (dadoEsito === casellaFuori) {
       esito = 'fuori';  motivo = '❌ FUORI!';
+      suonaFuori();
     } else {
       esito = 'goal';   motivo = '⚽ GOAL!';
     }
@@ -2620,8 +2729,7 @@ function fase3RigoreConGrafica(dadoTiro, attaccante, difensore) {
   var caselle = mescola([1,2,3,4,5,6,7,8,9]);
   var casellaPalo   = caselle[0];
   var casellaAngolo = caselle[1];
-  var casellaFuori1 = caselle[2];
-  var casellaFuori2 = caselle[3];
+  var casellaFuori  = caselle[2];
 
   var infoEl = document.getElementById('tiro-info');
   if (infoEl) infoEl.textContent = 'FASE 3 — Esito del rigore...';
@@ -2633,10 +2741,12 @@ function fase3RigoreConGrafica(dadoTiro, attaccante, difensore) {
     var esito, motivo;
     if (dadoEsito === casellaPalo) {
       esito = 'palo';   motivo = '🥅 PALO!';
+      suonaPalo();
     } else if (dadoEsito === casellaAngolo) {
       esito = 'angolo'; motivo = '🚩 ANGOLO!';
-    } else if (dadoEsito === casellaFuori1 || dadoEsito === casellaFuori2) {
+    } else if (dadoEsito === casellaFuori) {
       esito = 'fuori';  motivo = '❌ FUORI!';
+      suonaFuori();
     } else {
       esito = 'goal';   motivo = '⚽ GOAL!';
     }
@@ -2864,20 +2974,115 @@ function gestisciAngolo(attaccante, difensore) {
   }, 800);
 }
 
+/* ============================================================
+   FUORI — ora il portiere avversario rinvia al centrocampista
+   in Z3 con l'animazione a campanile (come dopo una parata)
+   ============================================================ */
 function gestisciFuori(attaccante, difensore) {
   log('❌ Fuori!');
+
+  var portiereSquadra = difensore;
+  var portiere = null;
+  for (var i = 0; i < stato.giocatori[portiereSquadra].length; i++) {
+    if (stato.giocatori[portiereSquadra][i].portiere) { portiere = stato.giocatori[portiereSquadra][i]; break; }
+  }
+
+  var compagni = stato.giocatori[difensore].filter(function(g) {
+    return g.zona === 3 && !g.portiere && !g.espulso;
+  });
+
+  if (compagni.length === 0) {
+    setTimeout(function() {
+      stato.zonaPalla = 3;
+      stato.metaContesa = 'inf';
+      stato.possessore = difensore;
+      stato.giocatorePalla = null;
+      renderCampo(); renderHeader();
+      bloccaCoppiaContrasto();
+      setTimeout(avviaContrasto, 800);
+    }, 600);
+    return;
+  }
+
+  var scelto = compagni[Math.floor(Math.random() * compagni.length)];
+  var idxScelto = compagni.indexOf(scelto);
+  var nuovaMeta = idxScelto === 0 ? 'sup' : 'inf';
+
+  stato.zonaPalla = 3;
+  stato.metaContesa = nuovaMeta;
+  stato.possessore = difensore;
+  stato.giocatorePalla = scelto.id;
+  stato.puntoPallaPersistente = null;
+  stato.puntoPallaFermo = null;
+  stato.contrastoCoppia = null;
+
+  renderCampo();
+  renderHeader();
+
+  var palleCentro = document.querySelectorAll('.palla-centro');
+  for (var p = 0; p < palleCentro.length; p++) palleCentro[p].remove();
+  var pallaAtt = document.querySelector('[data-giocatore-id="' + scelto.id + '"] .palla-attaccata');
+  if (pallaAtt) pallaAtt.remove();
+
+  if (portiere) {
+    var elPortiere = document.querySelector('[data-giocatore-id="' + portiere.id + '"]');
+    var elCompagno = document.querySelector('[data-giocatore-id="' + scelto.id + '"]');
+
+    if (elPortiere && elCompagno) {
+      suonaCalcio();
+      var areaGioco = document.querySelector('.area-gioco');
+      var box = areaGioco.getBoundingClientRect();
+      var rectP = elPortiere.getBoundingClientRect();
+      var rectC = elCompagno.getBoundingClientRect();
+
+      var partXPx = rectP.left + rectP.width / 2 - box.left;
+      var partYPx = rectP.top + rectP.height / 2 - box.top;
+      var arrivoXPx = rectC.left + rectC.width / 2 - box.left;
+      var arrivoYPx = rectC.bottom - box.top;
+
+      var palla = document.getElementById('palla-volante');
+      palla.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
+      var pallaInner = palla.querySelector('.palla-inner');
+      palla.style.transition = 'none';
+      palla.style.left = partXPx + 'px';
+      palla.style.top = partYPx + 'px';
+      palla.classList.add('attiva');
+      pallaInner.style.transform = 'rotate(0deg)';
+      void palla.offsetWidth;
+
+      var durata = DURATA_ANIM_PALLA;
+      var inizio = performance.now();
+      var dxTot = arrivoXPx - partXPx;
+      var dyTot = arrivoYPx - partYPx;
+      var distanzaTot = Math.sqrt(dxTot * dxTot + dyTot * dyTot);
+      var giriTotali = (distanzaTot / 50) * (dxTot >= 0 ? 1 : -1);
+      var gradiTotali = giriTotali * 360;
+
+      function animaVolo(now) {
+        var t = Math.min((now - inizio) / durata, 1);
+        var eased = t * t * (3 - 2 * t);
+        var x = partXPx + dxTot * eased;
+        var y = partYPx + dyTot * eased;
+        var arc = -Math.sin(Math.PI * t) * 40;
+        palla.style.left = x + 'px';
+        palla.style.top = (y + arc) + 'px';
+        pallaInner.style.transform = 'rotate(' + (gradiTotali * eased) + 'deg)';
+        if (t < 1) {
+          requestAnimationFrame(animaVolo);
+        } else {
+          palla.classList.remove('attiva');
+          creaPallaAiPiedi(3, scelto.id);
+          bloccaCoppiaContrasto();
+          setTimeout(avviaContrasto, 800);
+        }
+      }
+      requestAnimationFrame(animaVolo);
+      return;
+    }
+  }
+
   setTimeout(function() {
-    var subito = attaccante === 'tu' ? 'cpu' : 'tu';
-    stato.zonaPalla = 3;
-    stato.metaContesa = 'inf';
-    stato.possessore = subito;
-    var coppia = getCoppiaAttiva(3, 'inf');
-    var giocatore = subito === 'tu' ? coppia.tu : coppia.cpu;
-    stato.giocatorePalla = giocatore ? giocatore.id : null;
-    stato.puntoPallaFermo = null;
-    stato.puntoPallaPersistente = null;
-    stato.contrastoCoppia = null;
-    renderCampo(); renderHeader();
+    creaPallaAiPiedi(3, scelto.id);
     bloccaCoppiaContrasto();
     setTimeout(avviaContrasto, 800);
   }, 800);
