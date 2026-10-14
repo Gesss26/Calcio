@@ -306,7 +306,7 @@
   }
 
   /* ============================================================
-     CAMPO — PC / TABLET: layout originale (percentuali)
+     CAMPO — PC / TABLET: layout originale a percentuali
      ============================================================ */
   .campo-wrapper {
     position: absolute;
@@ -355,11 +355,24 @@
     }
   }
 
-  .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
+  /* ============================================================
+     ZONE — GLOBALI (valide su PC, tablet e mobile)
+     ============================================================ */
+  .zone {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
   .zona {
-    flex: 1; position: relative;
-    display: flex; flex-direction: column;
-    justify-content: center; align-items: stretch;
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
     padding: 0 1.5%;
   }
 
@@ -949,14 +962,9 @@
     .squadra-btn .maglia { width: 22px; height: 28px; }
 
     /* ============================================================
-       MOBILE: campo virtuale con linee CSS
+       MOBILE: campo virtuale 1400x700 scalato
        ============================================================ */
     .campo-wrapper {
-      position: absolute;
-      inset: 0;
-      z-index: 6;
-      pointer-events: none;
-      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -967,21 +975,13 @@
       top: auto;
       width: 1400px;
       height: 700px;
-      transform-origin: center center;
       padding: 0;
-      pointer-events: none;
+      transform-origin: center center;
       flex-shrink: 0;
     }
+    .campo-virtuale { display: block; }
 
-    /* Il campo virtuale (linee) è visibile solo su mobile landscape */
-    .campo-virtuale {
-      display: block;
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    /* Verde con righe di taglio */
+    /* Il campo virtuale (linee) — visibile solo qui */
     .campo-verde {
       position: absolute;
       inset: 0;
@@ -1060,37 +1060,12 @@
     .campo-porta.sx { left: -18px; border-right: none; border-radius: 5px 0 0 5px; }
     .campo-porta.dx { right: -18px; border-left: none; border-radius: 0 5px 5px 0; }
 
-    /* ============================================================
-       MOBILE: zone e pedine ancorate al campo 1400x700
-       ============================================================ */
-    .zone {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      z-index: 5;
-      pointer-events: none;
-    }
-    .zona {
-      flex: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: stretch;
-      padding: 0;
-    }
-    /* Portieri: zone più strette */
+    /* Zone: portieri più stretti su mobile */
     .zona[data-zona="0"],
     .zona[data-zona="6"] {
       flex: 0.55;
     }
-    .meta-sup, .meta-inf {
-      display: flex; flex-direction: row;
-      justify-content: center; align-items: center;
-      flex: 1; padding: 2px 4px; gap: 24px;
-      position: relative;
-    }
-    /* Rombo: zona 2 e 4 */
+    .meta-sup, .meta-inf { gap: 24px; }
     .zona[data-zona="2"] .meta-sup,
     .zona[data-zona="4"] .meta-sup { transform: translateY(-50px); }
     .zona[data-zona="2"] .meta-inf,
@@ -1098,7 +1073,7 @@
     .zona[data-zona="1"] .meta-inf,
     .zona[data-zona="5"] .meta-inf { transform: translateY(-60px); }
 
-    /* Portieri posizionati al centro della loro zona */
+    /* Portieri: al centro della loro zona */
     .portiere-wrapper {
       position: absolute !important;
       top: 50%;
@@ -1220,7 +1195,7 @@
       <div id="azioni-container"></div>
     </div>
 
-    <div class="campo-wrapper">
+    <div class="campo-wrapper" id="campo-wrapper">
       <div class="campo-area" id="campo-area">
         <!-- Campo virtuale: visibile solo su mobile landscape -->
         <div class="campo-virtuale">
@@ -1677,7 +1652,6 @@ function calcolaScalaMobile() {
   var topbarH = topbar ? topbar.offsetHeight : 0;
   var availableH = h - topbarH - 10;
 
-  // Su mobile landscape vogliamo che il campo occupi ~95% larghezza e ~90% altezza
   var scalaW = (w * 0.95) / CAMPO_BASE_W;
   var scalaH = (availableH * 0.92) / CAMPO_BASE_H;
   return Math.min(scalaW, scalaH);
@@ -1690,7 +1664,6 @@ function adattaCampoResponsive() {
   var isMobileLandscape = (h <= 600 && w > h);
 
   if (isMobileLandscape) {
-    // Applica la scala al campo virtuale 1400x700
     var scala = calcolaScalaMobile();
     area.style.transform = 'scale(' + scala + ')';
     area.style.position = 'relative';
@@ -1698,8 +1671,8 @@ function adattaCampoResponsive() {
     area.style.top = 'auto';
     area.style.width = CAMPO_BASE_W + 'px';
     area.style.height = CAMPO_BASE_H + 'px';
+    area.style.padding = '0';
   } else {
-    // Desktop/tablet: ripristina il layout originale
     area.style.transform = 'none';
     area.style.position = 'absolute';
     area.style.left = '18%';
