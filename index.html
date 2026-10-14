@@ -98,9 +98,7 @@
   .area-gioco { position: relative; flex: 1; z-index: 5; overflow: hidden; }
 
   /* ============================================================
-     SCENA: contenitore unico scalato
-     Tutto (campo + carte) vive dentro .scena 1600x900,
-     poi viene scalato via JS per entrare nello schermo.
+     SCENA UNICA SCALABILE
      ============================================================ */
   .scena-wrapper {
     position: absolute;
@@ -121,9 +119,7 @@
   }
   .scena > * { pointer-events: auto; }
 
-  /* ============================================================
-     CAMPO — dentro la scena, posizionato in percentuali
-     ============================================================ */
+  /* CAMPO */
   .campo-area {
     position: absolute;
     left: 18%;
@@ -341,7 +337,7 @@
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
   /* ============================================================
-     CARTE PANEL — dentro la scena, in alto
+     CARTE PANEL
      ============================================================ */
   .carte-panel {
     position: absolute;
@@ -502,6 +498,7 @@
   .bonus-slot .bonus-carta.contrasto-sicuro { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 2px solid #fbbf24; }
   .bonus-slot .bonus-carta.parata-super { background: linear-gradient(135deg, #7c2d12, #ea580c); border: 2px solid #fed7aa; }
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
+  .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
   .sost-panel {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -551,9 +548,6 @@
     50% { box-shadow: 0 0 24px rgba(255,215,0,1); }
   }
 
-  /* ============================================================
-     BONUS CPU INFO — dentro la scena, in alto a sinistra
-     ============================================================ */
   .bonus-cpu-info {
     position: absolute; top: 60px; left: 20px;
     font-size: 12px; color: #ff6b6b; font-weight: bold;
@@ -564,9 +558,6 @@
   }
   .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
 
-  /* ============================================================
-     PANCHINA — fixed in basso
-     ============================================================ */
   .panchina {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(10,10,20,0.9); backdrop-filter: blur(8px);
@@ -583,9 +574,6 @@
   .panchina-giocatore .pedina { transform: scale(0.85); width: 30px; height: 40px; }
   .panchina-giocatore .panchina-nome { font-size: 9px; color: #ccc; margin-top: 2px; font-weight: bold; }
 
-  /* ============================================================
-     BANNER E MODALI
-     ============================================================ */
   .goal-banner {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -807,13 +795,11 @@
   }
   .impostazioni-info { font-size: 12px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
 
-  /* Pulsanti toggle mobile: nascosti di default */
   .btn-toggle-panel,
   .btn-toggle-panchina { display: none; }
 
   /* ============================================================
-     MOBILE LANDSCAPE — solo riduzione pannello carte / topbar
-     La scena è già scalata via JS, quindi tutto è proporzionale.
+     MOBILE LANDSCAPE
      ============================================================ */
   @media (orientation: landscape) and (max-height: 600px) {
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
@@ -868,7 +854,6 @@
 </head>
 <body>
 
-<!-- AVVISO ROTAZIONE -->
 <div class="avviso-ruota" id="avviso-ruota">
   <div class="icona-ruota">📱</div>
   <h2>RUOTA IL DISPOSITIVO</h2>
@@ -922,7 +907,7 @@
               <div class="pila-bonus">
                 <div class="pila-titolo">BONUS</div>
                 <div class="pila-carte" id="bonus-pila"></div>
-                <div class="pila-count" id="bonus-count">12</div>
+                <div class="pila-count" id="bonus-count">15</div>
               </div>
             </div>
             <div class="seme-grande">
@@ -1043,11 +1028,12 @@ var CASELLE_PERC = {
   7:{x:16.6,y:83.3}, 8:{x:50,y:83.3}, 9:{x:83.3,y:83.3}
 };
 
-var TIPI_BONUS = ['contrasto-sicuro', 'parata-super', 'gol-super'];
+var TIPI_BONUS = ['contrasto-sicuro', 'parata-super', 'gol-super', 'passaggio-lungo'];
 var NOMI_BONUS = {
   'contrasto-sicuro': { nome: 'Contrasto Sicuro', icona: '⭐' },
   'parata-super': { nome: 'Parata Super', icona: '🧤' },
-  'gol-super': { nome: 'Gol Super', icona: '⚽' }
+  'gol-super': { nome: 'Gol Super', icona: '⚽' },
+  'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
 var urlParams = new URLSearchParams(window.location.search);
@@ -1059,8 +1045,7 @@ var URL_CASA = urlParams.get('casa');
 var URL_TRASFERTA = urlParams.get('trasferta');
 
 /* ============================================================
-   SCALA UNICA — la scena 1600x900 viene scalata per entrare
-   nello spazio disponibile. Funziona su PC, tablet, cellulare.
+   SCALA UNICA
    ============================================================ */
 var SCENA_W = 1600;
 var SCENA_H = 900;
@@ -1082,9 +1067,8 @@ window.addEventListener('orientationchange', function() {
 });
 
 /* ============================================================
-   TOGGLE PANNELLO CARTE E PANCHINA
+   TOGGLE PANNELLO CARTE
    ============================================================ */
-var pannelloRidotto = false;
 var panchinaAperta = false;
 
 function mostraPannelloCarte() {
@@ -1110,7 +1094,9 @@ function togglePanchina() {
   p.classList.toggle('aperta', panchinaAperta);
 }
 
-/* AMMONIZIONI */
+/* ============================================================
+   AMMONIZIONI
+   ============================================================ */
 var ammonizioni = null;
 function caricaAmmonizioniDaLocalStorage() {
   try { var s = localStorage.getItem('campionato_ammonizioni'); if (s) return JSON.parse(s); } catch(e){}
@@ -1136,35 +1122,59 @@ function aggiornaAmmonizione(sqId, nome, d) {
 }
 function èSqualificato(sqId, nome) { var g = getGiocatoreAmmonizioni(sqId, nome); return g ? g.squalificato : false; }
 
-function esportaAmmonizioni() {
-  var data = new Date().toISOString().slice(0,10);
-  var nomeFile = 'ammonizioni_' + data + '.json';
-  var blob = new Blob([JSON.stringify(ammonizioni, null, 2)], {type:'application/json'});
+/* ============================================================
+   SALVA / CARICA CAMPIONATO
+   ============================================================ */
+var STORAGE_KEY_CAMPIONATO = 'campionato_salvato_v1';
+
+function esportaCampionato() {
+  var dati = {
+    versione: 1,
+    data: new Date().toISOString(),
+    campionato: null,
+    ammonizioni: ammonizioni
+  };
+  try {
+    var c = localStorage.getItem('seriea2027_v1');
+    if (c) dati.campionato = JSON.parse(c);
+  } catch(e){}
+  var nomeFile = 'calcio_carte_salvataggio_' + new Date().toISOString().slice(0,10) + '.json';
+  var blob = new Blob([JSON.stringify(dati, null, 2)], {type:'application/json'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href = url; a.download = nomeFile;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  log('💾 Ammonizioni esportate: ' + nomeFile);
+  log('💾 Campionato esportato: ' + nomeFile);
+  alert('✅ Salvataggio creato!\nFile: ' + nomeFile);
 }
-function importaAmmonizioni(file) {
+function importaCampionato(file) {
   var reader = new FileReader();
   reader.onload = function(e) {
     try {
       var dati = JSON.parse(e.target.result);
-      if (!dati.squadre) { alert('File non valido'); return; }
-      ammonizioni = dati; salvaAmmonizioniInLocalStorage();
-      alert('✅ Ammonizioni importate!'); log('📂 Ammonizioni importate');
+      if (!dati || typeof dati !== 'object') { alert('File non valido'); return; }
+      if (dati.ammonizioni && dati.ammonizioni.squadre) {
+        ammonizioni = dati.ammonizioni;
+        salvaAmmonizioniInLocalStorage();
+      }
+      if (dati.campionato) {
+        localStorage.setItem('seriea2027_v1', JSON.stringify(dati.campionato));
+      }
+      alert('✅ Salvataggio importato con successo!\nRicaricamento...');
+      setTimeout(function() { location.href = 'index.html'; }, 800);
     } catch(err) { alert('Errore: ' + err.message); }
   };
   reader.readAsText(file);
 }
-function resetAmmonizioniTutte() {
-  if (!confirm('Azzerare TUTTE le ammonizioni?')) return;
-  ammonizioni = inizializzaAmmonizioniVuote(); salvaAmmonizioniInLocalStorage();
-  alert('✅ Ammonizioni azzerate');
+function resetCampionatoSalvato() {
+  if (!confirm('Vuoi davvero azzerare il campionato salvato? (Le ammonizioni restano)')) return;
+  try { localStorage.removeItem('seriea2027_v1'); } catch(e){}
+  alert('✅ Campionato azzerato');
 }
 
-/* SUONI */
+/* ============================================================
+   SUONI
+   ============================================================ */
 var audioCtx = null;
 function initAudio() {
   if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } }
@@ -1469,9 +1479,10 @@ function mescola(arr) {
 }
 function creaMazzoBonus() {
   var m = [];
-  for (var i=0;i<4;i++) m.push('contrasto-sicuro');
-  for (var j=0;j<4;j++) m.push('parata-super');
-  for (var k=0;k<4;k++) m.push('gol-super');
+  for (var i=0;i<3;i++) m.push('contrasto-sicuro');
+  for (var j=0;j<3;j++) m.push('parata-super');
+  for (var k=0;k<3;k++) m.push('gol-super');
+  for (var l=0;l<3;l++) m.push('passaggio-lungo');
   return mescola(m);
 }
 function inizializzaMazzi() {
@@ -1673,23 +1684,27 @@ function mostraMenuPrincipale() {
         '<div class="testo"><div class="titolo">PARTITA 2 GIOCATORI</div><div class="descr">Locale - stesso dispositivo</div></div></div>' +
       '<div class="menu-btn evidenza" onclick="location.href=\'seriea2027.html\'"><div class="icona">⚽</div>' +
         '<div class="testo"><div class="titolo">SERIE A 2026/2027</div><div class="descr">20 squadre · 38 giornate</div></div></div>' +
-      '<div style="margin-top:16px"><button onclick="apriImpostazioni()">⚙️ Impostazioni Ammonizioni</button></div>' +
+      '<div style="margin-top:16px"><button onclick="apriImpostazioni()">⚙️ Impostazioni</button></div>' +
     '</div>';
 }
 function apriImpostazioni() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
-    '<h2>⚙️ Impostazioni Ammonizioni</h2>' +
-    '<div class="impostazioni-info">Salva le ammonizioni in un file JSON e ricaricale su un altro dispositivo.</div>' +
+    '<h2>⚙️ Impostazioni</h2>' +
+    '<div class="impostazioni-info">Salva il campionato (classifica, giornate, ammonizioni) in un file JSON per giocare tra dispositivi.</div>' +
     '<div class="impostazioni-grid">' +
-      '<button class="primario" onclick="esportaAmmonizioni()">💾 Salva ammonizioni su file</button>' +
-      '<button onclick="document.getElementById(\'file-input-ammonizioni\').click()">📂 Carica ammonizioni da file</button>' +
-      '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetAmmonizioniTutte()">🗑 Azzera tutte le ammonizioni</button>' +
+      '<button class="primario" onclick="esportaCampionato()">💾 Salva campionato su file</button>' +
+      '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
+      '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
       '<button onclick="chiudiModale()">← Chiudi</button>' +
     '</div>' +
-    '<input type="file" id="file-input-ammonizioni" accept=".json,application/json" style="display:none" onchange="gestisciFileAmm(event)">';
+    '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
 }
-function gestisciFileAmm(ev) { var f = ev.target.files[0]; if (!f) return; importaAmmonizioni(f); ev.target.value = ''; }
+function gestisciFileCampionato(ev) {
+  var f = ev.target.files[0]; if (!f) return;
+  importaCampionato(f);
+  ev.target.value = '';
+}
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 function apriLog() {
   var html = '<h2>📋 Cronaca</h2><div style="background:#0a0a15;border-radius:8px;padding:12px;max-height:60vh;overflow-y:auto;font-size:12px;text-align:left;font-family:monospace">';
@@ -2067,17 +2082,8 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
-/* ============================================================
-   MOSTRA / NASCONDI PANNELLO CARTE
-   Il pannello carte è visibile quando serve giocare.
-   Durante l'animazione in campo è nascosto.
-   ============================================================ */
-function mostraVistaCampo() {
-  nascondiPannelloCarte();
-}
-function mostraVistaCarte() {
-  mostraPannelloCarte();
-}
+function mostraVistaCampo() { nascondiPannelloCarte(); }
+function mostraVistaCarte() { mostraPannelloCarte(); }
 
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -2121,7 +2127,7 @@ function eseguiCalcioIniziale(squadra) {
   }, 500);
 }
 
-function animaPallaInZona(gDa, gA, cb) {
+function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
   mostraVistaCampo();
   var area = document.querySelector('.scena');
@@ -2144,16 +2150,19 @@ function animaPallaInZona(gDa, gA, cb) {
   p.classList.add('attiva');
   pi.style.transform = 'rotate(0deg)'; void p.offsetWidth;
   var dur = DURATA_ANIM_PALLA / 1.5;
+  if (saltaZone) dur = dur * 1.4;
   var t0 = performance.now();
   var dx = aX - pX, dy = aY - pY;
   var dist = Math.sqrt(dx*dx + dy*dy);
   var giri = (dist/50) * (dx >= 0 ? 1 : -1);
   var gradi = giri * 360;
+  var arco = saltaZone ? 70 : 0;
   function anima(now) {
     var t = Math.min((now - t0) / dur, 1);
     var e2 = t*t*(3-2*t);
+    var arcoY = -Math.sin(Math.PI*t) * arco;
     p.style.left = (pX + dx*e2) + 'px';
-    p.style.top = (pY + dy*e2) + 'px';
+    p.style.top = (pY + dy*e2 + arcoY) + 'px';
     pi.style.transform = 'rotate(' + (gradi*e2) + 'deg)';
     if (t < 1) requestAnimationFrame(anima);
     else { p.classList.remove('attiva'); stato.pallaInAnimazione = false; if (cb) cb(); }
@@ -2240,6 +2249,9 @@ function renderPannelloContrasto() {
     if (haBonus('tu', 'contrasto-sicuro')) {
       azioni += ' <button class="bonus-btn" onclick="usaContrastoSicuroTU()">⭐ USA CONTRASTO SICURO</button>';
     }
+    if (haBonus('tu', 'passaggio-lungo') && puoUsarePassaggioLungo('tu')) {
+      azioni += ' <button class="bonus-btn" onclick="usaPassaggioLungoTU()">🎯 USA PASSAGGIO LUNGO</button>';
+    }
   }
   document.getElementById('azioni-container').innerHTML = azioni;
 }
@@ -2319,6 +2331,99 @@ function selezionaCartaTu(idx) {
   renderPannelloContrasto();
 }
 
+/* ============================================================
+   BONUS: PASSAGGIO LUNGO
+   Salta una zona (dal giocatore in zona X al giocatore in zona X+2).
+   Valido solo se c'è un compagno in zona X+2.
+   ============================================================ */
+function puoUsarePassaggioLungo(sq) {
+  if (!stato.contrasto || stato.contrasto.risolto) return false;
+  var zona = stato.contrasto.zona;
+  var dir = direzionePerSquadra(sq);
+  var zonaArrivo = zona + dir * 2;
+  if (zonaArrivo < 1 || zonaArrivo > 5) return false;
+  var compagni = stato.giocatori[sq].filter(function(g){
+    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
+  });
+  return compagni.length > 0;
+}
+function usaPassaggioLungoTU() {
+  if (!puoUsarePassaggioLungo('tu')) return;
+  if (!haBonus('tu', 'passaggio-lungo')) return;
+  consumaBonus('tu', 'passaggio-lungo');
+  renderBonusSlots();
+  var c = stato.contrasto;
+  c.risolto = true;
+  c.vincitore = 'tu';
+  c.motivoFallo = null;
+  c.passaggioLungo = true;
+  mostraBonusBanner('🎯 TU usi: PASSAGGIO LUNGO!');
+  flashVincitore('tu');
+  mostraVistaCampo();
+  setTimeout(function() {
+    eseguiPassaggioLungo('tu', c);
+  }, 800);
+}
+function eseguiPassaggioLungo(sq, c) {
+  var zonaP = c.zona;
+  var dir = direzionePerSquadra(sq);
+  var zonaArrivo = zonaP + dir * 2;
+  if (zonaArrivo < 1) zonaArrivo = 1;
+  if (zonaArrivo > 5) zonaArrivo = 5;
+  var compagni = stato.giocatori[sq].filter(function(g){
+    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
+  });
+  if (compagni.length === 0) {
+    // fallback: contrasto normale
+    stato.mano++;
+    continuaDopoContrastoVinto(sq, c, null);
+    return;
+  }
+  var sc = compagni[Math.floor(Math.random()*compagni.length)];
+  var nm = (compagni.indexOf(sc) === 0) ? 'sup' : 'inf';
+
+  // Trova il giocatore di partenza
+  var gP = null;
+  for (var i=0;i<stato.giocatori[sq].length;i++) {
+    if (stato.giocatori[sq][i].id === c.giocatorePoss) { gP = stato.giocatori[sq][i]; break; }
+  }
+  if (!gP) {
+    for (var j=0;j<stato.giocatori[sq].length;j++) {
+      if (stato.giocatori[sq][j].zona === zonaP && !stato.giocatori[sq][j].portiere) { gP = stato.giocatori[sq][j]; break; }
+    }
+  }
+
+  // Aggiorna stato prima dell'animazione
+  stato.zonaPalla = zonaArrivo;
+  stato.metaContesa = nm;
+  stato.possessore = sq;
+  stato.giocatorePalla = sc.id;
+  stato.pallaInAnimazione = true;
+  log('🎯 ' + sq.toUpperCase() + ' Passaggio Lungo: Z' + zonaP + ' → Z' + zonaArrivo + ' (' + sc.nome + ')', 'highlight');
+  renderCampo(); renderHeader();
+  aggiornaSottofondoPerZona(zonaArrivo);
+
+  if (!gP) {
+    // Senza punto di partenza, salta l'animazione
+    stato.pallaInAnimazione = false;
+    stato.mano++;
+    bloccaCoppiaContrasto();
+    setTimeout(avviaContrasto, 800);
+    return;
+  }
+
+  setTimeout(function() {
+    animaPallaInZona(gP, sc, function() {
+      stato.possessore = sq;
+      stato.giocatorePalla = sc.id;
+      stato.mano++;
+      renderHeader();
+      bloccaCoppiaContrasto();
+      setTimeout(avviaContrasto, 800);
+    }, true);
+  }, 300);
+}
+
 function usaContrastoSicuroTU() {
   if (!haBonus('tu', 'contrasto-sicuro')) return;
   consumaBonus('tu', 'contrasto-sicuro');
@@ -2350,6 +2455,20 @@ function cpuVuoleUsareContrastoSicuro(zona) {
   var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
   var secondoTempo = stato.tempo === 2;
   return zonaAv || (staPerdendo && secondoTempo);
+}
+function cpuVuoleUsarePassaggioLungo(zona) {
+  if (!haBonus('cpu', 'passaggio-lungo')) return false;
+  var dir = direzionePerSquadra('cpu');
+  var zonaArrivo = zona + dir * 2;
+  if (zonaArrivo < 1 || zonaArrivo > 5) return false;
+  var compagni = stato.giocatori.cpu.filter(function(g){
+    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
+  });
+  if (compagni.length === 0) return false;
+  // CPU lo usa in situazioni offensive (zona >= 3 se attacca a destra)
+  var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
+  var zonaAv = (dir > 0 && zona >= 3) || (dir < 0 && zona <= 3);
+  return zonaAv || staPerdendo;
 }
 
 function confermaCarta() {
@@ -2689,25 +2808,54 @@ function apriOverlayTiro(att, dif, isRigore) {
   ov.appendChild(bc);
   document.body.appendChild(ov);
   setTimeout(function() { ov.classList.add('attiva'); }, 50);
-  popolaBonusTiro(att, dif, isRigore);
-  setTimeout(function() { eseguiTiroConGrafica(att, dif, isRigore); }, 1800);
+
+  // ============================================================
+  // FASE BONUS: chiedi se usare carte bonus PRIMA del tiro
+  // ============================================================
+  var attesaBonus = popolaBonusTiro(att, dif, isRigore);
+  setTimeout(function() {
+    if (attesaBonus && attesaBonus.tuHaBonus) {
+      // Aspetta che l'utente decida
+      // il tiro parte dopo 3s se non clicca (o subito se clicca)
+      attesaBonus.timeoutId = setTimeout(function() {
+        eseguiTiroConGrafica(att, dif, isRigore);
+      }, 3000);
+    } else {
+      eseguiTiroConGrafica(att, dif, isRigore);
+    }
+  }, 1800);
 }
+
+// ============================================================
+// popolaBonusTiro: mostra i pulsanti bonus e ritorna
+// { tuHaBonus: bool, timeoutId: null }
+// ============================================================
 function popolaBonusTiro(att, dif, isRigore) {
   var bc = document.getElementById('tiro-bonus-container');
-  if (!bc) return;
+  if (!bc) return { tuHaBonus: false };
   bc.innerHTML = '';
+  var tuHaBonus = false;
+  var haB = false;
+
+  // Bonus attaccante (tu)
   if (att === 'tu' && haBonus('tu', 'gol-super')) {
-    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'gol-super\')">⚽ USA GOL SUPER</button>';
+    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'gol-super\',true)">⚽ USA GOL SUPER</button>';
+    tuHaBonus = true; haB = true;
   }
+  // Bonus difensore (tu)
   if (dif === 'tu' && haBonus('tu', 'parata-super')) {
-    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'parata-super\')">🧤 USA PARATA SUPER</button>';
+    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'parata-super\',true)">🧤 USA PARATA SUPER</button>';
+    tuHaBonus = true; haB = true;
   }
+
+  // Bonus CPU
   if (att === 'cpu' && haBonus('cpu', 'gol-super') && cpuVuoleUsareBonusTiro('gol-super', isRigore)) {
     setTimeout(function() {
       consumaBonus('cpu', 'gol-super');
       stato.bonusUsatoQuestoTiro.cpu = 'gol-super';
       mostraBonusBanner('🤖 CPU usa: ⚽ Gol Super!');
-      bc.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: ⚽ Gol Super</div>';
+      var bc2 = document.getElementById('tiro-bonus-container');
+      if (bc2) bc2.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: ⚽ Gol Super</div>';
     }, 600);
   }
   if (dif === 'cpu' && haBonus('cpu', 'parata-super') && cpuVuoleUsareBonusTiro('parata-super', isRigore)) {
@@ -2715,18 +2863,46 @@ function popolaBonusTiro(att, dif, isRigore) {
       consumaBonus('cpu', 'parata-super');
       stato.bonusUsatoQuestoTiro.cpu = 'parata-super';
       mostraBonusBanner('🤖 CPU usa: 🧤 Parata Super!');
-      bc.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: 🧤 Parata Super</div>';
+      var bc2 = document.getElementById('tiro-bonus-container');
+      if (bc2) bc2.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: 🧤 Parata Super</div>';
     }, 600);
   }
+
+  if (tuHaBonus && haB) {
+    // Aggiungi un pulsante "NO, TIRA" se ci sono bonus
+    bc.innerHTML += ' <button onclick="saltaBonusTiro()" style="background:#8B2020;border-color:#ff6b6b">▶ TIRA SENZA BONUS</button>';
+  }
+
+  return { tuHaBonus: tuHaBonus };
 }
-function attivaBonusTiro(sq, tipo) {
+
+var tiroInAttesa = null;
+
+function attivaBonusTiro(sq, tipo, rinviaTiro) {
   if (!haBonus(sq, tipo)) return;
   consumaBonus(sq, tipo);
   stato.bonusUsatoQuestoTiro[sq] = tipo;
   mostraBonusBanner((sq === 'tu' ? '🏆 TU' : '🤖 CPU') + ' usa: ' + NOMI_BONUS[tipo].icona + ' ' + NOMI_BONUS[tipo].nome);
   var bc = document.getElementById('tiro-bonus-container');
   if (bc) bc.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">Attivato: ' + NOMI_BONUS[tipo].icona + ' ' + NOMI_BONUS[tipo].nome + '</div>';
+  if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
+  // Avvia il tiro subito dopo la scelta
+  var att = stato._tiroAtt;
+  var dif = stato._tiroDif;
+  var isRig = stato._tiroRigore;
+  setTimeout(function() { eseguiTiroConGrafica(att, dif, isRig); }, 800);
 }
+
+function saltaBonusTiro() {
+  if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
+  var att = stato._tiroAtt;
+  var dif = stato._tiroDif;
+  var isRig = stato._tiroRigore;
+  var bc = document.getElementById('tiro-bonus-container');
+  if (bc) bc.innerHTML = '<div style="color:#aaa;font-size:12px">Nessun bonus usato</div>';
+  setTimeout(function() { eseguiTiroConGrafica(att, dif, isRig); }, 500);
+}
+
 function cpuVuoleUsareBonusTiro(tipo, isRigore) {
   var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
   var staVincendo = stato.punteggio.cpu > stato.punteggio.tu;
