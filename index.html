@@ -26,9 +26,6 @@
       rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%);
   }
 
-  /* ============================================================
-     AVVISO ROTAZIONE
-     ============================================================ */
   .avviso-ruota {
     display: none;
     position: fixed; inset: 0;
@@ -97,9 +94,6 @@
 
   .area-gioco { position: relative; flex: 1; z-index: 5; overflow: hidden; }
 
-  /* ============================================================
-     SCENA UNICA SCALABILE
-     ============================================================ */
   .scena-wrapper {
     position: absolute;
     inset: 0;
@@ -119,7 +113,6 @@
   }
   .scena > * { pointer-events: auto; }
 
-  /* CAMPO */
   .campo-area {
     position: absolute;
     left: 18%;
@@ -336,9 +329,6 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ============================================================
-     CARTE PANEL
-     ============================================================ */
   .carte-panel {
     position: absolute;
     top: 8px;
@@ -784,7 +774,7 @@
     100% { transform: scale(1); }
   }
   .tiro-dado-label { font-size: 11px; color: #aaa; text-transform: uppercase; min-width: 90px; text-align: right; }
-  .tiro-bonus-container { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .tiro-bonus-container { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: 44px; }
 
   .nascosto { display: none !important; }
 
@@ -798,9 +788,6 @@
   .btn-toggle-panel,
   .btn-toggle-panchina { display: none; }
 
-  /* ============================================================
-     MOBILE LANDSCAPE
-     ============================================================ */
   @media (orientation: landscape) and (max-height: 600px) {
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
     .risultato { font-size: 14px; letter-spacing: 0.5px; }
@@ -907,7 +894,7 @@
               <div class="pila-bonus">
                 <div class="pila-titolo">BONUS</div>
                 <div class="pila-carte" id="bonus-pila"></div>
-                <div class="pila-count" id="bonus-count">15</div>
+                <div class="pila-count" id="bonus-count">12</div>
               </div>
             </div>
             <div class="seme-grande">
@@ -1019,6 +1006,7 @@ var DURATA_RITORNO = 400;
 var SCIVOLATA_MAX_PX = 25;
 var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
+var BONUS_SCELTA_TIMEOUT = 3500;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -1028,7 +1016,6 @@ var CASELLE_PERC = {
   7:{x:16.6,y:83.3}, 8:{x:50,y:83.3}, 9:{x:83.3,y:83.3}
 };
 
-var TIPI_BONUS = ['contrasto-sicuro', 'parata-super', 'gol-super', 'passaggio-lungo'];
 var NOMI_BONUS = {
   'contrasto-sicuro': { nome: 'Contrasto Sicuro', icona: '⭐' },
   'parata-super': { nome: 'Parata Super', icona: '🧤' },
@@ -1067,7 +1054,7 @@ window.addEventListener('orientationchange', function() {
 });
 
 /* ============================================================
-   TOGGLE PANNELLO CARTE
+   TOGGLE PANNELLO
    ============================================================ */
 var panchinaAperta = false;
 
@@ -1125,8 +1112,6 @@ function èSqualificato(sqId, nome) { var g = getGiocatoreAmmonizioni(sqId, nome
 /* ============================================================
    SALVA / CARICA CAMPIONATO
    ============================================================ */
-var STORAGE_KEY_CAMPIONATO = 'campionato_salvato_v1';
-
 function esportaCampionato() {
   var dati = {
     versione: 1,
@@ -2249,9 +2234,6 @@ function renderPannelloContrasto() {
     if (haBonus('tu', 'contrasto-sicuro')) {
       azioni += ' <button class="bonus-btn" onclick="usaContrastoSicuroTU()">⭐ USA CONTRASTO SICURO</button>';
     }
-    if (haBonus('tu', 'passaggio-lungo') && puoUsarePassaggioLungo('tu')) {
-      azioni += ' <button class="bonus-btn" onclick="usaPassaggioLungoTU()">🎯 USA PASSAGGIO LUNGO</button>';
-    }
   }
   document.getElementById('azioni-container').innerHTML = azioni;
 }
@@ -2331,99 +2313,6 @@ function selezionaCartaTu(idx) {
   renderPannelloContrasto();
 }
 
-/* ============================================================
-   BONUS: PASSAGGIO LUNGO
-   Salta una zona (dal giocatore in zona X al giocatore in zona X+2).
-   Valido solo se c'è un compagno in zona X+2.
-   ============================================================ */
-function puoUsarePassaggioLungo(sq) {
-  if (!stato.contrasto || stato.contrasto.risolto) return false;
-  var zona = stato.contrasto.zona;
-  var dir = direzionePerSquadra(sq);
-  var zonaArrivo = zona + dir * 2;
-  if (zonaArrivo < 1 || zonaArrivo > 5) return false;
-  var compagni = stato.giocatori[sq].filter(function(g){
-    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
-  });
-  return compagni.length > 0;
-}
-function usaPassaggioLungoTU() {
-  if (!puoUsarePassaggioLungo('tu')) return;
-  if (!haBonus('tu', 'passaggio-lungo')) return;
-  consumaBonus('tu', 'passaggio-lungo');
-  renderBonusSlots();
-  var c = stato.contrasto;
-  c.risolto = true;
-  c.vincitore = 'tu';
-  c.motivoFallo = null;
-  c.passaggioLungo = true;
-  mostraBonusBanner('🎯 TU usi: PASSAGGIO LUNGO!');
-  flashVincitore('tu');
-  mostraVistaCampo();
-  setTimeout(function() {
-    eseguiPassaggioLungo('tu', c);
-  }, 800);
-}
-function eseguiPassaggioLungo(sq, c) {
-  var zonaP = c.zona;
-  var dir = direzionePerSquadra(sq);
-  var zonaArrivo = zonaP + dir * 2;
-  if (zonaArrivo < 1) zonaArrivo = 1;
-  if (zonaArrivo > 5) zonaArrivo = 5;
-  var compagni = stato.giocatori[sq].filter(function(g){
-    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
-  });
-  if (compagni.length === 0) {
-    // fallback: contrasto normale
-    stato.mano++;
-    continuaDopoContrastoVinto(sq, c, null);
-    return;
-  }
-  var sc = compagni[Math.floor(Math.random()*compagni.length)];
-  var nm = (compagni.indexOf(sc) === 0) ? 'sup' : 'inf';
-
-  // Trova il giocatore di partenza
-  var gP = null;
-  for (var i=0;i<stato.giocatori[sq].length;i++) {
-    if (stato.giocatori[sq][i].id === c.giocatorePoss) { gP = stato.giocatori[sq][i]; break; }
-  }
-  if (!gP) {
-    for (var j=0;j<stato.giocatori[sq].length;j++) {
-      if (stato.giocatori[sq][j].zona === zonaP && !stato.giocatori[sq][j].portiere) { gP = stato.giocatori[sq][j]; break; }
-    }
-  }
-
-  // Aggiorna stato prima dell'animazione
-  stato.zonaPalla = zonaArrivo;
-  stato.metaContesa = nm;
-  stato.possessore = sq;
-  stato.giocatorePalla = sc.id;
-  stato.pallaInAnimazione = true;
-  log('🎯 ' + sq.toUpperCase() + ' Passaggio Lungo: Z' + zonaP + ' → Z' + zonaArrivo + ' (' + sc.nome + ')', 'highlight');
-  renderCampo(); renderHeader();
-  aggiornaSottofondoPerZona(zonaArrivo);
-
-  if (!gP) {
-    // Senza punto di partenza, salta l'animazione
-    stato.pallaInAnimazione = false;
-    stato.mano++;
-    bloccaCoppiaContrasto();
-    setTimeout(avviaContrasto, 800);
-    return;
-  }
-
-  setTimeout(function() {
-    animaPallaInZona(gP, sc, function() {
-      stato.possessore = sq;
-      stato.giocatorePalla = sc.id;
-      stato.mano++;
-      renderHeader();
-      bloccaCoppiaContrasto();
-      setTimeout(avviaContrasto, 800);
-    }, true);
-  }, 300);
-}
-
 function usaContrastoSicuroTU() {
   if (!haBonus('tu', 'contrasto-sicuro')) return;
   consumaBonus('tu', 'contrasto-sicuro');
@@ -2455,20 +2344,6 @@ function cpuVuoleUsareContrastoSicuro(zona) {
   var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
   var secondoTempo = stato.tempo === 2;
   return zonaAv || (staPerdendo && secondoTempo);
-}
-function cpuVuoleUsarePassaggioLungo(zona) {
-  if (!haBonus('cpu', 'passaggio-lungo')) return false;
-  var dir = direzionePerSquadra('cpu');
-  var zonaArrivo = zona + dir * 2;
-  if (zonaArrivo < 1 || zonaArrivo > 5) return false;
-  var compagni = stato.giocatori.cpu.filter(function(g){
-    return g.zona === zonaArrivo && !g.portiere && !g.espulso;
-  });
-  if (compagni.length === 0) return false;
-  // CPU lo usa in situazioni offensive (zona >= 3 se attacca a destra)
-  var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
-  var zonaAv = (dir > 0 && zona >= 3) || (dir < 0 && zona <= 3);
-  return zonaAv || staPerdendo;
 }
 
 function confermaCarta() {
@@ -2761,8 +2636,17 @@ function apriSchermataRigore(att) {
   log('🎯 RIGORE!', 'highlight');
   apriOverlayTiro(att, dif, true);
 }
+
+/* ============================================================
+   OVERLAY TIRO CON FASE BONUS
+   ============================================================ */
+var tiroInAttesa = null;
+var tiroCorrente = { att:null, dif:null, isRigore:false };
+
 function apriOverlayTiro(att, dif, isRigore) {
   stato.bonusUsatoQuestoTiro = { tu:null, cpu:null };
+  tiroCorrente = { att:att, dif:dif, isRigore:isRigore };
+
   var ov = document.createElement('div');
   ov.className = 'tiro-overlay'; ov.id = 'tiro-overlay';
   var tit = document.createElement('div');
@@ -2795,7 +2679,7 @@ function apriOverlayTiro(att, dif, isRigore) {
   ov.appendChild(pw);
   var info = document.createElement('div');
   info.className = 'tiro-info'; info.id = 'tiro-info';
-  info.textContent = isRigore ? 'FASE 1 — Rigore' : 'FASE 1 — Tiro';
+  info.textContent = 'Scegli se usare un Bonus...';
   ov.appendChild(info);
   var dadi = document.createElement('div');
   dadi.className = 'tiro-dadi-info'; dadi.id = 'tiro-dadi-info';
@@ -2809,46 +2693,43 @@ function apriOverlayTiro(att, dif, isRigore) {
   document.body.appendChild(ov);
   setTimeout(function() { ov.classList.add('attiva'); }, 50);
 
-  // ============================================================
-  // FASE BONUS: chiedi se usare carte bonus PRIMA del tiro
-  // ============================================================
-  var attesaBonus = popolaBonusTiro(att, dif, isRigore);
+  // Fase bonus
   setTimeout(function() {
-    if (attesaBonus && attesaBonus.tuHaBonus) {
-      // Aspetta che l'utente decida
-      // il tiro parte dopo 3s se non clicca (o subito se clicca)
-      attesaBonus.timeoutId = setTimeout(function() {
+    var attesa = popolaBonusTiro(att, dif, isRigore);
+    if (attesa.tuHaBonus) {
+      tiroInAttesa = setTimeout(function() {
+        tiroInAttesa = null;
+        document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
         eseguiTiroConGrafica(att, dif, isRigore);
-      }, 3000);
+      }, BONUS_SCELTA_TIMEOUT);
     } else {
-      eseguiTiroConGrafica(att, dif, isRigore);
+      setTimeout(function() {
+        document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
+        eseguiTiroConGrafica(att, dif, isRigore);
+      }, 800);
     }
-  }, 1800);
+  }, 800);
 }
 
-// ============================================================
-// popolaBonusTiro: mostra i pulsanti bonus e ritorna
-// { tuHaBonus: bool, timeoutId: null }
-// ============================================================
 function popolaBonusTiro(att, dif, isRigore) {
   var bc = document.getElementById('tiro-bonus-container');
   if (!bc) return { tuHaBonus: false };
   bc.innerHTML = '';
   var tuHaBonus = false;
-  var haB = false;
 
-  // Bonus attaccante (tu)
   if (att === 'tu' && haBonus('tu', 'gol-super')) {
-    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'gol-super\',true)">⚽ USA GOL SUPER</button>';
-    tuHaBonus = true; haB = true;
+    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'gol-super\')">⚽ USA GOL SUPER</button>';
+    tuHaBonus = true;
   }
-  // Bonus difensore (tu)
   if (dif === 'tu' && haBonus('tu', 'parata-super')) {
-    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'parata-super\',true)">🧤 USA PARATA SUPER</button>';
-    tuHaBonus = true; haB = true;
+    bc.innerHTML += '<button class="bonus-btn" onclick="attivaBonusTiro(\'tu\',\'parata-super\')">🧤 USA PARATA SUPER</button>';
+    tuHaBonus = true;
+  }
+  if (tuHaBonus) {
+    bc.innerHTML += ' <button onclick="saltaBonusTiro()" style="background:#8B2020;border-color:#ff6b6b">▶ TIRA SENZA BONUS</button>';
   }
 
-  // Bonus CPU
+  // CPU: decisioni automatiche
   if (att === 'cpu' && haBonus('cpu', 'gol-super') && cpuVuoleUsareBonusTiro('gol-super', isRigore)) {
     setTimeout(function() {
       consumaBonus('cpu', 'gol-super');
@@ -2856,7 +2737,14 @@ function popolaBonusTiro(att, dif, isRigore) {
       mostraBonusBanner('🤖 CPU usa: ⚽ Gol Super!');
       var bc2 = document.getElementById('tiro-bonus-container');
       if (bc2) bc2.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: ⚽ Gol Super</div>';
-    }, 600);
+      // Se non ci sono bonus TU in attesa, esegui subito
+      if (!tiroInAttesa && !tuHaBonus) {
+        setTimeout(function() {
+          document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
+          eseguiTiroConGrafica(att, dif, isRigore);
+        }, 700);
+      }
+    }, 700);
   }
   if (dif === 'cpu' && haBonus('cpu', 'parata-super') && cpuVuoleUsareBonusTiro('parata-super', isRigore)) {
     setTimeout(function() {
@@ -2865,20 +2753,19 @@ function popolaBonusTiro(att, dif, isRigore) {
       mostraBonusBanner('🤖 CPU usa: 🧤 Parata Super!');
       var bc2 = document.getElementById('tiro-bonus-container');
       if (bc2) bc2.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: 🧤 Parata Super</div>';
-    }, 600);
-  }
-
-  if (tuHaBonus && haB) {
-    // Aggiungi un pulsante "NO, TIRA" se ci sono bonus
-    bc.innerHTML += ' <button onclick="saltaBonusTiro()" style="background:#8B2020;border-color:#ff6b6b">▶ TIRA SENZA BONUS</button>';
+      if (!tiroInAttesa && !tuHaBonus) {
+        setTimeout(function() {
+          document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
+          eseguiTiroConGrafica(att, dif, isRigore);
+        }, 700);
+      }
+    }, 700);
   }
 
   return { tuHaBonus: tuHaBonus };
 }
 
-var tiroInAttesa = null;
-
-function attivaBonusTiro(sq, tipo, rinviaTiro) {
+function attivaBonusTiro(sq, tipo) {
   if (!haBonus(sq, tipo)) return;
   consumaBonus(sq, tipo);
   stato.bonusUsatoQuestoTiro[sq] = tipo;
@@ -2886,21 +2773,20 @@ function attivaBonusTiro(sq, tipo, rinviaTiro) {
   var bc = document.getElementById('tiro-bonus-container');
   if (bc) bc.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">Attivato: ' + NOMI_BONUS[tipo].icona + ' ' + NOMI_BONUS[tipo].nome + '</div>';
   if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
-  // Avvia il tiro subito dopo la scelta
-  var att = stato._tiroAtt;
-  var dif = stato._tiroDif;
-  var isRig = stato._tiroRigore;
-  setTimeout(function() { eseguiTiroConGrafica(att, dif, isRig); }, 800);
+  setTimeout(function() {
+    document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
+    eseguiTiroConGrafica(tiroCorrente.att, tiroCorrente.dif, tiroCorrente.isRigore);
+  }, 800);
 }
 
 function saltaBonusTiro() {
   if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
-  var att = stato._tiroAtt;
-  var dif = stato._tiroDif;
-  var isRig = stato._tiroRigore;
   var bc = document.getElementById('tiro-bonus-container');
   if (bc) bc.innerHTML = '<div style="color:#aaa;font-size:12px">Nessun bonus usato</div>';
-  setTimeout(function() { eseguiTiroConGrafica(att, dif, isRig); }, 500);
+  setTimeout(function() {
+    document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
+    eseguiTiroConGrafica(tiroCorrente.att, tiroCorrente.dif, tiroCorrente.isRigore);
+  }, 400);
 }
 
 function cpuVuoleUsareBonusTiro(tipo, isRigore) {
@@ -2912,6 +2798,7 @@ function cpuVuoleUsareBonusTiro(tipo, isRigore) {
   if (tipo === 'parata-super') return staVincendo || staPerdendo;
   return false;
 }
+
 function mostraDadiTiro(dA, dP1, dP2) {
   var c = document.getElementById('tiro-dadi-info'); if (!c) return;
   var h = '<div class="tiro-dadi-riga"><span class="tiro-dado-label">🎲 Attaccante:</span>' +
@@ -3100,6 +2987,7 @@ function mostraEsitoTiroConGrafica(esito, dT, att, dif, motivo) {
   setTimeout(function() {
     var ov = document.getElementById('tiro-overlay');
     if (ov) { ov.classList.remove('attiva'); setTimeout(function() { ov.remove(); }, 400); }
+    tiroInAttesa = null;
     if (esito === 'goal') gestisciGoal(att);
     else if (esito === 'parata') { stato.statistiche[dif].parate++; gestisciParata(att, dif); }
     else if (esito === 'palo') { stato.statistiche[att].pali++; gestisciPalo(att, dif); }
