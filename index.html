@@ -81,7 +81,6 @@
     justify-content: center; width: 100%;
   }
 
-  /* PILE — ora 64x92 come le carte */
   .pila-bonus-wrapper { flex-shrink: 0; }
   .pila-bonus { position: relative; width: 64px; height: 92px; }
   .pila-bonus .pila-titolo {
@@ -104,7 +103,6 @@
     display: flex; align-items: center; justify-content: center; height: 100%;
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   }
-  /* Numeri carte staccati di 40px in più */
   .pila-bonus .pila-count {
     position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%);
     font-size: 13px; color: #fbbf24; font-weight: 900; white-space: nowrap;
@@ -167,7 +165,6 @@
   .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
   .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  /* Numeri carte staccati di 40px in più */
   .pila-count {
     position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%);
     font-size: 15px; color: #ffd700; font-weight: 900; white-space: nowrap;
@@ -332,7 +329,6 @@
     align-items: center; gap: 1px; position: relative;
   }
 
-  /* Portieri: classi in base alla ZONA (sx/dx), non alla squadra */
   .portiere-wrapper {
     position: absolute !important;
     top: 50%;
@@ -1360,6 +1356,8 @@ function assegnaBonus(sq) {
   if (sq === 'tu') {
     mostraBonusBanner('🏆 TU guadagni: ' + NOMI_BONUS[tipo].icona + ' ' + NOMI_BONUS[tipo].nome);
     log('🎁 TU guadagni bonus: ' + NOMI_BONUS[tipo].nome, 'highlight');
+    // FIX 3: aggiorna subito gli slot visivi
+    try { renderBonusSlots(); } catch(e){}
   } else {
     mostraBonusBanner('🤖 CPU ha guadagnato una carta Bonus!');
     log('🎁 CPU guadagna una carta Bonus (nascosta)', 'highlight');
@@ -1523,7 +1521,6 @@ function renderCampo() {
       }
       if (por) {
         var wrapper = document.createElement('div');
-        // Classi portiere-sx/portiere-dx in base alla ZONA (non alla squadra)
         var classeLato = (z.id === 0) ? 'portiere-sx' : 'portiere-dx';
         wrapper.className = 'pedina-wrapper ' + por.squadra + ' portiere-wrapper ' + classeLato;
         wrapper.appendChild(creaNomeGiocatore(por));
@@ -1538,7 +1535,6 @@ function renderCampo() {
     var tuG = stato.giocatori.tu.filter(function(g){ return g.zona === z.id && !g.portiere; });
     var cpuG = stato.giocatori.cpu.filter(function(g){ return g.zona === z.id && !g.portiere; });
 
-    // Ordine di append: se invertiCoppie=true (2° tempo), CPU prima e TU dopo
     var ordine = stato.invertiCoppie ? ['cpu', 'tu'] : ['tu', 'cpu'];
 
     var metaSup = document.createElement('div');
@@ -1688,37 +1684,42 @@ function renderPanchina() {
   }
 }
 
+/* FIX 1: doppio requestAnimationFrame per aspettare il layout */
 function evidenziaCoppiaContrasto() {
-  var el = document.getElementById('evidenzia-coppia');
-  if (!el) return;
-  var c = stato.contrasto;
-  if (!c || c.risolto) { el.style.display = 'none'; return; }
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      var el = document.getElementById('evidenzia-coppia');
+      if (!el) return;
+      var c = stato.contrasto;
+      if (!c || c.risolto) { el.style.display = 'none'; return; }
 
-  var elPoss = document.querySelector('[data-giocatore-id="' + c.giocatorePoss + '"]');
-  var elAvv = document.querySelector('[data-giocatore-id="' + c.giocatoreAvv + '"]');
-  if (!elPoss || !elAvv) { el.style.display = 'none'; return; }
+      var elPoss = document.querySelector('[data-giocatore-id="' + c.giocatorePoss + '"]');
+      var elAvv = document.querySelector('[data-giocatore-id="' + c.giocatoreAvv + '"]');
+      if (!elPoss || !elAvv) { el.style.display = 'none'; return; }
 
-  var area = document.querySelector('.area-gioco').getBoundingClientRect();
-  var rP = elPoss.getBoundingClientRect();
-  var rA = elAvv.getBoundingClientRect();
+      var area = document.querySelector('.area-gioco').getBoundingClientRect();
+      var rP = elPoss.getBoundingClientRect();
+      var rA = elAvv.getBoundingClientRect();
 
-  var cxP = rP.left + rP.width/2;
-  var cxA = rA.left + rA.width/2;
-  var cyP = rP.bottom;
-  var cyA = rA.bottom;
+      var cxP = rP.left + rP.width/2;
+      var cxA = rA.left + rA.width/2;
+      var cyP = rP.bottom;
+      var cyA = rA.bottom;
 
-  var cx = ((cxP + cxA) / 2) - area.left;
-  var cy = ((cyP + cyA) / 2) - area.top;
-  var dx = Math.abs(cxP - cxA);
+      var cx = ((cxP + cxA) / 2) - area.left;
+      var cy = ((cyP + cyA) / 2) - area.top;
+      var dx = Math.abs(cxP - cxA);
 
-  var larghezza = Math.max(90, dx + 60);
-  var altezza = 32;
+      var larghezza = Math.max(90, dx + 60);
+      var altezza = 32;
 
-  el.style.display = 'block';
-  el.style.left = cx + 'px';
-  el.style.top = cy + 'px';
-  el.style.width = larghezza + 'px';
-  el.style.height = altezza + 'px';
+      el.style.display = 'block';
+      el.style.left = cx + 'px';
+      el.style.top = cy + 'px';
+      el.style.width = larghezza + 'px';
+      el.style.height = altezza + 'px';
+    });
+  });
 }
 function nascondiEvidenzia() {
   var el = document.getElementById('evidenzia-coppia');
@@ -2001,10 +2002,11 @@ function renderPannelloContrasto() {
   document.getElementById('info-minuto').textContent = p + "' | " + t + "'";
   document.getElementById('info-streak').textContent = stato.streak.tu;
 
+  // FIX 2: mostra il pulsante bonus Contrasto Sicuro ANCHE se sei in difesa
   var azioni = '';
   if (!c.risolto) {
     azioni += '<button class="primario" id="btn-gioca" onclick="confermaCarta()" ' + (selezioneCarta === null ? 'disabled' : '') + '>GIOCA CARTA</button>';
-    if (haBonus('tu', 'contrasto-sicuro') && c.attaccante === 'tu') {
+    if (haBonus('tu', 'contrasto-sicuro')) {
       azioni += ' <button class="bonus-btn" onclick="usaContrastoSicuroTU()">⭐ USA CONTRASTO SICURO</button>';
     }
   }
@@ -2858,7 +2860,6 @@ function fineTempoOPartita() {
     suonaFischietto('fine-tempo');
     stato.tempo = 2;
     stato.mano = 1;
-    // Cambio campo: swap zone + scambio proprietari portieri + inverti ordine coppie
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
@@ -2874,7 +2875,6 @@ function fineTempoOPartita() {
     ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
     ZONE_CONFIG[6].proprietario = oldT;
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
-    // Inverti ordine coppie (TU/CPU)
     stato.invertiCoppie = !stato.invertiCoppie;
 
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
