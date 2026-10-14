@@ -27,7 +27,7 @@
   }
 
   /* ============================================================
-     AVVISO ROTAZIONE SCHERMO (solo se verticale su mobile)
+     AVVISO ROTAZIONE
      ============================================================ */
   .avviso-ruota {
     display: none;
@@ -57,7 +57,6 @@
   .avviso-ruota p {
     color: #aaa; font-size: 14px; max-width: 300px; line-height: 1.5;
   }
-  /* Mostra avviso solo se schermo piccolo in verticale */
   @media (orientation: portrait) and (max-width: 900px) {
     .avviso-ruota { display: flex; }
     .app { display: none; }
@@ -307,7 +306,7 @@
   }
 
   /* ============================================================
-     CAMPO: ora usa un contenitore scalabile
+     CAMPO — PC / TABLET: layout originale (percentuali)
      ============================================================ */
   .campo-wrapper {
     position: absolute;
@@ -318,16 +317,16 @@
   }
   .campo-area {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform-origin: center center;
-    /* dimensioni base: verranno scalate via JS */
-    width: 1200px;
-    height: 600px;
-    margin-left: -600px;
-    margin-top: -300px;
+    left: 18%;
+    top: 46%;
+    width: 64%;
+    height: 42%;
+    padding: 0 2%;
     pointer-events: none;
   }
+
+  /* Il campo virtuale è nascosto di default (solo su mobile landscape) */
+  .campo-virtuale { display: none; }
 
   .evidenzia-coppia {
     position: absolute;
@@ -781,9 +780,10 @@
   .btn-toggle-panchina { display: none; }
 
   /* ============================================================
-     MOBILE LANDSCAPE: adattamento proporzionale
+     MOBILE LANDSCAPE (h <= 600px): campo virtuale + layout ridotto
      ============================================================ */
   @media (orientation: landscape) and (max-height: 600px) {
+    /* Topbar compatta */
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
     .risultato { font-size: 14px; letter-spacing: 0.5px; }
     .risultato .sep { margin: 0 5px; }
@@ -947,26 +947,181 @@
     .squadra-btn { padding: 3px; border-radius: 4px; border-width: 2px; }
     .squadra-btn .nome { font-size: 7px; margin-bottom: 1px; }
     .squadra-btn .maglia { width: 22px; height: 28px; }
-  }
 
-  /* Tablet: altezza tra 600 e 900, landscape */
-  @media (orientation: landscape) and (min-height: 601px) and (max-height: 900px) and (max-width: 1400px) {
-    .carta { width: 52px; height: 74px; }
-    .carta .seme-centro { font-size: 32px; }
-    .carta .valore-alto, .carta .valore-basso { font-size: 14px; }
-    .pila, .pila-bonus, .pila-carta, .pila-bonus .pila-carta { width: 52px; height: 74px; }
-    .pila-carta.dietro::after { font-size: 30px; }
-    .pila-carta.scarto::after { font-size: 26px; }
-    .bonus-slot { width: 46px; height: 66px; }
-    .seme-grande .seme { font-size: 40px; }
-    .pedina { width: 30px; height: 38px; }
-    .nome-giocatore { font-size: 9px; }
+    /* ============================================================
+       MOBILE: campo virtuale con linee CSS
+       ============================================================ */
+    .campo-wrapper {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .campo-area {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: 1400px;
+      height: 700px;
+      transform-origin: center center;
+      padding: 0;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    /* Il campo virtuale (linee) è visibile solo su mobile landscape */
+    .campo-virtuale {
+      display: block;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    /* Verde con righe di taglio */
+    .campo-verde {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg,
+          #1a5c2a 0px, #1a5c2a 70px,
+          #1e6b30 70px, #1e6b30 140px);
+      border: 4px solid rgba(255,255,255,0.95);
+      border-radius: 6px;
+      box-shadow:
+        0 0 60px rgba(0,0,0,0.8),
+        inset 0 0 120px rgba(0,0,0,0.35);
+    }
+    .campo-meta {
+      position: absolute;
+      left: 50%; top: 0; bottom: 0;
+      width: 3px;
+      background: rgba(255,255,255,0.9);
+      transform: translateX(-50%);
+    }
+    .campo-cerchio {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 160px; height: 160px;
+      border: 3px solid rgba(255,255,255,0.9);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .campo-centro {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 10px; height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .campo-area-rigore {
+      position: absolute;
+      top: 50%;
+      width: 190px;
+      height: 340px;
+      border: 3px solid rgba(255,255,255,0.9);
+      transform: translateY(-50%);
+    }
+    .campo-area-rigore.sx { left: 0; border-left: none; border-radius: 0 8px 8px 0; }
+    .campo-area-rigore.dx { right: 0; border-right: none; border-radius: 8px 0 0 8px; }
+    .campo-area-piccola {
+      position: absolute;
+      top: 50%;
+      width: 70px;
+      height: 180px;
+      border: 2px solid rgba(255,255,255,0.8);
+      transform: translateY(-50%);
+    }
+    .campo-area-piccola.sx { left: 0; border-left: none; border-radius: 0 5px 5px 0; }
+    .campo-area-piccola.dx { right: 0; border-right: none; border-radius: 5px 0 0 5px; }
+    .campo-rigore {
+      position: absolute;
+      top: 50%;
+      width: 8px; height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
+    .campo-rigore.sx { left: 140px; }
+    .campo-rigore.dx { right: 140px; }
+    .campo-porta {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 100px;
+      border: 3px solid rgba(255,255,255,0.9);
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.12);
+    }
+    .campo-porta.sx { left: -18px; border-right: none; border-radius: 5px 0 0 5px; }
+    .campo-porta.dx { right: -18px; border-left: none; border-radius: 0 5px 5px 0; }
+
+    /* ============================================================
+       MOBILE: zone e pedine ancorate al campo 1400x700
+       ============================================================ */
+    .zone {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .zona {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      padding: 0;
+    }
+    /* Portieri: zone più strette */
+    .zona[data-zona="0"],
+    .zona[data-zona="6"] {
+      flex: 0.55;
+    }
+    .meta-sup, .meta-inf {
+      display: flex; flex-direction: row;
+      justify-content: center; align-items: center;
+      flex: 1; padding: 2px 4px; gap: 24px;
+      position: relative;
+    }
+    /* Rombo: zona 2 e 4 */
+    .zona[data-zona="2"] .meta-sup,
+    .zona[data-zona="4"] .meta-sup { transform: translateY(-50px); }
+    .zona[data-zona="2"] .meta-inf,
+    .zona[data-zona="4"] .meta-inf { transform: translateY(50px); }
+    .zona[data-zona="1"] .meta-inf,
+    .zona[data-zona="5"] .meta-inf { transform: translateY(-60px); }
+
+    /* Portieri posizionati al centro della loro zona */
+    .portiere-wrapper {
+      position: absolute !important;
+      top: 50%;
+      left: 50% !important;
+      transform: translate(-50%, calc(-50% - 20px)) !important;
+      z-index: 5;
+    }
+    .portiere-wrapper.portiere-sx { left: 50% !important; transform: translate(-50%, calc(-50% - 20px)) translateX(70px) !important; }
+    .portiere-wrapper.portiere-dx { left: 50% !important; transform: translate(-50%, calc(-50% - 20px)) translateX(-70px) !important; }
+
+    /* Pedine un po' più piccole su mobile */
+    .pedina { width: 30px; height: 40px; }
+    .nome-giocatore { font-size: 9px; padding: 1px 4px; }
+    .info-sotto { font-size: 8px; padding: 0 3px; margin-top: 1px; }
+    .info-sotto .stamina-txt,
+    .info-sotto .falli-txt,
+    .info-sotto .cartellini { font-size: 8px; }
   }
 </style>
 </head>
 <body>
 
-<!-- AVVISO ROTAZIONE SCHERMO -->
+<!-- AVVISO ROTAZIONE -->
 <div class="avviso-ruota" id="avviso-ruota">
   <div class="icona-ruota">📱</div>
   <h2>RUOTA IL DISPOSITIVO</h2>
@@ -1067,6 +1222,21 @@
 
     <div class="campo-wrapper">
       <div class="campo-area" id="campo-area">
+        <!-- Campo virtuale: visibile solo su mobile landscape -->
+        <div class="campo-virtuale">
+          <div class="campo-verde"></div>
+          <div class="campo-meta"></div>
+          <div class="campo-cerchio"></div>
+          <div class="campo-centro"></div>
+          <div class="campo-area-rigore sx"></div>
+          <div class="campo-area-rigore dx"></div>
+          <div class="campo-area-piccola sx"></div>
+          <div class="campo-area-piccola dx"></div>
+          <div class="campo-rigore sx"></div>
+          <div class="campo-rigore dx"></div>
+          <div class="campo-porta sx"></div>
+          <div class="campo-porta dx"></div>
+        </div>
         <div class="zone" id="zone"></div>
       </div>
     </div>
@@ -1495,60 +1665,49 @@ var VALORI = [
 ];
 
 /* ============================================================
-   SCALA DINAMICA DEL CAMPO E DEL PANNELLO
+   SCALA MOBILE: adatta il campo 1400x700 allo schermo
    ============================================================ */
-var CAMPO_BASE_W = 1200;
-var CAMPO_BASE_H = 600;
-var scalaCorrente = 1;
+var CAMPO_BASE_W = 1400;
+var CAMPO_BASE_H = 700;
 
-function calcolaScala() {
+function calcolaScalaMobile() {
   var w = window.innerWidth;
   var h = window.innerHeight;
-  var landscape = w > h;
-  var topbarH = 0;
   var topbar = document.querySelector('.topbar');
-  if (topbar) topbarH = topbar.offsetHeight;
+  var topbarH = topbar ? topbar.offsetHeight : 0;
+  var availableH = h - topbarH - 10;
 
-  var availableH = h - topbarH;
-  // Su mobile landscape: il campo occupa ~tutta l'area
-  // Su desktop: lascia spazio al pannello carte in alto
-  var campoH, campoW;
-
-  if (landscape && h <= 600) {
-    // MOBILE LANDSCAPE: campo full-screen
-    campoH = availableH;
-    campoW = w;
-  } else if (landscape && h <= 900 && w <= 1400) {
-    // TABLET LANDSCAPE: campo occupa ~70% larghezza, ~75% altezza
-    campoH = availableH * 0.78;
-    campoW = w * 0.72;
-  } else {
-    // DESKTOP / TABLET GRANDE: campo classico 64% x 42%
-    campoH = availableH * 0.42;
-    campoW = w * 0.64;
-  }
-
-  // Calcola la scala per adattare CAMPO_BASE (1200x600) dentro campoW x campoH
-  var scalaW = campoW / CAMPO_BASE_W;
-  var scalaH = campoH / CAMPO_BASE_H;
-  var scala = Math.min(scalaW, scalaH);
-
-  // Limita la scala massima (per non ingigantire su desktop)
-  if (!landscape || h > 600) {
-    scala = Math.min(scala, 1.0);
-  }
-  // Limita la scala minima
-  scala = Math.max(scala, 0.3);
-
-  return scala;
+  // Su mobile landscape vogliamo che il campo occupi ~95% larghezza e ~90% altezza
+  var scalaW = (w * 0.95) / CAMPO_BASE_W;
+  var scalaH = (availableH * 0.92) / CAMPO_BASE_H;
+  return Math.min(scalaW, scalaH);
 }
 
 function adattaCampoResponsive() {
   var area = document.getElementById('campo-area');
   if (!area) return;
-  var nuovaScala = calcolaScala();
-  scalaCorrente = nuovaScala;
-  area.style.transform = 'scale(' + nuovaScala + ')';
+  var w = window.innerWidth, h = window.innerHeight;
+  var isMobileLandscape = (h <= 600 && w > h);
+
+  if (isMobileLandscape) {
+    // Applica la scala al campo virtuale 1400x700
+    var scala = calcolaScalaMobile();
+    area.style.transform = 'scale(' + scala + ')';
+    area.style.position = 'relative';
+    area.style.left = 'auto';
+    area.style.top = 'auto';
+    area.style.width = CAMPO_BASE_W + 'px';
+    area.style.height = CAMPO_BASE_H + 'px';
+  } else {
+    // Desktop/tablet: ripristina il layout originale
+    area.style.transform = 'none';
+    area.style.position = 'absolute';
+    area.style.left = '18%';
+    area.style.top = '46%';
+    area.style.width = '64%';
+    area.style.height = '42%';
+    area.style.padding = '0 2%';
+  }
 }
 
 window.addEventListener('resize', adattaCampoResponsive);
@@ -2169,8 +2328,9 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   applicaSqualifiche('tu');
   applicaSqualifiche('cpu');
 
-  // Adatta la scala dopo il rendering
-  setTimeout(adattaCampoResponsive, 100);
+  adattaCampoResponsive();
+  setTimeout(adattaCampoResponsive, 200);
+  setTimeout(adattaCampoResponsive, 500);
 
   renderCampo();
   renderPanchina();
@@ -3385,7 +3545,6 @@ function confermaSostituzione() {
 
 try {
   inizializzaAmmonizioni();
-  // Adatta subito la scala, e dopo il primo render
   adattaCampoResponsive();
   setTimeout(adattaCampoResponsive, 200);
   setTimeout(adattaCampoResponsive, 500);
