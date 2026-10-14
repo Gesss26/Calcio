@@ -488,7 +488,6 @@
   .bonus-slot .bonus-carta.contrasto-sicuro { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 2px solid #fbbf24; }
   .bonus-slot .bonus-carta.parata-super { background: linear-gradient(135deg, #7c2d12, #ea580c); border: 2px solid #fed7aa; }
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
-  .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
   .sost-panel {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1007,6 +1006,7 @@ var SCIVOLATA_MAX_PX = 25;
 var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
+var DURATA_CALCIO_INIZIO = 1400;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -1467,7 +1467,6 @@ function creaMazzoBonus() {
   for (var i=0;i<3;i++) m.push('contrasto-sicuro');
   for (var j=0;j<3;j++) m.push('parata-super');
   for (var k=0;k<3;k++) m.push('gol-super');
-  for (var l=0;l<3;l++) m.push('passaggio-lungo');
   return mescola(m);
 }
 function inizializzaMazzi() {
@@ -1830,7 +1829,13 @@ function creaPallaAiPiedi(zonaId, idG) {
 
   var zE = document.querySelector('.zona[data-zona="' + zonaId + '"]'); if (!zE) return;
   var elG = document.querySelector('[data-giocatore-id="' + idG + '"]'); if (!elG) return;
-  var r = elG.getBoundingClientRect(), zR = zE.getBoundingClientRect();
+
+  // ============================================================
+  // FIX: posiziona la palla sotto il PIEDE della pedina (bottom
+  // del .pedina interno, non del wrapper che include nome e info)
+  // ============================================================
+  var ped = elG.querySelector('.pedina'); if (!ped) ped = elG;
+  var r = ped.getBoundingClientRect(), zR = zE.getBoundingClientRect();
   var xP = ((r.left + r.width/2) - zR.left) / zR.width * 100;
   var yP = (r.bottom - zR.top) / zR.height * 100;
 
@@ -2070,59 +2075,34 @@ function lanciaMoneta(scelta) {
 function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
-function eseguiCalcioIniziale(squadra) {
-  mostraVistaCampo();
-  nascondiEvidenzia();
-  stato.pallaInAnimazione = true;
-  var c = getCoppiaAttiva(3, 'inf');
-  var gB = squadra === 'tu' ? c.tu : c.cpu;
-  if (!gB) gB = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g){ return g.zona === 3; })[0];
-  stato.zonaPalla = 3;
-  stato.metaContesa = 'inf';
-  stato.possessore = squadra;
-  stato.giocatorePalla = gB ? gB.id : null;
-  log('⚽ Calcio d\'inizio: ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' batte');
-  renderCampo(); renderHeader();
-  aggiornaSottofondoPerZona(3);
-  setTimeout(function() {
-    var dir = direzionePerSquadra(squadra);
-    var nz = 3 + dir;
-    if (nz < 1) nz = 1;
-    if (nz > 5) nz = 5;
-    var comp = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g){
-      return g.zona === nz && !g.portiere && !g.espulso;
-    });
-    if (comp.length === 0) {
-      stato.mano++; renderHeader();
-      setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 300);
-      return;
-    }
-    var sc = comp[Math.floor(Math.random()*comp.length)];
-    var nm = (comp.indexOf(sc) === 0) ? 'sup' : 'inf';
-    stato.zonaPalla = nz; stato.metaContesa = nm; stato.giocatorePalla = sc.id;
-    renderCampo(); renderHeader(); aggiornaSottofondoPerZona(nz);
-    setTimeout(function() {
-      animaPallaInZona(gB, sc, function() {
-        stato.possessore = squadra; stato.giocatorePalla = sc.id;
-        stato.mano++; renderHeader();
-        bloccaCoppiaContrasto();
-        setTimeout(avviaContrasto, 800);
-      });
-    }, 200);
-  }, 500);
+/* ============================================================
+   ANIMAZIONE PALLA — parte dal PIEDE del giocatore di partenza
+   ============================================================ */
+function ottieniPosizionePallaDi(g) {
+  // Restituisce { x, y, zE } in coordinate relative alla .scena
+  var elG = document.querySelector('[data-giocatore-id="' + g.id + '"]');
+  if (!elG) return null;
+  var ped = elG.querySelector('.pedina');
+  if (!ped) ped = elG;
+  var scena = document.getElementById('scena');
+  var box = scena.getBoundingClientRect();
+  var r = ped.getBoundingClientRect();
+  return {
+    x: r.left + r.width/2 - box.left,
+    y: r.bottom - box.top,
+    elG: elG,
+    elPed: ped
+  };
 }
 
-function animaPallaInZona(gDa, gA, cb, saltaZone) {
+function animaPallaInZona(gDa, gA, cb) {
   suonaCalcio();
   mostraVistaCampo();
-  var area = document.querySelector('.scena');
-  var box = area.getBoundingClientRect();
-  var elD = document.querySelector('[data-giocatore-id="' + gDa.id + '"]');
-  var elA = document.querySelector('[data-giocatore-id="' + gA.id + '"]');
-  if (!elD || !elA) { if (cb) cb(); return; }
-  var rD = elD.getBoundingClientRect(), rA = elA.getBoundingClientRect();
-  var pX = rD.left + rD.width/2 - box.left, pY = rD.bottom - box.top;
-  var aX = rA.left + rA.width/2 - box.left, aY = rA.bottom - box.top;
+
+  var posDa = ottieniPosizionePallaDi(gDa);
+  var posA = ottieniPosizionePallaDi(gA);
+  if (!posDa || !posA) { if (cb) cb(); return; }
+
   var v = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v.length;i++) v[i].remove();
   var e = document.querySelectorAll('.evidenzia-coppia');
@@ -2131,28 +2111,98 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   var p = document.getElementById('palla-volante');
   p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
   var pi = p.querySelector('.palla-inner');
-  p.style.transition = 'none'; p.style.left = pX + 'px'; p.style.top = pY + 'px';
+  p.style.transition = 'none'; p.style.left = posDa.x + 'px'; p.style.top = posDa.y + 'px';
   p.classList.add('attiva');
   pi.style.transform = 'rotate(0deg)'; void p.offsetWidth;
+
   var dur = DURATA_ANIM_PALLA / 1.5;
-  if (saltaZone) dur = dur * 1.4;
   var t0 = performance.now();
-  var dx = aX - pX, dy = aY - pY;
+  var dx = posA.x - posDa.x, dy = posA.y - posDa.y;
   var dist = Math.sqrt(dx*dx + dy*dy);
   var giri = (dist/50) * (dx >= 0 ? 1 : -1);
   var gradi = giri * 360;
-  var arco = saltaZone ? 70 : 0;
+
   function anima(now) {
     var t = Math.min((now - t0) / dur, 1);
     var e2 = t*t*(3-2*t);
-    var arcoY = -Math.sin(Math.PI*t) * arco;
-    p.style.left = (pX + dx*e2) + 'px';
-    p.style.top = (pY + dy*e2 + arcoY) + 'px';
+    // Piccola parabola per effetto "passaggio"
+    var arco = -Math.sin(Math.PI*t) * 25;
+    p.style.left = (posDa.x + dx*e2) + 'px';
+    p.style.top = (posDa.y + dy*e2 + arco) + 'px';
     pi.style.transform = 'rotate(' + (gradi*e2) + 'deg)';
     if (t < 1) requestAnimationFrame(anima);
     else { p.classList.remove('attiva'); stato.pallaInAnimazione = false; if (cb) cb(); }
   }
   requestAnimationFrame(anima);
+}
+
+/* ============================================================
+   CALCIO D'INIZIO CON ANIMAZIONE DAL DISCHETTO
+   ============================================================ */
+function eseguiCalcioIniziale(squadra) {
+  mostraVistaCampo();
+  nascondiEvidenzia();
+
+  // Il giocatore che batte è quello in Z3 'inf' (il più centrale)
+  var coppiaZ3 = getCoppiaAttiva(3, 'inf');
+  var gB = squadra === 'tu' ? coppiaZ3.tu : coppiaZ3.cpu;
+  if (!gB) {
+    // fallback: prendi il primo in Z3
+    var lista = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu)
+      .filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
+    gB = lista[0] || null;
+  }
+  if (!gB) {
+    // Non c'è nessuno in Z3, salta direttamente al contrasto
+    stato.mano++; renderHeader();
+    setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
+    return;
+  }
+
+  // Compagno destinazione: l'altro giocatore in Z3
+  var compagniZ3 = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu)
+    .filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso && g.id !== gB.id; });
+  var gA = compagniZ3[0];
+  if (!gA) {
+    // Nessun compagno, vai al contrasto normale
+    stato.zonaPalla = 3;
+    stato.metaContesa = 'inf';
+    stato.possessore = squadra;
+    stato.giocatorePalla = gB.id;
+    renderCampo(); renderHeader();
+    aggiornaSottofondoPerZona(3);
+    setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
+    return;
+  }
+
+  // Imposta lo stato PRIMA dell'animazione
+  stato.zonaPalla = 3;
+  stato.metaContesa = 'inf';
+  stato.possessore = squadra;
+  stato.giocatorePalla = gB.id;
+  stato.pallaInAnimazione = true;
+  renderCampo(); renderHeader();
+  aggiornaSottofondoPerZona(3);
+
+  log('⚽ Calcio d\'inizio: ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' batte con ' + gB.nome);
+
+  // Animazione: la palla parte dal piede di gB e arriva a gA
+  setTimeout(function() {
+    animaPallaInZona(gB, gA, function() {
+      // Dopo il passaggio, il possesso resta in Z3 ma si passa al contrasto
+      stato.possessore = squadra;
+      stato.giocatorePalla = gB.id; // il giocatore che ha battuto resta in possesso
+      stato.pallaInAnimazione = false;
+      // Aspetta un attimo e riporta la palla ai piedi di gB
+      setTimeout(function() {
+        renderCampo();
+        stato.mano++;
+        renderHeader();
+        bloccaCoppiaContrasto();
+        setTimeout(avviaContrasto, 800);
+      }, 400);
+    });
+  }, 300);
 }
 
 function avviaContrasto() {
@@ -2693,7 +2743,6 @@ function apriOverlayTiro(att, dif, isRigore) {
   document.body.appendChild(ov);
   setTimeout(function() { ov.classList.add('attiva'); }, 50);
 
-  // Fase bonus
   setTimeout(function() {
     var attesa = popolaBonusTiro(att, dif, isRigore);
     if (attesa.tuHaBonus) {
@@ -2729,7 +2778,6 @@ function popolaBonusTiro(att, dif, isRigore) {
     bc.innerHTML += ' <button onclick="saltaBonusTiro()" style="background:#8B2020;border-color:#ff6b6b">▶ TIRA SENZA BONUS</button>';
   }
 
-  // CPU: decisioni automatiche
   if (att === 'cpu' && haBonus('cpu', 'gol-super') && cpuVuoleUsareBonusTiro('gol-super', isRigore)) {
     setTimeout(function() {
       consumaBonus('cpu', 'gol-super');
@@ -2737,7 +2785,6 @@ function popolaBonusTiro(att, dif, isRigore) {
       mostraBonusBanner('🤖 CPU usa: ⚽ Gol Super!');
       var bc2 = document.getElementById('tiro-bonus-container');
       if (bc2) bc2.innerHTML = '<div style="color:#ffd700;font-weight:bold;font-size:14px">🤖 CPU ha attivato: ⚽ Gol Super</div>';
-      // Se non ci sono bonus TU in attesa, esegui subito
       if (!tiroInAttesa && !tuHaBonus) {
         setTimeout(function() {
           document.getElementById('tiro-info').textContent = 'FASE 1 — Tiro dell\'attaccante';
@@ -3039,10 +3086,10 @@ function gestisciParata(att, dif) {
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
     if (elP && elC) {
       suonaCalcio();
-      var area = document.querySelector('.scena');
-      var box = area.getBoundingClientRect();
+      var scena = document.getElementById('scena');
+      var box = scena.getBoundingClientRect();
       var rP = elP.getBoundingClientRect(), rC = elC.getBoundingClientRect();
-      var pX = rP.left + rP.width/2 - box.left, pY = rP.top + rP.height/2 - box.top;
+      var pX = rP.left + rP.width/2 - box.left, pY = rP.bottom - box.top;
       var aX = rC.left + rC.width/2 - box.left, aY = rC.bottom - box.top;
       var p = document.getElementById('palla-volante');
       p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
@@ -3133,10 +3180,10 @@ function gestisciFuori(att, dif) {
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
     if (elP && elC) {
       suonaCalcio();
-      var area = document.querySelector('.scena');
-      var box = area.getBoundingClientRect();
+      var scena = document.getElementById('scena');
+      var box = scena.getBoundingClientRect();
       var rP = elP.getBoundingClientRect(), rC = elC.getBoundingClientRect();
-      var pX = rP.left + rP.width/2 - box.left, pY = rP.top + rP.height/2 - box.top;
+      var pX = rP.left + rP.width/2 - box.left, pY = rP.bottom - box.top;
       var aX = rC.left + rC.width/2 - box.left, aY = rC.bottom - box.top;
       var p = document.getElementById('palla-volante');
       p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
