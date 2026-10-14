@@ -274,29 +274,33 @@
     z-index: 6; pointer-events: none; padding: 0 2%;
   }
 
+  /* ============================================================
+     EVIDENZIA COPPIA: ora è figlia della .zona (come la palla)
+     Usa le stesse coordinate percentuali della palla.
+     ============================================================ */
   .evidenzia-coppia {
     position: absolute;
+    width: 130px;
+    height: 42px;
     border-radius: 50%;
     background: radial-gradient(ellipse at center,
       rgba(255,215,0,0.55) 0%,
-      rgba(255,215,0,0.25) 50%,
-      rgba(255,215,0,0) 80%);
-    border: 2px solid rgba(255,215,0,0.8);
-    box-shadow: 0 0 20px rgba(255,215,0,0.6), inset 0 0 20px rgba(255,215,0,0.3);
+      rgba(255,215,0,0.2) 55%,
+      rgba(255,215,0,0) 85%);
+    border: 3px solid rgba(255,215,0,0.9);
+    box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 15px rgba(255,215,0,0.4);
     pointer-events: none;
     transform: translate(-50%, -50%);
-    z-index: 4;
-    display: none;
-    transition: left 0.3s ease-out, top 0.3s ease-out, width 0.3s ease-out;
+    z-index: 3;
     animation: pulseEllisse 1.5s infinite;
   }
   @keyframes pulseEllisse {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(255,215,0,0.6), inset 0 0 20px rgba(255,215,0,0.3);
-      border-color: rgba(255,215,0,0.8);
+      box-shadow: 0 0 25px rgba(255,215,0,0.8), inset 0 0 15px rgba(255,215,0,0.4);
+      border-color: rgba(255,215,0,0.9);
     }
     50% {
-      box-shadow: 0 0 35px rgba(255,215,0,1), inset 0 0 30px rgba(255,215,0,0.5);
+      box-shadow: 0 0 40px rgba(255,215,0,1), inset 0 0 25px rgba(255,215,0,0.6);
       border-color: rgba(255,215,0,1);
     }
   }
@@ -813,7 +817,6 @@
     </div>
 
     <div class="campo-area">
-      <div class="evidenzia-coppia" id="evidenzia-coppia"></div>
       <div class="zone" id="zone"></div>
     </div>
 
@@ -1356,7 +1359,6 @@ function assegnaBonus(sq) {
   if (sq === 'tu') {
     mostraBonusBanner('🏆 TU guadagni: ' + NOMI_BONUS[tipo].icona + ' ' + NOMI_BONUS[tipo].nome);
     log('🎁 TU guadagni bonus: ' + NOMI_BONUS[tipo].nome, 'highlight');
-    // FIX 3: aggiorna subito gli slot visivi
     try { renderBonusSlots(); } catch(e){}
   } else {
     mostraBonusBanner('🤖 CPU ha guadagnato una carta Bonus!');
@@ -1581,26 +1583,41 @@ function renderCampo() {
     }
     if (idG) creaPallaAiPiedi(stato.zonaPalla, idG);
   }
-  if (stato.contrasto && !stato.contrasto.risolto) {
-    setTimeout(evidenziaCoppiaContrasto, 50);
-  }
   renderingCampoInCorso = false;
 }
 
+/* ============================================================
+   CREA PALLA + ELLISSE nella stessa zona, stesse coordinate %
+   ============================================================ */
 function creaPallaAiPiedi(zonaId, idG) {
+  // Rimuovo eventuali palle/ellissi precedenti
   var v = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v.length;i++) v[i].remove();
+  var e = document.querySelectorAll('.evidenzia-coppia');
+  for (var j=0;j<e.length;j++) e[j].remove();
+
   var zE = document.querySelector('.zona[data-zona="' + zonaId + '"]'); if (!zE) return;
   var elG = document.querySelector('[data-giocatore-id="' + idG + '"]'); if (!elG) return;
   var r = elG.getBoundingClientRect(), zR = zE.getBoundingClientRect();
   var xP = ((r.left + r.width/2) - zR.left) / zR.width * 100;
   var yP = (r.bottom - zR.top) / zR.height * 100;
+
+  // ELLISSE GIALLA sotto la palla (nella stessa zona, stesse coord %)
+  var ell = document.createElement('div');
+  ell.className = 'evidenzia-coppia';
+  ell.style.left = xP + '%';
+  ell.style.top = yP + '%';
+  zE.appendChild(ell);
+
+  // PALLA sopra l'ellisse
   var p = document.createElement('div');
   p.className = 'palla-centro';
-  p.style.left = xP + '%'; p.style.top = yP + '%';
+  p.style.left = xP + '%';
+  p.style.top = yP + '%';
   p.innerHTML = creaPalloneSVG();
   zE.appendChild(p);
 }
+
 function creaNomeGiocatore(g) {
   var el = document.createElement('div');
   el.className = 'nome-giocatore';
@@ -1640,11 +1657,7 @@ function creaPedinaEl(g, anim) {
     div = g.squadra === 'tu' ? stato.divise.tu : stato.divise.cpu;
   }
   el.innerHTML = creaGiocatoreSVG(div, anim);
-  if (stato.giocatorePalla === g.id && !g.espulso && !stato.pallaInAnimazione) {
-    var p = document.createElement('div');
-    p.className = 'palla-attaccata'; p.innerHTML = creaPalloneSVG();
-    el.appendChild(p);
-  }
+  // RIMOSSO: palla-attaccata (la palla ora è gestita da creaPallaAiPiedi)
   var bar = document.createElement('div'); bar.className = 'stamina-bar';
   var fill = document.createElement('div'); fill.className = 'stamina-fill';
   var pct = (g.stamina / g.staminaMax) * 100;
@@ -1684,46 +1697,11 @@ function renderPanchina() {
   }
 }
 
-/* FIX 1: doppio requestAnimationFrame per aspettare il layout */
-function evidenziaCoppiaContrasto() {
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      var el = document.getElementById('evidenzia-coppia');
-      if (!el) return;
-      var c = stato.contrasto;
-      if (!c || c.risolto) { el.style.display = 'none'; return; }
-
-      var elPoss = document.querySelector('[data-giocatore-id="' + c.giocatorePoss + '"]');
-      var elAvv = document.querySelector('[data-giocatore-id="' + c.giocatoreAvv + '"]');
-      if (!elPoss || !elAvv) { el.style.display = 'none'; return; }
-
-      var area = document.querySelector('.area-gioco').getBoundingClientRect();
-      var rP = elPoss.getBoundingClientRect();
-      var rA = elAvv.getBoundingClientRect();
-
-      var cxP = rP.left + rP.width/2;
-      var cxA = rA.left + rA.width/2;
-      var cyP = rP.bottom;
-      var cyA = rA.bottom;
-
-      var cx = ((cxP + cxA) / 2) - area.left;
-      var cy = ((cyP + cyA) / 2) - area.top;
-      var dx = Math.abs(cxP - cxA);
-
-      var larghezza = Math.max(90, dx + 60);
-      var altezza = 32;
-
-      el.style.display = 'block';
-      el.style.left = cx + 'px';
-      el.style.top = cy + 'px';
-      el.style.width = larghezza + 'px';
-      el.style.height = altezza + 'px';
-    });
-  });
-}
+/* Vecchie funzioni: ora non servono più (usate da creaPallaAiPiedi) */
+function evidenziaCoppiaContrasto() {}
 function nascondiEvidenzia() {
-  var el = document.getElementById('evidenzia-coppia');
-  if (el) el.style.display = 'none';
+  var els = document.querySelectorAll('.evidenzia-coppia');
+  for (var i=0;i<els.length;i++) els[i].remove();
 }
 
 function avviaSetup1P() {
@@ -1800,13 +1778,28 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   stato.streak = { tu:0, cpu:0 };
   stato.contrasto = null;
   stato.invertiCoppie = false;
-  nascondiEvidenzia();
 
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
 
+  // ============================================================
+  // FIX: se TU è in trasferta, inverti gli schieramenti
+  // (TU a destra, CPU a sinistra). Funziona come il 2° tempo.
+  // ============================================================
   if (casaSquadra && casaSquadra !== sqTU) {
     stato.direzioneAttaccoTU = -1;
+    stato.invertiCoppie = true;
+    // Swap zone di tutti i giocatori
+    ['tu','cpu'].forEach(function(sq) {
+      for (var i=0;i<stato.giocatori[sq].length;i++) {
+        var g = stato.giocatori[sq][i];
+        g.zona = 6 - g.zona;
+      }
+    });
+    // Swap proprietari portieri
+    var oldT = ZONE_CONFIG[0].proprietario;
+    ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
+    ZONE_CONFIG[6].proprietario = oldT;
   } else {
     stato.direzioneAttaccoTU = 1;
   }
@@ -1904,6 +1897,9 @@ function animaPallaInZona(gDa, gA, cb) {
   var aX = rA.left + rA.width/2 - box.left, aY = rA.bottom - box.top;
   var v = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v.length;i++) v[i].remove();
+  var e = document.querySelectorAll('.evidenzia-coppia');
+  for (var j=0;j<e.length;j++) e[j].remove();
+
   var p = document.getElementById('palla-volante');
   p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
   var pi = p.querySelector('.palla-inner');
@@ -1918,10 +1914,10 @@ function animaPallaInZona(gDa, gA, cb) {
   var gradi = giri * 360;
   function anima(now) {
     var t = Math.min((now - t0) / dur, 1);
-    var e = t*t*(3-2*t);
-    p.style.left = (pX + dx*e) + 'px';
-    p.style.top = (pY + dy*e) + 'px';
-    pi.style.transform = 'rotate(' + (gradi*e) + 'deg)';
+    var e2 = t*t*(3-2*t);
+    p.style.left = (pX + dx*e2) + 'px';
+    p.style.top = (pY + dy*e2) + 'px';
+    pi.style.transform = 'rotate(' + (gradi*e2) + 'deg)';
     if (t < 1) requestAnimationFrame(anima);
     else { p.classList.remove('attiva'); stato.pallaInAnimazione = false; if (cb) cb(); }
   }
@@ -1968,12 +1964,11 @@ function avviaContrasto() {
   }
 
   renderCampo(); renderHeader(); renderPannelloContrasto();
-  setTimeout(evidenziaCoppiaContrasto, 100);
 }
 
 function renderPannelloContrasto() {
   var c = stato.contrasto; if (!c) return;
-  document.getElementById('titolo-mano').textContent = 'Contrasto Z' + c.zona + ' ' + c.meta;
+  document.getElementById('titolo-mano').textContent = 'Contrasto Z' + c.zona + ' ' + stato.metaContesa;
   document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
   document.getElementById('turno-label').textContent = 'Seme guida: ' + SEMI[c.semeGuida].nome;
 
@@ -2002,7 +1997,6 @@ function renderPannelloContrasto() {
   document.getElementById('info-minuto').textContent = p + "' | " + t + "'";
   document.getElementById('info-streak').textContent = stato.streak.tu;
 
-  // FIX 2: mostra il pulsante bonus Contrasto Sicuro ANCHE se sei in difesa
   var azioni = '';
   if (!c.risolto) {
     azioni += '<button class="primario" id="btn-gioca" onclick="confermaCarta()" ' + (selezioneCarta === null ? 'disabled' : '') + '>GIOCA CARTA</button>';
@@ -2011,7 +2005,6 @@ function renderPannelloContrasto() {
     }
   }
   document.getElementById('azioni-container').innerHTML = azioni;
-  setTimeout(evidenziaCoppiaContrasto, 50);
 }
 
 function creaCartaEl(carta) {
@@ -2105,7 +2098,6 @@ function risolviContrastoAutomatico(vincente) {
   c.motivoFallo = null;
   flashVincitore(vincente);
   document.getElementById('carte-panel').classList.add('nascosto');
-  nascondiEvidenzia();
   stato.streak[vincente]++;
   if (stato.streak[vincente] >= STREAK_PER_BONUS) {
     stato.streak[vincente] = 0;
@@ -2171,8 +2163,6 @@ function confermaCarta() {
   else if (esito === 'falloCpu') motivoB = 'FALLO di CPU';
   else if (tuHaSeme && cpuHaSeme) motivoB = 'Entrambi avevano il seme';
   else motivoB = 'Nessuno aveva il seme';
-
-  nascondiEvidenzia();
 
   setTimeout(function() {
     mostraBannerMano(c.vincitore, cartaTu, cartaCpu, c.semeGuida, motivoB);
@@ -2714,8 +2704,7 @@ function gestisciParata(att, dif) {
   stato.zonaPalla = 3; stato.metaContesa = nMeta; stato.possessore = dif; stato.giocatorePalla = sc.id;
   renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
   var v = document.querySelectorAll('.palla-centro'); for (var p=0;p<v.length;p++) v[p].remove();
-  var pa = document.querySelector('[data-giocatore-id="' + sc.id + '"] .palla-attaccata');
-  if (pa) pa.remove();
+  var e = document.querySelectorAll('.evidenzia-coppia'); for (var p2=0;p2<e.length;p2++) e[p2].remove();
   if (por) {
     var elP = document.querySelector('[data-giocatore-id="' + por.id + '"]');
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
@@ -2735,10 +2724,10 @@ function gestisciParata(att, dif) {
       var dx = aX - pX, dy = aY - pY, dist = Math.sqrt(dx*dx+dy*dy);
       var giri = (dist/50)*(dx >= 0 ? 1 : -1), gr = giri*360;
       function anima(now) {
-        var t = Math.min((now - t0)/dur, 1), e = t*t*(3-2*t);
-        p.style.left = (pX + dx*e) + 'px';
-        p.style.top = (pY + dy*e + (-Math.sin(Math.PI*t)*40)) + 'px';
-        pi.style.transform = 'rotate(' + (gr*e) + 'deg)';
+        var t = Math.min((now - t0)/dur, 1), e2 = t*t*(3-2*t);
+        p.style.left = (pX + dx*e2) + 'px';
+        p.style.top = (pY + dy*e2 + (-Math.sin(Math.PI*t)*40)) + 'px';
+        pi.style.transform = 'rotate(' + (gr*e2) + 'deg)';
         if (t < 1) requestAnimationFrame(anima);
         else {
           p.classList.remove('attiva');
@@ -2809,8 +2798,7 @@ function gestisciFuori(att, dif) {
   stato.zonaPalla = 3; stato.metaContesa = nMeta; stato.possessore = dif; stato.giocatorePalla = sc.id;
   renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
   var v = document.querySelectorAll('.palla-centro'); for (var p=0;p<v.length;p++) v[p].remove();
-  var pa = document.querySelector('[data-giocatore-id="' + sc.id + '"] .palla-attaccata');
-  if (pa) pa.remove();
+  var e = document.querySelectorAll('.evidenzia-coppia'); for (var p2=0;p2<e.length;p2++) e[p2].remove();
   if (por) {
     var elP = document.querySelector('[data-giocatore-id="' + por.id + '"]');
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
@@ -2830,10 +2818,10 @@ function gestisciFuori(att, dif) {
       var dx = aX - pX, dy = aY - pY, dist = Math.sqrt(dx*dx+dy*dy);
       var giri = (dist/50)*(dx >= 0 ? 1 : -1), gr = giri*360;
       function anima(now) {
-        var t = Math.min((now - t0)/dur, 1), e = t*t*(3-2*t);
-        p.style.left = (pX + dx*e) + 'px';
-        p.style.top = (pY + dy*e + (-Math.sin(Math.PI*t)*40)) + 'px';
-        pi.style.transform = 'rotate(' + (gr*e) + 'deg)';
+        var t = Math.min((now - t0)/dur, 1), e2 = t*t*(3-2*t);
+        p.style.left = (pX + dx*e2) + 'px';
+        p.style.top = (pY + dy*e2 + (-Math.sin(Math.PI*t)*40)) + 'px';
+        pi.style.transform = 'rotate(' + (gr*e2) + 'deg)';
         if (t < 1) requestAnimationFrame(anima);
         else {
           p.classList.remove('attiva');
