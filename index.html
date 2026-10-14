@@ -97,16 +97,272 @@
 
   .area-gioco { position: relative; flex: 1; z-index: 5; overflow: hidden; }
 
+  /* ============================================================
+     SCENA: contenitore unico scalato
+     Tutto (campo + carte) vive dentro .scena 1600x900,
+     poi viene scalato via JS per entrare nello schermo.
+     ============================================================ */
+  .scena-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    z-index: 6;
+  }
+  .scena {
+    position: relative;
+    width: 1600px;
+    height: 900px;
+    transform-origin: center center;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+  .scena > * { pointer-events: auto; }
+
+  /* ============================================================
+     CAMPO — dentro la scena, posizionato in percentuali
+     ============================================================ */
+  .campo-area {
+    position: absolute;
+    left: 18%;
+    top: 46%;
+    width: 64%;
+    height: 42%;
+    padding: 0 2%;
+    pointer-events: none;
+  }
+
+  .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
+  .zona {
+    flex: 1; position: relative;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: stretch;
+    padding: 0 1.5%;
+  }
+  .meta-sup, .meta-inf {
+    display: flex; flex-direction: row;
+    justify-content: center; align-items: center;
+    flex: 1; padding: 2px 4px; gap: 12px;
+    position: relative;
+  }
+  .zona[data-zona="2"] .meta-sup,
+  .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
+  .zona[data-zona="2"] .meta-inf,
+  .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
+  .zona[data-zona="1"] .meta-inf,
+  .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
+
+  .pedina-wrapper {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1px; position: relative;
+  }
+  .portiere-wrapper {
+    position: absolute !important;
+    top: 50%;
+    transform: translate(-50%, calc(-50% - 20px));
+    z-index: 5;
+  }
+  .portiere-wrapper.portiere-sx {
+    left: 62%;
+    transform: translate(-50%, calc(-50% - 20px)) translateX(40px);
+  }
+  .portiere-wrapper.portiere-dx {
+    left: 38%;
+    transform: translate(-50%, calc(-50% - 20px)) translateX(-40px);
+  }
+
+  .nome-giocatore {
+    font-size: 10px; font-weight: 900; color: #fff;
+    text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000;
+    background: rgba(0,0,0,0.8);
+    padding: 2px 6px; border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.3);
+    white-space: nowrap; text-align: center;
+    font-family: 'Segoe UI', sans-serif;
+    letter-spacing: 0.3px; pointer-events: none;
+  }
+  .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
+  .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
+
+  .info-sotto {
+    display: flex; flex-direction: row; gap: 3px;
+    font-size: 10px; line-height: 1; color: #fff;
+    text-shadow: 0 1px 3px #000;
+    pointer-events: none; font-weight: 900;
+    font-family: 'Courier New', monospace;
+    background: rgba(0,0,0,0.75);
+    padding: 1px 4px; border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.25);
+    white-space: nowrap; margin-top: 2px;
+  }
+  .info-sotto .stamina-txt { color: #4ade80; font-size: 10px; }
+  .info-sotto .stamina-txt.medio { color: #fbbf24; }
+  .info-sotto .stamina-txt.basso { color: #ef4444; }
+  .info-sotto .falli-txt { color: #ff8a8a; font-size: 10px; font-weight: 900; }
+  .info-sotto .falli-txt.zero { color: #555; font-size: 9px; }
+  .info-sotto .cartellini { font-size: 10px; line-height: 1; }
+  .info-sotto.ammonito-info { border-color: #ffd700; box-shadow: 0 0 5px rgba(255,215,0,0.6); }
+  .info-sotto.espulso-info { border-color: #ff0000; box-shadow: 0 0 5px rgba(255,0,0,0.6); }
+
+  .pedina {
+    position: relative; width: 34px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.85));
+  }
+  .pedina.cpu svg { transform: scaleX(-1); }
+  .pedina.stanco { filter: grayscale(0.6) brightness(0.7) drop-shadow(0 4px 6px rgba(0,0,0,0.85)); }
+  .pedina.esaurito { filter: grayscale(0.9) brightness(0.35) drop-shadow(0 4px 6px rgba(0,0,0,0.85)); }
+  .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
+  .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
+  .pedina .stamina-bar {
+    position: absolute; bottom: -3px; left: 0; width: 100%; height: 2px;
+    background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
+  }
+  .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
+  .pedina .stamina-fill.medio { background: #fbbf24; }
+  .pedina .stamina-fill.basso { background: #ef4444; }
+
+  .palla-centro {
+    position: absolute; width: 18px; height: 18px;
+    z-index: 12; pointer-events: none;
+    transform: translate(-50%, -50%);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7));
+  }
+  .palla-centro svg { width: 100%; height: 100%; display: block; }
+
+  .palla-volante {
+    position: absolute; z-index: 15;
+    width: 18px; height: 18px;
+    display: none; pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .palla-volante.attiva { display: block; }
+  .palla-volante .palla-inner {
+    width: 100%; height: 100%;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
+  }
+  .palla-volante svg { width: 100%; height: 100%; display: block; }
+
+  .evidenzia-coppia {
+    position: absolute;
+    width: 65px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+      rgba(255,215,0,0.55) 0%,
+      rgba(255,215,0,0.2) 55%,
+      rgba(255,215,0,0) 85%);
+    border: 2px solid rgba(255,215,0,0.9);
+    box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4);
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    animation: pulseEllisse 1.5s infinite;
+  }
+  @keyframes pulseEllisse {
+    0%, 100% {
+      box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4);
+      border-color: rgba(255,215,0,0.9);
+    }
+    50% {
+      box-shadow: 0 0 25px rgba(255,215,0,1), inset 0 0 15px rgba(255,215,0,0.6);
+      border-color: rgba(255,215,0,1);
+    }
+  }
+
+  .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
+  @keyframes animFermo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  @keyframes calciaGamba {
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(-55deg); }
+    35% { transform: rotate(45deg); }
+    55% { transform: rotate(30deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .pedina.pg-in-calcio .pg-gamba-dx { animation: calciaGamba 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards; }
+  @keyframes calciaBusto {
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(-4deg); }
+    35% { transform: rotate(6deg); }
+    55% { transform: rotate(3deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .pedina.pg-in-calcio .pg-busto {
+    transform-origin: 20px 38px;
+    animation: calciaBusto 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards;
+  }
+  .pg-braccio-sx, .pg-braccio-dx { transition: transform 0.5s cubic-bezier(0.34,1.2,0.64,1); }
+  .pedina.pg-in-parata .pg-braccio-sx { transform: rotate(-140deg); }
+  .pedina.pg-in-parata .pg-braccio-dx { transform: rotate(140deg); }
+  .pedina.pg-in-parata.parata-sx .pg-braccio-sx { transform: rotate(-160deg); }
+  .pedina.pg-in-parata.parata-sx .pg-braccio-dx { transform: rotate(75deg); }
+  .pedina.pg-in-parata.parata-dx .pg-braccio-sx { transform: rotate(-75deg); }
+  .pedina.pg-in-parata.parata-dx .pg-braccio-dx { transform: rotate(160deg); }
+  .pedina.pg-in-parata.parata-centro .pg-braccio-sx { transform: rotate(-160deg); }
+  .pedina.pg-in-parata.parata-centro .pg-braccio-dx { transform: rotate(160deg); }
+  .pedina.pg-in-parata.parata-alto .pg-braccio-sx { transform: rotate(-170deg); }
+  .pedina.pg-in-parata.parata-alto .pg-braccio-dx { transform: rotate(170deg); }
+  .pedina.pg-in-parata.parata-basso .pg-braccio-sx { transform: rotate(-60deg); }
+  .pedina.pg-in-parata.parata-basso .pg-braccio-dx { transform: rotate(60deg); }
+
+  .tiro-portiere.pg-salta { animation: portiereSalta 0.7s cubic-bezier(0.34,1.4,0.64,1); }
+  @keyframes portiereSalta {
+    0% { transform: translate(0,0) scale(1); }
+    40% { transform: translate(0,-12%) scale(1.05); }
+    100% { transform: translate(0,0) scale(1); }
+  }
+  .tiro-portiere.parata-sx { transform: rotate(-8deg); }
+  .tiro-portiere.parata-dx { transform: rotate(8deg); }
+
+  .pedina-scivola-wrapper {
+    position: relative; z-index: 20;
+    transition: transform 0.6s cubic-bezier(0.34,1.5,0.64,1);
+  }
+  .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
+  .pedina-scivola-wrapper.scivolando .pedina svg { animation: animScivolata 0.6s ease-out; }
+  @keyframes animScivolata {
+    0% { transform: rotate(0deg) translateY(0); }
+    40% { transform: rotate(-35deg) translateY(4px); }
+    70% { transform: rotate(-15deg) translateY(2px); }
+    100% { transform: rotate(0deg) translateY(0); }
+  }
+
+  .flash-vincitore { position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0; }
+  .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
+  .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
+  .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
+  @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
+
+  /* ============================================================
+     CARTE PANEL — dentro la scena, in alto
+     ============================================================ */
   .carte-panel {
-    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-    width: 98%; max-width: 1450px;
-    background: rgba(10,15,30,0.88); backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,215,0,0.5); border-radius: 12px;
-    padding: 22px 14px 16px;
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96%;
+    background: rgba(10,15,30,0.9);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,215,0,0.5);
+    border-radius: 12px;
+    padding: 20px 14px 14px;
     display: flex; flex-direction: column; align-items: center; gap: 10px;
     z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7);
+    transition: opacity 0.3s, transform 0.3s;
   }
-  .carte-panel.nascosto { display: none; }
+  .carte-panel.nascosto {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(-20px);
+  }
 
   .info-mano { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
   .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; }
@@ -247,16 +503,6 @@
   .bonus-slot .bonus-carta.parata-super { background: linear-gradient(135deg, #7c2d12, #ea580c); border: 2px solid #fed7aa; }
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
 
-  .bonus-cpu-info {
-    position: absolute; top: 44px; left: 12px;
-    font-size: 12px; color: #ff6b6b; font-weight: bold;
-    background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px;
-    border: 2px solid rgba(255,107,107,0.6);
-    z-index: 20; display: flex; align-items: center; gap: 4px;
-    text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-  }
-  .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
-
   .sost-panel {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: rgba(0,0,0,0.35); border-radius: 10px; padding: 6px 10px;
@@ -306,251 +552,21 @@
   }
 
   /* ============================================================
-     CAMPO — PC / TABLET: layout originale a percentuali
+     BONUS CPU INFO — dentro la scena, in alto a sinistra
      ============================================================ */
-  .campo-wrapper {
-    position: absolute;
-    inset: 0;
-    z-index: 6;
-    pointer-events: none;
-    overflow: hidden;
+  .bonus-cpu-info {
+    position: absolute; top: 60px; left: 20px;
+    font-size: 12px; color: #ff6b6b; font-weight: bold;
+    background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px;
+    border: 2px solid rgba(255,107,107,0.6);
+    z-index: 20; display: flex; align-items: center; gap: 4px;
+    text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
-  .campo-area {
-    position: absolute;
-    left: 18%;
-    top: 46%;
-    width: 64%;
-    height: 42%;
-    padding: 0 2%;
-    pointer-events: none;
-  }
-
-  /* Il campo virtuale è nascosto di default (solo su mobile landscape) */
-  .campo-virtuale { display: none; }
-
-  .evidenzia-coppia {
-    position: absolute;
-    width: 65px;
-    height: 22px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center,
-      rgba(255,215,0,0.55) 0%,
-      rgba(255,215,0,0.2) 55%,
-      rgba(255,215,0,0) 85%);
-    border: 2px solid rgba(255,215,0,0.9);
-    box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4);
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    animation: pulseEllisse 1.5s infinite;
-  }
-  @keyframes pulseEllisse {
-    0%, 100% {
-      box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4);
-      border-color: rgba(255,215,0,0.9);
-    }
-    50% {
-      box-shadow: 0 0 25px rgba(255,215,0,1), inset 0 0 15px rgba(255,215,0,0.6);
-      border-color: rgba(255,215,0,1);
-    }
-  }
+  .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
 
   /* ============================================================
-     ZONE — GLOBALI (valide su PC, tablet e mobile)
+     PANCHINA — fixed in basso
      ============================================================ */
-  .zone {
-    display: flex;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-  }
-  .zona {
-    flex: 1;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: stretch;
-    padding: 0 1.5%;
-  }
-
-  .meta-sup, .meta-inf {
-    display: flex; flex-direction: row;
-    justify-content: center; align-items: center;
-    flex: 1; padding: 2px 4px; gap: 12px;
-    position: relative;
-  }
-
-  .zona[data-zona="2"] .meta-sup,
-  .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
-  .zona[data-zona="2"] .meta-inf,
-  .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
-
-  .zona[data-zona="1"] .meta-inf,
-  .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
-
-  .pedina-wrapper {
-    display: flex; flex-direction: column;
-    align-items: center; gap: 1px; position: relative;
-  }
-
-  .portiere-wrapper {
-    position: absolute !important;
-    top: 50%;
-    transform: translate(-50%, calc(-50% - 20px));
-    z-index: 5;
-  }
-  .portiere-wrapper.portiere-sx {
-    left: 62%;
-    transform: translate(-50%, calc(-50% - 20px)) translateX(40px);
-  }
-  .portiere-wrapper.portiere-dx {
-    left: 38%;
-    transform: translate(-50%, calc(-50% - 20px)) translateX(-40px);
-  }
-
-  .nome-giocatore {
-    font-size: 10px; font-weight: 900; color: #fff;
-    text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000;
-    background: rgba(0,0,0,0.8);
-    padding: 2px 6px; border-radius: 3px;
-    border: 1px solid rgba(255,255,255,0.3);
-    white-space: nowrap; text-align: center;
-    font-family: 'Segoe UI', sans-serif;
-    letter-spacing: 0.3px; pointer-events: none;
-  }
-  .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
-  .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
-
-  .info-sotto {
-    display: flex; flex-direction: row; gap: 3px;
-    font-size: 10px; line-height: 1; color: #fff;
-    text-shadow: 0 1px 3px #000;
-    pointer-events: none; font-weight: 900;
-    font-family: 'Courier New', monospace;
-    background: rgba(0,0,0,0.75);
-    padding: 1px 4px; border-radius: 3px;
-    border: 1px solid rgba(255,255,255,0.25);
-    white-space: nowrap; margin-top: 2px;
-  }
-  .info-sotto .stamina-txt { color: #4ade80; font-size: 10px; }
-  .info-sotto .stamina-txt.medio { color: #fbbf24; }
-  .info-sotto .stamina-txt.basso { color: #ef4444; }
-  .info-sotto .falli-txt { color: #ff8a8a; font-size: 10px; font-weight: 900; }
-  .info-sotto .falli-txt.zero { color: #555; font-size: 9px; }
-  .info-sotto .cartellini { font-size: 10px; line-height: 1; }
-  .info-sotto.ammonito-info { border-color: #ffd700; box-shadow: 0 0 5px rgba(255,215,0,0.6); }
-  .info-sotto.espulso-info { border-color: #ff0000; box-shadow: 0 0 5px rgba(255,0,0,0.6); }
-
-  .pedina {
-    position: relative; width: 34px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.85));
-  }
-  .pedina.cpu svg { transform: scaleX(-1); }
-  .pedina.stanco { filter: grayscale(0.6) brightness(0.7) drop-shadow(0 4px 6px rgba(0,0,0,0.85)); }
-  .pedina.esaurito { filter: grayscale(0.9) brightness(0.35) drop-shadow(0 4px 6px rgba(0,0,0,0.85)); }
-  .pedina.ammonito { box-shadow: 0 0 0 2px #ffd700; border-radius: 4px; }
-  .pedina.espulso { filter: grayscale(1) brightness(0.4) !important; opacity: 0.5; }
-  .pedina .stamina-bar {
-    position: absolute; bottom: -3px; left: 0; width: 100%; height: 2px;
-    background: rgba(0,0,0,0.6); border-radius: 2px; overflow: hidden;
-  }
-  .pedina .stamina-fill { height: 100%; background: #4ade80; transition: width 0.3s; }
-  .pedina .stamina-fill.medio { background: #fbbf24; }
-  .pedina .stamina-fill.basso { background: #ef4444; }
-
-  .palla-centro {
-    position: absolute; width: 18px; height: 18px;
-    z-index: 12; pointer-events: none;
-    transform: translate(-50%, -50%);
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7));
-  }
-  .palla-centro svg { width: 100%; height: 100%; display: block; }
-
-  .palla-volante {
-    position: absolute; z-index: 15;
-    width: 18px; height: 18px;
-    display: none; pointer-events: none;
-    transform: translate(-50%, -50%);
-  }
-  .palla-volante.attiva { display: block; }
-  .palla-volante .palla-inner {
-    width: 100%; height: 100%;
-    transform-origin: 50% 50%;
-    will-change: transform;
-    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
-  }
-  .palla-volante svg { width: 100%; height: 100%; display: block; }
-
-  .anim-fermo { animation: animFermo 1.8s infinite ease-in-out; }
-  @keyframes animFermo {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
-  }
-  @keyframes calciaGamba {
-    0% { transform: rotate(0deg); }
-    15% { transform: rotate(-55deg); }
-    35% { transform: rotate(45deg); }
-    55% { transform: rotate(30deg); }
-    100% { transform: rotate(0deg); }
-  }
-  .pedina.pg-in-calcio .pg-gamba-dx { animation: calciaGamba 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards; }
-  @keyframes calciaBusto {
-    0% { transform: rotate(0deg); }
-    15% { transform: rotate(-4deg); }
-    35% { transform: rotate(6deg); }
-    55% { transform: rotate(3deg); }
-    100% { transform: rotate(0deg); }
-  }
-  .pedina.pg-in-calcio .pg-busto {
-    transform-origin: 20px 38px;
-    animation: calciaBusto 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards;
-  }
-  .pg-braccio-sx, .pg-braccio-dx { transition: transform 0.5s cubic-bezier(0.34,1.2,0.64,1); }
-  .pedina.pg-in-parata .pg-braccio-sx { transform: rotate(-140deg); }
-  .pedina.pg-in-parata .pg-braccio-dx { transform: rotate(140deg); }
-  .pedina.pg-in-parata.parata-sx .pg-braccio-sx { transform: rotate(-160deg); }
-  .pedina.pg-in-parata.parata-sx .pg-braccio-dx { transform: rotate(75deg); }
-  .pedina.pg-in-parata.parata-dx .pg-braccio-sx { transform: rotate(-75deg); }
-  .pedina.pg-in-parata.parata-dx .pg-braccio-dx { transform: rotate(160deg); }
-  .pedina.pg-in-parata.parata-centro .pg-braccio-sx { transform: rotate(-160deg); }
-  .pedina.pg-in-parata.parata-centro .pg-braccio-dx { transform: rotate(160deg); }
-  .pedina.pg-in-parata.parata-alto .pg-braccio-sx { transform: rotate(-170deg); }
-  .pedina.pg-in-parata.parata-alto .pg-braccio-dx { transform: rotate(170deg); }
-  .pedina.pg-in-parata.parata-basso .pg-braccio-sx { transform: rotate(-60deg); }
-  .pedina.pg-in-parata.parata-basso .pg-braccio-dx { transform: rotate(60deg); }
-
-  .tiro-portiere.pg-salta { animation: portiereSalta 0.7s cubic-bezier(0.34,1.4,0.64,1); }
-  @keyframes portiereSalta {
-    0% { transform: translate(0,0) scale(1); }
-    40% { transform: translate(0,-12%) scale(1.05); }
-    100% { transform: translate(0,0) scale(1); }
-  }
-  .tiro-portiere.parata-sx { transform: rotate(-8deg); }
-  .tiro-portiere.parata-dx { transform: rotate(8deg); }
-
-  .pedina-scivola-wrapper {
-    position: relative; z-index: 20;
-    transition: transform 0.6s cubic-bezier(0.34,1.5,0.64,1);
-  }
-  .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
-  .pedina-scivola-wrapper.scivolando .pedina svg { animation: animScivolata 0.6s ease-out; }
-  @keyframes animScivolata {
-    0% { transform: rotate(0deg) translateY(0); }
-    40% { transform: rotate(-35deg) translateY(4px); }
-    70% { transform: rotate(-15deg) translateY(2px); }
-    100% { transform: rotate(0deg) translateY(0); }
-  }
-
-  .flash-vincitore { position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0; }
-  .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
-  .flash-vincitore.cpu { background: radial-gradient(circle, rgba(255,107,107,0.7), transparent 70%); }
-  .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
-  @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
-
   .panchina {
     position: fixed; bottom: 0; left: 0; right: 0;
     background: rgba(10,10,20,0.9); backdrop-filter: blur(8px);
@@ -567,6 +583,9 @@
   .panchina-giocatore .pedina { transform: scale(0.85); width: 30px; height: 40px; }
   .panchina-giocatore .panchina-nome { font-size: 9px; color: #ccc; margin-top: 2px; font-weight: bold; }
 
+  /* ============================================================
+     BANNER E MODALI
+     ============================================================ */
   .goal-banner {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s;
@@ -788,15 +807,15 @@
   }
   .impostazioni-info { font-size: 12px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
 
-  /* Pulsanti toggle mobile: nascosti di default su desktop */
+  /* Pulsanti toggle mobile: nascosti di default */
   .btn-toggle-panel,
   .btn-toggle-panchina { display: none; }
 
   /* ============================================================
-     MOBILE LANDSCAPE (h <= 600px): campo virtuale + layout ridotto
+     MOBILE LANDSCAPE — solo riduzione pannello carte / topbar
+     La scena è già scalata via JS, quindi tutto è proporzionale.
      ============================================================ */
   @media (orientation: landscape) and (max-height: 600px) {
-    /* Topbar compatta */
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
     .risultato { font-size: 14px; letter-spacing: 0.5px; }
     .risultato .sep { margin: 0 5px; }
@@ -804,26 +823,6 @@
     .info-top { font-size: 8px; right: 60px; line-height: 1.05; }
     .btn-icona { width: 24px; height: 24px; font-size: 11px; border-width: 1px; border-radius: 5px; }
     .topbar-buttons { gap: 2px; right: 4px; }
-
-    /* Pannello carte: overlay semi-trasparente */
-    .carte-panel {
-      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-      transform: none; width: 100%; max-width: none;
-      border-radius: 0; border: none;
-      border-top: 2px solid rgba(255,215,0,0.6);
-      border-bottom: 2px solid rgba(255,215,0,0.6);
-      padding: 6px 6px 4px; gap: 4px;
-      background: rgba(10,15,30,0.82);
-      backdrop-filter: blur(3px) saturate(1.2);
-      -webkit-backdrop-filter: blur(3px) saturate(1.2);
-      justify-content: center; z-index: 40;
-      transition: opacity 0.25s;
-    }
-    .carte-panel.ridotto { bottom: auto; height: auto; padding: 3px 6px; opacity: 0.85; }
-    .carte-panel.ridotto .mano-wrapper,
-    .carte-panel.ridotto .info-carte,
-    .carte-panel.ridotto #azioni-container { display: none; }
-    .carte-panel.ridotto .info-mano { margin: 0; }
 
     .btn-toggle-panel {
       display: flex;
@@ -838,57 +837,6 @@
     }
     .btn-toggle-panel:active { background: #fff; }
 
-    .mano-wrapper { gap: 6px; flex-wrap: nowrap; overflow-x: auto; padding: 2px 4px; justify-content: center; }
-
-    .carta { width: 42px; height: 60px; padding: 2px; border-radius: 4px; }
-    .carta .valore-alto { font-size: 11px; }
-    .carta .seme-centro { font-size: 26px; }
-    .carta .valore-basso { font-size: 11px; }
-    .carta.selezionata { transform: translateY(-5px); }
-
-    .mano-sezione { padding: 2px 5px; gap: 2px; border-radius: 6px; }
-    .mano-sezione .mano-label { font-size: 8px; }
-
-    .seme-grande { padding: 3px 7px; border-radius: 6px; border-width: 2px; }
-    .seme-grande .label { font-size: 7px; letter-spacing: 1px; }
-    .seme-grande .seme { font-size: 24px; }
-
-    .pile-wrapper { gap: 14px; }
-    .pila, .pila-bonus { width: 42px; height: 60px; }
-    .pila-carta, .pila-bonus .pila-carta { width: 42px; height: 60px; border-radius: 4px; }
-    .pila-carta.dietro::after { font-size: 20px; }
-    .pila-carta.scarto::after { font-size: 16px; }
-    .pila-bonus .pila-carta.bonus::after { font-size: 20px; }
-    .pila-titolo { font-size: 7px; top: -11px; letter-spacing: 0.5px; }
-    .pila-bonus .pila-titolo { font-size: 7px; top: -11px; }
-    .pila-count, .pila-bonus .pila-count {
-      bottom: -16px; font-size: 8px; padding: 1px 4px;
-      border-width: 1px; border-radius: 4px;
-    }
-
-    .bonus-tu-wrapper { padding: 2px 5px; gap: 2px; border-radius: 6px; }
-    .bonus-tu-wrapper .bonus-label { font-size: 7px; }
-    .bonus-slots { gap: 3px; }
-    .bonus-slot { width: 32px; height: 46px; border-radius: 4px; }
-    .bonus-slot .bonus-carta { font-size: 16px; }
-    .bonus-slot .bonus-carta .ang { font-size: 6px; }
-    .bonus-slot .bonus-carta .nome-bonus { font-size: 4px; bottom: 2px; }
-
-    .sost-panel { padding: 2px 5px; border-radius: 6px; }
-    .sost-panel .sost-btn { padding: 3px 6px; border-radius: 5px; border-width: 1px; }
-    .sost-panel .sost-btn .icona { font-size: 14px; }
-    .sost-panel .sost-btn .testo { font-size: 6px; }
-
-    .info-mano { font-size: 8px; gap: 5px; }
-    .info-mano .titolo { font-size: 8px; }
-    .info-mano .turno-label { font-size: 8px; }
-
-    .info-carte { font-size: 7px; padding: 1px 5px; gap: 5px; border-width: 1px; }
-
-    #azioni-container button { padding: 3px 8px; font-size: 9px; }
-    button { padding: 3px 8px; font-size: 9px; }
-
-    /* Panchina: nascosta di default su mobile landscape */
     .panchina {
       position: fixed; bottom: 0; left: 0; right: 0;
       min-height: 44px; padding: 2px 4px;
@@ -915,182 +863,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.7);
     }
     .btn-toggle-panchina:active { background: #4dabf7; color: #16213e; }
-
-    .bonus-cpu-info {
-      top: 28px; left: 4px;
-      font-size: 8px; padding: 1px 4px;
-      border-width: 1px; border-radius: 4px;
-    }
-    .bonus-cpu-info .carte-bonus { font-size: 9px; }
-
-    .goal-banner-text { font-size: 40px; letter-spacing: 3px; }
-    .moneta-banner-text { font-size: 22px; padding: 10px 18px; letter-spacing: 2px; }
-    .bonus-banner { font-size: 10px; padding: 5px 10px; top: 30px; border-width: 2px; border-radius: 7px; }
-
-    .banner-mano-box { padding: 8px 14px; border-width: 3px; border-radius: 12px; }
-    .banner-mano-vincitore { font-size: 16px; margin-bottom: 6px; letter-spacing: 2px; }
-    .banner-mano-carte { gap: 6px; }
-    .banner-mano-carta .carta { width: 44px; height: 62px; }
-    .banner-mano-carta .carta .seme-centro { font-size: 24px; }
-    .banner-mano-carta.seme-centrale .carta .seme-centro { font-size: 30px; }
-    .banner-mano-carta .chi { font-size: 7px; }
-    .banner-mano-vs { font-size: 11px; }
-    .banner-mano-seme { font-size: 8px; margin-top: 5px; }
-    .banner-mano-motivo { font-size: 8px; margin-top: 2px; }
-
-    .tiro-titolo { font-size: 13px; margin-bottom: 4px; letter-spacing: 2px; }
-    .tiro-porta-wrapper { max-width: 340px; margin: 2px auto; }
-    .tiro-esito { font-size: 22px; margin-top: 6px; min-height: 28px; }
-    .tiro-info { font-size: 9px; margin-top: 3px; }
-    .tiro-dadi-info { font-size: 9px; min-height: 42px; margin-top: 3px; gap: 2px; }
-    .tiro-dado { width: 20px; height: 20px; font-size: 11px; }
-    .tiro-dado-label { font-size: 7px; min-width: 55px; }
-    .tiro-bonus-container { margin-top: 3px; gap: 3px; }
-    .tiro-bonus-container button { padding: 3px 7px; font-size: 9px; }
-
-    .modale-box { padding: 10px; border-radius: 8px; border-width: 2px; }
-    .modale-box h2 { font-size: 13px; margin-bottom: 6px; }
-    .menu-titolo { font-size: 18px; letter-spacing: 2px; }
-    .menu-sottotitolo { font-size: 9px; margin-bottom: 8px; }
-    .menu-btn { padding: 6px 12px; min-width: 200px; border-radius: 7px; gap: 7px; border-width: 2px; }
-    .menu-btn .icona { font-size: 18px; }
-    .menu-btn .testo .titolo { font-size: 11px; }
-    .menu-btn .testo .descr { font-size: 8px; }
-    .squadre-griglia { grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 3px; margin: 6px 0; }
-    .squadra-btn { padding: 3px; border-radius: 4px; border-width: 2px; }
-    .squadra-btn .nome { font-size: 7px; margin-bottom: 1px; }
-    .squadra-btn .maglia { width: 22px; height: 28px; }
-
-    /* ============================================================
-       MOBILE: campo virtuale 1400x700 scalato
-       ============================================================ */
-    .campo-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .campo-area {
-      position: relative;
-      left: auto;
-      top: auto;
-      width: 1400px;
-      height: 700px;
-      padding: 0;
-      transform-origin: center center;
-      flex-shrink: 0;
-    }
-    .campo-virtuale { display: block; }
-
-    /* Il campo virtuale (linee) — visibile solo qui */
-    .campo-verde {
-      position: absolute;
-      inset: 0;
-      background:
-        repeating-linear-gradient(90deg,
-          #1a5c2a 0px, #1a5c2a 70px,
-          #1e6b30 70px, #1e6b30 140px);
-      border: 4px solid rgba(255,255,255,0.95);
-      border-radius: 6px;
-      box-shadow:
-        0 0 60px rgba(0,0,0,0.8),
-        inset 0 0 120px rgba(0,0,0,0.35);
-    }
-    .campo-meta {
-      position: absolute;
-      left: 50%; top: 0; bottom: 0;
-      width: 3px;
-      background: rgba(255,255,255,0.9);
-      transform: translateX(-50%);
-    }
-    .campo-cerchio {
-      position: absolute;
-      left: 50%; top: 50%;
-      width: 160px; height: 160px;
-      border: 3px solid rgba(255,255,255,0.9);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .campo-centro {
-      position: absolute;
-      left: 50%; top: 50%;
-      width: 10px; height: 10px;
-      background: #fff;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-    }
-    .campo-area-rigore {
-      position: absolute;
-      top: 50%;
-      width: 190px;
-      height: 340px;
-      border: 3px solid rgba(255,255,255,0.9);
-      transform: translateY(-50%);
-    }
-    .campo-area-rigore.sx { left: 0; border-left: none; border-radius: 0 8px 8px 0; }
-    .campo-area-rigore.dx { right: 0; border-right: none; border-radius: 8px 0 0 8px; }
-    .campo-area-piccola {
-      position: absolute;
-      top: 50%;
-      width: 70px;
-      height: 180px;
-      border: 2px solid rgba(255,255,255,0.8);
-      transform: translateY(-50%);
-    }
-    .campo-area-piccola.sx { left: 0; border-left: none; border-radius: 0 5px 5px 0; }
-    .campo-area-piccola.dx { right: 0; border-right: none; border-radius: 5px 0 0 5px; }
-    .campo-rigore {
-      position: absolute;
-      top: 50%;
-      width: 8px; height: 8px;
-      background: #fff;
-      border-radius: 50%;
-      transform: translateY(-50%);
-    }
-    .campo-rigore.sx { left: 140px; }
-    .campo-rigore.dx { right: 140px; }
-    .campo-porta {
-      position: absolute;
-      top: 50%;
-      width: 18px;
-      height: 100px;
-      border: 3px solid rgba(255,255,255,0.9);
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.12);
-    }
-    .campo-porta.sx { left: -18px; border-right: none; border-radius: 5px 0 0 5px; }
-    .campo-porta.dx { right: -18px; border-left: none; border-radius: 0 5px 5px 0; }
-
-    /* Zone: portieri più stretti su mobile */
-    .zona[data-zona="0"],
-    .zona[data-zona="6"] {
-      flex: 0.55;
-    }
-    .meta-sup, .meta-inf { gap: 24px; }
-    .zona[data-zona="2"] .meta-sup,
-    .zona[data-zona="4"] .meta-sup { transform: translateY(-50px); }
-    .zona[data-zona="2"] .meta-inf,
-    .zona[data-zona="4"] .meta-inf { transform: translateY(50px); }
-    .zona[data-zona="1"] .meta-inf,
-    .zona[data-zona="5"] .meta-inf { transform: translateY(-60px); }
-
-    /* Portieri: al centro della loro zona */
-    .portiere-wrapper {
-      position: absolute !important;
-      top: 50%;
-      left: 50% !important;
-      transform: translate(-50%, calc(-50% - 20px)) !important;
-      z-index: 5;
-    }
-    .portiere-wrapper.portiere-sx { left: 50% !important; transform: translate(-50%, calc(-50% - 20px)) translateX(70px) !important; }
-    .portiere-wrapper.portiere-dx { left: 50% !important; transform: translate(-50%, calc(-50% - 20px)) translateX(-70px) !important; }
-
-    /* Pedine un po' più piccole su mobile */
-    .pedina { width: 30px; height: 40px; }
-    .nome-giocatore { font-size: 9px; padding: 1px 4px; }
-    .info-sotto { font-size: 8px; padding: 0 3px; margin-top: 1px; }
-    .info-sotto .stamina-txt,
-    .info-sotto .falli-txt,
-    .info-sotto .cartellini { font-size: 8px; }
   }
 </style>
 </head>
@@ -1134,90 +906,77 @@
   <div class="area-gioco">
     <button class="btn-toggle-panel" id="btn-toggle-panel" onclick="togglePannelloCarte()" title="Mostra/nascondi carte">▼</button>
 
-    <div class="bonus-cpu-info" id="bonus-cpu-info">
-      🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
-    </div>
+    <div class="scena-wrapper" id="scena-wrapper">
+      <div class="scena" id="scena">
+        <div class="bonus-cpu-info" id="bonus-cpu-info">
+          🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
+        </div>
 
-    <div class="carte-panel nascosto" id="carte-panel">
-      <div class="info-mano">
-        <div class="titolo" id="titolo-mano">Contrasto</div>
-        <div class="turno-label" id="turno-label"></div>
-      </div>
-      <div class="mano-wrapper">
-        <div class="pila-bonus-wrapper">
-          <div class="pila-bonus">
-            <div class="pila-titolo">BONUS</div>
-            <div class="pila-carte" id="bonus-pila"></div>
-            <div class="pila-count" id="bonus-count">12</div>
+        <div class="carte-panel" id="carte-panel">
+          <div class="info-mano">
+            <div class="titolo" id="titolo-mano">Contrasto</div>
+            <div class="turno-label" id="turno-label"></div>
           </div>
-        </div>
-        <div class="seme-grande">
-          <span class="label">SEME</span>
-          <span class="seme" id="seme-guidatore">⚽</span>
-        </div>
-        <div class="mano-sezione tu">
-          <div class="mano-label">Tu (<span id="count-tu">7</span>)</div>
-          <div class="carte" id="carte-tu"></div>
-        </div>
-        <div class="bonus-tu-wrapper">
-          <div class="bonus-label">Bonus</div>
-          <div class="bonus-slots" id="bonus-slots-tu">
-            <div class="bonus-slot" data-slot="0"></div>
-            <div class="bonus-slot" data-slot="1"></div>
-            <div class="bonus-slot" data-slot="2"></div>
+          <div class="mano-wrapper">
+            <div class="pila-bonus-wrapper">
+              <div class="pila-bonus">
+                <div class="pila-titolo">BONUS</div>
+                <div class="pila-carte" id="bonus-pila"></div>
+                <div class="pila-count" id="bonus-count">12</div>
+              </div>
+            </div>
+            <div class="seme-grande">
+              <span class="label">SEME</span>
+              <span class="seme" id="seme-guidatore">⚽</span>
+            </div>
+            <div class="mano-sezione tu">
+              <div class="mano-label">Tu (<span id="count-tu">7</span>)</div>
+              <div class="carte" id="carte-tu"></div>
+            </div>
+            <div class="bonus-tu-wrapper">
+              <div class="bonus-label">Bonus</div>
+              <div class="bonus-slots" id="bonus-slots-tu">
+                <div class="bonus-slot" data-slot="0"></div>
+                <div class="bonus-slot" data-slot="1"></div>
+                <div class="bonus-slot" data-slot="2"></div>
+              </div>
+            </div>
+            <div class="pile-wrapper">
+              <div class="pila">
+                <div class="pila-titolo">MAZZO</div>
+                <div class="pila-carte" id="mazzo-pila"></div>
+                <div class="pila-count mazzo" id="mazzo-count">0</div>
+              </div>
+              <div class="pila">
+                <div class="pila-titolo">SCARTI</div>
+                <div class="pila-carte" id="scarti-pila"></div>
+                <div class="pila-count scarto" id="scarti-count">0</div>
+              </div>
+            </div>
+            <div class="sost-panel">
+              <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
+                <div class="icona">🔄</div>
+                <div class="testo">SOSTITUZIONI</div>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="pile-wrapper">
-          <div class="pila">
-            <div class="pila-titolo">MAZZO</div>
-            <div class="pila-carte" id="mazzo-pila"></div>
-            <div class="pila-count mazzo" id="mazzo-count">0</div>
+          <div class="info-carte">
+            <span>Mazzo: <strong id="info-mazzo">52</strong></span>
+            <span>Scarti: <strong id="info-scarti">0</strong></span>
+            <span>Minuto: <strong id="info-minuto">0'</strong></span>
+            <span>Streak: <strong id="info-streak">0</strong>/3</span>
           </div>
-          <div class="pila">
-            <div class="pila-titolo">SCARTI</div>
-            <div class="pila-carte" id="scarti-pila"></div>
-            <div class="pila-count scarto" id="scarti-count">0</div>
-          </div>
+          <div id="azioni-container"></div>
         </div>
-        <div class="sost-panel">
-          <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
-            <div class="icona">🔄</div>
-            <div class="testo">SOSTITUZIONI</div>
-          </button>
-        </div>
-      </div>
-      <div class="info-carte">
-        <span>Mazzo: <strong id="info-mazzo">52</strong></span>
-        <span>Scarti: <strong id="info-scarti">0</strong></span>
-        <span>Minuto: <strong id="info-minuto">0'</strong></span>
-        <span>Streak: <strong id="info-streak">0</strong>/3</span>
-      </div>
-      <div id="azioni-container"></div>
-    </div>
 
-    <div class="campo-wrapper" id="campo-wrapper">
-      <div class="campo-area" id="campo-area">
-        <!-- Campo virtuale: visibile solo su mobile landscape -->
-        <div class="campo-virtuale">
-          <div class="campo-verde"></div>
-          <div class="campo-meta"></div>
-          <div class="campo-cerchio"></div>
-          <div class="campo-centro"></div>
-          <div class="campo-area-rigore sx"></div>
-          <div class="campo-area-rigore dx"></div>
-          <div class="campo-area-piccola sx"></div>
-          <div class="campo-area-piccola dx"></div>
-          <div class="campo-rigore sx"></div>
-          <div class="campo-rigore dx"></div>
-          <div class="campo-porta sx"></div>
-          <div class="campo-porta dx"></div>
+        <div class="campo-area">
+          <div class="zone" id="zone"></div>
         </div>
-        <div class="zone" id="zone"></div>
+
+        <div class="palla-volante" id="palla-volante"></div>
+        <div class="flash-vincitore" id="flash"></div>
       </div>
     </div>
-
-    <div class="palla-volante" id="palla-volante"></div>
-    <div class="flash-vincitore" id="flash"></div>
   </div>
 
   <div class="panchina" id="panchina"></div>
@@ -1298,6 +1057,58 @@ var URL_SQ_TU = urlParams.get('sqTU');
 var URL_SQ_CPU = urlParams.get('sqCPU');
 var URL_CASA = urlParams.get('casa');
 var URL_TRASFERTA = urlParams.get('trasferta');
+
+/* ============================================================
+   SCALA UNICA — la scena 1600x900 viene scalata per entrare
+   nello spazio disponibile. Funziona su PC, tablet, cellulare.
+   ============================================================ */
+var SCENA_W = 1600;
+var SCENA_H = 900;
+
+function adattaScena() {
+  var scena = document.getElementById('scena');
+  var wrapper = document.getElementById('scena-wrapper');
+  if (!scena || !wrapper) return;
+  var w = wrapper.clientWidth;
+  var h = wrapper.clientHeight;
+  if (w === 0 || h === 0) return;
+  var scala = Math.min(w / SCENA_W, h / SCENA_H);
+  scena.style.transform = 'scale(' + scala + ')';
+}
+
+window.addEventListener('resize', adattaScena);
+window.addEventListener('orientationchange', function() {
+  setTimeout(adattaScena, 250);
+});
+
+/* ============================================================
+   TOGGLE PANNELLO CARTE E PANCHINA
+   ============================================================ */
+var pannelloRidotto = false;
+var panchinaAperta = false;
+
+function mostraPannelloCarte() {
+  var panel = document.getElementById('carte-panel');
+  if (!panel) return;
+  panel.classList.remove('nascosto');
+}
+function nascondiPannelloCarte() {
+  var panel = document.getElementById('carte-panel');
+  if (!panel) return;
+  panel.classList.add('nascosto');
+}
+function togglePannelloCarte() {
+  var panel = document.getElementById('carte-panel');
+  if (!panel) return;
+  if (panel.classList.contains('nascosto')) panel.classList.remove('nascosto');
+  else panel.classList.add('nascosto');
+}
+function togglePanchina() {
+  var p = document.getElementById('panchina');
+  if (!p) return;
+  panchinaAperta = !panchinaAperta;
+  p.classList.toggle('aperta', panchinaAperta);
+}
 
 /* AMMONIZIONI */
 var ammonizioni = null;
@@ -1638,89 +1449,6 @@ var VALORI = [
   {valore:10,label:'10'},{valore:9,label:'9'},{valore:8,label:'8'},{valore:7,label:'7'},
   {valore:6,label:'6'},{valore:5,label:'5'},{valore:4,label:'4'},{valore:3,label:'3'},{valore:2,label:'2'}
 ];
-
-/* ============================================================
-   SCALA MOBILE: adatta il campo 1400x700 allo schermo
-   ============================================================ */
-var CAMPO_BASE_W = 1400;
-var CAMPO_BASE_H = 700;
-
-function calcolaScalaMobile() {
-  var w = window.innerWidth;
-  var h = window.innerHeight;
-  var topbar = document.querySelector('.topbar');
-  var topbarH = topbar ? topbar.offsetHeight : 0;
-  var availableH = h - topbarH - 10;
-
-  var scalaW = (w * 0.95) / CAMPO_BASE_W;
-  var scalaH = (availableH * 0.92) / CAMPO_BASE_H;
-  return Math.min(scalaW, scalaH);
-}
-
-function adattaCampoResponsive() {
-  var area = document.getElementById('campo-area');
-  if (!area) return;
-  var w = window.innerWidth, h = window.innerHeight;
-  var isMobileLandscape = (h <= 600 && w > h);
-
-  if (isMobileLandscape) {
-    var scala = calcolaScalaMobile();
-    area.style.transform = 'scale(' + scala + ')';
-    area.style.position = 'relative';
-    area.style.left = 'auto';
-    area.style.top = 'auto';
-    area.style.width = CAMPO_BASE_W + 'px';
-    area.style.height = CAMPO_BASE_H + 'px';
-    area.style.padding = '0';
-  } else {
-    area.style.transform = 'none';
-    area.style.position = 'absolute';
-    area.style.left = '18%';
-    area.style.top = '46%';
-    area.style.width = '64%';
-    area.style.height = '42%';
-    area.style.padding = '0 2%';
-  }
-}
-
-window.addEventListener('resize', adattaCampoResponsive);
-window.addEventListener('orientationchange', function() {
-  setTimeout(adattaCampoResponsive, 250);
-});
-
-/* ============================================================
-   TOGGLE PANNELLO CARTE E PANCHINA
-   ============================================================ */
-var pannelloRidotto = false;
-var panchinaAperta = false;
-
-function togglePannelloCarte() {
-  var panel = document.getElementById('carte-panel');
-  var btn = document.getElementById('btn-toggle-panel');
-  if (!panel) return;
-  pannelloRidotto = !pannelloRidotto;
-  if (pannelloRidotto) {
-    panel.classList.add('ridotto');
-    if (btn) { btn.textContent = '▲'; btn.title = 'Mostra carte'; }
-  } else {
-    panel.classList.remove('ridotto');
-    if (btn) { btn.textContent = '▼'; btn.title = 'Nascondi carte'; }
-  }
-}
-function togglePanchina() {
-  var p = document.getElementById('panchina');
-  if (!p) return;
-  panchinaAperta = !panchinaAperta;
-  p.classList.toggle('aperta', panchinaAperta);
-}
-function apriPannelloCarte() {
-  var panel = document.getElementById('carte-panel');
-  var btn = document.getElementById('btn-toggle-panel');
-  if (!panel) return;
-  pannelloRidotto = false;
-  panel.classList.remove('ridotto');
-  if (btn) { btn.textContent = '▼'; btn.title = 'Nascondi carte'; }
-}
 
 function creaMazzoPoker() {
   var mazzo=[], id=0;
@@ -2301,9 +2029,9 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   applicaSqualifiche('tu');
   applicaSqualifiche('cpu');
 
-  adattaCampoResponsive();
-  setTimeout(adattaCampoResponsive, 200);
-  setTimeout(adattaCampoResponsive, 500);
+  adattaScena();
+  setTimeout(adattaScena, 100);
+  setTimeout(adattaScena, 400);
 
   renderCampo();
   renderPanchina();
@@ -2339,10 +2067,20 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
+/* ============================================================
+   MOSTRA / NASCONDI PANNELLO CARTE
+   Il pannello carte è visibile quando serve giocare.
+   Durante l'animazione in campo è nascosto.
+   ============================================================ */
+function mostraVistaCampo() {
+  nascondiPannelloCarte();
+}
+function mostraVistaCarte() {
+  mostraPannelloCarte();
+}
+
 function eseguiCalcioIniziale(squadra) {
-  if (window.innerHeight > 600 || window.innerWidth < window.innerHeight) {
-    document.getElementById('carte-panel').classList.add('nascosto');
-  }
+  mostraVistaCampo();
   nascondiEvidenzia();
   stato.pallaInAnimazione = true;
   var c = getCoppiaAttiva(3, 'inf');
@@ -2385,7 +2123,8 @@ function eseguiCalcioIniziale(squadra) {
 
 function animaPallaInZona(gDa, gA, cb) {
   suonaCalcio();
-  var area = document.querySelector('.area-gioco');
+  mostraVistaCampo();
+  var area = document.querySelector('.scena');
   var box = area.getBoundingClientRect();
   var elD = document.querySelector('[data-giocatore-id="' + gDa.id + '"]');
   var elA = document.querySelector('[data-giocatore-id="' + gA.id + '"]');
@@ -2424,8 +2163,7 @@ function animaPallaInZona(gDa, gA, cb) {
 
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
-  apriPannelloCarte();
-  document.getElementById('carte-panel').classList.remove('nascosto');
+  mostraVistaCarte();
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
 
@@ -2596,9 +2334,7 @@ function risolviContrastoAutomatico(vincente) {
   c.vincitore = vincente;
   c.motivoFallo = null;
   flashVincitore(vincente);
-  if (window.innerHeight > 600 || window.innerWidth < window.innerHeight) {
-    document.getElementById('carte-panel').classList.add('nascosto');
-  }
+  mostraVistaCampo();
   stato.streak[vincente]++;
   if (stato.streak[vincente] >= STREAK_PER_BONUS) {
     stato.streak[vincente] = 0;
@@ -2780,9 +2516,7 @@ function risolviContrasto(vincente, motivoFallo) {
   if (gP && !gP.portiere && !gP.espulso) gP.stamina = Math.max(0, gP.stamina - 1);
   if (gA && !gA.portiere && !gA.espulso) gA.stamina = Math.max(0, gA.stamina - 1);
 
-  if (window.innerHeight > 600 || window.innerWidth < window.innerHeight) {
-    document.getElementById('carte-panel').classList.add('nascosto');
-  }
+  mostraVistaCampo();
 
   if (motivoFallo) {
     suonaFischietto('fallo');
@@ -3241,7 +2975,7 @@ function gestisciParata(att, dif) {
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
     if (elP && elC) {
       suonaCalcio();
-      var area = document.querySelector('.area-gioco');
+      var area = document.querySelector('.scena');
       var box = area.getBoundingClientRect();
       var rP = elP.getBoundingClientRect(), rC = elC.getBoundingClientRect();
       var pX = rP.left + rP.width/2 - box.left, pY = rP.top + rP.height/2 - box.top;
@@ -3335,7 +3069,7 @@ function gestisciFuori(att, dif) {
     var elC = document.querySelector('[data-giocatore-id="' + sc.id + '"]');
     if (elP && elC) {
       suonaCalcio();
-      var area = document.querySelector('.area-gioco');
+      var area = document.querySelector('.scena');
       var box = area.getBoundingClientRect();
       var rP = elP.getBoundingClientRect(), rC = elC.getBoundingClientRect();
       var pX = rP.left + rP.width/2 - box.left, pY = rP.top + rP.height/2 - box.top;
@@ -3518,9 +3252,9 @@ function confermaSostituzione() {
 
 try {
   inizializzaAmmonizioni();
-  adattaCampoResponsive();
-  setTimeout(adattaCampoResponsive, 200);
-  setTimeout(adattaCampoResponsive, 500);
+  adattaScena();
+  setTimeout(adattaScena, 100);
+  setTimeout(adattaScena, 400);
 
   if (TORNEO_MODE === 'seriea' && PARTITA_TORNEO && URL_SQ_TU && URL_SQ_CPU) {
     if (SQUADRE[URL_SQ_TU] && SQUADRE[URL_SQ_CPU]) {
