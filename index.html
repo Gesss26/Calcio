@@ -81,8 +81,9 @@
     justify-content: center; width: 100%;
   }
 
+  /* PILE — ora 64x92 come le carte */
   .pila-bonus-wrapper { flex-shrink: 0; }
-  .pila-bonus { position: relative; width: 48px; height: 88px; }
+  .pila-bonus { position: relative; width: 64px; height: 92px; }
   .pila-bonus .pila-titolo {
     position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
     font-size: 11px; color: #ffd700; font-weight: 900; white-space: nowrap;
@@ -91,7 +92,7 @@
   }
   .pila-bonus .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-bonus .pila-carta {
-    position: absolute; width: 48px; height: 88px; border-radius: 4px;
+    position: absolute; width: 64px; height: 92px; border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   .pila-bonus .pila-carta.bonus {
@@ -99,12 +100,13 @@
     border: 2px solid #fff;
   }
   .pila-bonus .pila-carta.bonus::after {
-    content: '★'; color: #fff; font-size: 30px;
+    content: '★'; color: #fff; font-size: 40px;
     display: flex; align-items: center; justify-content: center; height: 100%;
     text-shadow: 0 1px 2px rgba(0,0,0,0.6);
   }
+  /* Numeri carte staccati di 40px in più */
   .pila-bonus .pila-count {
-    position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%);
     font-size: 13px; color: #fbbf24; font-weight: 900; white-space: nowrap;
     background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px;
     border: 2px solid rgba(251,191,36,0.7);
@@ -150,7 +152,7 @@
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
 
   .pile-wrapper { display: flex; gap: 50px; align-items: center; flex-shrink: 0; }
-  .pila { position: relative; width: 48px; height: 88px; }
+  .pila { position: relative; width: 64px; height: 92px; }
   .pila-titolo {
     position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
     font-size: 12px; color: #ffd700; font-weight: 900; white-space: nowrap;
@@ -158,15 +160,16 @@
   }
   .pila-carte { position: relative; width: 100%; height: 100%; }
   .pila-carta {
-    position: absolute; width: 48px; height: 88px; border-radius: 4px;
+    position: absolute; width: 64px; height: 92px; border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   .pila-carta.dietro { background: linear-gradient(135deg, #4dabf7, #2563eb); border: 2px solid #fff; }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
-  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  /* Numeri carte staccati di 40px in più */
   .pila-count {
-    position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%);
     font-size: 15px; color: #ffd700; font-weight: 900; white-space: nowrap;
     background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px;
     border: 2px solid rgba(255,215,0,0.6);
@@ -274,7 +277,6 @@
     z-index: 6; pointer-events: none; padding: 0 2%;
   }
 
-  /* Ellisse gialla che evidenzia la coppia in contrasto */
   .evidenzia-coppia {
     position: absolute;
     border-radius: 50%;
@@ -317,13 +319,11 @@
     position: relative;
   }
 
-  /* Z2 e Z4: sup verso l'alto 30px, inf verso il basso 30px */
   .zona[data-zona="2"] .meta-sup,
   .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
   .zona[data-zona="2"] .meta-inf,
   .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
 
-  /* Z1 e Z5: meta-inf spostata su di 30px (dentro area di rigore) */
   .zona[data-zona="1"] .meta-inf,
   .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
 
@@ -332,17 +332,18 @@
     align-items: center; gap: 1px; position: relative;
   }
 
+  /* Portieri: classi in base alla ZONA (sx/dx), non alla squadra */
   .portiere-wrapper {
     position: absolute !important;
-    top: 50%; left: 50%;
-    transform: translate(-50%, calc(-50% - 20px)) translateX(0);
+    top: 50%;
+    transform: translate(-50%, calc(-50% - 20px));
     z-index: 5;
   }
-  .portiere-wrapper.tu {
+  .portiere-wrapper.portiere-sx {
     left: 62%;
     transform: translate(-50%, calc(-50% - 20px)) translateX(40px);
   }
-  .portiere-wrapper.cpu {
+  .portiere-wrapper.portiere-dx {
     left: 38%;
     transform: translate(-50%, calc(-50% - 20px)) translateX(-40px);
   }
@@ -1201,6 +1202,7 @@ var stato = {
   partitaFinita:false, sostBloccate:false,
   semeGuidaPrecedente:null,
   direzioneAttaccoTU:1,
+  invertiCoppie:false,
   bonus: { tu: [], cpu: [] },
   bonusUsatoQuestoTiro: { tu:null, cpu:null },
   streak: { tu:0, cpu:0 },
@@ -1346,7 +1348,6 @@ function direzionePerSquadra(sq) {
   return sq === 'tu' ? dirTU : -dirTU;
 }
 
-/* BONUS */
 function assegnaBonus(sq) {
   if (stato.bonus[sq].length >= MAX_BONUS) {
     log('⚠️ ' + sq.toUpperCase() + ' ha già ' + MAX_BONUS + ' bonus, scartato!');
@@ -1382,7 +1383,6 @@ function consumaBonus(sq, tipo) {
 }
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
 
-/* CREAZIONE GIOCATORI */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
@@ -1445,7 +1445,6 @@ function applicaSqualifiche(sq) {
   }
 }
 
-/* MENU */
 function mostraMenuPrincipale() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
@@ -1487,7 +1486,6 @@ function apriLog() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* RENDER HEADER */
 function renderHeader() {
   document.getElementById('punteggio-tu').textContent = stato.punteggio.tu;
   document.getElementById('punteggio-cpu').textContent = stato.punteggio.cpu;
@@ -1506,7 +1504,6 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
-/* RENDER CAMPO */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -1526,7 +1523,9 @@ function renderCampo() {
       }
       if (por) {
         var wrapper = document.createElement('div');
-        wrapper.className = 'pedina-wrapper ' + por.squadra + ' portiere-wrapper';
+        // Classi portiere-sx/portiere-dx in base alla ZONA (non alla squadra)
+        var classeLato = (z.id === 0) ? 'portiere-sx' : 'portiere-dx';
+        wrapper.className = 'pedina-wrapper ' + por.squadra + ' portiere-wrapper ' + classeLato;
         wrapper.appendChild(creaNomeGiocatore(por));
         wrapper.appendChild(creaPedinaEl(por));
         wrapper.appendChild(creaInfoSotto(por));
@@ -1539,39 +1538,38 @@ function renderCampo() {
     var tuG = stato.giocatori.tu.filter(function(g){ return g.zona === z.id && !g.portiere; });
     var cpuG = stato.giocatori.cpu.filter(function(g){ return g.zona === z.id && !g.portiere; });
 
+    // Ordine di append: se invertiCoppie=true (2° tempo), CPU prima e TU dopo
+    var ordine = stato.invertiCoppie ? ['cpu', 'tu'] : ['tu', 'cpu'];
+
     var metaSup = document.createElement('div');
     metaSup.className = 'meta-sup';
-    if (tuG[0]) {
-      var w1 = document.createElement('div'); w1.className = 'pedina-wrapper tu';
-      w1.appendChild(creaNomeGiocatore(tuG[0]));
-      w1.appendChild(creaPedinaEl(tuG[0]));
-      w1.appendChild(creaInfoSotto(tuG[0]));
-      metaSup.appendChild(w1);
-    }
-    if (cpuG[0]) {
-      var w2 = document.createElement('div'); w2.className = 'pedina-wrapper cpu';
-      w2.appendChild(creaNomeGiocatore(cpuG[0]));
-      w2.appendChild(creaPedinaEl(cpuG[0]));
-      w2.appendChild(creaInfoSotto(cpuG[0]));
-      metaSup.appendChild(w2);
+    for (var oi=0; oi<ordine.length; oi++) {
+      var sqO = ordine[oi];
+      var gioc = sqO === 'tu' ? tuG[0] : cpuG[0];
+      if (gioc) {
+        var w = document.createElement('div');
+        w.className = 'pedina-wrapper ' + sqO;
+        w.appendChild(creaNomeGiocatore(gioc));
+        w.appendChild(creaPedinaEl(gioc));
+        w.appendChild(creaInfoSotto(gioc));
+        metaSup.appendChild(w);
+      }
     }
     zona.appendChild(metaSup);
 
     var metaInf = document.createElement('div');
     metaInf.className = 'meta-inf';
-    if (tuG[1]) {
-      var w3 = document.createElement('div'); w3.className = 'pedina-wrapper tu';
-      w3.appendChild(creaNomeGiocatore(tuG[1]));
-      w3.appendChild(creaPedinaEl(tuG[1]));
-      w3.appendChild(creaInfoSotto(tuG[1]));
-      metaInf.appendChild(w3);
-    }
-    if (cpuG[1]) {
-      var w4 = document.createElement('div'); w4.className = 'pedina-wrapper cpu';
-      w4.appendChild(creaNomeGiocatore(cpuG[1]));
-      w4.appendChild(creaPedinaEl(cpuG[1]));
-      w4.appendChild(creaInfoSotto(cpuG[1]));
-      metaInf.appendChild(w4);
+    for (var oj=0; oj<ordine.length; oj++) {
+      var sqO2 = ordine[oj];
+      var gioc2 = sqO2 === 'tu' ? tuG[1] : cpuG[1];
+      if (gioc2) {
+        var w2 = document.createElement('div');
+        w2.className = 'pedina-wrapper ' + sqO2;
+        w2.appendChild(creaNomeGiocatore(gioc2));
+        w2.appendChild(creaPedinaEl(gioc2));
+        w2.appendChild(creaInfoSotto(gioc2));
+        metaInf.appendChild(w2);
+      }
     }
     zona.appendChild(metaInf);
 
@@ -1587,7 +1585,6 @@ function renderCampo() {
     }
     if (idG) creaPallaAiPiedi(stato.zonaPalla, idG);
   }
-  // Ridisegna ellisse se c'è un contrasto attivo
   if (stato.contrasto && !stato.contrasto.risolto) {
     setTimeout(evidenziaCoppiaContrasto, 50);
   }
@@ -1691,9 +1688,6 @@ function renderPanchina() {
   }
 }
 
-/* ============================================================
-   EVIDENZIA COPPIA — ellisse gialla sotto la coppia in contrasto
-   ============================================================ */
 function evidenziaCoppiaContrasto() {
   var el = document.getElementById('evidenzia-coppia');
   if (!el) return;
@@ -1731,7 +1725,6 @@ function nascondiEvidenzia() {
   if (el) el.style.display = 'none';
 }
 
-/* SETUP */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
@@ -1780,7 +1773,6 @@ function avviaPartitaDaSetup() {
   avviaPartita(stato.squadraTU, stato.squadraCPU, stato.tipoPartita);
 }
 
-/* AVVIO PARTITA */
 function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   tipo = tipo || '1P';
   stato.tipoPartita = tipo;
@@ -1806,6 +1798,7 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   stato.bonusUsatoQuestoTiro = { tu:null, cpu:null };
   stato.streak = { tu:0, cpu:0 };
   stato.contrasto = null;
+  stato.invertiCoppie = false;
   nascondiEvidenzia();
 
   ZONE_CONFIG[0].proprietario = 'tu';
@@ -1836,7 +1829,6 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'));
 }
 
-/* MONETA */
 function lanciaMoneta(scelta) {
   initAudio();
   avviaSottofondo();
@@ -1857,7 +1849,6 @@ function lanciaMoneta(scelta) {
   }, 2000);
 }
 
-/* CALCIO D'INIZIO */
 function eseguiCalcioIniziale(squadra) {
   document.getElementById('carte-panel').classList.add('nascosto');
   nascondiEvidenzia();
@@ -1936,7 +1927,6 @@ function animaPallaInZona(gDa, gA, cb) {
   requestAnimationFrame(anima);
 }
 
-/* CONTRASTO */
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   document.getElementById('carte-panel').classList.remove('nascosto');
@@ -2131,7 +2121,6 @@ function cpuVuoleUsareContrastoSicuro(zona) {
   return zonaAv || (staPerdendo && secondoTempo);
 }
 
-/* CONFERMA CARTA */
 function confermaCarta() {
   if (selezioneCarta === null) return;
   var c = stato.contrasto;
@@ -2241,7 +2230,6 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* RISOLUZIONE CONTRASTO */
 function risolviContrasto(vincente, motivoFallo) {
   if (vincente === 'tu') {
     stato.streak.tu++;
@@ -2385,7 +2373,6 @@ function continuaDopoContrastoVinto(vincente, c, motivoFallo) {
   }, dPR);
 }
 
-/* TIRO */
 function apriSchermataTiro(att) {
   var dif = att === 'tu' ? 'cpu' : 'tu';
   stato.statistiche[att].tiri++;
@@ -2694,7 +2681,6 @@ function mostraGoalBanner(v) {
   setTimeout(function() { b.classList.remove('attivo'); }, 3200);
 }
 
-/* POST-TIRO */
 function gestisciGoal(att) {
   stato.punteggio[att]++;
   stato.statistiche[att].gol++;
@@ -2867,12 +2853,12 @@ function flashVincitore(sq) {
   setTimeout(function() { f.classList.remove('attivo'); }, 600);
 }
 
-/* FINE TEMPO / FINE PARTITA */
 function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2;
     stato.mano = 1;
+    // Cambio campo: swap zone + scambio proprietari portieri + inverti ordine coppie
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
@@ -2888,6 +2874,8 @@ function fineTempoOPartita() {
     ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
     ZONE_CONFIG[6].proprietario = oldT;
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
+    // Inverti ordine coppie (TU/CPU)
+    stato.invertiCoppie = !stato.invertiCoppie;
 
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     log('🔄 CAMBIO CAMPO! Le squadre si scambiano di lato.', 'highlight');
@@ -2954,7 +2942,6 @@ function salvaRisultatoTorneo() {
   }, 1500);
 }
 
-/* SOSTITUZIONI */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; }
   if (stato.partitaFinita) return;
@@ -3010,7 +2997,6 @@ function confermaSostituzione() {
   renderCampo(); renderPanchina(); renderModaleSostituzioni();
 }
 
-/* AVVIO */
 try {
   inizializzaAmmonizioni();
   if (TORNEO_MODE === 'seriea' && PARTITA_TORNEO && URL_SQ_TU && URL_SQ_CPU) {
