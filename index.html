@@ -7,16 +7,10 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: #0a0a15; color: #eee;
-    overflow: hidden; user-select: none;
-  }
+  html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
-
   .stadio-sfondo { position: fixed; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
-
   .avviso-ruota { display: none; position: fixed; inset: 0; background: linear-gradient(135deg, #0a0a15, #16213e); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: #fff; }
   .avviso-ruota .icona-ruota { font-size: 80px; margin-bottom: 20px; animation: ruotaAnim 2s infinite ease-in-out; }
   @keyframes ruotaAnim { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
@@ -44,7 +38,6 @@
   .scena > * { pointer-events: auto; }
 
   .campo-area { position: absolute; left: 18%; top: 46%; width: 64%; height: 42%; padding: 0 2%; pointer-events: none; }
-
   .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
   .zona { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 1.5%; }
   .meta-sup, .meta-inf { display: flex; flex-direction: row; justify-content: center; align-items: center; flex: 1; padding: 2px 4px; gap: 12px; position: relative; }
@@ -101,16 +94,7 @@
 
   .pedina-scivola-wrapper { position: relative; z-index: 20; transition: transform 0.6s cubic-bezier(0.34,1.5,0.64,1); }
   .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
-  @keyframes animScivolata { 0% { transform: rotate(0deg) translateY(0); } 40% { transform: rotate(-35deg) translateY(4px); } 70% { transform: rotate(-15deg) translateY(2px); } 100% { transform: rotate(0deg) translateY(0); } }
-  .pedina-scivola-wrapper.scivolando .pedina svg { animation: animScivolata 0.6s ease-out; }
-
-  /* ============================================================
-     SCIVOLATA INCLINATA: la piega è verso il lato opposto alla palla
-     Il wrapper .pedina riceve un rotate dinamico via JS
-     ============================================================ */
-  .pedina.pg-in-scivolata {
-    transition: transform 0.4s cubic-bezier(0.34,1.3,0.64,1);
-  }
+  .pedina.pg-in-scivolata { transition: transform 0.4s cubic-bezier(0.34,1.3,0.64,1); }
 
   .flash-vincitore { position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0; }
   .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
@@ -193,7 +177,6 @@
 
   .info-carte { display: flex; gap: 14px; font-size: 11px; color: #aaa; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-
   #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
   #azioni-container button { padding: 8px 20px; font-size: 13px; }
 
@@ -313,7 +296,6 @@
   .tiro-bonus-container { margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; min-height: 44px; }
 
   .nascosto { display: none !important; }
-
   .impostazioni-grid { display: flex; flex-direction: column; gap: 14px; padding: 10px 0; }
   .impostazioni-grid button { padding: 16px 20px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .impostazioni-info { font-size: 12px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
@@ -509,6 +491,7 @@ var SCIVOLATA_MAX_PX = 25;
 var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
+var DURATA_SPOSTAMENTO_INIZIO = 600;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -1112,7 +1095,7 @@ function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
 /* ============================================================
-   ANIMAZIONE PALLA
+   ANIMAZIONE PALLA — coordinate scena corrette
    ============================================================ */
 function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
@@ -1170,15 +1153,20 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 
 /* ============================================================
    CALCIO D'INIZIO
-   Il battitore è il giocatore in Z3 'inf'.
-   1. Si sposta verso il CENTRO del campo (riga immaginaria = il punto
-      più vicino alla metà campo avversaria in base alla direzione)
-   2. Calcia la palla al compagno nella ZONA SUCCESSIVA
-      (Z4 se attacca a destra, Z2 se attacca a sinistra)
-   3. Ritorna al suo posto in Z3 inf
+   1. Il battitore è in Z3 inf.
+   2. Si sposta verso la metà campo avversaria (riga immaginaria).
+   3. Calcia la palla al compagno nella ZONA SUCCESSIVA
+      (Z4 se attacca a destra, Z2 se attacca a sinistra).
+   4. Il battitore ritorna al suo posto.
+   IMPORTANTE: NON crea palla ai piedi del battitore durante l'animazione.
+   La palla esiste SOLO come "palla-volante" durante l'animazione, poi
+   ricompare ai piedi del RICEVENTE.
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
+  // Rimuovi palla e evidenzia dal campo (la palla parte solo come palla-volante)
+  var v0 = document.querySelectorAll('.palla-centro');
+  for (var i=0;i<v0.length;i++) v0[i].remove();
   nascondiEvidenzia();
   stato.pallaInAnimazione = true;
 
@@ -1194,7 +1182,6 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  // Destinazione: zona successiva nella direzione di attacco
   var dirAtt = direzionePerSquadra(squadra);
   var zonaDest = 3 + dirAtt;
   if (zonaDest < 1) zonaDest = 1;
@@ -1212,27 +1199,25 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  stato.zonaPalla = 3;
-  stato.metaContesa = 'inf';
-  stato.possessore = squadra;
-  stato.giocatorePalla = gB.id;
+  // Stato iniziale
+  stato.zonaPalla = 3; stato.metaContesa = 'inf';
+  stato.possessore = squadra; stato.giocatorePalla = gB.id;
   renderCampo(); renderHeader();
   aggiornaSottofondoPerZona(3);
   log('⚽ Calcio d\'inizio: ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' ' + gB.nome + ' → ' + gA.nome + ' (Z' + zonaDest + ')');
 
-  // 1. Il battitore si sposta al CENTRO del campo.
-  //    dirAtt = 1 → attacca verso destra → il centro è a sinistra del giocatore (verso la sua porta)
-  //    dirAtt = -1 → attacca verso sinistra → il centro è a destra del giocatore
+  // 1. Il battitore si sposta verso il CENTRO del campo (riga di metà campo).
+  //    - Se attacca a destra (dirAtt=1), il centro è a sinistra → si sposta a sinistra
+  //    - Se attacca a sinistra (dirAtt=-1), il centro è a destra → si sposta a destra
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
-  if (!wrapperB) { eseguiPassaggioDopoSpostamento(); return; }
+  if (!wrapperB) { eseguiPassaggioFinale(); return; }
 
-  // Calcola lo spostamento in pixel SCENA: il battitore si sposta di ~50px nella direzione
-  // OPPOSTA al suo attacco, per avvicinarsi alla riga di centrocampo
-  var spostamentoX = -dirAtt * 50; // se attacca a destra (dirAtt=1) si sposta a sinistra di 50
-  wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
+  // Spostamento: 50px scena verso la riga di metà campo (direzione -dirAtt)
+  var spostamentoX = -dirAtt * 50;
+  wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
 
-  // 2. Dopo lo spostamento, calcia la palla al compagno
+  // 2. Dopo lo spostamento, calcia
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
@@ -1245,9 +1230,11 @@ function eseguiCalcioIniziale(squadra) {
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
         // 4. Ritorno del battitore al suo posto
-        wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
+        wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
         wrapperB.style.transform = 'translateX(0)';
         setTimeout(function() {
+          // Stato finale: possesso al battitore (che è tornato al suo posto)
+          // In realtà la palla è andata al compagno, quindi il possesso resta in Z3
           stato.zonaPalla = 3;
           stato.metaContesa = 'inf';
           stato.possessore = squadra;
@@ -1257,12 +1244,12 @@ function eseguiCalcioIniziale(squadra) {
           stato.mano++;
           bloccaCoppiaContrasto();
           setTimeout(avviaContrasto, 800);
-        }, 600);
+        }, DURATA_SPOSTAMENTO_INIZIO);
       });
-    }, 200);
-  }, 700);
+    }, 250);
+  }, DURATA_SPOSTAMENTO_INIZIO);
 
-  function eseguiPassaggioDopoSpostamento() {
+  function eseguiPassaggioFinale() {
     animaPallaInZona(gB, gA, function() {
       stato.zonaPalla = 3;
       stato.possessore = squadra;
@@ -1547,11 +1534,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   var gVincitore = (vincente === c.attaccante) ? gP : gA;
   var gPerdente = (vincente === c.attaccante) ? gA : gP;
 
-  // ============================================================
-  // SCIVOLATA Piegata al contrario: se la palla (il perdente) è a destra,
-  // il vincitore si piega a sinistra (perché i piedi vanno a destra).
-  // Se la palla è a sinistra, si piega a destra.
-  // ============================================================
   if (haRubato && gVincitore && gPerdente) {
     suonaScivolata();
     animaScivolata(gVincitore, gPerdente);
@@ -1588,8 +1570,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
 }
 
 /* ============================================================
-   SCIVOLATA: la piega è VERSO IL LATO OPPOSTO alla palla
-   (i piedi vanno verso la palla, il busto si inclina dall'altra parte)
+   SCIVOLATA: piega opposta alla palla
    ============================================================ */
 function animaScivolata(gVincitore, gPerdente) {
   var wrapperV = document.querySelector('[data-giocatore-id="' + gVincitore.id + '"]');
@@ -1605,31 +1586,20 @@ function animaScivolata(gVincitore, gPerdente) {
   var dist = Math.sqrt(dx*dx + dy*dy);
   if (dist < 1) return;
 
-  // Spostamento verso la palla (per portare i piedi vicino alla palla)
   var mSp = SCIVOLATA_MAX_PX * scalaCorrente;
   var dXs = (dx/dist) * Math.min(mSp, dist);
   var dYs = (dy/dist) * Math.min(mSp, dist);
 
-  // La piega è OPPOSTA alla direzione della palla:
-  // se la palla è a destra (dx > 0), mi piego a sinistra (rotate negativo)
-  // se la palla è a sinistra (dx < 0), mi piego a destra (rotate positivo)
   var angoloPiega = dx > 0 ? -22 : 22;
-  // Aggiungo una componente verticale se la palla è molto sopra/sotto
-  if (Math.abs(dy) > Math.abs(dx)) {
-    // palla in verticale: piega sul lato in cui si va
-    angoloPiega = dy > 0 ? -15 : 15;
-  }
+  if (Math.abs(dy) > Math.abs(dx)) angoloPiega = dy > 0 ? -15 : 15;
 
-  // Wrapper per il movimento
   var w = document.createElement('div');
   w.className = 'pedina-scivola-wrapper scivolando';
   wrapperV.parentNode.insertBefore(w, wrapperV);
   w.appendChild(wrapperV);
 
-  // Applico TRANSFORM combinato: translate verso la palla + rotate opposto
   requestAnimationFrame(function() {
     w.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px)';
-    // La pedina stessa si inclina (la piega è opposta alla palla)
     pedV.classList.add('pg-in-scivolata');
     pedV.style.transform = 'rotate(' + angoloPiega + 'deg)';
   });
@@ -1877,19 +1847,63 @@ function gestisciGoal(att) {
   mostraGoalBanner(att); suonaEsultanza();
   setTimeout(function() { var sub = att === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(sub); }, 3200);
 }
+
+/* ============================================================
+   PARATA: il portiere rilancia al centrocampo (Z3)
+   ============================================================ */
 function gestisciParata(att, dif) {
   log('🧤 Parata!');
-  var comp = stato.giocatori[dif].filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
-  if (comp.length === 0) { setTimeout(function() { stato.zonaPalla = 3; stato.metaContesa = 'inf'; stato.possessore = dif; stato.giocatorePalla = null; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 600); return; }
-  var sc = comp[Math.floor(Math.random()*comp.length)];
-  var idx = comp.indexOf(sc);
+  // Trova il portiere della squadra che ha parato
+  var por = null;
+  for (var i=0;i<stato.giocatori[dif].length;i++) {
+    if (stato.giocatori[dif][i].portiere) { por = stato.giocatori[dif][i]; break; }
+  }
+  // Trova un compagno in Z3
+  var compZ3 = stato.giocatori[dif].filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
+  if (compZ3.length === 0) {
+    // Fallback: nessun compagno in Z3, vai direttamente al contrasto
+    setTimeout(function() {
+      stato.zonaPalla = 3; stato.metaContesa = 'inf';
+      stato.possessore = dif; stato.giocatorePalla = null;
+      renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
+      bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800);
+    }, 600);
+    return;
+  }
+  var sc = compZ3[Math.floor(Math.random()*compZ3.length)];
+  var idx = compZ3.indexOf(sc);
   var nMeta = idx === 0 ? 'sup' : 'inf';
-  stato.zonaPalla = 3; stato.metaContesa = nMeta; stato.possessore = dif; stato.giocatorePalla = sc.id;
+
+  // Imposta lo stato (palla ancora al portiere, poi animazione)
+  stato.zonaPalla = 3;
+  stato.metaContesa = nMeta;
+  stato.possessore = dif;
+  stato.giocatorePalla = sc.id;
+  stato.pallaInAnimazione = true;
+
   renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
-  var v = document.querySelectorAll('.palla-centro'); for (var p=0;p<v.length;p++) v[p].remove();
-  var e = document.querySelectorAll('.evidenzia-coppia'); for (var p2=0;p2<e.length;p2++) e[p2].remove();
-  setTimeout(function() { creaPallaAiPiedi(3, sc.id); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 800);
+  log('🧤 ' + (dif === 'tu' ? 'TU' : 'CPU') + ' riparte: ' + por.nome + ' → ' + sc.nome + ' (Z3)');
+
+  // Aspetta che il render sia finito, poi anima la palla dal portiere al centrocampista
+  setTimeout(function() {
+    if (por && sc) {
+      animaPallaInZona(por, sc, function() {
+        stato.possessore = dif;
+        stato.giocatorePalla = sc.id;
+        stato.pallaInAnimazione = false;
+        renderCampo(); renderHeader();
+        bloccaCoppiaContrasto();
+        setTimeout(avviaContrasto, 800);
+      });
+    } else {
+      stato.pallaInAnimazione = false;
+      renderCampo(); renderHeader();
+      bloccaCoppiaContrasto();
+      setTimeout(avviaContrasto, 800);
+    }
+  }, 400);
 }
+
 function gestisciPalo(att, dif) {
   log('🥅 Palo!', 'highlight');
   var az = stato.azioneTiroDaPalo;
@@ -1915,16 +1929,8 @@ function gestisciAngolo(att, dif) {
 }
 function gestisciFuori(att, dif) {
   log('❌ Fuori!');
-  var comp = stato.giocatori[dif].filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
-  if (comp.length === 0) { setTimeout(function() { stato.zonaPalla = 3; stato.metaContesa = 'inf'; stato.possessore = dif; stato.giocatorePalla = null; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 600); return; }
-  var sc = comp[Math.floor(Math.random()*comp.length)];
-  var idx = comp.indexOf(sc);
-  var nMeta = idx === 0 ? 'sup' : 'inf';
-  stato.zonaPalla = 3; stato.metaContesa = nMeta; stato.possessore = dif; stato.giocatorePalla = sc.id;
-  renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
-  var v = document.querySelectorAll('.palla-centro'); for (var p=0;p<v.length;p++) v[p].remove();
-  var e = document.querySelectorAll('.evidenzia-coppia'); for (var p2=0;p2<e.length;p2++) e[p2].remove();
-  setTimeout(function() { creaPallaAiPiedi(3, sc.id); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 800);
+  // Come la parata: il portiere rilancia al centrocampo
+  gestisciParata(att, dif);
 }
 function flashVincitore(sq) { var f = document.getElementById('flash'); f.classList.remove('tu','cpu','attivo'); void f.offsetWidth; f.classList.add(sq, 'attivo'); setTimeout(function() { f.classList.remove('attivo'); }, 600); }
 
