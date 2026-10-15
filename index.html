@@ -931,20 +931,6 @@ function posizionePortiere(squadra) {
   return squadra === 'tu' ? baseTU : baseCPU;
 }
 
-/* Offset di un giocatore nella coppia, in base alla direzione della squadra
-   e alla meta logica del giocatore (sup/inf).
-   - dir > 0 (attacca a destra): sup a sinistra (-), inf a destra (+)
-   - dir < 0 (attacca a sinistra): sup a destra (+), inf a sinistra (-)
-   Questo garantisce che l'ordine visivo dei giocatori nella coppia rispecchi
-   l'ordine logico (sup, inf) dal punto di vista della squadra. */
-function offsetPerGiocatore(dir, metaLogica) {
-  if (dir > 0) {
-    return metaLogica === 'sup' ? -OFFSET_COPPIA : +OFFSET_COPPIA;
-  } else {
-    return metaLogica === 'sup' ? +OFFSET_COPPIA : -OFFSET_COPPIA;
-  }
-}
-
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -974,12 +960,10 @@ function renderCampo() {
       var coppiaTU = getCoppiaAttiva(zonaLogicaTU, metaLogicaTU);
       var coppiaCPU = getCoppiaAttiva(zonaLogicaCPU, metaLogicaCPU);
 
-      var offsetTU = offsetPerGiocatore(dirTU, metaLogicaTU);
-      var offsetCPU = offsetPerGiocatore(dirCPU, metaLogicaCPU);
-
+      /* TU a DESTRA, CPU a SINISTRA (coppie switchate) */
       var items = [
-        { g: coppiaTU.tu,  offsetX: offsetTU,  sq: 'tu'  },
-        { g: coppiaCPU.cpu, offsetX: offsetCPU, sq: 'cpu' }
+        { g: coppiaTU.tu,  offsetX: +OFFSET_COPPIA, sq: 'tu'  },
+        { g: coppiaCPU.cpu, offsetX: -OFFSET_COPPIA, sq: 'cpu' }
       ];
 
       for (var i = 0; i < items.length; i++) {
