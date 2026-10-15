@@ -9,6 +9,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
+  .app.visuale-cellulare { width: min(900px, 94vw); height: min(506px, 90dvh); margin: auto; border: 8px solid #111827; border-radius: 24px; overflow: hidden; box-shadow: 0 0 0 2px #64748b, 0 18px 60px rgba(0,0,0,.75); }
+  .app.visuale-cellulare::after { content: 'ANTEPRIMA CELLULARE'; position: absolute; top: 5px; left: 50%; transform: translateX(-50%); z-index: 100; color: #fff; background: rgba(15,23,42,.9); border-radius: 10px; padding: 3px 10px; font-size: 9px; letter-spacing: 1px; pointer-events: none; }
   .stadio-sfondo { position: fixed; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
   .avviso-ruota { display: none; position: fixed; inset: 0; background: linear-gradient(135deg, #0a0a15, #16213e); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: #fff; }
@@ -263,8 +265,9 @@
   .banner-mano-seme { margin-top: 14px; font-size: 13px; color: #ffd700; text-transform: uppercase; }
   .banner-mano-motivo { margin-top: 8px; font-size: 12px; color: #ccc; }
 
-  .tiro-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.4s ease; }
+  .tiro-overlay { position: fixed; inset: 0; overflow-y: auto; background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.4s ease; }
   .tiro-overlay.attiva { opacity: 1; }
+  .app.visuale-cellulare ~ .tiro-overlay { left: 50%; top: 50%; right: auto; bottom: auto; width: min(900px, 94vw); height: min(506px, 90dvh); transform: translate(-50%, -50%); border: 8px solid #111827; border-radius: 24px; }
   .tiro-titolo { color: #ffd700; font-size: 22px; font-weight: 900; letter-spacing: 3px; margin-bottom: 12px; text-align: center; }
   .tiro-porta-wrapper { position: relative; width: 90%; max-width: 640px; aspect-ratio: 3 / 2; margin: 10px auto; --porta-left: 21%; --porta-top: 34%; --porta-width: 58%; --porta-height: 48%; }
   .tiro-porta-sfondo { position: absolute; inset: 0; width: 100%; height: 100%; background: url('Porta.png') center/cover no-repeat; border-radius: 10px; }
@@ -320,6 +323,15 @@
     .panchina-giocatore .panchina-nome { font-size: 6px; margin-top: 0; }
     .btn-toggle-panchina { display: flex; position: fixed; bottom: 4px; left: 4px; z-index: 65; width: 30px; height: 30px; background: rgba(15,52,96,0.9); color: #4dabf7; border: 2px solid #4dabf7; border-radius: 7px; font-size: 14px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.7); }
     .btn-toggle-panchina:active { background: #4dabf7; color: #16213e; }
+    .tiro-overlay { justify-content: flex-start; gap: 2px; padding: 4px 8px 10px; }
+    .tiro-titolo { font-size: 16px; letter-spacing: 1px; margin: 2px 0; }
+    .tiro-porta-wrapper { width: min(54vh, 72vw); max-width: 400px; margin: 2px auto; flex-shrink: 0; }
+    .tiro-info { margin-top: 2px; min-height: 16px; font-size: 11px; }
+    .tiro-dadi-info { margin-top: 2px; gap: 3px; min-height: 48px; font-size: 12px; }
+    .tiro-dado { width: 27px; height: 27px; font-size: 15px; }
+    .tiro-esito { font-size: 30px; margin-top: 2px; min-height: 36px; }
+    .tiro-bonus-container { margin: 4px 0 0; min-height: 44px; padding-bottom: 4px; width: 100%; }
+    .tiro-bonus-container button { padding: 10px 12px; font-size: 12px; }
   }
 </style>
 </head>
@@ -789,14 +801,24 @@ function apriImpostazioni() {
     '<div class="impostazioni-info">Salva il campionato (classifica, giornate, ammonizioni) in un file JSON per giocare tra dispositivi.</div>' +
     '<div class="impostazioni-grid">' +
       '<button class="primario" onclick="esportaCampionato()">💾 Salva campionato su file</button>' +
+      '<button id="btn-visuale-cellulare" onclick="toggleVisualeCellulare()">📱 Visuale Cellulare</button>' +
       '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
-      '<button onclick="chiudiModale()">← Chiudi</button>' +
+      '<button onclick="chiudiImpostazioni()">← Torna al menu principale</button>' +
     '</div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
 }
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
+function chiudiImpostazioni() { mostraMenuPrincipale(); }
+function toggleVisualeCellulare() {
+  var app = document.querySelector('.app');
+  if (!app) return;
+  app.classList.toggle('visuale-cellulare');
+  var btn = document.getElementById('btn-visuale-cellulare');
+  if (btn) btn.textContent = app.classList.contains('visuale-cellulare') ? '🖥️ Esci da Visuale Cellulare' : '📱 Visuale Cellulare';
+  setTimeout(adattaScena, 80);
+}
 function apriLog() {
   var html = '<h2>📋 Cronaca</h2><div style="background:#0a0a15;border-radius:8px;padding:12px;max-height:60vh;overflow-y:auto;font-size:12px;text-align:left;font-family:monospace">';
   for (var i=0;i<stato.logCompleto.length;i++) { var l = stato.logCompleto[i]; html += '<p class="' + (l.classe||'') + '" style="margin:2px 0">' + l.msg + '</p>'; }
@@ -1164,9 +1186,7 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
-  // Rimuovi palla e evidenzia dal campo (la palla parte solo come palla-volante)
-  var v0 = document.querySelectorAll('.palla-centro');
-  for (var i=0;i<v0.length;i++) v0[i].remove();
+  document.querySelectorAll('.palla-centro').forEach(function(p) { p.remove(); });
   nascondiEvidenzia();
   stato.pallaInAnimazione = true;
 
@@ -1177,47 +1197,37 @@ function eseguiCalcioIniziale(squadra) {
     gB = lista[0] || null;
   }
   if (!gB) {
+    stato.pallaInAnimazione = false;
     stato.mano++; renderHeader();
     setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
     return;
   }
 
   var dirAtt = direzionePerSquadra(squadra);
-  var zonaDest = 3 + dirAtt;
-  if (zonaDest < 1) zonaDest = 1;
-  if (zonaDest > 5) zonaDest = 5;
+  var zonaDest = Math.max(1, Math.min(5, 3 + dirAtt));
   var compagni = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g){
     return g.zona === zonaDest && !g.portiere && !g.espulso;
   });
   var gA = compagni[0];
   if (!gA) {
-    stato.zonaPalla = 3; stato.metaContesa = 'inf';
-    stato.possessore = squadra; stato.giocatorePalla = gB.id;
+    stato.zonaPalla = 3; stato.metaContesa = 'inf'; stato.possessore = squadra; stato.giocatorePalla = gB.id;
     stato.pallaInAnimazione = false;
     renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
     setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
     return;
   }
 
-  // Stato iniziale
-  stato.zonaPalla = 3; stato.metaContesa = 'inf';
-  stato.possessore = squadra; stato.giocatorePalla = gB.id;
-  renderCampo(); renderHeader();
-  aggiornaSottofondoPerZona(3);
+  stato.zonaPalla = 3; stato.metaContesa = 'inf'; stato.possessore = squadra; stato.giocatorePalla = gB.id;
+  renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
   log('⚽ Calcio d\'inizio: ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' ' + gB.nome + ' → ' + gA.nome + ' (Z' + zonaDest + ')');
 
-  // 1. Il battitore si sposta verso il CENTRO del campo (riga di metà campo).
-  //    - Se attacca a destra (dirAtt=1), il centro è a sinistra → si sposta a sinistra
-  //    - Se attacca a sinistra (dirAtt=-1), il centro è a destra → si sposta a destra
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
-  if (!wrapperB) { eseguiPassaggioFinale(); return; }
-
-  // Spostamento: 50px scena verso la riga di metà campo (direzione -dirAtt)
-  var spostamentoX = -dirAtt * 50;
-  wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
+  if (!wrapperB) { completaPassaggio(); return; }
+  var durata = 600;
+  var spostamentoX = -dirAtt * 100;
+  wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
 
-  // 2. Dopo lo spostamento, calcia
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
@@ -1225,44 +1235,36 @@ function eseguiCalcioIniziale(squadra) {
       setTimeout(function() { ped.classList.remove('pg-in-calcio'); }, 800);
     }
     suonaCalcio();
-
-    // 3. Animazione palla verso il compagno
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
-        // 4. Ritorno del battitore al suo posto
-        wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
+        wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
         wrapperB.style.transform = 'translateX(0)';
         setTimeout(function() {
-          // Stato finale: possesso al battitore (che è tornato al suo posto)
-          // In realtà la palla è andata al compagno, quindi il possesso resta in Z3
-          stato.zonaPalla = 3;
+          stato.zonaPalla = zonaDest;
           stato.metaContesa = 'inf';
           stato.possessore = squadra;
-          stato.giocatorePalla = gB.id;
+          stato.giocatorePalla = gA.id;
           stato.pallaInAnimazione = false;
-          renderCampo(); renderHeader();
+          renderCampo(); renderHeader(); aggiornaSottofondoPerZona(zonaDest);
           stato.mano++;
           bloccaCoppiaContrasto();
           setTimeout(avviaContrasto, 800);
-        }, DURATA_SPOSTAMENTO_INIZIO);
+        }, durata);
       });
     }, 250);
-  }, DURATA_SPOSTAMENTO_INIZIO);
+  }, durata);
 
-  function eseguiPassaggioFinale() {
+  function completaPassaggio() {
     animaPallaInZona(gB, gA, function() {
-      stato.zonaPalla = 3;
-      stato.possessore = squadra;
-      stato.giocatorePalla = gB.id;
+      stato.zonaPalla = zonaDest; stato.metaContesa = 'inf'; stato.possessore = squadra; stato.giocatorePalla = gA.id;
       stato.pallaInAnimazione = false;
-      renderCampo(); renderHeader();
+      renderCampo(); renderHeader(); aggiornaSottofondoPerZona(zonaDest);
       stato.mano++;
       bloccaCoppiaContrasto();
       setTimeout(avviaContrasto, 800);
     });
   }
 }
-
 /* ============================================================
    CONTRASTO
    ============================================================ */
