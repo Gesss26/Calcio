@@ -35,7 +35,6 @@
   .scena { position: relative; width: 1600px; height: 900px; transform-origin: center center; flex-shrink: 0; pointer-events: none; overflow: hidden; }
   .scena > * { pointer-events: auto; }
 
-  /* Sfondo DENTRO la scena: scala insieme, così le coordinate x/y% dell'editor combaciano */
   .stadio-sfondo { position: absolute; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
 
@@ -531,6 +530,7 @@ var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
 var COPPIA_INIZIO = 4;
+var OFFSET_COPPIA = 25; /* px scena tra le due pedine della coppia */
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -547,20 +547,18 @@ var NOMI_BONUS = {
   'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
-/* ============================================================
-   POSIZIONI CAMPO — dal tuo editor
-   ============================================================ */
+/* Posizioni: x/y sono il CENTRO della coppia (in %) */
 var POSIZIONI_COPPIE = [
-  { x: 70.7, y: 70.5 }, // #0
-  { x: 72.6, y: 83.8 }, // #1
-  { x: 62.6, y: 63.7 }, // #2
-  { x: 64.7, y: 93.6 }, // #3
-  { x: 55.1, y: 68.9 }, // #4 (centro)
-  { x: 55.1, y: 88.7 }, // #5
-  { x: 47.5, y: 63.8 }, // #6
-  { x: 45.3, y: 93.5 }, // #7
-  { x: 39.4, y: 70.3 }, // #8
-  { x: 37.4, y: 83.5 }  // #9
+  { x: 70.7, y: 70.5 },
+  { x: 72.6, y: 83.8 },
+  { x: 62.6, y: 63.7 },
+  { x: 64.7, y: 93.6 },
+  { x: 55.1, y: 68.9 },
+  { x: 55.1, y: 88.7 },
+  { x: 47.5, y: 63.8 },
+  { x: 45.3, y: 93.5 },
+  { x: 39.4, y: 70.3 },
+  { x: 37.4, y: 83.5 }
 ];
 
 var POSIZIONI_PORTIERI = [
@@ -765,9 +763,6 @@ function creaPalloneSVG() {
     '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#fff" opacity="0.55"/></svg>';
 }
 
-/* ============================================================
-   GIOCATORI
-   ============================================================ */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
@@ -824,9 +819,7 @@ function applicaSqualifiche(sq) {
   }
 }
 
-/* ============================================================
-   UTILITY COPPIE
-   ============================================================ */
+/* UTILITY COPPIE */
 function getGiocatoriCoppia(coppiaIdx) {
   var tu = null, cpu = null;
   for (var i=0;i<stato.giocatori.tu.length;i++) {
@@ -850,9 +843,7 @@ function direzionePerSquadra(sq) {
   return -stato.direzioneAttaccoTU;
 }
 
-/* ============================================================
-   BONUS
-   ============================================================ */
+/* BONUS */
 function assegnaBonus(sq) {
   if (stato.bonus[sq].length >= MAX_BONUS) { log('⚠️ ' + sq.toUpperCase() + ' ha già ' + MAX_BONUS + ' bonus, scartato!'); return false; }
   var tipo = pescaUnaCartaBonus();
@@ -873,9 +864,7 @@ function mostraBonusBanner(testo) { var b = document.getElementById('bonus-banne
 function consumaBonus(sq, tipo) { var idx = stato.bonus[sq].indexOf(tipo); if (idx > -1) { stato.bonus[sq].splice(idx, 1); log('🎴 ' + (sq === 'tu' ? 'TU' : 'CPU') + ' usa: ' + NOMI_BONUS[tipo].nome, 'highlight'); return true; } return false; }
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
 
-/* ============================================================
-   MENU / IMPOSTAZIONI
-   ============================================================ */
+/* MENU / IMPOSTAZIONI */
 function mostraMenuPrincipale() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
@@ -936,9 +925,7 @@ function apriLog() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* HEADER */
 function renderHeader() {
   var sqCasa, sqTrasf;
   if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; }
@@ -968,7 +955,9 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO — coordinate assolute
+   RENDER CAMPO
+   La coordinata è il CENTRO della coppia.
+   TU a -25px (sinistra), CPU a +25px (destra).
    ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -980,22 +969,33 @@ function renderCampo() {
     var pos = POSIZIONI_COPPIE[idx];
     var coppia = getGiocatoriCoppia(idx);
 
-    ['tu','cpu'].forEach(function(sq) {
-      var g = sq === 'tu' ? coppia.tu : coppia.cpu;
-      if (!g) return;
+    // Centro coppia in px di scena
+    var centerX = (pos.x / 100) * SCENA_W;
+    var centerY = (pos.y / 100) * SCENA_H;
+
+    // TU a sinistra, CPU a destra
+    var items = [
+      { g: coppia.tu,  offsetX: -OFFSET_COPPIA, sq: 'tu'  },
+      { g: coppia.cpu, offsetX: +OFFSET_COPPIA, sq: 'cpu' }
+    ];
+
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (!it.g) continue;
       var w = document.createElement('div');
-      w.className = 'pedina-wrapper ' + sq;
-      w.dataset.giocatoreId = g.id;
-      w.style.left = pos.x + '%';
-      w.style.top = pos.y + '%';
-      if (g.espulso) w.style.opacity = '0.5';
-      w.appendChild(creaNomeGiocatore(g));
-      w.appendChild(creaPedinaEl(g));
-      w.appendChild(creaInfoSotto(g));
+      w.className = 'pedina-wrapper ' + it.sq;
+      w.dataset.giocatoreId = it.g.id;
+      w.style.left = (centerX + it.offsetX) + 'px';
+      w.style.top = centerY + 'px';
+      if (it.g.espulso) w.style.opacity = '0.5';
+      w.appendChild(creaNomeGiocatore(it.g));
+      w.appendChild(creaPedinaEl(it.g));
+      w.appendChild(creaInfoSotto(it.g));
       zone.appendChild(w);
-    });
+    }
   }
 
+  // Portieri singoli (centrati sulla loro coordinata)
   for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
     var pp = POSIZIONI_PORTIERI[k];
     var por = getPortiere(pp.squadra);
@@ -1003,8 +1003,8 @@ function renderCampo() {
     var w = document.createElement('div');
     w.className = 'pedina-wrapper ' + pp.squadra;
     w.dataset.giocatoreId = por.id;
-    w.style.left = pp.x + '%';
-    w.style.top = pp.y + '%';
+    w.style.left = ((pp.x / 100) * SCENA_W) + 'px';
+    w.style.top = ((pp.y / 100) * SCENA_H) + 'px';
     w.appendChild(creaNomeGiocatore(por));
     w.appendChild(creaPedinaEl(por));
     w.appendChild(creaInfoSotto(por));
@@ -1101,9 +1101,7 @@ function resetPallaVolante() {
   pv.innerHTML = '';
 }
 
-/* ============================================================
-   SETUP
-   ============================================================ */
+/* SETUP */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
@@ -1202,9 +1200,7 @@ function lanciaMoneta(scelta) {
 function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
-/* ============================================================
-   ANIMAZIONE PALLA
-   ============================================================ */
+/* ANIMAZIONE PALLA */
 function animaPallaInCoppia(gDa, gA, cb) {
   suonaCalcio();
   mostraVistaCampo();
@@ -1263,9 +1259,7 @@ function animaPallaInCoppia(gDa, gA, cb) {
   requestAnimationFrame(anima);
 }
 
-/* ============================================================
-   CALCIO D'INIZIO
-   ============================================================ */
+/* CALCIO D'INIZIO */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
   var v0 = document.querySelectorAll('.palla-centro');
@@ -1292,9 +1286,7 @@ function eseguiCalcioIniziale(squadra) {
   setTimeout(avviaContrasto, 800);
 }
 
-/* ============================================================
-   CONTRASTO
-   ============================================================ */
+/* CONTRASTO */
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   mostraVistaCarte();
@@ -1508,9 +1500,7 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* ============================================================
-   PASSAGGIO LUNGO
-   ============================================================ */
+/* PASSAGGIO LUNGO */
 function chiediPassaggioLungo(coppiaAttuale, direzione, callback) {
   var cNormale = coppiaAttuale - direzione;
   var cLungo = coppiaAttuale - direzione * 2;
@@ -1547,9 +1537,7 @@ function confermaPassaggioLungo(usa) {
   if (window._passaggioLungoCallback) window._passaggioLungoCallback(usa);
 }
 
-/* ============================================================
-   RISOLVI CONTRASTO
-   ============================================================ */
+/* RISOLVI CONTRASTO */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
   if (vincente === 'tu') {
     stato.streak.tu++; stato.streak.cpu = 0;
@@ -1658,9 +1646,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   }
 }
 
-/* ============================================================
-   SCIVOLATA
-   ============================================================ */
+/* SCIVOLATA */
 function animaScivolata(gVincitore, gPerdente) {
   var wrapperV = document.querySelector('[data-giocatore-id="' + gVincitore.id + '"]');
   var wrapperP = document.querySelector('[data-giocatore-id="' + gPerdente.id + '"]');
@@ -1701,7 +1687,6 @@ function animaScivolata(gVincitore, gPerdente) {
 function apriSchermataTiro(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🥅 TIRO IN PORTA!', 'highlight'); apriOverlayTiro(att, dif, false); }
 function apriSchermataRigore(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🎯 RIGORE!', 'highlight'); apriOverlayTiro(att, dif, true); }
 
-/* OVERLAY TIRO */
 var tiroInAttesa = null;
 var tiroCorrente = { att:null, dif:null, isRigore:false };
 
@@ -1931,9 +1916,6 @@ function gestisciGoal(att) {
   setTimeout(function() { var sub = att === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(sub); }, 3200);
 }
 
-/* ============================================================
-   PARATA — il portiere rilancia alla coppia centrale
-   ============================================================ */
 function gestisciParata(att, dif) {
   log('🧤 Parata!');
   var por = getPortiere(dif);
@@ -2046,9 +2028,6 @@ function salvaRisultatoTorneo() {
   setTimeout(function() { location.href = 'seriea2027.html?risultato=' + encodeURIComponent(PARTITA_TORNEO); }, 1500);
 }
 
-/* ============================================================
-   SOSTITUZIONI
-   ============================================================ */
 function apriSostituzioni() { if (stato.sostBloccate) { alert('Sostituzioni bloccate.'); return; } if (stato.partitaFinita) return; selezioneSost = { campo:null, panchina:null }; renderModaleSostituzioni(); document.getElementById('modale').classList.remove('nascosto'); }
 function renderModaleSostituzioni() {
   var sq = 'tu'; var h = '<h2>🔄 Sostituzioni</h2>';
@@ -2093,9 +2072,6 @@ function bloccaCoppiaContrasto() {
   };
 }
 
-/* ============================================================
-   AVVIO
-   ============================================================ */
 try {
   inizializzaAmmonizioni();
   adattaScena();
