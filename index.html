@@ -551,8 +551,8 @@ var NOMI_BONUS = {
   'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
-/* Posizioni "base" delle coppie, con Z1 a destra (lato porta CPU in config standard TU-casa).
-   Vengono rimappate in renderCampo() in base a direzioneAttaccoTU. */
+/* Posizioni base delle coppie: Z1 a sinistra, Z5 a destra.
+   Questa configurazione corrisponde a "TU in casa, attacca a destra". */
 var POSIZIONI_COPPIE = [
   { x: 70.7, y: 70.5 },
   { x: 72.6, y: 83.8 },
@@ -566,7 +566,8 @@ var POSIZIONI_COPPIE = [
   { x: 37.4, y: 83.5 }
 ];
 
-/* Portieri in posizione base: TU a sinistra (vicino Z0), CPU a destra (vicino Z6) */
+/* Portieri in posizione base: TU a sinistra (vicino Z0), CPU a destra (vicino Z6).
+   Questa configurazione corrisponde a "TU in casa, attacca a destra". */
 var POSIZIONI_PORTIERI = [
   { x: 29.3, y: 72.1, squadra: 'tu' },
   { x: 75.8, y: 72.1, squadra: 'cpu' }
@@ -924,27 +925,10 @@ function renderHeader() {
 
 /* ============================================================
    RENDER CAMPO — versione CORRETTA
-   La posizione fisica di ogni coppia/portiere dipende dalla zona
-   e da stato.direzioneAttaccoTU.
-
-   - Zona 0 = porta della squadra TU (difesa TU) in config base.
-   - Zona 6 = porta della squadra CPU (difesa CPU) in config base.
-   - Se direzioneAttaccoTU = +1: TU attacca verso destra (Z0→Z6),
-     le posizioni base valgono così come sono.
-   - Se direzioneAttaccoTU = -1: TU attacca verso sinistra (Z6→Z0),
-     allora la zona Z viene disegnata usando la posizione base di (6 - Z).
-   Per la CPU si usa la direzione opposta: -direzioneAttaccoTU.
-
-   Le posizioni base di POSIZIONI_COPPIE e POSIZIONI_PORTIERI sono
-   definite per la config "TU in casa, attacca a destra".
    ============================================================ */
 function posizioneCoppiaPerZona(zona, meta, squadra) {
-  // Determina la direzione di attacco della squadra
   var dir = direzionePerSquadra(squadra);
-  // Se la squadra attacca verso sinistra (dir < 0), specchia la zona
   var zonaEff = dir < 0 ? (6 - zona) : zona;
-  // Anche la meta sup/inf va invertita quando la squadra attacca a sinistra,
-  // perché la numerazione delle coppie base è pensata per attacco a destra.
   var metaEff = dir < 0 ? (meta === 'sup' ? 'inf' : 'sup') : meta;
   var chiave = zonaEff + '_' + metaEff;
   var idx = MAPPA_COPPIA_IDX[chiave];
@@ -952,16 +936,18 @@ function posizioneCoppiaPerZona(zona, meta, squadra) {
   return POSIZIONI_COPPIE[idx];
 }
 
+/* CORREZIONE: scambia le posizioni dei portieri SOLO quando TU è in trasferta.
+   - TU in casa (dir > 0): TU a sinistra (base), CPU a destra (base).
+   - TU in trasferta (dir < 0): TU a destra, CPU a sinistra. */
 function posizionePortiere(squadra) {
-  var dir = direzionePerSquadra(squadra);
-  // Portiere base: TU a sinistra (x 29.3), CPU a destra (x 75.8).
-  // Se la squadra attacca a sinistra (dir < 0), il suo portiere va a destra.
-  var base = squadra === 'tu' ? POSIZIONI_PORTIERI[0] : POSIZIONI_PORTIERI[1];
-  if (dir < 0) {
-    // Specchia rispetto al centro: x -> 100 - x
-    return { x: 100 - base.x, y: base.y, squadra: squadra };
+  var baseTU = POSIZIONI_PORTIERI[0];   // {x: 29.3} -> sinistra
+  var baseCPU = POSIZIONI_PORTIERI[1];  // {x: 75.8} -> destra
+  if (stato.direzioneAttaccoTU < 0) {
+    // TU in trasferta: TU attacca a sinistra -> porta TU a destra; CPU in casa -> porta CPU a sinistra
+    return squadra === 'tu' ? baseCPU : baseTU;
   }
-  return base;
+  // TU in casa: TU a sinistra, CPU a destra
+  return squadra === 'tu' ? baseTU : baseCPU;
 }
 
 function renderCampo() {
@@ -971,13 +957,8 @@ function renderCampo() {
   zone.innerHTML = '';
 
   // --- Giocatori di movimento ---
-  // Iteriamo sulle zone "fisiche" 1..5 e per ciascuna disegniamo
-  // i giocatori di TU e CPU che si trovano in quella zona.
-  // Per trovare quali giocatori stanno in una zona fisica, dobbiamo
-  // convertire la zona fisica nella zona logica della squadra.
   for (var zonaFisica = 1; zonaFisica <= 5; zonaFisica++) {
     ['sup', 'inf'].forEach(function(metaFisica) {
-      // Per TU: la sua zona logica è la zona fisica se dir=+1, altrimenti 6-zonaFisica
       var dirTU = stato.direzioneAttaccoTU;
       var zonaLogicaTU = dirTU < 0 ? (6 - zonaFisica) : zonaFisica;
       var metaLogicaTU = dirTU < 0 ? (metaFisica === 'sup' ? 'inf' : 'sup') : metaFisica;
@@ -986,7 +967,6 @@ function renderCampo() {
       var zonaLogicaCPU = dirCPU < 0 ? (6 - zonaFisica) : zonaFisica;
       var metaLogicaCPU = dirCPU < 0 ? (metaFisica === 'sup' ? 'inf' : 'sup') : metaFisica;
 
-      // Posizione fisica: usa la posizione base della zona fisica/meta fisica
       var chiaveFisica = zonaFisica + '_' + metaFisica;
       var idxFisico = MAPPA_COPPIA_IDX[chiaveFisica];
       if (idxFisico === undefined) return;
@@ -996,7 +976,6 @@ function renderCampo() {
       var centerX = (pos.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X;
       var centerY = (pos.y / 100) * SCENA_H + OFFSET_GLOBALE_Y;
 
-      // Trova i giocatori TU e CPU che stanno in questa zona logica/meta
       var coppiaTU = getCoppiaAttiva(zonaLogicaTU, metaLogicaTU);
       var coppiaCPU = getCoppiaAttiva(zonaLogicaCPU, metaLogicaCPU);
 
@@ -1191,14 +1170,11 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
 
   /* Direzione di attacco:
      - Se TU è in casa (casaSquadra assente o uguale a sqTU): TU attacca a destra (Z0→Z6), dir = +1.
-     - Se TU è in trasferta (casaSquadra !== sqTU): TU attacca a sinistra (Z6→Z0), dir = -1.
+     - Se TU è in trasferta: TU attacca a sinistra (Z6→Z0), dir = -1.
      NON invertiamo le zone dei giocatori: le zone rimangono logiche (0 = porta TU, 6 = porta CPU).
      È renderCampo() che mappa zona logica → posizione fisica in base a direzioneAttaccoTU. */
-  if (casaSquadra && casaSquadra !== sqTU) {
-    stato.direzioneAttaccoTU = -1;
-  } else {
-    stato.direzioneAttaccoTU = 1;
-  }
+  var tuInCasa = !casaSquadra || casaSquadra === sqTU;
+  stato.direzioneAttaccoTU = tuInCasa ? 1 : -1;
 
   applicaSqualifiche('tu');
   applicaSqualifiche('cpu');
@@ -2097,9 +2073,6 @@ function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
-    /* Al cambio campo TUTTE le squadre invertono le zone logiche,
-       perché si scambiano fisicamente i lati. La direzioneAttaccoTU
-       si inverte di conseguenza. */
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
