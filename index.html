@@ -532,10 +532,16 @@ var BONUS_SCELTA_TIMEOUT = 3500;
 var DURATA_SPOSTAMENTO_INIZIO = 600;
 var OFFSET_COPPIA = 25;
 var OFFSET_GLOBALE_X = -50;
-var OFFSET_GIOCATORI_X = -50;
+var OFFSET_GIOCATORI_X = -20;   /* ← MODIFICATO: era -50, ora -20 = +30px verso destra */
 var OFFSET_GLOBALE_Y = -75;
 var OFFSET_PORTIERE_Y = -50;
 var SALITA_CALCIO_INIZIO = 50;
+
+/* Mappa: chi batte il calcio d'inizio → nomi dei compagni a cui può passare */
+var PASSAGGIO_CALCIO_INIZIO = {
+  'McKennie': ['Douglas', 'Miretti'],
+  'Baldanzi': ['Masini', 'Ellertson']
+};
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -1004,7 +1010,7 @@ function renderCampo() {
     var w2 = document.createElement('div');
     w2.className = 'pedina-wrapper ' + sq;
     w2.dataset.giocatoreId = por.id;
-    w2.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X) + 'px';
+    w2.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X) + 'px';
     w2.style.top = ((pp.y / 100) * SCENA_H + OFFSET_PORTIERE_Y) + 'px';
     w2.appendChild(creaNomeGiocatore(por));
     w2.appendChild(creaPedinaEl(por));
@@ -1280,7 +1286,7 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 /* ============================================================
    CALCIO D'INIZIO — versione corretta
    - Batte il giocatore INFERIORE (meta 'inf') della Z3 logica
-   - Sale di 50px, calcia, passa al compagno in Z3+dirAtt, torna giù
+   - Sale di 50px, calcia, passa al compagno specifico (McKennie→Douglas/Miretti, Baldanzi→Masini/Ellertson), torna giù
    - Direzione attacco determinata da casa/trasferta
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
@@ -1300,7 +1306,6 @@ function eseguiCalcioIniziale(squadra) {
     setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
     return;
   }
-  /* Il giocatore inferiore è quello con meta 'inf' → indice 1 se ci sono 2 giocatori */
   var idxB = listaZ3.length >= 2 ? 1 : 0;
   var gB = listaZ3[idxB];
   var metaB = 'inf';
@@ -1313,7 +1318,24 @@ function eseguiCalcioIniziale(squadra) {
 
   var compagni = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu)
     .filter(function(g){ return g.zona === zonaDest && !g.portiere && !g.espulso; });
-  var gA = compagni[0];
+
+  /* 3. Scegli il compagno in base al nome di chi batte */
+  var gA = null;
+  var targetNomi = PASSAGGIO_CALCIO_INIZIO[gB.nome] || null;
+  if (targetNomi && compagni.length > 0) {
+    for (var t=0; t<compagni.length; t++) {
+      var nomeComp = compagni[t].nome;
+      for (var n=0; n<targetNomi.length; n++) {
+        if (nomeComp.indexOf(targetNomi[n]) > -1 || targetNomi[n].indexOf(nomeComp) > -1) {
+          gA = compagni[t];
+          break;
+        }
+      }
+      if (gA) break;
+    }
+  }
+  /* Fallback: se nessun nome corrisponde, prendi il primo compagno */
+  if (!gA && compagni.length > 0) gA = compagni[0];
 
   stato.zonaPalla = 3; stato.metaContesa = metaB;
   stato.possessore = squadra;
@@ -1334,7 +1356,6 @@ function eseguiCalcioIniziale(squadra) {
 
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
 
-  /* 3. Animazione: sale di 50px, calcia, passa, torna giù */
   function finalizza() {
     var idxG = compagni.indexOf(gA);
     var metaG = idxG <= 0 ? 'sup' : 'inf';
@@ -1356,12 +1377,12 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  /* 3a. Sale di 50px verso l'alto */
+  /* FASE 1: gB (McKennie/Baldanzi) sale di 50px */
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateY(-' + SALITA_CALCIO_INIZIO + 'px)';
 
   setTimeout(function() {
-    /* 3b. Calcia (animazione gamba) */
+    /* FASE 2: gB calcia */
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
       ped.classList.add('pg-in-calcio');
@@ -1369,10 +1390,10 @@ function eseguiCalcioIniziale(squadra) {
     }
     suonaCalcio();
 
-    /* 3c. Passaggio animato verso il compagno */
     setTimeout(function() {
+      /* FASE 3: la palla vola da gB a gA */
       animaPallaInZona(gB, gA, function() {
-        /* 3d. Torna al suo posto in Z3 inf (scende di 50px) */
+        /* FASE 4: gB torna giù */
         wrapperB.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
         wrapperB.style.transform = 'translateY(0)';
         setTimeout(finalizza, DURATA_RITORNO);
@@ -2107,7 +2128,6 @@ function fineTempoOPartita() {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
 
-    /* Inverti SOLO i giocatori di movimento, NON i portieri */
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
