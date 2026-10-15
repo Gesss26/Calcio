@@ -40,13 +40,37 @@
   .campo-area { position: absolute; left: 18%; top: 46%; width: 64%; height: 42%; padding: 0 2%; pointer-events: none; }
   .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
   .zona { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 1.5%; }
-  /* MODIFICA 1: gap 50px tra i 2 giocatori della stessa coppia */
-  .meta-sup, .meta-inf { display: flex; flex-direction: row; justify-content: center; align-items: center; flex: 1; padding: 2px 4px; gap: 50px; position: relative; }
+
+  /* MODIFICA: coppie con contenitore relativo, altezza fissa, wrapper in absolute */
+  .meta-sup, .meta-inf { 
+    position: relative; 
+    flex: 1; 
+    min-height: 110px;
+    padding: 2px 4px; 
+  }
   .zona[data-zona="2"] .meta-sup, .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
   .zona[data-zona="2"] .meta-inf, .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
   .zona[data-zona="1"] .meta-inf, .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
 
-  .pedina-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1px; position: relative; transition: transform 0.6s cubic-bezier(0.34,1.2,0.64,1); }
+  /* MODIFICA: pedina-wrapper in absolute, centrata, con offset 25px dal centro */
+  .pedina-wrapper { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 1px; 
+    position: absolute; 
+    top: 0; 
+    transform: translateX(-50%); 
+    transition: transform 0.6s cubic-bezier(0.34,1.2,0.64,1); 
+  }
+  .meta-sup > .pedina-wrapper:nth-child(1),
+  .meta-inf > .pedina-wrapper:nth-child(1) { 
+    left: calc(50% - 25px);
+  }
+  .meta-sup > .pedina-wrapper:nth-child(2),
+  .meta-inf > .pedina-wrapper:nth-child(2) { 
+    left: calc(50% + 25px);
+  }
 
   .portiere-wrapper { position: absolute !important; top: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
   .portiere-wrapper.portiere-sx { left: 62%; transform: translate(-50%, calc(-50% - 20px)) translateX(40px); }
@@ -1320,8 +1344,9 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
+  /* FIX: preserva translateX(-50%) durante la salita */
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
-  wrapperB.style.transform = 'translateY(-' + SALITA_CALCIO_INIZIO + 'px)';
+  wrapperB.style.transform = 'translate(-50%, -' + SALITA_CALCIO_INIZIO + 'px)';
 
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
@@ -1333,8 +1358,9 @@ function eseguiCalcioIniziale(squadra) {
 
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
+        /* FIX: ritorno preservando translateX(-50%) */
         wrapperB.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
-        wrapperB.style.transform = 'translateY(0)';
+        wrapperB.style.transform = 'translate(-50%, 0)';
         setTimeout(finalizza, DURATA_RITORNO);
       });
     }, 250);
@@ -1725,6 +1751,7 @@ function animaScivolata(gVincitore, gPerdente) {
   wrapperV.parentNode.insertBefore(w, wrapperV);
   w.appendChild(wrapperV);
 
+  /* FIX: preserva translateX(-50%) + aggiunge lo spostamento */
   requestAnimationFrame(function() {
     w.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px)';
     pedV.classList.add('pg-in-scivolata');
@@ -1944,7 +1971,6 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
       var coppiaB = COPPIE_11[dP11b];
       document.getElementById('tiro-info').textContent = 'FASE 2 — Portiere (Parata Super) tira 1d11...';
       mostraDadiTiro(dT, dP11b);
-      /* Evidenzia le 7 caselle coperte (tutte tranne le 2 della coppia) */
       var tutteLeCaselle = [1,2,3,4,5,6,7,8,9];
       var coperte = [];
       for (var k=0;k<tutteLeCaselle.length;k++) {
