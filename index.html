@@ -9,8 +9,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
-  .stadio-sfondo { position: fixed; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
-  .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
   .avviso-ruota { display: none; position: fixed; inset: 0; background: linear-gradient(135deg, #0a0a15, #16213e); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: #fff; }
   .avviso-ruota .icona-ruota { font-size: 80px; margin-bottom: 20px; animation: ruotaAnim 2s infinite ease-in-out; }
   @keyframes ruotaAnim { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
@@ -34,13 +32,16 @@
 
   .area-gioco { position: relative; flex: 1; z-index: 5; overflow: hidden; }
   .scena-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 6; }
-  .scena { position: relative; width: 1600px; height: 900px; transform-origin: center center; flex-shrink: 0; pointer-events: none; }
+  .scena { position: relative; width: 1600px; height: 900px; transform-origin: center center; flex-shrink: 0; pointer-events: none; overflow: hidden; }
   .scena > * { pointer-events: auto; }
 
-  .campo-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+  /* Sfondo DENTRO la scena: scala insieme, così le coordinate x/y% dell'editor combaciano */
+  .stadio-sfondo { position: absolute; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
+  .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
+
+  .campo-area { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
   .zone { position: absolute; inset: 0; z-index: 5; }
 
-  /* Pedine posizionate in modo assoluto con coordinate X,Y% */
   .pedina-wrapper {
     position: absolute;
     transform: translate(-50%, -50%);
@@ -368,8 +369,6 @@
   <p>Per giocare a Calcio a Carte, ruota il telefono in orizzontale (landscape).</p>
 </div>
 
-<div class="stadio-sfondo"></div>
-
 <div class="app" id="app">
   <div class="topbar">
     <div class="risultato-wrapper">
@@ -401,8 +400,14 @@
 
     <div class="scena-wrapper" id="scena-wrapper">
       <div class="scena" id="scena">
+        <div class="stadio-sfondo"></div>
+
         <div class="bonus-cpu-info" id="bonus-cpu-info">
           🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
+        </div>
+
+        <div class="campo-area">
+          <div class="zone" id="zone"></div>
         </div>
 
         <div class="carte-panel" id="carte-panel">
@@ -460,10 +465,6 @@
             <span>Streak: <strong id="info-streak">0</strong>/3</span>
           </div>
           <div id="azioni-container"></div>
-        </div>
-
-        <div class="campo-area">
-          <div class="zone" id="zone"></div>
         </div>
 
         <div class="flash-vincitore" id="flash"></div>
@@ -529,8 +530,7 @@ var SCIVOLATA_MAX_PX = 25;
 var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
-var DURATA_SPOSTAMENTO_INIZIO = 600;
-var COPPIA_INIZIO = 4;  // coppia centrale di partenza
+var COPPIA_INIZIO = 4;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -548,20 +548,19 @@ var NOMI_BONUS = {
 };
 
 /* ============================================================
-   POSIZIONI CAMPO
-   x, y in percentuale (0-100) del campo-area
+   POSIZIONI CAMPO — dal tuo editor
    ============================================================ */
 var POSIZIONI_COPPIE = [
-  { x: 70.7, y: 70.5 }, // #0 - vicino porta CPU
+  { x: 70.7, y: 70.5 }, // #0
   { x: 72.6, y: 83.8 }, // #1
   { x: 62.6, y: 63.7 }, // #2
   { x: 64.7, y: 93.6 }, // #3
-  { x: 55.1, y: 68.9 }, // #4 - CENTRO (calcio d'inizio)
+  { x: 55.1, y: 68.9 }, // #4 (centro)
   { x: 55.1, y: 88.7 }, // #5
   { x: 47.5, y: 63.8 }, // #6
   { x: 45.3, y: 93.5 }, // #7
   { x: 39.4, y: 70.3 }, // #8
-  { x: 37.4, y: 83.5 }  // #9 - vicino porta TU
+  { x: 37.4, y: 83.5 }  // #9
 ];
 
 var POSIZIONI_PORTIERI = [
@@ -696,9 +695,8 @@ function fermaSottofondo() { if (!sottofondo.attivo || !sottofondo.source) retur
 function aggiornaSottofondoPerCoppia(coppia) {
   if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return;
   var ora = audioCtx.currentTime, target;
-  // Coppie più avanzate = più tensione
-  var distanzaPortaCPU = coppia; // 0 = vicino porta CPU
-  var distanzaPortaTU = 9 - coppia; // 9 = vicino porta TU
+  var distanzaPortaCPU = coppia;
+  var distanzaPortaTU = 9 - coppia;
   var minDist = Math.min(distanzaPortaCPU, distanzaPortaTU);
   if (minDist <= 1) { target = 0.14; sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora+0.6); }
   else if (minDist <= 3) { target = 0.08; sottofondo.filtro.frequency.linearRampToValueAtTime(600, ora+0.6); }
@@ -713,12 +711,12 @@ var stato = {
   tipoPartita:'1P', squadraTU:'inter', squadraCPU:'milan', divise:{ tu:null, cpu:null },
   tempo:1, mano:1, maxMani:MANI_PER_TEMPO, punteggio:{ tu:0, cpu:0 },
   coppiaPalla:COPPIA_INIZIO, possessore:null, giocatorePalla:null,
-  direzioneAttaccoTU:1,  // 1 = verso coppia 0 (destra), -1 = verso coppia 9 (sinistra)
+  direzioneAttaccoTU:1,
   pallaInAnimazione:false, azioneTiroDaPalo:null,
   mazzo:[], scarti:[], mazzoBonus:[],
   mani:{ tu:[], cpu:[] }, giocatori:{ tu:[], cpu:[] }, panchina:{ tu:[], cpu:[] },
   monetaVinta:null, partitaFinita:false, sostBloccate:false,
-  semeGuidaPrecedente:null, invertiCoppie:false,
+  semeGuidaPrecedente:null,
   bonus: { tu: [], cpu: [] }, bonusUsatoQuestoTiro: { tu:null, cpu:null }, streak: { tu:0, cpu:0 },
   statistiche: {
     tu: { gol:0, tiri:0, parate:0, angoli:0, pali:0, contese:0, vinte:0, falli:0, ammonizioni:0, espulsioni:0, sostituzioni:0, bonusGuadagnati:0 },
@@ -768,27 +766,23 @@ function creaPalloneSVG() {
 }
 
 /* ============================================================
-   GIOCATORI — 10 di movimento + 1 portiere per squadra
+   GIOCATORI
    ============================================================ */
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
   var rosa = ROSE[sqId]; if (!rosa) return g;
 
-  // Portiere (coppiaIdx = -1)
   g.push({
     id:sq+'_'+id++, squadra:sq, coppiaIdx:-1, ruolo:'POR', portiere:true,
     stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false,
     nome:rosa.portiere[0]
   });
 
-  // 10 giocatori di movimento (coppie 0-9)
-  // Mappatura: 0-1 difensori, 2-3 difensori_alta, 4-9 centrocampisti
   var lista = [];
   for (var d=0;d<rosa.difensori.length && lista.length<2;d++) lista.push(rosa.difensori[d]);
   for (var da=0;da<rosa.difensori_alta.length && lista.length<4;da++) lista.push(rosa.difensori_alta[da]);
   for (var c=0;c<rosa.centrocampisti.length && lista.length<10;c++) lista.push(rosa.centrocampisti[c]);
-  // Fallback se mancano giocatori
   while (lista.length < 10) lista.push('Giocatore' + (lista.length+1));
 
   for (var i=0;i<10;i++) {
@@ -851,9 +845,6 @@ function getPortiere(sq) {
   }
   return null;
 }
-// Direzione attacco di una squadra rispetto alle coppie
-// TU: 1 = verso coppia 0 (destra), -1 = verso coppia 9 (sinistra)
-// CPU: opposta
 function direzionePerSquadra(sq) {
   if (sq === 'tu') return stato.direzioneAttaccoTU;
   return -stato.direzioneAttaccoTU;
@@ -985,7 +976,6 @@ function renderCampo() {
   var zone = document.getElementById('zone');
   zone.innerHTML = '';
 
-  // Disegna i 10 giocatori di movimento per ciascuna squadra
   for (var idx = 0; idx < POSIZIONI_COPPIE.length; idx++) {
     var pos = POSIZIONI_COPPIE[idx];
     var coppia = getGiocatoriCoppia(idx);
@@ -1006,7 +996,6 @@ function renderCampo() {
     });
   }
 
-  // Disegna i 2 portieri
   for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
     var pp = POSIZIONI_PORTIERI[k];
     var por = getPortiere(pp.squadra);
@@ -1022,7 +1011,6 @@ function renderCampo() {
     zone.appendChild(w);
   }
 
-  // Palla ai piedi del possessore
   if (!stato.pallaInAnimazione && stato.possessore && stato.giocatorePalla) {
     creaPallaAiPiedi(stato.giocatorePalla);
   }
@@ -1169,14 +1157,9 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   passaggioLungoInCorso = false;
   resetPallaVolante();
 
-  // Direzione attacco in base a chi è in casa
-  // Se TU è in casa (casaSquadra == sqTU o casaSquadra undefined), TU attacca verso coppia 0 (destra)
-  // Altrimenti TU attacca verso coppia 9 (sinistra)
   if (casaSquadra && casaSquadra !== sqTU) {
-    // TU è in trasferta → attacca verso coppia 9 (sinistra)
     stato.direzioneAttaccoTU = -1;
   } else {
-    // TU in casa (o partita singola senza torneo) → attacca verso coppia 0 (destra)
     stato.direzioneAttaccoTU = 1;
   }
 
@@ -1291,7 +1274,6 @@ function eseguiCalcioIniziale(squadra) {
   resetPallaVolante();
   stato.pallaInAnimazione = false;
 
-  // La squadra che vince il sorteggio parte con palla alla coppia centrale
   var coppiaCentrale = getGiocatoriCoppia(COPPIA_INIZIO);
   var gB = squadra === 'tu' ? coppiaCentrale.tu : coppiaCentrale.cpu;
   if (!gB) {
@@ -1324,7 +1306,6 @@ function avviaContrasto() {
   var poss = stato.possessore;
   var dif = poss === 'tu' ? 'cpu' : 'tu';
 
-  // Suona tensione se vicino alle porte
   if (coppiaIdx <= 1 || coppiaIdx >= 8) suonaTensione();
 
   var coppia = getGiocatoriCoppia(coppiaIdx);
@@ -1427,7 +1408,6 @@ function risolviContrastoAutomatico(vincente) {
 }
 function cpuVuoleUsareContrastoSicuro(coppiaIdx) {
   var dir = direzionePerSquadra('cpu');
-  // zonaAv: CPU vicina alla porta TU
   var zonaAv = dir > 0 ? (coppiaIdx >= 6) : (coppiaIdx <= 3);
   var staPerdendo = stato.punteggio.cpu < stato.punteggio.tu;
   var secondoTempo = stato.tempo === 2;
@@ -1504,10 +1484,9 @@ function scegliCartaCPU() {
     return carteSeme[carteSeme.length - 1];
   }
   var p = manoOrd[0];
-  if (p && p.valore >= 12) { if (!statoVincendo(staVincendo) || zonaAv || ultimiMin) return p; }
+  if (p && p.valore >= 12) { if (!staVincendo || zonaAv || ultimiMin) return p; }
   return manoOrd[manoOrd.length - 1];
 }
-function statoVincendo(v) { return v; }
 
 function mostraBannerMano(v, cT, cC, seme, motivo) {
   var b = document.getElementById('banner-mano');
@@ -1533,7 +1512,7 @@ function nascondiBannerMano() { document.getElementById('banner-mano').classList
    PASSAGGIO LUNGO
    ============================================================ */
 function chiediPassaggioLungo(coppiaAttuale, direzione, callback) {
-  var cNormale = coppiaAttuale - direzione; // avanzo di 1 verso porta avversaria
+  var cNormale = coppiaAttuale - direzione;
   var cLungo = coppiaAttuale - direzione * 2;
   if (cLungo < 0) cLungo = 0;
   if (cLungo > 9) cLungo = 9;
@@ -1608,9 +1587,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
 
   var dirVincente = direzionePerSquadra(vincente);
   var coppiaAttuale = c.coppia;
-  // La coppia d'arrivo in direzione della porta avversaria:
-  // TU attacca verso coppia 0 se dirVincente=1, verso coppia 9 se -1
-  // Avanzo = -dirVincente (perché coppia 0 è vicina alla porta CPU)
   var coppiaTiro = dirVincente > 0 ? 0 : 9;
   var isTiro = (coppiaAttuale === coppiaTiro);
 
@@ -1625,7 +1601,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     return;
   }
 
-  // Avanzo di 1 coppia verso la porta avversaria
   var nuovaCoppia = coppiaAttuale - dirVincente;
   if (nuovaCoppia < 0) nuovaCoppia = 0;
   if (nuovaCoppia > 9) nuovaCoppia = 9;
@@ -1640,12 +1615,10 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   }
 
   function eseguiAvanzamento(coppiaFinale) {
-    // Il giocatore che ha la palla nella nuova coppia è il compagno di squadra in quella coppia
     var coppiaGiocatori = getGiocatoriCoppia(coppiaFinale);
     var sc = vincente === 'tu' ? coppiaGiocatori.tu : coppiaGiocatori.cpu;
 
     if (!sc) {
-      // Nessun giocatore → tiro
       setTimeout(function() { apriSchermataTiro(vincente); }, 500);
       return;
     }
@@ -1669,7 +1642,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     }, dPR);
   }
 
-  // Passaggio lungo se TU e non è fallo
   var cLungo = coppiaAttuale - dirVincente * 2;
   var passaggioLungoValido = (cLungo >= 0 && cLungo <= 9);
 
@@ -1965,7 +1937,6 @@ function gestisciGoal(att) {
 function gestisciParata(att, dif) {
   log('🧤 Parata!');
   var por = getPortiere(dif);
-  // Rilancia alla coppia centrale 4 o 5
   var coppiaRilancio = Math.random() < 0.5 ? 4 : 5;
   var coppiaGiocatori = getGiocatoriCoppia(coppiaRilancio);
   var sc = dif === 'tu' ? coppiaGiocatori.tu : coppiaGiocatori.cpu;
@@ -2026,7 +1997,6 @@ function gestisciPalo(att, dif) {
 function gestisciAngolo(att, dif) {
   log('🚩 Angolo!');
   setTimeout(function() {
-    // Angolo: palla alla coppia più vicina alla porta avversaria (coppia 0 per TU, 9 per CPU)
     var dir = direzionePerSquadra(att);
     var coppiaAngolo = dir > 0 ? 0 : 9;
     stato.coppiaPalla = coppiaAngolo;
@@ -2048,7 +2018,6 @@ function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
-    // Inverti direzione attacco TU
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     log('🔄 CAMBIO CAMPO!', 'highlight');
