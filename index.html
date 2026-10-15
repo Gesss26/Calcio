@@ -40,7 +40,7 @@
   .campo-area { position: absolute; left: 18%; top: 46%; width: 64%; height: 42%; padding: 0 2%; pointer-events: none; }
   .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
   .zona { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 1.5%; }
-  .meta-sup, .meta-inf { display: flex; flex-direction: row; justify-content: center; align-items: center; flex: 1; padding: 2px 4px; gap: 12px; position: relative; }
+  .meta-sup, .meta-inf { display: flex; flex-direction: row; justify-content: center; align-items: center; flex: 1; padding: 2px 4px; gap: 4px; position: relative; }
   .zona[data-zona="2"] .meta-sup, .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
   .zona[data-zona="2"] .meta-inf, .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
   .zona[data-zona="1"] .meta-inf, .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
@@ -57,15 +57,17 @@
     justify-content: flex-start;
   }
 
-  .portiere-wrapper { position: absolute !important; top: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
-  .portiere-wrapper.portiere-sx { left: 62%; transform: translate(-50%, calc(-50% - 20px)) translateX(40px); }
-  .portiere-wrapper.portiere-dx { left: 38%; transform: translate(-50%, calc(-50% - 20px)) translateX(-40px); }
+  /* Portieri davanti alla porta */
+  .portiere-wrapper { position: absolute !important; top: 50%; left: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
+  .portiere-wrapper.portiere-sx { left: 70%; }
+  .portiere-wrapper.portiere-dx { left: 30%; }
 
   .nome-giocatore { font-size: 10px; font-weight: 900; color: #fff; text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 88px; text-align: center; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.3px; pointer-events: none; }
   .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
   .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
 
-  .info-sotto { display: flex; flex-direction: row; gap: 3px; font-size: 10px; line-height: 1; color: #fff; text-shadow: 0 1px 3px #000; pointer-events: none; font-weight: 900; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.75); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.25); white-space: nowrap; margin-top: 2px; }
+  /* Barra stamina/falli: 15px sotto la pedina */
+  .info-sotto { display: flex; flex-direction: row; gap: 3px; font-size: 10px; line-height: 1; color: #fff; text-shadow: 0 1px 3px #000; pointer-events: none; font-weight: 900; font-family: 'Courier New', monospace; background: rgba(0,0,0,0.75); padding: 1px 4px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.25); white-space: nowrap; margin-top: 15px; }
   .info-sotto .stamina-txt { color: #4ade80; font-size: 10px; }
   .info-sotto .stamina-txt.medio { color: #fbbf24; }
   .info-sotto .stamina-txt.basso { color: #ef4444; }
@@ -89,10 +91,6 @@
   .palla-centro { position: absolute; width: 18px; height: 18px; z-index: 12; pointer-events: none; transform: translate(-50%, -50%); filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7)); }
   .palla-centro svg { width: 100%; height: 100%; display: block; }
 
-  /* ============================================================
-     PALLA VOLANTE — ora è FUORI dalla scena scalata.
-     position: fixed, coordinate viewport, dimensioni reali 18x18.
-     ============================================================ */
   .palla-volante {
     position: fixed;
     z-index: 9999;
@@ -123,11 +121,6 @@
   .pedina-scivola-wrapper { position: relative; z-index: 20; transition: transform 0.6s cubic-bezier(0.34,1.5,0.64,1); }
   .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
   .pedina.pg-in-scivolata { transition: transform 0.4s cubic-bezier(0.34,1.3,0.64,1); }
-  .pedina.pg-in-scivolata + .info-sotto,
-  .pedina-scivola-wrapper .info-sotto {
-    margin-top: 15px;
-    transition: margin-top 0.2s;
-  }
 
   .flash-vincitore { position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0; }
   .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
@@ -490,7 +483,6 @@
       </div>
     </div>
 
-    <!-- Palla volante FUORI dalla scena: non viene scalata -->
     <div class="palla-volante" id="palla-volante"></div>
   </div>
 
@@ -539,7 +531,7 @@
 <script src="ammonizioni.js"></script>
 <script>
 /* CONFIGURAZIONE */
-var STAMINA_MAX = 20;
+var STAMINA_MAX = 10;
 var CARTE_INIZIALI = 7;
 var MINUTI_PER_MANO = 2;
 var MANI_PER_TEMPO = 23;
@@ -1038,7 +1030,7 @@ function creaPedinaEl(g, anim) {
   var el = document.createElement('div');
   el.className = 'pedina ' + g.squadra + (g.portiere ? ' portiere' : '');
   el.dataset.giocatoreId = g.id;
-  if (g.stamina <= 5 && g.stamina > 0) el.classList.add('stanco');
+  if (g.stamina <= 3 && g.stamina > 0) el.classList.add('stanco');
   if (g.stamina === 0) el.classList.add('esaurito');
   if (g.ammonito) el.classList.add('ammonito');
   if (g.espulso) el.classList.add('espulso');
@@ -1187,9 +1179,7 @@ function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
 /* ============================================================
-   ANIMAZIONE PALLA
-   La palla volante è position:fixed, fuori dalla scena scalata.
-   Le coordinate di getBoundingClientRect() sono già in px viewport.
+   ANIMAZIONE PALLA — position fixed, coordinate viewport
    ============================================================ */
 function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
@@ -1201,7 +1191,6 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   var pedD = wrapperD.querySelector('.pedina'); if (!pedD) pedD = wrapperD;
   var pedA = wrapperA.querySelector('.pedina'); if (!pedA) pedA = wrapperA;
 
-  // Coordinate viewport reali (position:fixed)
   var rD = pedD.getBoundingClientRect(), rA = pedA.getBoundingClientRect();
   var pX = rD.left + rD.width/2;
   var pY = rD.bottom;
@@ -1557,7 +1546,7 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
 /* ============================================================
-   PASSAGGIO LUNGO — scelta utente
+   PASSAGGIO LUNGO
    ============================================================ */
 function chiediPassaggioLungo(zonaAttuale, dirVincente, callback) {
   var nzNormale = zonaAttuale + dirVincente;
@@ -1709,13 +1698,13 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
 }
 
 /* ============================================================
-   SCIVOLATA
+   SCIVOLATA — sposta SOLO la pedina, la barra resta ferma
    ============================================================ */
 function animaScivolata(gVincitore, gPerdente) {
   var wrapperV = document.querySelector('[data-giocatore-id="' + gVincitore.id + '"]');
   var wrapperP = document.querySelector('[data-giocatore-id="' + gPerdente.id + '"]');
   if (!wrapperV || !wrapperP) return;
-  var pedV = wrapperV.querySelector('.pedina'); if (!pedV) pedV = wrapperV;
+  var pedV = wrapperV.querySelector('.pedina'); if (!pedV) return;
   var pedP = wrapperP.querySelector('.pedina'); if (!pedP) pedP = wrapperP;
 
   var rV = pedV.getBoundingClientRect();
@@ -1732,24 +1721,19 @@ function animaScivolata(gVincitore, gPerdente) {
   var angoloPiega = dx > 0 ? -22 : 22;
   if (Math.abs(dy) > Math.abs(dx)) angoloPiega = dy > 0 ? -15 : 15;
 
-  var w = document.createElement('div');
-  w.className = 'pedina-scivola-wrapper scivolando';
-  wrapperV.parentNode.insertBefore(w, wrapperV);
-  w.appendChild(wrapperV);
-
+  // Sposta SOLO la pedina (la barra stamina resta ferma)
+  pedV.style.transition = 'transform ' + (DURATA_SCIVOLATA/1000) + 's cubic-bezier(0.34,1.5,0.64,1)';
+  pedV.classList.add('pg-in-scivolata');
   requestAnimationFrame(function() {
-    w.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px)';
-    pedV.classList.add('pg-in-scivolata');
-    pedV.style.transform = 'rotate(' + angoloPiega + 'deg)';
+    pedV.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px) rotate(' + angoloPiega + 'deg)';
   });
 
   setTimeout(function() {
-    w.classList.remove('scivolando'); w.classList.add('ritorno');
-    w.style.transform = 'translate(0, 0)';
-    pedV.style.transform = 'rotate(0deg)';
+    pedV.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
+    pedV.style.transform = 'translate(0, 0) rotate(0deg)';
     setTimeout(function() {
-      if (w.parentNode) { w.parentNode.insertBefore(wrapperV, w); w.remove(); }
       pedV.classList.remove('pg-in-scivolata');
+      pedV.style.transition = '';
     }, DURATA_RITORNO);
   }, DURATA_SCIVOLATA);
 }
@@ -2106,9 +2090,9 @@ function renderModaleSostituzioni() {
   var sq = 'tu'; var h = '<h2>🔄 Sostituzioni</h2>';
   h += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">In campo</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
   var gs = stato.giocatori[sq].filter(function(g){ return !g.espulso; });
-  for (var i=0;i<gs.length;i++) { var g = gs[i]; var sel = selezioneSost.campo === g.id ? ' style="background:#ffd700;color:#16213e"' : ''; h += '<div' + sel + ' style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer" onclick="selezionaSostCampo(\'' + g.id + '\')">' + '<div>' + g.nome + '</div><div>⚡' + g.stamina + '/20</div></div>'; }
+  for (var i=0;i<gs.length;i++) { var g = gs[i]; var sel = selezioneSost.campo === g.id ? ' style="background:#ffd700;color:#16213e"' : ''; h += '<div' + sel + ' style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer" onclick="selezionaSostCampo(\'' + g.id + '\')">' + '<div>' + g.nome + '</div><div>⚡' + g.stamina + '/10</div></div>'; }
   h += '</div></div><div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
-  for (var k=0;k<stato.panchina[sq].length;k++) { var p = stato.panchina[sq][k]; var sel2 = selezioneSost.panchina === p.id ? ' style="background:#ffd700;color:#16213e"' : ''; var dis = p.entrato ? ' opacity:0.35;cursor:not-allowed' : ''; h += '<div' + sel2 + ' style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer' + dis + '" onclick="selezionaSostPanchina(\'' + p.id + '\')">' + '<div>' + p.nome + '</div><div>⚡' + p.stamina + '/20</div></div>'; }
+  for (var k=0;k<stato.panchina[sq].length;k++) { var p = stato.panchina[sq][k]; var sel2 = selezioneSost.panchina === p.id ? ' style="background:#ffd700;color:#16213e"' : ''; var dis = p.entrato ? ' opacity:0.35;cursor:not-allowed' : ''; h += '<div' + sel2 + ' style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer' + dis + '" onclick="selezionaSostPanchina(\'' + p.id + '\')">' + '<div>' + p.nome + '</div><div>⚡' + p.stamina + '/10</div></div>'; }
   h += '</div></div><div style="margin-top:14px">';
   if (selezioneSost.campo && selezioneSost.panchina) h += '<button class="primario" onclick="confermaSostituzione()">CONFERMA</button>';
   h += '<button onclick="chiudiModale()">CHIUDI</button></div>';
