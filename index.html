@@ -89,11 +89,28 @@
   .palla-centro { position: absolute; width: 18px; height: 18px; z-index: 12; pointer-events: none; transform: translate(-50%, -50%); filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7)); }
   .palla-centro svg { width: 100%; height: 100%; display: block; }
 
-  /* FIX pallone fantasma: usa visibility invece di display */
-  .palla-volante { position: absolute; z-index: 15; width: 18px; height: 18px; visibility: hidden; pointer-events: none; transform: translate(-50%, -50%); }
-  .palla-volante.attiva { visibility: visible; }
-  .palla-volante .palla-inner { width: 100%; height: 100%; transform-origin: 50% 50%; will-change: transform; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6)); }
-  .palla-volante svg { width: 100%; height: 100%; display: block; }
+  /* ============================================================
+     PALLA VOLANTE — ora è FUORI dalla scena scalata.
+     position: fixed, coordinate viewport, dimensioni reali 18x18.
+     ============================================================ */
+  .palla-volante {
+    position: fixed;
+    z-index: 9999;
+    width: 18px;
+    height: 18px;
+    display: none;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .palla-volante.attiva { display: block; }
+  .palla-volante .palla-inner {
+    width: 18px;
+    height: 18px;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6));
+  }
+  .palla-volante svg { width: 18px; height: 18px; display: block; }
 
   .evidenzia-coppia { position: absolute; width: 65px; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,215,0,0.55) 0%, rgba(255,215,0,0.2) 55%, rgba(255,215,0,0) 85%); border: 2px solid rgba(255,215,0,0.9); box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4); pointer-events: none; transform: translate(-50%, -50%); z-index: 3; animation: pulseEllisse 1.5s infinite; }
   @keyframes pulseEllisse { 0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4); border-color: rgba(255,215,0,0.9); } 50% { box-shadow: 0 0 25px rgba(255,215,0,1), inset 0 0 15px rgba(255,215,0,0.6); border-color: rgba(255,215,0,1); } }
@@ -469,10 +486,12 @@
           <div class="zone" id="zone"></div>
         </div>
 
-        <div class="palla-volante" id="palla-volante"></div>
         <div class="flash-vincitore" id="flash"></div>
       </div>
     </div>
+
+    <!-- Palla volante FUORI dalla scena: non viene scalata -->
+    <div class="palla-volante" id="palla-volante"></div>
   </div>
 
   <div class="panchina" id="panchina"></div>
@@ -727,7 +746,7 @@ function scegliSemeGuida() { var d = SEMI_KEYS.filter(function(s){ return s !== 
 function log(msg, classe) { stato.logCompleto.push({ msg:msg, classe:classe||'' }); }
 
 function creaPalloneSVG() {
-  return '<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">' +
+  return '<svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg">' +
     '<defs><radialGradient id="pg" cx="35%" cy="30%" r="75%">' +
     '<stop offset="0%" stop-color="#fff"/><stop offset="60%" stop-color="#f0f0f0"/>' +
     '<stop offset="100%" stop-color="#c8c8c8"/></radialGradient></defs>' +
@@ -1052,6 +1071,7 @@ function resetPallaVolante() {
   pv.classList.remove('attiva');
   pv.style.left = '';
   pv.style.top = '';
+  pv.innerHTML = '';
 }
 
 function avviaSetup1P() {
@@ -1168,12 +1188,12 @@ function mostraVistaCarte() { mostraPannelloCarte(); }
 
 /* ============================================================
    ANIMAZIONE PALLA
+   La palla volante è position:fixed, fuori dalla scena scalata.
+   Le coordinate di getBoundingClientRect() sono già in px viewport.
    ============================================================ */
 function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
   mostraVistaCampo();
-  var scena = document.getElementById('scena');
-  var box = scena.getBoundingClientRect();
 
   var wrapperD = document.querySelector('[data-giocatore-id="' + gDa.id + '"]');
   var wrapperA = document.querySelector('[data-giocatore-id="' + gA.id + '"]');
@@ -1181,11 +1201,12 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   var pedD = wrapperD.querySelector('.pedina'); if (!pedD) pedD = wrapperD;
   var pedA = wrapperA.querySelector('.pedina'); if (!pedA) pedA = wrapperA;
 
+  // Coordinate viewport reali (position:fixed)
   var rD = pedD.getBoundingClientRect(), rA = pedA.getBoundingClientRect();
-  var pX = (rD.left + rD.width/2 - box.left) / scalaCorrente;
-  var pY = (rD.bottom - box.top) / scalaCorrente;
-  var aX = (rA.left + rA.width/2 - box.left) / scalaCorrente;
-  var aY = (rA.bottom - box.top) / scalaCorrente;
+  var pX = rD.left + rD.width/2;
+  var pY = rD.bottom;
+  var aX = rA.left + rA.width/2;
+  var aY = rA.bottom;
 
   var v = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v.length;i++) v[i].remove();
@@ -1198,8 +1219,6 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   p.style.transition = 'none';
   p.style.left = pX + 'px';
   p.style.top = pY + 'px';
-  p.style.width = '18px';
-  p.style.height = '18px';
   p.classList.add('attiva');
   pi.style.transform = 'rotate(0deg)'; void p.offsetWidth;
 
@@ -1224,6 +1243,7 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
       p.classList.remove('attiva');
       p.style.left = '';
       p.style.top = '';
+      p.innerHTML = '';
       stato.pallaInAnimazione = false;
       if (cb) cb();
     }
@@ -1330,7 +1350,6 @@ function eseguiCalcioIniziale(squadra) {
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   mostraVistaCarte();
-  // Sicurezza: assicurati che la palla volante sia nascosta
   resetPallaVolante();
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
@@ -1673,7 +1692,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     }, dPR);
   }
 
-  // Chiedi Passaggio Lungo se il vincitore è 'tu' e ha il bonus (e non è un fallo)
   var nzLungo = zonaAttuale + dirVincente * 2;
   var passaggioLungoValido = (nzLungo >= 1 && nzLungo <= 5);
 
