@@ -531,9 +531,10 @@ var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
 var DURATA_SPOSTAMENTO_INIZIO = 600;
 var OFFSET_COPPIA = 25;          /* distanza orizzontale tra TU e CPU nella coppia */
-var OFFSET_GLOBALE_X = -50;      /* spostamento globale a sinistra (tutti) */
-var OFFSET_GLOBALE_Y = -75;      /* spostamento verticale giocatori di movimento */
-var OFFSET_PORTIERE_Y = -50;     /* spostamento verticale portieri (separato) */
+var OFFSET_GLOBALE_X = -50;      /* offset X per i PORTIERI */
+var OFFSET_GIOCATORI_X = -50;    /* offset X EXTRA per i GIOCATORI (totale -100) */
+var OFFSET_GLOBALE_Y = -75;      /* offset Y per i GIOCATORI di movimento */
+var OFFSET_PORTIERE_Y = -50;     /* offset Y per i PORTIERI */
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -918,7 +919,13 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
-/* RENDER CAMPO — sistema a zone + coordinate a coppie */
+/* ============================================================
+   RENDER CAMPO
+   - Offset X portieri: OFFSET_GLOBALE_X
+   - Offset X giocatori: OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X
+   - Offset Y giocatori: OFFSET_GLOBALE_Y
+   - Offset Y portieri: OFFSET_PORTIERE_Y
+   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -938,7 +945,8 @@ function renderCampo() {
       var gTU = coppia.tu;
       var gCPU = coppia.cpu;
 
-      var centerX = (pos.x / 100) * SCENA_W + OFFSET_GLOBALE_X;
+      // Giocatori di movimento: offset X base + extra, offset Y movimento
+      var centerX = (pos.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X;
       var centerY = (pos.y / 100) * SCENA_H + OFFSET_GLOBALE_Y;
 
       var items = [
@@ -963,7 +971,7 @@ function renderCampo() {
     });
   }
 
-  // Portieri (con OFFSET_PORTIERE_Y separato)
+  // Portieri (offset X base senza extra, offset Y portiere)
   for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
     var pp = POSIZIONI_PORTIERI[k];
     var por = null;
@@ -1243,6 +1251,13 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   requestAnimationFrame(anima);
 }
 
+/* ============================================================
+   CALCIO D'INIZIO
+   1) Il battitore si sposta verso la riga di metà campo
+   2) Calcia la palla al compagno
+   3) Torna alla sua posizione originale
+   4) Poi parte il contrasto
+   ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
   var v0 = document.querySelectorAll('.palla-centro');
@@ -1312,9 +1327,12 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
+  // 1) Il battitore si sposta verso la riga di metà campo
+  var spostamentoX = -dirAtt * 60;
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
-  wrapperB.style.transform = 'translateY(-100px)';
+  wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
 
+  // 2) Dopo lo spostamento, calcia
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
@@ -1323,10 +1341,14 @@ function eseguiCalcioIniziale(squadra) {
     }
     suonaCalcio();
 
+    // 3) La palla parte verso il compagno
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
+        // 4) Il battitore ritorna
         wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
-        wrapperB.style.transform = 'translateY(0)';
+        wrapperB.style.transform = 'translateX(0)';
+
+        // 5) Finalizza dopo il ritorno
         setTimeout(finalizza, DURATA_SPOSTAMENTO_INIZIO);
       });
     }, 250);
