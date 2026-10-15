@@ -535,6 +535,7 @@ var OFFSET_GLOBALE_X = -50;
 var OFFSET_GIOCATORI_X = -50;
 var OFFSET_GLOBALE_Y = -75;
 var OFFSET_PORTIERE_Y = -50;
+var SALITA_CALCIO_INIZIO = 50;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -699,7 +700,9 @@ function fermaSottofondo() { if (!sottofondo.attivo || !sottofondo.source) retur
 function aggiornaSottofondoPerZona(zona) { if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return; var ora = audioCtx.currentTime, target; if (zona === 1 || zona === 5) { target = 0.14; sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora+0.6); } else if (zona === 0 || zona === 6) { target = 0.05; sottofondo.filtro.frequency.linearRampToValueAtTime(400, ora+0.6); } else { target = 0.04; sottofondo.filtro.frequency.linearRampToValueAtTime(500, ora+0.6); } sottofondo.volumeTarget = target; sottofondo.gain.gain.cancelScheduledValues(ora); sottofondo.gain.gain.linearRampToValueAtTime(target, ora+0.6); }
 
 var stato = {
-  tipoPartita:'1P', squadraTU:'inter', squadraCPU:'milan', divise:{ tu:null, cpu:null },
+  tipoPartita:'1P', squadraTU:'inter', squadraCPU:'milan',
+  squadraCasa:'inter', squadraTrasferta:'milan',
+  divise:{ tu:null, cpu:null },
   tempo:1, mano:1, maxMani:MANI_PER_TEMPO, punteggio:{ tu:0, cpu:0 },
   zonaPalla:3, possessore:null, giocatorePalla:null, metaContesa:'inf',
   pallaInAnimazione:false, azioneTiroDaPalo:null,
@@ -771,12 +774,10 @@ function getCoppiaAttiva(zonaId, meta) {
 }
 function direzionePerSquadra(sq) { var dirTU = stato.direzioneAttaccoTU; return sq === 'tu' ? dirTU : -dirTU; }
 
-/* Converte una zona logica di una squadra nella zona fisica corrispondente (1..5) */
 function zonaFisicaDaLogica(zonaLogica, squadra) {
   var dir = direzionePerSquadra(squadra);
   return dir > 0 ? zonaLogica : (6 - zonaLogica);
 }
-/* Converte una zona fisica (1..5) nella zona logica di una squadra */
 function zonaLogicaDaFisica(zonaFisica, squadra) {
   var dir = direzionePerSquadra(squadra);
   return dir > 0 ? zonaFisica : (6 - zonaFisica);
@@ -905,7 +906,7 @@ function apriLog() {
 function renderHeader() {
   var sqCasa, sqTrasf;
   if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; }
-  else { sqCasa = stato.squadraTU; sqTrasf = stato.squadraCPU; }
+  else { sqCasa = stato.squadraCasa; sqTrasf = stato.squadraTrasferta; }
   var nomeCasa = SQUADRE[sqCasa] ? SQUADRE[sqCasa].nome : sqCasa;
   var nomeTrasf = SQUADRE[sqTrasf] ? SQUADRE[sqTrasf].nome : sqTrasf;
   var golCasa, golTrasf;
@@ -948,7 +949,6 @@ function renderCampo() {
   var zone = document.getElementById('zone');
   zone.innerHTML = '';
 
-  // --- Giocatori di movimento ---
   for (var zonaFisica = 1; zonaFisica <= 5; zonaFisica++) {
     ['sup', 'inf'].forEach(function(metaFisica) {
       var dirTU = stato.direzioneAttaccoTU;
@@ -971,7 +971,6 @@ function renderCampo() {
       var coppiaTU = getCoppiaAttiva(zonaLogicaTU, metaLogicaTU);
       var coppiaCPU = getCoppiaAttiva(zonaLogicaCPU, metaLogicaCPU);
 
-      /* TU a DESTRA, CPU a SINISTRA (coppie switchate) */
       var items = [
         { g: coppiaTU.tu,  offsetX: +OFFSET_COPPIA, sq: 'tu'  },
         { g: coppiaCPU.cpu, offsetX: -OFFSET_COPPIA, sq: 'cpu' }
@@ -994,7 +993,6 @@ function renderCampo() {
     });
   }
 
-  // --- Portieri ---
   for (var s = 0; s < 2; s++) {
     var sq = s === 0 ? 'tu' : 'cpu';
     var por = null;
@@ -1161,7 +1159,23 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
 
-  var tuInCasa = !casaSquadra || casaSquadra === sqTU;
+  /* === DETERMINA CASA/TRASFERTA === */
+  var squadraCasa, squadraTrasf;
+  if (URL_CASA && URL_TRASFERTA) {
+    squadraCasa = URL_CASA;
+    squadraTrasf = URL_TRASFERTA;
+  } else if (casaSquadra) {
+    squadraCasa = casaSquadra;
+    squadraTrasf = (casaSquadra === sqTU) ? sqCPU : sqTU;
+  } else {
+    squadraCasa = sqTU;
+    squadraTrasf = sqCPU;
+  }
+  stato.squadraCasa = squadraCasa;
+  stato.squadraTrasferta = squadraTrasf;
+
+  /* Direzione attacco TU: +1 se TU è CASA (attacca Z0→Z6), -1 se TU è TRASFERTA (attacca Z6→Z0) */
+  var tuInCasa = (stato.squadraTU === squadraCasa);
   stato.direzioneAttaccoTU = tuInCasa ? 1 : -1;
 
   applicaSqualifiche('tu');
@@ -1182,7 +1196,8 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
     '<button class="primario" onclick="lanciaMoneta(\'croce\')">CROCE</button></div>';
   document.getElementById('modale').classList.remove('nascosto');
   log('🎮 ' + SQUADRE[sqTU].nome + ' vs ' + SQUADRE[sqCPU].nome);
-  log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA (Z0→Z6)' : 'SINISTRA (Z6→Z0)'));
+  log('🏟️ Casa: ' + SQUADRE[squadraCasa].nome + ' | Trasferta: ' + SQUADRE[squadraTrasf].nome);
+  log('📐 TU (' + (tuInCasa ? 'CASA' : 'TRASFERTA') + ') attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA (Z0→Z6)' : 'SINISTRA (Z6→Z0)'));
 }
 
 function lanciaMoneta(scelta) {
@@ -1263,7 +1278,10 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 }
 
 /* ============================================================
-   CALCIO D'INIZIO
+   CALCIO D'INIZIO — versione corretta
+   - Batte il giocatore INFERIORE (meta 'inf') della Z3 logica
+   - Sale di 50px, calcia, passa al compagno in Z3+dirAtt, torna giù
+   - Direzione attacco determinata da casa/trasferta
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -1274,28 +1292,30 @@ function eseguiCalcioIniziale(squadra) {
   stato.pallaInAnimazione = true;
   stato.giocatorePalla = null;
 
-  var coppiaZ3 = getCoppiaAttiva(3, 'inf');
-  var gB = squadra === 'tu' ? coppiaZ3.tu : coppiaZ3.cpu;
-  if (!gB) {
-    var lista = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
-    gB = lista[0] || null;
-  }
-  if (!gB) {
+  /* 1. Trova il giocatore INFERIORE della Z3 logica della squadra */
+  var listaZ3 = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu)
+    .filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
+  if (listaZ3.length === 0) {
     stato.mano++; renderHeader();
     setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 400);
     return;
   }
+  /* Il giocatore inferiore è quello con meta 'inf' → indice 1 se ci sono 2 giocatori */
+  var idxB = listaZ3.length >= 2 ? 1 : 0;
+  var gB = listaZ3[idxB];
+  var metaB = 'inf';
 
+  /* 2. Zona di destinazione: la successiva nella direzione di attacco della squadra */
   var dirAtt = direzionePerSquadra(squadra);
   var zonaDest = 3 + dirAtt;
   if (zonaDest < 1) zonaDest = 1;
   if (zonaDest > 5) zonaDest = 5;
-  var compagni = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu).filter(function(g){
-    return g.zona === zonaDest && !g.portiere && !g.espulso;
-  });
+
+  var compagni = (squadra === 'tu' ? stato.giocatori.tu : stato.giocatori.cpu)
+    .filter(function(g){ return g.zona === zonaDest && !g.portiere && !g.espulso; });
   var gA = compagni[0];
 
-  stato.zonaPalla = 3; stato.metaContesa = 'inf';
+  stato.zonaPalla = 3; stato.metaContesa = metaB;
   stato.possessore = squadra;
   stato.giocatorePalla = null;
   renderCampo(); renderHeader();
@@ -1309,10 +1329,12 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  log('⚽ Calcio d\'inizio: ' + (squadra === 'tu' ? 'TU' : 'CPU') + ' ' + gB.nome + ' → ' + gA.nome + ' (Z' + zonaDest + ')');
+  var nomeSq = squadra === 'tu' ? 'TU' : 'CPU';
+  log('⚽ Calcio d\'inizio: ' + nomeSq + ' ' + gB.nome + ' → ' + gA.nome + ' (Z' + zonaDest + ')');
 
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
 
+  /* 3. Animazione: sale di 50px, calcia, passa, torna giù */
   function finalizza() {
     var idxG = compagni.indexOf(gA);
     var metaG = idxG <= 0 ? 'sup' : 'inf';
@@ -1334,11 +1356,12 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  var spostamentoX = -dirAtt * 60;
+  /* 3a. Sale di 50px verso l'alto */
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
-  wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
+  wrapperB.style.transform = 'translateY(-' + SALITA_CALCIO_INIZIO + 'px)';
 
   setTimeout(function() {
+    /* 3b. Calcia (animazione gamba) */
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
       ped.classList.add('pg-in-calcio');
@@ -1346,20 +1369,20 @@ function eseguiCalcioIniziale(squadra) {
     }
     suonaCalcio();
 
+    /* 3c. Passaggio animato verso il compagno */
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
-        wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
-        wrapperB.style.transform = 'translateX(0)';
-        setTimeout(finalizza, DURATA_SPOSTAMENTO_INIZIO);
+        /* 3d. Torna al suo posto in Z3 inf (scende di 50px) */
+        wrapperB.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
+        wrapperB.style.transform = 'translateY(0)';
+        setTimeout(finalizza, DURATA_RITORNO);
       });
     }, 250);
   }, DURATA_SPOSTAMENTO_INIZIO);
 }
 
 /* ============================================================
-   CONTRASTO — versione CORRETTA
-   Il difensore viene cercato nella sua ZONA LOGICA (in base alla
-   sua direzione di attacco), non in quella dell'attaccante.
+   CONTRASTO
    ============================================================ */
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
@@ -1368,15 +1391,13 @@ function avviaContrasto() {
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
 
-  var zona = stato.zonaPalla;       // zona logica dell'attaccante
+  var zona = stato.zonaPalla;
   var poss = stato.possessore;
   var dif = poss === 'tu' ? 'cpu' : 'tu';
   var meta = stato.metaContesa;
   if (zona === 1 || zona === 5) suonaTensione();
 
-  // Zona FISICA corrispondente alla zona logica dell'attaccante
   var zonaFisica = zonaFisicaDaLogica(zona, poss);
-  // Zona LOGICA del difensore (nella sua direzione)
   var zonaLogicaDif = zonaLogicaDaFisica(zonaFisica, dif);
 
   var cAtt = getCoppiaAttiva(zona, meta);
@@ -1565,7 +1586,7 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
   if (v === 'pareggio') b.classList.add('attivo'); else b.classList.add(v, 'attivo');
   document.getElementById('banner-vincitore').textContent = v === 'tu' ? '🏆 TU VINCI!' : v === 'cpu' ? '🏆 CPU VINCE!' : '🤝 PAREGGIO!';
   var sqCasa, sqTrasf;
-  if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; } else { sqCasa = stato.squadraTU; sqTrasf = stato.squadraCPU; }
+  if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; } else { sqCasa = stato.squadraCasa; sqTrasf = stato.squadraTrasferta; }
   var cartaCasa, cartaTrasf;
   if (sqCasa === stato.squadraTU) { cartaCasa = cT; cartaTrasf = cC; } else { cartaCasa = cC; cartaTrasf = cT; }
   var eCasa = document.getElementById('banner-carta-casa'); eCasa.innerHTML = ''; eCasa.appendChild(creaCartaEl(cartaCasa));
@@ -1616,9 +1637,7 @@ function confermaPassaggioLungo(usa) {
 }
 
 /* ============================================================
-   RISOLUZIONE CONTRASTO — versione CORRETTA
-   La zona di partenza dell'avanzamento è quella del VINCITORE
-   (non dell'attaccante originale).
+   RISOLUZIONE CONTRASTO
    ============================================================ */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
   if (vincente === 'tu') {
@@ -1657,10 +1676,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
 
   var dirVincente = direzionePerSquadra(vincente);
 
-  /* Zona logica di partenza per l'avanzamento: è la zona logica del VINCITORE.
-     - Se il vincitore è l'attaccante originale, è c.zona.
-     - Se il vincitore è il difensore, è la sua zona logica, calcolata
-       a partire dalla zona fisica corrispondente a c.zona. */
   var zonaPartenza;
   if (vincente === c.attaccante) {
     zonaPartenza = c.zona;
@@ -2091,24 +2106,39 @@ function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
+
+    /* Inverti SOLO i giocatori di movimento, NON i portieri */
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
+        if (g.portiere) continue;
         g.zona = 6 - g.zona;
       }
     });
-    var oldT = ZONE_CONFIG[0].proprietario;
-    ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
-    ZONE_CONFIG[6].proprietario = oldT;
+
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     stato.invertiCoppie = !stato.invertiCoppie;
+
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     log('🔄 CAMBIO CAMPO! TU attacca ora verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'), 'highlight');
-    ['tu','cpu'].forEach(function(sq) { for (var i=0;i<stato.giocatori[sq].length;i++) { stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax; stato.giocatori[sq][i].falli = 0; stato.giocatori[sq][i].ammonito = false; } });
+
+    ['tu','cpu'].forEach(function(sq) {
+      for (var i=0;i<stato.giocatori[sq].length;i++) {
+        stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax;
+        stato.giocatori[sq][i].falli = 0;
+        stato.giocatori[sq][i].ammonito = false;
+      }
+    });
+
     riempiMano('tu'); riempiMano('cpu');
     renderHeader();
-    mostraFinestraFineTempo(function() { var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(perdente); });
-  } else { finePartita(); }
+    mostraFinestraFineTempo(function() {
+      var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
+      eseguiCalcioIniziale(perdente);
+    });
+  } else {
+    finePartita();
+  }
 }
 function mostraFinestraFineTempo(cb) {
   var h = '<div style="text-align:center;padding:10px">' + '<h2 style="color:#ffd700;margin-bottom:12px">⏸️ FINE PRIMO TEMPO</h2>' + '<p style="font-size:32px;font-weight:bold;margin:12px 0">' + '<span style="color:#4dabf7">' + stato.punteggio.tu + '</span> - <span style="color:#ff6b6b">' + stato.punteggio.cpu + '</span>' + '</p><p style="font-size:14px;color:#ffd700;margin:8px 0">🔄 Cambio campo!</p>' + '<p style="font-size:12px;color:#aaa">Ripresa tra 3 secondi...</p></div>';
@@ -2124,7 +2154,7 @@ function finePartita() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 function salvaRisultatoTorneo() {
-  var r = { golTU: stato.punteggio.tu, golCPU: stato.punteggio.cpu, sqTU: stato.squadraTU, sqCPU: stato.squadraCPU, casaOriginale: URL_CASA || stato.squadraTU, trasfertaOriginale: URL_TRASFERTA || stato.squadraCPU, statistiche: JSON.parse(JSON.stringify(stato.statistiche)) };
+  var r = { golTU: stato.punteggio.tu, golCPU: stato.punteggio.cpu, sqTU: stato.squadraTU, sqCPU: stato.squadraCPU, casaOriginale: URL_CASA || stato.squadraCasa, trasfertaOriginale: URL_TRASFERTA || stato.squadraTrasferta, statistiche: JSON.parse(JSON.stringify(stato.statistiche)) };
   localStorage.setItem('campionato_partita_' + PARTITA_TORNEO, JSON.stringify(r));
   setTimeout(function() { location.href = 'seriea2027.html?risultato=' + encodeURIComponent(PARTITA_TORNEO); }, 1500);
 }
