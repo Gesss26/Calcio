@@ -284,6 +284,7 @@
   .tiro-esito.angolo { color: #4dabf7; }
   .tiro-esito.fuori { color: #666; }
   .tiro-info { font-size: 12px; color: #ffd700; margin-top: 4px; text-align: center; min-height: 16px; }
+
   .tiro-dadi-info { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; font-family: 'Courier New', monospace; font-size: 13px; color: #fff; min-height: 60px; }
   .tiro-dadi-riga { display: flex; align-items: center; gap: 8px; }
   .tiro-dado { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #fff; color: #16213e; border: 2px solid #333; border-radius: 5px; font-weight: 900; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -301,7 +302,6 @@
 
   .btn-toggle-panel, .btn-toggle-panchina { display: none; }
 
-  /* Visuale cellulare (anteprima su PC) */
   body.visualizza-cellulare::before {
     content: '📱 ANTEPRIMA VISUALE CELLULARE — premi ESC per uscire';
     position: fixed; top: 0; left: 0; right: 0; z-index: 10000;
@@ -1142,7 +1142,7 @@ function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
 /* ============================================================
-   ANIMAZIONE PALLA — coordinate scena corrette
+   ANIMAZIONE PALLA
    ============================================================ */
 function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
@@ -1199,13 +1199,8 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 }
 
 /* ============================================================
-   CALCIO D'INIZIO
-   1. Il battitore è in Z3 inf.
-   2. Si sposta 100px VERSO L'ALTO (riga di metà campo) in 600ms.
-   3. Calcia la palla al compagno nella ZONA SUCCESSIVA
-      (Z4 se attacca a destra, Z2 se attacca a sinistra).
-   4. Il battitore ritorna al suo posto.
-   IMPORTANTE: durante l'animazione la palla non è mai ai piedi di nessuno.
+   CALCIO D'INIZIO — INTERPRETAZIONE B:
+   La palla va al RICEVENTE (Gandelman), non al battitore.
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -1243,6 +1238,7 @@ function eseguiCalcioIniziale(squadra) {
   aggiornaSottofondoPerZona(3);
 
   if (!gA) {
+    // Nessun compagno nella zona successiva → palla al battitore
     stato.giocatorePalla = gB.id;
     stato.pallaInAnimazione = false;
     renderCampo();
@@ -1255,12 +1251,17 @@ function eseguiCalcioIniziale(squadra) {
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
 
   function finalizza() {
-    stato.zonaPalla = 3;
-    stato.metaContesa = 'inf';
+    // Il possesso va al RICEVENTE (Gandelman), non al battitore
+    var idxG = compagni.indexOf(gA);
+    var metaG = idxG <= 0 ? 'sup' : 'inf';
+
+    stato.zonaPalla = zonaDest;
+    stato.metaContesa = metaG;
     stato.possessore = squadra;
-    stato.giocatorePalla = gB.id;
+    stato.giocatorePalla = gA.id;   // ← Gandelman ha la palla
     stato.pallaInAnimazione = false;
     renderCampo(); renderHeader();
+    aggiornaSottofondoPerZona(zonaDest);
     stato.mano++;
     bloccaCoppiaContrasto();
     setTimeout(avviaContrasto, 800);
@@ -1285,7 +1286,6 @@ function eseguiCalcioIniziale(squadra) {
 
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
-        // Ritorno del battitore al suo posto
         wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
         wrapperB.style.transform = 'translateY(0)';
         setTimeout(finalizza, DURATA_SPOSTAMENTO_INIZIO);
@@ -1314,7 +1314,9 @@ function avviaContrasto() {
   var gA = poss === 'tu' ? c.cpu : c.tu;
   if (!gP) { var l1 = stato.giocatori[poss].filter(function(g){ return g.zona === zona && !g.portiere; }); gP = l1[0]; }
   if (!gA) { var l2 = stato.giocatori[dif].filter(function(g){ return g.zona === zona && !g.portiere; }); gA = l2[0]; }
-  if (gP) stato.giocatorePalla = gP.id;
+
+  // NON sovrascrivere giocatorePalla se già impostato (es. dal calcio d'inizio)
+  if (!stato.giocatorePalla && gP) stato.giocatorePalla = gP.id;
 
   riempiMano('tu'); riempiMano('cpu');
   var seme = scegliSemeGuida();
@@ -2027,7 +2029,15 @@ function bloccaCoppiaContrasto() {
   var c = getCoppiaAttiva(zona, meta);
   var gP = poss === 'tu' ? c.tu : c.cpu;
   var gA = poss === 'tu' ? c.cpu : c.tu;
-  stato.contrastoCoppia = { zona:zona, meta:meta, giocatorePoss: gP ? gP.id : null, giocatoreAvv: gA ? gA.id : null, possessore: poss };
+  // Rispetta il possessore già impostato (es. dal calcio d'inizio)
+  var idPoss = stato.giocatorePalla || (gP ? gP.id : null);
+  var idAvv = gA ? gA.id : null;
+  stato.contrastoCoppia = {
+    zona: zona, meta: meta,
+    giocatorePoss: idPoss,
+    giocatoreAvv: idAvv,
+    possessore: poss
+  };
 }
 
 try {
