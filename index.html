@@ -517,7 +517,9 @@
 <script src="divise.js"></script>
 <script src="ammonizioni.js"></script>
 <script>
-/* CONFIGURAZIONE */
+/* ============================================================
+   CONFIGURAZIONE
+   ============================================================ */
 var STAMINA_MAX = 10;
 var CARTE_INIZIALI = 7;
 var MINUTI_PER_MANO = 2;
@@ -532,7 +534,8 @@ var BONUS_SCELTA_TIMEOUT = 3500;
 var DURATA_SPOSTAMENTO_INIZIO = 600;
 var OFFSET_COPPIA = 25;
 var OFFSET_GLOBALE_X = -50;
-var OFFSET_GIOCATORI_X = -20;   /* ← MODIFICATO: era -50, ora -20 = +30px verso destra */
+var OFFSET_GIOCATORI_X = -20;   /* giocatori di movimento: +30px a destra */
+var OFFSET_PORTIERI_X  = -25;   /* portieri: +25px a destra */
 var OFFSET_GLOBALE_Y = -75;
 var OFFSET_PORTIERE_Y = -50;
 var SALITA_CALCIO_INIZIO = 50;
@@ -540,7 +543,7 @@ var SALITA_CALCIO_INIZIO = 50;
 /* Mappa: chi batte il calcio d'inizio → nomi dei compagni a cui può passare */
 var PASSAGGIO_CALCIO_INIZIO = {
   'McKennie': ['Douglas', 'Miretti'],
-  'Baldanzi': ['Masini', 'Ellertson']
+  'Baldanzi': ['Masini', 'Ellertson', 'Ellertsson']
 };
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
@@ -1010,7 +1013,7 @@ function renderCampo() {
     var w2 = document.createElement('div');
     w2.className = 'pedina-wrapper ' + sq;
     w2.dataset.giocatoreId = por.id;
-    w2.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X) + 'px';
+    w2.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_PORTIERI_X) + 'px';
     w2.style.top = ((pp.y / 100) * SCENA_H + OFFSET_PORTIERE_Y) + 'px';
     w2.appendChild(creaNomeGiocatore(por));
     w2.appendChild(creaPedinaEl(por));
@@ -1162,9 +1165,6 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   passaggioLungoInCorso = false;
   resetPallaVolante();
 
-  ZONE_CONFIG[0].proprietario = 'tu';
-  ZONE_CONFIG[6].proprietario = 'cpu';
-
   /* === DETERMINA CASA/TRASFERTA === */
   var squadraCasa, squadraTrasf;
   if (URL_CASA && URL_TRASFERTA) {
@@ -1183,6 +1183,17 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   /* Direzione attacco TU: +1 se TU è CASA (attacca Z0→Z6), -1 se TU è TRASFERTA (attacca Z6→Z0) */
   var tuInCasa = (stato.squadraTU === squadraCasa);
   stato.direzioneAttaccoTU = tuInCasa ? 1 : -1;
+
+  /* === ASSEGNA LE PORTE IN BASE ALLA DIREZIONE DI ATTACCO === */
+  if (stato.direzioneAttaccoTU > 0) {
+    /* TU attacca verso destra: porta TU = Z0 (sinistra), porta CPU = Z6 (destra) */
+    ZONE_CONFIG[0].proprietario = 'tu';
+    ZONE_CONFIG[6].proprietario = 'cpu';
+  } else {
+    /* TU attacca verso sinistra: porta TU = Z6 (destra), porta CPU = Z0 (sinistra) */
+    ZONE_CONFIG[0].proprietario = 'cpu';
+    ZONE_CONFIG[6].proprietario = 'tu';
+  }
 
   applicaSqualifiche('tu');
   applicaSqualifiche('cpu');
@@ -1204,6 +1215,7 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   log('🎮 ' + SQUADRE[sqTU].nome + ' vs ' + SQUADRE[sqCPU].nome);
   log('🏟️ Casa: ' + SQUADRE[squadraCasa].nome + ' | Trasferta: ' + SQUADRE[squadraTrasf].nome);
   log('📐 TU (' + (tuInCasa ? 'CASA' : 'TRASFERTA') + ') attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA (Z0→Z6)' : 'SINISTRA (Z6→Z0)'));
+  log('🚪 Porta TU: Z' + (stato.direzioneAttaccoTU > 0 ? '0 (sinistra)' : '6 (destra)') + ' | Porta CPU: Z' + (stato.direzioneAttaccoTU > 0 ? '6 (destra)' : '0 (sinistra)'));
 }
 
 function lanciaMoneta(scelta) {
@@ -1283,11 +1295,68 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   requestAnimationFrame(anima);
 }
 
+/* Variante che accetta wrapper direttamente (per calcio d'inizio atomico) */
+function animaPallaInZonaDaWrapper(wrapperD, wrapperA, cb) {
+  suonaCalcio();
+  mostraVistaCampo();
+
+  if (!wrapperD || !wrapperA) { if (cb) cb(); return; }
+  var pedD = wrapperD.querySelector('.pedina'); if (!pedD) pedD = wrapperD;
+  var pedA = wrapperA.querySelector('.pedina'); if (!pedA) pedA = wrapperA;
+
+  var rD = pedD.getBoundingClientRect(), rA = pedA.getBoundingClientRect();
+  var pX = rD.left + rD.width/2;
+  var pY = rD.bottom;
+  var aX = rA.left + rA.width/2;
+  var aY = rA.bottom;
+
+  var v = document.querySelectorAll('.palla-centro');
+  for (var i=0;i<v.length;i++) v[i].remove();
+  var e = document.querySelectorAll('.evidenzia-coppia');
+  for (var j=0;j<e.length;j++) e[j].remove();
+
+  var p = document.getElementById('palla-volante');
+  p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
+  var pi = p.querySelector('.palla-inner');
+  p.style.transition = 'none';
+  p.style.left = pX + 'px';
+  p.style.top = pY + 'px';
+  p.classList.add('attiva');
+  pi.style.transform = 'rotate(0deg)'; void p.offsetWidth;
+
+  var dur = DURATA_ANIM_PALLA;
+  var t0 = performance.now();
+  var dx = aX - pX, dy = aY - pY;
+  var dist = Math.sqrt(dx*dx + dy*dy);
+  var giri = (dist/50) * (dx >= 0 ? 1 : -1);
+  var gradi = giri * 360;
+  var arco = 25;
+
+  function anima(now) {
+    var t = Math.min((now - t0) / dur, 1);
+    var e2 = t*t*(3-2*t);
+    var arcoY = -Math.sin(Math.PI*t) * arco;
+    p.style.left = (pX + dx*e2) + 'px';
+    p.style.top = (pY + dy*e2 + arcoY) + 'px';
+    pi.style.transform = 'rotate(' + (gradi*e2) + 'deg)';
+    if (t < 1) requestAnimationFrame(anima);
+    else {
+      p.classList.remove('attiva');
+      p.style.left = '';
+      p.style.top = '';
+      p.innerHTML = '';
+      stato.pallaInAnimazione = false;
+      if (cb) cb();
+    }
+  }
+  requestAnimationFrame(anima);
+}
+
 /* ============================================================
-   CALCIO D'INIZIO — versione corretta
+   CALCIO D'INIZIO — atomico
    - Batte il giocatore INFERIORE (meta 'inf') della Z3 logica
-   - Sale di 50px, calcia, passa al compagno specifico (McKennie→Douglas/Miretti, Baldanzi→Masini/Ellertson), torna giù
-   - Direzione attacco determinata da casa/trasferta
+   - Sale di 50px, calcia, passa al compagno specifico, torna giù
+   - Compagno scelto in base al nome di chi batte
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -1354,35 +1423,32 @@ function eseguiCalcioIniziale(squadra) {
   var nomeSq = squadra === 'tu' ? 'TU' : 'CPU';
   log('⚽ Calcio d\'inizio: ' + nomeSq + ' ' + gB.nome + ' → ' + gA.nome + ' (Z' + zonaDest + ')');
 
+  /* Prendi i wrapper ORA e non ricrearli fino alla fine */
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
-
-  function finalizza() {
-    var idxG = compagni.indexOf(gA);
-    var metaG = idxG <= 0 ? 'sup' : 'inf';
-
-    stato.zonaPalla = zonaDest;
-    stato.metaContesa = metaG;
-    stato.possessore = squadra;
-    stato.giocatorePalla = gA.id;
-    stato.pallaInAnimazione = false;
-    renderCampo(); renderHeader();
-    aggiornaSottofondoPerZona(zonaDest);
-    stato.mano++;
-    bloccaCoppiaContrasto();
-    setTimeout(avviaContrasto, 800);
-  }
+  var wrapperA = document.querySelector('[data-giocatore-id="' + gA.id + '"]');
 
   if (!wrapperB) {
-    animaPallaInZona(gB, gA, finalizza);
+    /* Fallback: anima la palla direttamente */
+    animaPallaInZona(gB, gA, function() {
+      var idxG = compagni.indexOf(gA);
+      var metaG = idxG <= 0 ? 'sup' : 'inf';
+      stato.zonaPalla = zonaDest; stato.metaContesa = metaG;
+      stato.possessore = squadra; stato.giocatorePalla = gA.id;
+      stato.pallaInAnimazione = false;
+      renderCampo(); renderHeader();
+      stato.mano++;
+      bloccaCoppiaContrasto();
+      setTimeout(avviaContrasto, 800);
+    });
     return;
   }
 
-  /* FASE 1: gB (McKennie/Baldanzi) sale di 50px */
+  /* === PASSO 1: gB sale di 50px === */
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateY(-' + SALITA_CALCIO_INIZIO + 'px)';
 
   setTimeout(function() {
-    /* FASE 2: gB calcia */
+    /* === PASSO 2: gB calcia (animazione gamba) === */
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
       ped.classList.add('pg-in-calcio');
@@ -1391,12 +1457,28 @@ function eseguiCalcioIniziale(squadra) {
     suonaCalcio();
 
     setTimeout(function() {
-      /* FASE 3: la palla vola da gB a gA */
-      animaPallaInZona(gB, gA, function() {
-        /* FASE 4: gB torna giù */
+      /* === PASSO 3: la palla vola da gB (rialzato) a gA === */
+      animaPallaInZonaDaWrapper(wrapperB, wrapperA, function() {
+        /* === PASSO 4: gB torna giù (50px) === */
         wrapperB.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
         wrapperB.style.transform = 'translateY(0)';
-        setTimeout(finalizza, DURATA_RITORNO);
+
+        setTimeout(function() {
+          /* === PASSO 5: aggiorna stato e ridisegna === */
+          var idxG = compagni.indexOf(gA);
+          var metaG = idxG <= 0 ? 'sup' : 'inf';
+
+          stato.zonaPalla = zonaDest;
+          stato.metaContesa = metaG;
+          stato.possessore = squadra;
+          stato.giocatorePalla = gA.id;
+          stato.pallaInAnimazione = false;
+          renderCampo(); renderHeader();
+          aggiornaSottofondoPerZona(zonaDest);
+          stato.mano++;
+          bloccaCoppiaContrasto();
+          setTimeout(avviaContrasto, 800);
+        }, DURATA_RITORNO);
       });
     }, 250);
   }, DURATA_SPOSTAMENTO_INIZIO);
@@ -1442,6 +1524,7 @@ function avviaContrasto() {
   };
   stato.statistiche[poss].contese++;
   log('🎯 Contrasto Z' + zona + ' (fisica Z' + zonaFisica + ') ' + meta + ' — Seme: ' + SEMI[seme].emoji + ' ' + SEMI[seme].nome, 'highlight');
+  log('   Attaccante: ' + (gP?gP.nome:'?') + ' (' + poss + ') | Difensore: ' + (gA?gA.nome:'?') + ' (' + dif + ')');
   selezioneCarta = null;
 
   if (poss === 'cpu' && haBonus('cpu', 'contrasto-sicuro') && cpuVuoleUsareContrastoSicuro(zona)) {
@@ -1659,6 +1742,7 @@ function confermaPassaggioLungo(usa) {
 
 /* ============================================================
    RISOLUZIONE CONTRASTO
+   — Zona tiro calcolata in ZONA FISICA (fix del bug)
    ============================================================ */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
   if (vincente === 'tu') {
@@ -1672,6 +1756,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   flashVincitore(vincente);
   stato.statistiche[vincente].vinte++;
 
+  /* Recupera i giocatori ESATTI tramite ID */
   var gP = null, gA = null;
   for (var i=0;i<stato.giocatori[c.attaccante].length;i++) if (stato.giocatori[c.attaccante][i].id === c.giocatorePoss) { gP = stato.giocatori[c.attaccante][i]; break; }
   for (var j=0;j<stato.giocatori[c.difensore].length;j++) if (stato.giocatori[c.difensore][j].id === c.giocatoreAvv) { gA = stato.giocatori[c.difensore][j]; break; }
@@ -1697,6 +1782,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
 
   var dirVincente = direzionePerSquadra(vincente);
 
+  /* Zona logica di partenza per l'avanzamento */
   var zonaPartenza;
   if (vincente === c.attaccante) {
     zonaPartenza = c.zona;
@@ -1704,8 +1790,10 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     zonaPartenza = c.zonaLogicaDif;
   }
 
-  var zonaTiro = dirVincente > 0 ? 5 : 1;
-  var isTiro = (zonaPartenza === zonaTiro);
+  /* === FIX: calcola la zona FISICA di partenza e la zona tiro FISICA === */
+  var zonaFisicaPartenza = zonaFisicaDaLogica(zonaPartenza, vincente);
+  var zonaTiroFisica = dirVincente > 0 ? 5 : 1;
+  var isTiro = (zonaFisicaPartenza === zonaTiroFisica);
 
   if (isTiro && !motivoFallo) {
     stato.azioneTiroDaPalo = { zona:zonaPartenza, giocatoreAtt:c.giocatorePoss, giocatoreDif:c.giocatoreAvv, meta:c.meta, attaccante:c.attaccante, difensore:c.difensore, possessore:vincente };
@@ -1721,11 +1809,13 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   var nz = zonaPartenza + dirVincente;
   if (nz < 0 || nz > 6) { setTimeout(function() { apriSchermataTiro(vincente); }, 500); return; }
 
+  /* Scivolata: la fa il VINCITORE, se è il difensore (ha rubato palla) */
   var haRubato = (vincente === c.difensore);
   var gVincitore = (vincente === c.attaccante) ? gP : gA;
   var gPerdente = (vincente === c.attaccante) ? gA : gP;
 
   if (haRubato && gVincitore && gPerdente) {
+    log('🦵 Scivolata di ' + gVincitore.nome + ' su ' + gPerdente.nome);
     suonaScivolata();
     animaScivolata(gVincitore, gPerdente);
   }
@@ -1814,8 +1904,8 @@ function animaScivolata(gVincitore, gPerdente) {
   }, DURATA_SCIVOLATA);
 }
 
-function apriSchermataTiro(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🥅 TIRO IN PORTA!', 'highlight'); apriOverlayTiro(att, dif, false); }
-function apriSchermataRigore(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🎯 RIGORE!', 'highlight'); apriOverlayTiro(att, dif, true); }
+function apriSchermataTiro(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🥅 TIRO IN PORTA di ' + (att === 'tu' ? 'TU' : 'CPU') + '!', 'highlight'); apriOverlayTiro(att, dif, false); }
+function apriSchermataRigore(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🎯 RIGORE di ' + (att === 'tu' ? 'TU' : 'CPU') + '!', 'highlight'); apriOverlayTiro(att, dif, true); }
 
 var tiroInAttesa = null;
 var tiroCorrente = { att:null, dif:null, isRigore:false };
@@ -2041,13 +2131,13 @@ function mostraGoalBanner(v) { var b = document.getElementById('goal-banner'); b
 
 function gestisciGoal(att) {
   stato.punteggio[att]++; stato.statistiche[att].gol++;
-  log('⚽ GOAL!', 'goal');
+  log('⚽ GOAL di ' + (att === 'tu' ? 'TU' : 'CPU') + '!', 'goal');
   mostraGoalBanner(att); suonaEsultanza();
   setTimeout(function() { var sub = att === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(sub); }, 3200);
 }
 
 function gestisciParata(att, dif) {
-  log('🧤 Parata!');
+  log('🧤 Parata di ' + (dif === 'tu' ? 'TU' : 'CPU') + '!');
   var por = null;
   for (var i=0;i<stato.giocatori[dif].length;i++) {
     if (stato.giocatori[dif][i].portiere) { por = stato.giocatori[dif][i]; break; }
@@ -2095,7 +2185,7 @@ function gestisciParata(att, dif) {
 }
 
 function gestisciPalo(att, dif) {
-  log('🥅 Palo!', 'highlight');
+  log('🥅 Palo di ' + (att === 'tu' ? 'TU' : 'CPU') + '!', 'highlight');
   var az = stato.azioneTiroDaPalo;
   if (!az) { setTimeout(function() { stato.zonaPalla = 3; stato.possessore = att; stato.metaContesa = 'inf'; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 800); return; }
   setTimeout(function() {
@@ -2107,7 +2197,7 @@ function gestisciPalo(att, dif) {
   }, 800);
 }
 function gestisciAngolo(att, dif) {
-  log('🚩 Angolo!');
+  log('🚩 Angolo di ' + (att === 'tu' ? 'TU' : 'CPU') + '!');
   setTimeout(function() {
     var zA = direzionePerSquadra(att) > 0 ? 5 : 1;
     stato.zonaPalla = zA; stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf'; stato.possessore = att;
@@ -2118,7 +2208,7 @@ function gestisciAngolo(att, dif) {
   }, 800);
 }
 function gestisciFuori(att, dif) {
-  log('❌ Fuori!');
+  log('❌ Fuori di ' + (att === 'tu' ? 'TU' : 'CPU') + '!');
   gestisciParata(att, dif);
 }
 function flashVincitore(sq) { var f = document.getElementById('flash'); f.classList.remove('tu','cpu','attivo'); void f.offsetWidth; f.classList.add(sq, 'attivo'); setTimeout(function() { f.classList.remove('attivo'); }, 600); }
@@ -2128,6 +2218,7 @@ function fineTempoOPartita() {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
 
+    /* Inverti SOLO i giocatori di movimento, NON i portieri */
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
@@ -2138,6 +2229,11 @@ function fineTempoOPartita() {
 
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     stato.invertiCoppie = !stato.invertiCoppie;
+
+    /* === SCAMBIA LE PORTE a fine primo tempo === */
+    var oldProp0 = ZONE_CONFIG[0].proprietario;
+    ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
+    ZONE_CONFIG[6].proprietario = oldProp0;
 
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
     log('🔄 CAMBIO CAMPO! TU attacca ora verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'), 'highlight');
