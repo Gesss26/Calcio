@@ -771,6 +771,17 @@ function getCoppiaAttiva(zonaId, meta) {
 }
 function direzionePerSquadra(sq) { var dirTU = stato.direzioneAttaccoTU; return sq === 'tu' ? dirTU : -dirTU; }
 
+/* Converte una zona logica di una squadra nella zona fisica corrispondente (1..5) */
+function zonaFisicaDaLogica(zonaLogica, squadra) {
+  var dir = direzionePerSquadra(squadra);
+  return dir > 0 ? zonaLogica : (6 - zonaLogica);
+}
+/* Converte una zona fisica (1..5) nella zona logica di una squadra */
+function zonaLogicaDaFisica(zonaFisica, squadra) {
+  var dir = direzionePerSquadra(squadra);
+  return dir > 0 ? zonaFisica : (6 - zonaFisica);
+}
+
 function assegnaBonus(sq) {
   if (stato.bonus[sq].length >= MAX_BONUS) { log('⚠️ ' + sq.toUpperCase() + ' ha già ' + MAX_BONUS + ' bonus, scartato!'); return false; }
   var tipo = pescaUnaCartaBonus();
@@ -1345,6 +1356,11 @@ function eseguiCalcioIniziale(squadra) {
   }, DURATA_SPOSTAMENTO_INIZIO);
 }
 
+/* ============================================================
+   CONTRASTO — versione CORRETTA
+   Il difensore viene cercato nella sua ZONA LOGICA (in base alla
+   sua direzione di attacco), non in quella dell'attaccante.
+   ============================================================ */
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   mostraVistaCarte();
@@ -1352,29 +1368,38 @@ function avviaContrasto() {
   document.getElementById('btn-sost').disabled = false;
   stato.sostBloccate = false;
 
-  var zona = stato.zonaPalla;
+  var zona = stato.zonaPalla;       // zona logica dell'attaccante
   var poss = stato.possessore;
   var dif = poss === 'tu' ? 'cpu' : 'tu';
   var meta = stato.metaContesa;
   if (zona === 1 || zona === 5) suonaTensione();
 
-  var c = getCoppiaAttiva(zona, meta);
-  var gP = poss === 'tu' ? c.tu : c.cpu;
-  var gA = poss === 'tu' ? c.cpu : c.tu;
+  // Zona FISICA corrispondente alla zona logica dell'attaccante
+  var zonaFisica = zonaFisicaDaLogica(zona, poss);
+  // Zona LOGICA del difensore (nella sua direzione)
+  var zonaLogicaDif = zonaLogicaDaFisica(zonaFisica, dif);
+
+  var cAtt = getCoppiaAttiva(zona, meta);
+  var cDif = getCoppiaAttiva(zonaLogicaDif, meta);
+
+  var gP = poss === 'tu' ? cAtt.tu : cAtt.cpu;
+  var gA = dif === 'tu' ? cDif.tu : cDif.cpu;
+
   if (!gP) { var l1 = stato.giocatori[poss].filter(function(g){ return g.zona === zona && !g.portiere; }); gP = l1[0]; }
-  if (!gA) { var l2 = stato.giocatori[dif].filter(function(g){ return g.zona === zona && !g.portiere; }); gA = l2[0]; }
+  if (!gA) { var l2 = stato.giocatori[dif].filter(function(g){ return g.zona === zonaLogicaDif && !g.portiere; }); gA = l2[0]; }
 
   if (!stato.giocatorePalla && gP) stato.giocatorePalla = gP.id;
 
   riempiMano('tu'); riempiMano('cpu');
   var seme = scegliSemeGuida();
   stato.contrasto = {
-    zona:zona, attaccante:poss, difensore:dif, semeGuida:seme,
+    zona:zona, zonaFisica:zonaFisica, zonaLogicaDif:zonaLogicaDif,
+    attaccante:poss, difensore:dif, semeGuida:seme,
     giocatorePoss: gP ? gP.id : null, giocatoreAvv: gA ? gA.id : null,
     cartaTu:null, cartaCpu:null, risolto:false
   };
   stato.statistiche[poss].contese++;
-  log('🎯 Contrasto Z' + zona + ' ' + meta + ' — Seme: ' + SEMI[seme].emoji + ' ' + SEMI[seme].nome, 'highlight');
+  log('🎯 Contrasto Z' + zona + ' (fisica Z' + zonaFisica + ') ' + meta + ' — Seme: ' + SEMI[seme].emoji + ' ' + SEMI[seme].nome, 'highlight');
   selezioneCarta = null;
 
   if (poss === 'cpu' && haBonus('cpu', 'contrasto-sicuro') && cpuVuoleUsareContrastoSicuro(zona)) {
@@ -1590,6 +1615,11 @@ function confermaPassaggioLungo(usa) {
   if (window._passaggioLungoCallback) window._passaggioLungoCallback(usa);
 }
 
+/* ============================================================
+   RISOLUZIONE CONTRASTO — versione CORRETTA
+   La zona di partenza dell'avanzamento è quella del VINCITORE
+   (non dell'attaccante originale).
+   ============================================================ */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
   if (vincente === 'tu') {
     stato.streak.tu++; stato.streak.cpu = 0;
@@ -1626,22 +1656,33 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   stato.mano++;
 
   var dirVincente = direzionePerSquadra(vincente);
-  var zonaAttuale = c.zona;
+
+  /* Zona logica di partenza per l'avanzamento: è la zona logica del VINCITORE.
+     - Se il vincitore è l'attaccante originale, è c.zona.
+     - Se il vincitore è il difensore, è la sua zona logica, calcolata
+       a partire dalla zona fisica corrispondente a c.zona. */
+  var zonaPartenza;
+  if (vincente === c.attaccante) {
+    zonaPartenza = c.zona;
+  } else {
+    zonaPartenza = c.zonaLogicaDif;
+  }
+
   var zonaTiro = dirVincente > 0 ? 5 : 1;
-  var isTiro = (zonaAttuale === zonaTiro);
+  var isTiro = (zonaPartenza === zonaTiro);
 
   if (isTiro && !motivoFallo) {
-    stato.azioneTiroDaPalo = { zona:c.zona, giocatoreAtt:c.giocatorePoss, giocatoreDif:c.giocatoreAvv, meta:c.meta, attaccante:c.attaccante, difensore:c.difensore, possessore:vincente };
+    stato.azioneTiroDaPalo = { zona:zonaPartenza, giocatoreAtt:c.giocatorePoss, giocatoreDif:c.giocatoreAvv, meta:c.meta, attaccante:c.attaccante, difensore:c.difensore, possessore:vincente };
     setTimeout(function() { apriSchermataTiro(vincente); }, 500);
     return;
   }
   if (isTiro && motivoFallo) {
-    stato.azioneTiroDaPalo = { zona:c.zona, giocatoreAtt:c.giocatorePoss, giocatoreDif:c.giocatoreAvv, meta:c.meta, attaccante:c.attaccante, difensore:c.difensore, possessore:vincente };
+    stato.azioneTiroDaPalo = { zona:zonaPartenza, giocatoreAtt:c.giocatorePoss, giocatoreDif:c.giocatoreAvv, meta:c.meta, attaccante:c.attaccante, difensore:c.difensore, possessore:vincente };
     setTimeout(function() { apriSchermataRigore(vincente); }, 800);
     return;
   }
 
-  var nz = zonaAttuale + dirVincente;
+  var nz = zonaPartenza + dirVincente;
   if (nz < 0 || nz > 6) { setTimeout(function() { apriSchermataTiro(vincente); }, 500); return; }
 
   var haRubato = (vincente === c.difensore);
@@ -1684,13 +1725,13 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     }, dPR);
   }
 
-  var zLungo = zonaAttuale + dirVincente * 2;
+  var zLungo = zonaPartenza + dirVincente * 2;
   var passaggioLungoValido = (zLungo >= 1 && zLungo <= 5);
 
   if (vincente === 'tu' && !motivoFallo && haBonus('tu', 'passaggio-lungo') && passaggioLungoValido && !passaggioLungoInCorso && !isTiro) {
     passaggioLungoInCorso = true;
     setTimeout(function() {
-      chiediPassaggioLungo(zonaAttuale, dirVincente, function(zScelta) {
+      chiediPassaggioLungo(zonaPartenza, dirVincente, function(zScelta) {
         passaggioLungoInCorso = false;
         eseguiAvanzamento(zScelta);
       });
@@ -2119,9 +2160,13 @@ function confermaSostituzione() {
 function bloccaCoppiaContrasto() {
   var zona = stato.zonaPalla, meta = stato.metaContesa, poss = stato.possessore;
   if (zona === null || zona === undefined || !poss) return;
-  var c = getCoppiaAttiva(zona, meta);
-  var gP = poss === 'tu' ? c.tu : c.cpu;
-  var gA = poss === 'tu' ? c.cpu : c.tu;
+  var dif = poss === 'tu' ? 'cpu' : 'tu';
+  var zonaFisica = zonaFisicaDaLogica(zona, poss);
+  var zonaLogicaDif = zonaLogicaDaFisica(zonaFisica, dif);
+  var cAtt = getCoppiaAttiva(zona, meta);
+  var cDif = getCoppiaAttiva(zonaLogicaDif, meta);
+  var gP = poss === 'tu' ? cAtt.tu : cAtt.cpu;
+  var gA = dif === 'tu' ? cDif.tu : cDif.cpu;
   var idPoss = stato.giocatorePalla || (gP ? gP.id : null);
   var idAvv = gA ? gA.id : null;
   stato.contrastoCoppia = {
