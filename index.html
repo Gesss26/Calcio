@@ -1224,9 +1224,8 @@ function eseguiCalcioIniziale(squadra) {
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
   if (!wrapperB) { completaPassaggio(); return; }
   var durata = 600;
-  var spostamentoX = -dirAtt * 100;
   wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
-  wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
+  wrapperB.style.transform = 'translateY(-100px)';
 
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
@@ -1238,7 +1237,7 @@ function eseguiCalcioIniziale(squadra) {
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
         wrapperB.style.transition = 'transform 0.6s cubic-bezier(0.34,1.2,0.64,1)';
-        wrapperB.style.transform = 'translateX(0)';
+        wrapperB.style.transform = 'translateY(0)';
         setTimeout(function() {
           stato.zonaPalla = zonaDest;
           stato.metaContesa = 'inf';
