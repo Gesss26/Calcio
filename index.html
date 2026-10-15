@@ -530,7 +530,9 @@ var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
 var COPPIA_INIZIO = 4;
-var OFFSET_COPPIA = 25; /* px scena tra le due pedine della coppia */
+var OFFSET_COPPIA = 25;          /* px tra le due pedine della coppia */
+var OFFSET_GLOBALE_X = -50;      /* spostamento globale X */
+var OFFSET_GLOBALE_Y = -50;      /* spostamento globale Y */
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -547,7 +549,6 @@ var NOMI_BONUS = {
   'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
-/* Posizioni: x/y sono il CENTRO della coppia (in %) */
 var POSIZIONI_COPPIE = [
   { x: 70.7, y: 70.5 },
   { x: 72.6, y: 83.8 },
@@ -574,7 +575,6 @@ var URL_SQ_CPU = urlParams.get('sqCPU');
 var URL_CASA = urlParams.get('casa');
 var URL_TRASFERTA = urlParams.get('trasferta');
 
-/* SCALA */
 var SCENA_W = 1600;
 var SCENA_H = 900;
 var scalaCorrente = 1;
@@ -590,14 +590,12 @@ function adattaScena() {
 window.addEventListener('resize', adattaScena);
 window.addEventListener('orientationchange', function() { setTimeout(adattaScena, 250); });
 
-/* TOGGLE */
 var panchinaAperta = false;
 function mostraPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.remove('nascosto'); }
 function nascondiPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.add('nascosto'); }
 function togglePannelloCarte() { var p = document.getElementById('carte-panel'); if (!p) return; if (p.classList.contains('nascosto')) p.classList.remove('nascosto'); else p.classList.add('nascosto'); }
 function togglePanchina() { var p = document.getElementById('panchina'); if (!p) return; panchinaAperta = !panchinaAperta; p.classList.toggle('aperta', panchinaAperta); }
 
-/* AMMONIZIONI */
 var ammonizioni = null;
 function caricaAmmonizioniDaLocalStorage() { try { var s = localStorage.getItem('campionato_ammonizioni'); if (s) return JSON.parse(s); } catch(e){} return null; }
 function salvaAmmonizioniInLocalStorage() { try { localStorage.setItem('campionato_ammonizioni', JSON.stringify(ammonizioni)); } catch(e){} }
@@ -612,7 +610,6 @@ function getGiocatoreAmmonizioni(sqId, nome) {
 function aggiornaAmmonizione(sqId, nome, d) { var g = getGiocatoreAmmonizioni(sqId, nome); if (!g) return; g.gialli += d; if (g.gialli >= 2) g.squalificato = true; }
 function èSqualificato(sqId, nome) { var g = getGiocatoreAmmonizioni(sqId, nome); return g ? g.squalificato : false; }
 
-/* SALVA/CARICA */
 function esportaCampionato() {
   var dati = { versione: 1, data: new Date().toISOString(), campionato: null, ammonizioni: ammonizioni };
   try { var c = localStorage.getItem('seriea2027_v1'); if (c) dati.campionato = JSON.parse(c); } catch(e){}
@@ -645,7 +642,6 @@ function resetCampionatoSalvato() {
   alert('✅ Campionato azzerato');
 }
 
-/* SUONI */
 var audioCtx = null;
 function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
 function suonaFischietto(tipo) {
@@ -704,7 +700,6 @@ function aggiornaSottofondoPerCoppia(coppia) {
   sottofondo.gain.gain.linearRampToValueAtTime(target, ora+0.6);
 }
 
-/* STATO */
 var stato = {
   tipoPartita:'1P', squadraTU:'inter', squadraCPU:'milan', divise:{ tu:null, cpu:null },
   tempo:1, mano:1, maxMani:MANI_PER_TEMPO, punteggio:{ tu:0, cpu:0 },
@@ -819,7 +814,6 @@ function applicaSqualifiche(sq) {
   }
 }
 
-/* UTILITY COPPIE */
 function getGiocatoriCoppia(coppiaIdx) {
   var tu = null, cpu = null;
   for (var i=0;i<stato.giocatori.tu.length;i++) {
@@ -843,7 +837,6 @@ function direzionePerSquadra(sq) {
   return -stato.direzioneAttaccoTU;
 }
 
-/* BONUS */
 function assegnaBonus(sq) {
   if (stato.bonus[sq].length >= MAX_BONUS) { log('⚠️ ' + sq.toUpperCase() + ' ha già ' + MAX_BONUS + ' bonus, scartato!'); return false; }
   var tipo = pescaUnaCartaBonus();
@@ -864,7 +857,6 @@ function mostraBonusBanner(testo) { var b = document.getElementById('bonus-banne
 function consumaBonus(sq, tipo) { var idx = stato.bonus[sq].indexOf(tipo); if (idx > -1) { stato.bonus[sq].splice(idx, 1); log('🎴 ' + (sq === 'tu' ? 'TU' : 'CPU') + ' usa: ' + NOMI_BONUS[tipo].nome, 'highlight'); return true; } return false; }
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
 
-/* MENU / IMPOSTAZIONI */
 function mostraMenuPrincipale() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
@@ -925,7 +917,6 @@ function apriLog() {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* HEADER */
 function renderHeader() {
   var sqCasa, sqTrasf;
   if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; }
@@ -955,9 +946,7 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO
-   La coordinata è il CENTRO della coppia.
-   TU a -25px (sinistra), CPU a +25px (destra).
+   RENDER CAMPO — Coordinata = centro coppia + offset globale
    ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -969,11 +958,10 @@ function renderCampo() {
     var pos = POSIZIONI_COPPIE[idx];
     var coppia = getGiocatoriCoppia(idx);
 
-    // Centro coppia in px di scena
-    var centerX = (pos.x / 100) * SCENA_W;
-    var centerY = (pos.y / 100) * SCENA_H;
+    // Centro coppia in px di scena + offset globale
+    var centerX = (pos.x / 100) * SCENA_W + OFFSET_GLOBALE_X;
+    var centerY = (pos.y / 100) * SCENA_H + OFFSET_GLOBALE_Y;
 
-    // TU a sinistra, CPU a destra
     var items = [
       { g: coppia.tu,  offsetX: -OFFSET_COPPIA, sq: 'tu'  },
       { g: coppia.cpu, offsetX: +OFFSET_COPPIA, sq: 'cpu' }
@@ -995,7 +983,6 @@ function renderCampo() {
     }
   }
 
-  // Portieri singoli (centrati sulla loro coordinata)
   for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
     var pp = POSIZIONI_PORTIERI[k];
     var por = getPortiere(pp.squadra);
@@ -1003,8 +990,8 @@ function renderCampo() {
     var w = document.createElement('div');
     w.className = 'pedina-wrapper ' + pp.squadra;
     w.dataset.giocatoreId = por.id;
-    w.style.left = ((pp.x / 100) * SCENA_W) + 'px';
-    w.style.top = ((pp.y / 100) * SCENA_H) + 'px';
+    w.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X) + 'px';
+    w.style.top = ((pp.y / 100) * SCENA_H + OFFSET_GLOBALE_Y) + 'px';
     w.appendChild(creaNomeGiocatore(por));
     w.appendChild(creaPedinaEl(por));
     w.appendChild(creaInfoSotto(por));
@@ -1101,7 +1088,6 @@ function resetPallaVolante() {
   pv.innerHTML = '';
 }
 
-/* SETUP */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
@@ -1200,7 +1186,6 @@ function lanciaMoneta(scelta) {
 function mostraVistaCampo() { nascondiPannelloCarte(); }
 function mostraVistaCarte() { mostraPannelloCarte(); }
 
-/* ANIMAZIONE PALLA */
 function animaPallaInCoppia(gDa, gA, cb) {
   suonaCalcio();
   mostraVistaCampo();
@@ -1259,7 +1244,6 @@ function animaPallaInCoppia(gDa, gA, cb) {
   requestAnimationFrame(anima);
 }
 
-/* CALCIO D'INIZIO */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
   var v0 = document.querySelectorAll('.palla-centro');
@@ -1286,7 +1270,6 @@ function eseguiCalcioIniziale(squadra) {
   setTimeout(avviaContrasto, 800);
 }
 
-/* CONTRASTO */
 function avviaContrasto() {
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   mostraVistaCarte();
@@ -1500,7 +1483,6 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
 }
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
-/* PASSAGGIO LUNGO */
 function chiediPassaggioLungo(coppiaAttuale, direzione, callback) {
   var cNormale = coppiaAttuale - direzione;
   var cLungo = coppiaAttuale - direzione * 2;
@@ -1537,7 +1519,6 @@ function confermaPassaggioLungo(usa) {
   if (window._passaggioLungoCallback) window._passaggioLungoCallback(usa);
 }
 
-/* RISOLVI CONTRASTO */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
   if (vincente === 'tu') {
     stato.streak.tu++; stato.streak.cpu = 0;
@@ -1646,7 +1627,6 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   }
 }
 
-/* SCIVOLATA */
 function animaScivolata(gVincitore, gPerdente) {
   var wrapperV = document.querySelector('[data-giocatore-id="' + gVincitore.id + '"]');
   var wrapperP = document.querySelector('[data-giocatore-id="' + gPerdente.id + '"]');
