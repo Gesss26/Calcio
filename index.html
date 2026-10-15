@@ -46,12 +46,23 @@
   .zona[data-zona="1"] .meta-inf, .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
 
   .pedina-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1px; position: relative; transition: transform 0.6s cubic-bezier(0.34,1.2,0.64,1); }
+  /* Larghezza fissa per allineare perfettamente le due righe in X */
+  .meta-sup > .pedina-wrapper,
+  .meta-inf > .pedina-wrapper {
+    width: 90px;
+    min-width: 90px;
+    max-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
 
   .portiere-wrapper { position: absolute !important; top: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
   .portiere-wrapper.portiere-sx { left: 62%; transform: translate(-50%, calc(-50% - 20px)) translateX(40px); }
   .portiere-wrapper.portiere-dx { left: 38%; transform: translate(-50%, calc(-50% - 20px)) translateX(-40px); }
 
-  .nome-giocatore { font-size: 10px; font-weight: 900; color: #fff; text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; text-align: center; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.3px; pointer-events: none; }
+  .nome-giocatore { font-size: 10px; font-weight: 900; color: #fff; text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 88px; text-align: center; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.3px; pointer-events: none; }
   .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
   .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
 
@@ -76,25 +87,16 @@
   .pedina .stamina-fill.medio { background: #fbbf24; }
   .pedina .stamina-fill.basso { background: #ef4444; }
 
-  .palla-centro { position: absolute; width: 18px; height: 18px; z-index: 12; pointer-events: none; transform: translate(-50%, -50%); filter: drop-shadow(0 2px 3px rgba(0,0,0,0.7)); }
-  .palla-centro svg { width: 100%; height: 100%; display: block; }
-
-  .palla-volante { position: absolute; z-index: 15; width: 18px; height: 18px; display: none; pointer-events: none; transform: translate(-50%, -50%); }
-  .palla-volante.attiva { display: block; }
-  .palla-volante .palla-inner { width: 100%; height: 100%; transform-origin: 50% 50%; will-change: transform; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6)); }
-  .palla-volante svg { width: 100%; height: 100%; display: block; }
-
-  .evidenzia-coppia { position: absolute; width: 65px; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(255,215,0,0.55) 0%, rgba(255,215,0,0.2) 55%, rgba(255,215,0,0) 85%); border: 2px solid rgba(255,215,0,0.9); box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4); pointer-events: none; transform: translate(-50%, -50%); z-index: 3; animation: pulseEllisse 1.5s infinite; }
-  @keyframes pulseEllisse { 0%, 100% { box-shadow: 0 0 15px rgba(255,215,0,0.8), inset 0 0 8px rgba(255,215,0,0.4); border-color: rgba(255,215,0,0.9); } 50% { box-shadow: 0 0 25px rgba(255,215,0,1), inset 0 0 15px rgba(255,215,0,0.6); border-color: rgba(255,215,0,1); } }
-
-  @keyframes calciaGamba { 0% { transform: rotate(0deg); } 15% { transform: rotate(-55deg); } 35% { transform: rotate(45deg); } 55% { transform: rotate(30deg); } 100% { transform: rotate(0deg); } }
-  .pedina.pg-in-calcio .pg-gamba-dx { animation: calciaGamba 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards; }
-  @keyframes calciaBusto { 0% { transform: rotate(0deg); } 15% { transform: rotate(-4deg); } 35% { transform: rotate(6deg); } 55% { transform: rotate(3deg); } 100% { transform: rotate(0deg); } }
-  .pedina.pg-in-calcio .pg-busto { transform-origin: 20px 38px; animation: calciaBusto 0.7s cubic-bezier(0.34,1.2,0.64,1) forwards; }
-
+  /* La barra stamina/falli esce dal wrapper della pedina durante la scivolata:
+     staccata di 15px verso il basso e NON ruota con il giocatore */
   .pedina-scivola-wrapper { position: relative; z-index: 20; transition: transform 0.6s cubic-bezier(0.34,1.5,0.64,1); }
   .pedina-scivola-wrapper.ritorno { transition: transform 0.4s ease-out; }
   .pedina.pg-in-scivolata { transition: transform 0.4s cubic-bezier(0.34,1.3,0.64,1); }
+  .pedina.pg-in-scivolata + .info-sotto,
+  .pedina-scivola-wrapper .info-sotto {
+    margin-top: 15px;
+    transition: margin-top 0.2s;
+  }
 
   .flash-vincitore { position: absolute; inset: 0; z-index: 55; pointer-events: none; opacity: 0; }
   .flash-vincitore.tu { background: radial-gradient(circle, rgba(77,171,247,0.7), transparent 70%); }
@@ -284,7 +286,6 @@
   .tiro-esito.angolo { color: #4dabf7; }
   .tiro-esito.fuori { color: #666; }
   .tiro-info { font-size: 12px; color: #ffd700; margin-top: 4px; text-align: center; min-height: 16px; }
-
   .tiro-dadi-info { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 6px; font-family: 'Courier New', monospace; font-size: 13px; color: #fff; min-height: 60px; }
   .tiro-dadi-riga { display: flex; align-items: center; gap: 8px; }
   .tiro-dado { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: #fff; color: #16213e; border: 2px solid #333; border-radius: 5px; font-weight: 900; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -679,6 +680,7 @@ var stato = {
 var selezioneCarta = null;
 var selezioneSost = { campo:null, panchina:null };
 var renderingCampoInCorso = false;
+var passaggioLungoInCorso = false;
 
 var ZONE_CONFIG = [
   { id:0, nome:'Z0', ruolo:'POR', portiere:true, proprietario:'tu' },
@@ -1082,6 +1084,7 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   stato.streak = { tu:0, cpu:0 };
   stato.contrasto = null;
   stato.invertiCoppie = false;
+  passaggioLungoInCorso = false;
 
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
@@ -1199,8 +1202,7 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 }
 
 /* ============================================================
-   CALCIO D'INIZIO — INTERPRETAZIONE B:
-   La palla va al RICEVENTE (Gandelman), non al battitore.
+   CALCIO D'INIZIO — la palla va al RICEVENTE
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -1238,7 +1240,6 @@ function eseguiCalcioIniziale(squadra) {
   aggiornaSottofondoPerZona(3);
 
   if (!gA) {
-    // Nessun compagno nella zona successiva → palla al battitore
     stato.giocatorePalla = gB.id;
     stato.pallaInAnimazione = false;
     renderCampo();
@@ -1251,14 +1252,13 @@ function eseguiCalcioIniziale(squadra) {
   var wrapperB = document.querySelector('[data-giocatore-id="' + gB.id + '"]');
 
   function finalizza() {
-    // Il possesso va al RICEVENTE (Gandelman), non al battitore
     var idxG = compagni.indexOf(gA);
     var metaG = idxG <= 0 ? 'sup' : 'inf';
 
     stato.zonaPalla = zonaDest;
     stato.metaContesa = metaG;
     stato.possessore = squadra;
-    stato.giocatorePalla = gA.id;   // ← Gandelman ha la palla
+    stato.giocatorePalla = gA.id;
     stato.pallaInAnimazione = false;
     renderCampo(); renderHeader();
     aggiornaSottofondoPerZona(zonaDest);
@@ -1272,7 +1272,6 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  // Spostamento: 100px VERSO L'ALTO
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateY(-100px)';
 
@@ -1315,7 +1314,6 @@ function avviaContrasto() {
   if (!gP) { var l1 = stato.giocatori[poss].filter(function(g){ return g.zona === zona && !g.portiere; }); gP = l1[0]; }
   if (!gA) { var l2 = stato.giocatori[dif].filter(function(g){ return g.zona === zona && !g.portiere; }); gA = l2[0]; }
 
-  // NON sovrascrivere giocatorePalla se già impostato (es. dal calcio d'inizio)
   if (!stato.giocatorePalla && gP) stato.giocatorePalla = gP.id;
 
   riempiMano('tu'); riempiMano('cpu');
@@ -1507,6 +1505,46 @@ function mostraBannerMano(v, cT, cC, seme, motivo) {
 function nascondiBannerMano() { document.getElementById('banner-mano').classList.remove('attivo'); }
 
 /* ============================================================
+   PASSAGGIO LUNGO — scelta utente
+   ============================================================ */
+function chiediPassaggioLungo(zonaAttuale, dirVincente, callback) {
+  var nzNormale = zonaAttuale + dirVincente;
+  var nzLungo = zonaAttuale + dirVincente * 2;
+  if (nzLungo < 0) nzLungo = 0;
+  if (nzLungo > 6) nzLungo = 6;
+
+  document.getElementById('modale-box').innerHTML =
+    '<h2>🎯 Passaggio Lungo</h2>' +
+    '<p style="font-size:13px;color:#aaa;margin-bottom:14px">' +
+      'Hai vinto il contrasto in <b>Z' + zonaAttuale + '</b>.<br>' +
+      'Vuoi usare il bonus <b>🎯 Passaggio Lungo</b> per avanzare di <b>2 zone</b> invece di 1?' +
+    '</p>' +
+    '<p style="font-size:15px;color:#ffd700;margin-bottom:16px">' +
+      'Senza bonus → <b>Z' + nzNormale + '</b> &nbsp;|&nbsp; ' +
+      'Con bonus → <b>Z' + nzLungo + '</b>' +
+    '</p>' +
+    '<div>' +
+      '<button class="bonus-btn" onclick="confermaPassaggioLungo(true)">🎯 USA PASSAGGIO LUNGO</button>' +
+      '<button onclick="confermaPassaggioLungo(false)">NO, AVANZA DI 1</button>' +
+    '</div>';
+  document.getElementById('modale').classList.remove('nascosto');
+
+  window._passaggioLungoCallback = function(usa) {
+    chiudiModale();
+    if (usa) {
+      consumaBonus('tu', 'passaggio-lungo');
+      mostraBonusBanner('🏆 TU usi: 🎯 Passaggio Lungo!');
+      renderBonusSlots();
+    }
+    callback(usa ? nzLungo : nzNormale);
+  };
+  window._passaggioLungoUsa = function() { window._passaggioLungoCallback(true); };
+}
+function confermaPassaggioLungo(usa) {
+  if (window._passaggioLungoCallback) window._passaggioLungoCallback(usa);
+}
+
+/* ============================================================
    RISOLVI CONTRASTO
    ============================================================ */
 function risolviContrastoLogica(vincente, c, motivoFallo) {
@@ -1572,34 +1610,52 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     animaScivolata(gVincitore, gPerdente);
   }
 
-  var comp = stato.giocatori[vincente].filter(function(g){ return g.zona === nz && !g.portiere && !g.espulso; });
-  if (comp.length === 0) { setTimeout(function() { apriSchermataTiro(vincente); }, 500); return; }
+  function eseguiAvanzamento(nzFinale) {
+    var comp = stato.giocatori[vincente].filter(function(g){ return g.zona === nzFinale && !g.portiere && !g.espulso; });
+    if (comp.length === 0) { setTimeout(function() { apriSchermataTiro(vincente); }, 500); return; }
 
-  var sc = comp[Math.floor(Math.random()*comp.length)];
-  var nm = (comp.indexOf(sc) === 0) ? 'sup' : 'inf';
+    var sc = comp[Math.floor(Math.random()*comp.length)];
+    var nm = (comp.indexOf(sc) === 0) ? 'sup' : 'inf';
 
-  stato.zonaPalla = nz; stato.possessore = vincente; stato.metaContesa = nm;
-  stato.giocatorePalla = sc.id;
-  aggiornaSottofondoPerZona(nz);
+    stato.zonaPalla = nzFinale; stato.possessore = vincente; stato.metaContesa = nm;
+    stato.giocatorePalla = sc.id;
+    aggiornaSottofondoPerZona(nzFinale);
 
-  var dPR = haRubato ? (DURATA_SCIVOLATA + DURATA_RITORNO) : 0;
+    var dPR = haRubato ? (DURATA_SCIVOLATA + DURATA_RITORNO) : 0;
 
-  setTimeout(function() {
-    renderCampo(); renderHeader();
     setTimeout(function() {
-      if (!gVincitore) {
-        stato.possessore = vincente; stato.giocatorePalla = sc.id;
-        bloccaCoppiaContrasto();
-        setTimeout(avviaContrasto, 800);
-        return;
-      }
-      animaPallaInZona(gVincitore, sc, function() {
-        stato.possessore = vincente; stato.giocatorePalla = sc.id;
-        bloccaCoppiaContrasto();
-        setTimeout(avviaContrasto, 800);
+      renderCampo(); renderHeader();
+      setTimeout(function() {
+        if (!gVincitore) {
+          stato.possessore = vincente; stato.giocatorePalla = sc.id;
+          bloccaCoppiaContrasto();
+          setTimeout(avviaContrasto, 800);
+          return;
+        }
+        animaPallaInZona(gVincitore, sc, function() {
+          stato.possessore = vincente; stato.giocatorePalla = sc.id;
+          bloccaCoppiaContrasto();
+          setTimeout(avviaContrasto, 800);
+        });
+      }, 100);
+    }, dPR);
+  }
+
+  // Chiedi Passaggio Lungo se il vincitore è 'tu' e ha il bonus (e non è un fallo)
+  var nzLungo = zonaAttuale + dirVincente * 2;
+  var passaggioLungoValido = (nzLungo >= 1 && nzLungo <= 5);
+
+  if (vincente === 'tu' && !motivoFallo && haBonus('tu', 'passaggio-lungo') && passaggioLungoValido && !passaggioLungoInCorso) {
+    passaggioLungoInCorso = true;
+    setTimeout(function() {
+      chiediPassaggioLungo(zonaAttuale, dirVincente, function(nzScelto) {
+        passaggioLungoInCorso = false;
+        eseguiAvanzamento(nzScelto);
       });
-    }, 100);
-  }, dPR);
+    }, 600);
+  } else {
+    eseguiAvanzamento(nz);
+  }
 }
 
 /* ============================================================
@@ -2029,7 +2085,6 @@ function bloccaCoppiaContrasto() {
   var c = getCoppiaAttiva(zona, meta);
   var gP = poss === 'tu' ? c.tu : c.cpu;
   var gA = poss === 'tu' ? c.cpu : c.tu;
-  // Rispetta il possessore già impostato (es. dal calcio d'inizio)
   var idPoss = stato.giocatorePalla || (gP ? gP.id : null);
   var idAvv = gA ? gA.id : null;
   stato.contrastoCoppia = {
