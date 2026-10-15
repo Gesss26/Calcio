@@ -530,11 +530,11 @@ var MAX_BONUS = 3;
 var STREAK_PER_BONUS = 3;
 var BONUS_SCELTA_TIMEOUT = 3500;
 var DURATA_SPOSTAMENTO_INIZIO = 600;
-var OFFSET_COPPIA = 25;          /* distanza orizzontale tra TU e CPU nella coppia */
-var OFFSET_GLOBALE_X = -50;      /* offset X per i PORTIERI */
-var OFFSET_GIOCATORI_X = -50;    /* offset X EXTRA per i GIOCATORI (totale -100) */
-var OFFSET_GLOBALE_Y = -75;      /* offset Y per i GIOCATORI di movimento */
-var OFFSET_PORTIERE_Y = -50;     /* offset Y per i PORTIERI */
+var OFFSET_COPPIA = 25;
+var OFFSET_GLOBALE_X = -50;
+var OFFSET_GIOCATORI_X = -50;
+var OFFSET_GLOBALE_Y = -75;
+var OFFSET_PORTIERE_Y = -50;
 
 var PORTA_LEFT = 21, PORTA_TOP = 34, PORTA_W = 58, PORTA_H = 48;
 
@@ -551,6 +551,8 @@ var NOMI_BONUS = {
   'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
+/* Posizioni "base" delle coppie, con Z1 a destra (lato porta CPU in config standard TU-casa).
+   Vengono rimappate in renderCampo() in base a direzioneAttaccoTU. */
 var POSIZIONI_COPPIE = [
   { x: 70.7, y: 70.5 },
   { x: 72.6, y: 83.8 },
@@ -564,6 +566,7 @@ var POSIZIONI_COPPIE = [
   { x: 37.4, y: 83.5 }
 ];
 
+/* Portieri in posizione base: TU a sinistra (vicino Z0), CPU a destra (vicino Z6) */
 var POSIZIONI_PORTIERI = [
   { x: 29.3, y: 72.1, squadra: 'tu' },
   { x: 75.8, y: 72.1, squadra: 'cpu' }
@@ -920,38 +923,86 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO
-   - Offset X portieri: OFFSET_GLOBALE_X
-   - Offset X giocatori: OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X
-   - Offset Y giocatori: OFFSET_GLOBALE_Y
-   - Offset Y portieri: OFFSET_PORTIERE_Y
+   RENDER CAMPO — versione CORRETTA
+   La posizione fisica di ogni coppia/portiere dipende dalla zona
+   e da stato.direzioneAttaccoTU.
+
+   - Zona 0 = porta della squadra TU (difesa TU) in config base.
+   - Zona 6 = porta della squadra CPU (difesa CPU) in config base.
+   - Se direzioneAttaccoTU = +1: TU attacca verso destra (Z0→Z6),
+     le posizioni base valgono così come sono.
+   - Se direzioneAttaccoTU = -1: TU attacca verso sinistra (Z6→Z0),
+     allora la zona Z viene disegnata usando la posizione base di (6 - Z).
+   Per la CPU si usa la direzione opposta: -direzioneAttaccoTU.
+
+   Le posizioni base di POSIZIONI_COPPIE e POSIZIONI_PORTIERI sono
+   definite per la config "TU in casa, attacca a destra".
    ============================================================ */
+function posizioneCoppiaPerZona(zona, meta, squadra) {
+  // Determina la direzione di attacco della squadra
+  var dir = direzionePerSquadra(squadra);
+  // Se la squadra attacca verso sinistra (dir < 0), specchia la zona
+  var zonaEff = dir < 0 ? (6 - zona) : zona;
+  // Anche la meta sup/inf va invertita quando la squadra attacca a sinistra,
+  // perché la numerazione delle coppie base è pensata per attacco a destra.
+  var metaEff = dir < 0 ? (meta === 'sup' ? 'inf' : 'sup') : meta;
+  var chiave = zonaEff + '_' + metaEff;
+  var idx = MAPPA_COPPIA_IDX[chiave];
+  if (idx === undefined) return null;
+  return POSIZIONI_COPPIE[idx];
+}
+
+function posizionePortiere(squadra) {
+  var dir = direzionePerSquadra(squadra);
+  // Portiere base: TU a sinistra (x 29.3), CPU a destra (x 75.8).
+  // Se la squadra attacca a sinistra (dir < 0), il suo portiere va a destra.
+  var base = squadra === 'tu' ? POSIZIONI_PORTIERI[0] : POSIZIONI_PORTIERI[1];
+  if (dir < 0) {
+    // Specchia rispetto al centro: x -> 100 - x
+    return { x: 100 - base.x, y: base.y, squadra: squadra };
+  }
+  return base;
+}
+
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
   var zone = document.getElementById('zone');
   zone.innerHTML = '';
 
-  for (var zona = 1; zona <= 5; zona++) {
-    ['sup', 'inf'].forEach(function(meta) {
-      var chiave = zona + '_' + meta;
-      var idxCoppia = MAPPA_COPPIA_IDX[chiave];
-      if (idxCoppia === undefined) return;
+  // --- Giocatori di movimento ---
+  // Iteriamo sulle zone "fisiche" 1..5 e per ciascuna disegniamo
+  // i giocatori di TU e CPU che si trovano in quella zona.
+  // Per trovare quali giocatori stanno in una zona fisica, dobbiamo
+  // convertire la zona fisica nella zona logica della squadra.
+  for (var zonaFisica = 1; zonaFisica <= 5; zonaFisica++) {
+    ['sup', 'inf'].forEach(function(metaFisica) {
+      // Per TU: la sua zona logica è la zona fisica se dir=+1, altrimenti 6-zonaFisica
+      var dirTU = stato.direzioneAttaccoTU;
+      var zonaLogicaTU = dirTU < 0 ? (6 - zonaFisica) : zonaFisica;
+      var metaLogicaTU = dirTU < 0 ? (metaFisica === 'sup' ? 'inf' : 'sup') : metaFisica;
 
-      var pos = POSIZIONI_COPPIE[idxCoppia];
+      var dirCPU = -stato.direzioneAttaccoTU;
+      var zonaLogicaCPU = dirCPU < 0 ? (6 - zonaFisica) : zonaFisica;
+      var metaLogicaCPU = dirCPU < 0 ? (metaFisica === 'sup' ? 'inf' : 'sup') : metaFisica;
+
+      // Posizione fisica: usa la posizione base della zona fisica/meta fisica
+      var chiaveFisica = zonaFisica + '_' + metaFisica;
+      var idxFisico = MAPPA_COPPIA_IDX[chiaveFisica];
+      if (idxFisico === undefined) return;
+      var pos = POSIZIONI_COPPIE[idxFisico];
       if (!pos) return;
 
-      var coppia = getCoppiaAttiva(zona, meta);
-      var gTU = coppia.tu;
-      var gCPU = coppia.cpu;
-
-      // Giocatori di movimento: offset X base + extra, offset Y movimento
       var centerX = (pos.x / 100) * SCENA_W + OFFSET_GLOBALE_X + OFFSET_GIOCATORI_X;
       var centerY = (pos.y / 100) * SCENA_H + OFFSET_GLOBALE_Y;
 
+      // Trova i giocatori TU e CPU che stanno in questa zona logica/meta
+      var coppiaTU = getCoppiaAttiva(zonaLogicaTU, metaLogicaTU);
+      var coppiaCPU = getCoppiaAttiva(zonaLogicaCPU, metaLogicaCPU);
+
       var items = [
-        { g: gTU,  offsetX: -OFFSET_COPPIA, sq: 'tu'  },
-        { g: gCPU, offsetX: +OFFSET_COPPIA, sq: 'cpu' }
+        { g: coppiaTU.tu,  offsetX: -OFFSET_COPPIA, sq: 'tu'  },
+        { g: coppiaCPU.cpu, offsetX: +OFFSET_COPPIA, sq: 'cpu' }
       ];
 
       for (var i = 0; i < items.length; i++) {
@@ -971,16 +1022,17 @@ function renderCampo() {
     });
   }
 
-  // Portieri (offset X base senza extra, offset Y portiere)
-  for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
-    var pp = POSIZIONI_PORTIERI[k];
+  // --- Portieri ---
+  for (var s = 0; s < 2; s++) {
+    var sq = s === 0 ? 'tu' : 'cpu';
     var por = null;
-    for (var j = 0; j < stato.giocatori[pp.squadra].length; j++) {
-      if (stato.giocatori[pp.squadra][j].portiere) { por = stato.giocatori[pp.squadra][j]; break; }
+    for (var j = 0; j < stato.giocatori[sq].length; j++) {
+      if (stato.giocatori[sq][j].portiere) { por = stato.giocatori[sq][j]; break; }
     }
     if (!por) continue;
+    var pp = posizionePortiere(sq);
     var w2 = document.createElement('div');
-    w2.className = 'pedina-wrapper ' + pp.squadra;
+    w2.className = 'pedina-wrapper ' + sq;
     w2.dataset.giocatoreId = por.id;
     w2.style.left = ((pp.x / 100) * SCENA_W + OFFSET_GLOBALE_X) + 'px';
     w2.style.top = ((pp.y / 100) * SCENA_H + OFFSET_PORTIERE_Y) + 'px';
@@ -1137,18 +1189,13 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
 
+  /* Direzione di attacco:
+     - Se TU è in casa (casaSquadra assente o uguale a sqTU): TU attacca a destra (Z0→Z6), dir = +1.
+     - Se TU è in trasferta (casaSquadra !== sqTU): TU attacca a sinistra (Z6→Z0), dir = -1.
+     NON invertiamo le zone dei giocatori: le zone rimangono logiche (0 = porta TU, 6 = porta CPU).
+     È renderCampo() che mappa zona logica → posizione fisica in base a direzioneAttaccoTU. */
   if (casaSquadra && casaSquadra !== sqTU) {
     stato.direzioneAttaccoTU = -1;
-    stato.invertiCoppie = true;
-    ['tu','cpu'].forEach(function(sq) {
-      for (var i=0;i<stato.giocatori[sq].length;i++) {
-        var g = stato.giocatori[sq][i];
-        g.zona = 6 - g.zona;
-      }
-    });
-    var oldT = ZONE_CONFIG[0].proprietario;
-    ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
-    ZONE_CONFIG[6].proprietario = oldT;
   } else {
     stato.direzioneAttaccoTU = 1;
   }
@@ -1171,7 +1218,7 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
     '<button class="primario" onclick="lanciaMoneta(\'croce\')">CROCE</button></div>';
   document.getElementById('modale').classList.remove('nascosto');
   log('🎮 ' + SQUADRE[sqTU].nome + ' vs ' + SQUADRE[sqCPU].nome);
-  log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'));
+  log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA (Z0→Z6)' : 'SINISTRA (Z6→Z0)'));
 }
 
 function lanciaMoneta(scelta) {
@@ -1253,10 +1300,6 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 
 /* ============================================================
    CALCIO D'INIZIO
-   1) Il battitore si sposta verso la riga di metà campo
-   2) Calcia la palla al compagno
-   3) Torna alla sua posizione originale
-   4) Poi parte il contrasto
    ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
@@ -1327,12 +1370,10 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  // 1) Il battitore si sposta verso la riga di metà campo
   var spostamentoX = -dirAtt * 60;
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translateX(' + spostamentoX + 'px)';
 
-  // 2) Dopo lo spostamento, calcia
   setTimeout(function() {
     var ped = wrapperB.querySelector('.pedina');
     if (ped) {
@@ -1341,14 +1382,10 @@ function eseguiCalcioIniziale(squadra) {
     }
     suonaCalcio();
 
-    // 3) La palla parte verso il compagno
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
-        // 4) Il battitore ritorna
         wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
         wrapperB.style.transform = 'translateX(0)';
-
-        // 5) Finalizza dopo il ritorno
         setTimeout(finalizza, DURATA_SPOSTAMENTO_INIZIO);
       });
     }, 250);
@@ -2060,14 +2097,22 @@ function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
-    ['tu','cpu'].forEach(function(sq) { for (var i=0;i<stato.giocatori[sq].length;i++) { var g = stato.giocatori[sq][i]; if (g.zona === 0) g.zona = 6; else if (g.zona === 6) g.zona = 0; else if (g.zona === 1) g.zona = 5; else if (g.zona === 5) g.zona = 1; else if (g.zona === 2) g.zona = 4; else if (g.zona === 4) g.zona = 2; } });
+    /* Al cambio campo TUTTE le squadre invertono le zone logiche,
+       perché si scambiano fisicamente i lati. La direzioneAttaccoTU
+       si inverte di conseguenza. */
+    ['tu','cpu'].forEach(function(sq) {
+      for (var i=0;i<stato.giocatori[sq].length;i++) {
+        var g = stato.giocatori[sq][i];
+        g.zona = 6 - g.zona;
+      }
+    });
     var oldT = ZONE_CONFIG[0].proprietario;
     ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
     ZONE_CONFIG[6].proprietario = oldT;
     stato.direzioneAttaccoTU = -stato.direzioneAttaccoTU;
     stato.invertiCoppie = !stato.invertiCoppie;
     log('⏸️ FINE PRIMO TEMPO. Risultato: ' + stato.punteggio.tu + '-' + stato.punteggio.cpu, 'goal');
-    log('🔄 CAMBIO CAMPO!', 'highlight');
+    log('🔄 CAMBIO CAMPO! TU attacca ora verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'), 'highlight');
     ['tu','cpu'].forEach(function(sq) { for (var i=0;i<stato.giocatori[sq].length;i++) { stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax; stato.giocatori[sq][i].falli = 0; stato.giocatori[sq][i].ammonito = false; } });
     riempiMano('tu'); riempiMano('cpu');
     renderHeader();
