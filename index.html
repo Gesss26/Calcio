@@ -551,8 +551,6 @@ var NOMI_BONUS = {
   'passaggio-lungo': { nome: 'Passaggio Lungo', icona: '🎯' }
 };
 
-/* Posizioni base delle coppie: Z1 a sinistra, Z5 a destra.
-   Questa configurazione corrisponde a "TU in casa, attacca a destra". */
 var POSIZIONI_COPPIE = [
   { x: 70.7, y: 70.5 },
   { x: 72.6, y: 83.8 },
@@ -566,8 +564,6 @@ var POSIZIONI_COPPIE = [
   { x: 37.4, y: 83.5 }
 ];
 
-/* Portieri in posizione base: TU a sinistra (vicino Z0), CPU a destra (vicino Z6).
-   Questa configurazione corrisponde a "TU in casa, attacca a destra". */
 var POSIZIONI_PORTIERI = [
   { x: 29.3, y: 72.1, squadra: 'tu' },
   { x: 75.8, y: 72.1, squadra: 'cpu' }
@@ -924,30 +920,29 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO — versione CORRETTA
+   RENDER CAMPO
    ============================================================ */
-function posizioneCoppiaPerZona(zona, meta, squadra) {
-  var dir = direzionePerSquadra(squadra);
-  var zonaEff = dir < 0 ? (6 - zona) : zona;
-  var metaEff = dir < 0 ? (meta === 'sup' ? 'inf' : 'sup') : meta;
-  var chiave = zonaEff + '_' + metaEff;
-  var idx = MAPPA_COPPIA_IDX[chiave];
-  if (idx === undefined) return null;
-  return POSIZIONI_COPPIE[idx];
-}
-
-/* CORREZIONE: scambia le posizioni dei portieri SOLO quando TU è in trasferta.
-   - TU in casa (dir > 0): TU a sinistra (base), CPU a destra (base).
-   - TU in trasferta (dir < 0): TU a destra, CPU a sinistra. */
 function posizionePortiere(squadra) {
-  var baseTU = POSIZIONI_PORTIERI[0];   // {x: 29.3} -> sinistra
-  var baseCPU = POSIZIONI_PORTIERI[1];  // {x: 75.8} -> destra
+  var baseTU = POSIZIONI_PORTIERI[0];
+  var baseCPU = POSIZIONI_PORTIERI[1];
   if (stato.direzioneAttaccoTU < 0) {
-    // TU in trasferta: TU attacca a sinistra -> porta TU a destra; CPU in casa -> porta CPU a sinistra
     return squadra === 'tu' ? baseCPU : baseTU;
   }
-  // TU in casa: TU a sinistra, CPU a destra
   return squadra === 'tu' ? baseTU : baseCPU;
+}
+
+/* Offset di un giocatore nella coppia, in base alla direzione della squadra
+   e alla meta logica del giocatore (sup/inf).
+   - dir > 0 (attacca a destra): sup a sinistra (-), inf a destra (+)
+   - dir < 0 (attacca a sinistra): sup a destra (+), inf a sinistra (-)
+   Questo garantisce che l'ordine visivo dei giocatori nella coppia rispecchi
+   l'ordine logico (sup, inf) dal punto di vista della squadra. */
+function offsetPerGiocatore(dir, metaLogica) {
+  if (dir > 0) {
+    return metaLogica === 'sup' ? -OFFSET_COPPIA : +OFFSET_COPPIA;
+  } else {
+    return metaLogica === 'sup' ? +OFFSET_COPPIA : -OFFSET_COPPIA;
+  }
 }
 
 function renderCampo() {
@@ -979,9 +974,12 @@ function renderCampo() {
       var coppiaTU = getCoppiaAttiva(zonaLogicaTU, metaLogicaTU);
       var coppiaCPU = getCoppiaAttiva(zonaLogicaCPU, metaLogicaCPU);
 
+      var offsetTU = offsetPerGiocatore(dirTU, metaLogicaTU);
+      var offsetCPU = offsetPerGiocatore(dirCPU, metaLogicaCPU);
+
       var items = [
-        { g: coppiaTU.tu,  offsetX: -OFFSET_COPPIA, sq: 'tu'  },
-        { g: coppiaCPU.cpu, offsetX: +OFFSET_COPPIA, sq: 'cpu' }
+        { g: coppiaTU.tu,  offsetX: offsetTU,  sq: 'tu'  },
+        { g: coppiaCPU.cpu, offsetX: offsetCPU, sq: 'cpu' }
       ];
 
       for (var i = 0; i < items.length; i++) {
@@ -1168,11 +1166,6 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
 
-  /* Direzione di attacco:
-     - Se TU è in casa (casaSquadra assente o uguale a sqTU): TU attacca a destra (Z0→Z6), dir = +1.
-     - Se TU è in trasferta: TU attacca a sinistra (Z6→Z0), dir = -1.
-     NON invertiamo le zone dei giocatori: le zone rimangono logiche (0 = porta TU, 6 = porta CPU).
-     È renderCampo() che mappa zona logica → posizione fisica in base a direzioneAttaccoTU. */
   var tuInCasa = !casaSquadra || casaSquadra === sqTU;
   stato.direzioneAttaccoTU = tuInCasa ? 1 : -1;
 
