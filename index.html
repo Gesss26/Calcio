@@ -37,44 +37,29 @@
   .scena { position: relative; width: 1600px; height: 900px; transform-origin: center center; flex-shrink: 0; pointer-events: none; }
   .scena > * { pointer-events: auto; }
 
+  /* ============================================================
+     RENDERING A COORDINATE PIXEL — NUOVE CLASSI
+     ============================================================ */
+  .coppia-render {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    pointer-events: none;
+  }
+  .pedina-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  /* Vecchie classi mantenute per compatibilità (non usate nel render) */
   .campo-area { position: absolute; left: 18%; top: 46%; width: 64%; height: 42%; padding: 0 2%; pointer-events: none; }
   .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
   .zona { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 1.5%; }
-
-  /* MODIFICA: coppie con contenitore relativo, altezza fissa, wrapper in absolute */
-  .meta-sup, .meta-inf { 
-    position: relative; 
-    flex: 1; 
-    min-height: 110px;
-    padding: 2px 4px; 
-  }
-  .zona[data-zona="2"] .meta-sup, .zona[data-zona="4"] .meta-sup { transform: translateY(-30px); }
-  .zona[data-zona="2"] .meta-inf, .zona[data-zona="4"] .meta-inf { transform: translateY(30px); }
-  .zona[data-zona="1"] .meta-inf, .zona[data-zona="5"] .meta-inf { transform: translateY(-30px); }
-
-  /* MODIFICA: pedina-wrapper in absolute, centrata, con offset 25px dal centro */
-  .pedina-wrapper { 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 1px; 
-    position: absolute; 
-    top: 0; 
-    transform: translateX(-50%); 
-    transition: transform 0.6s cubic-bezier(0.34,1.2,0.64,1); 
-  }
-  .meta-sup > .pedina-wrapper:nth-child(1),
-  .meta-inf > .pedina-wrapper:nth-child(1) { 
-    left: calc(50% - 25px);
-  }
-  .meta-sup > .pedina-wrapper:nth-child(2),
-  .meta-inf > .pedina-wrapper:nth-child(2) { 
-    left: calc(50% + 25px);
-  }
-
+  .meta-sup, .meta-inf { position: relative; flex: 1; min-height: 110px; padding: 2px 4px; }
+  .pedina-wrapper { display: flex; flex-direction: column; align-items: center; gap: 1px; }
   .portiere-wrapper { position: absolute !important; top: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
-  .portiere-wrapper.portiere-sx { left: 62%; transform: translate(-50%, calc(-50% - 20px)) translateX(40px); }
-  .portiere-wrapper.portiere-dx { left: 38%; transform: translate(-50%, calc(-50% - 20px)) translateX(-40px); }
 
   .nome-giocatore { font-size: 10px; font-weight: 900; color: #fff; text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; text-align: center; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.3px; pointer-events: none; }
   .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
@@ -588,6 +573,45 @@ var URL_TRASFERTA = urlParams.get('trasferta');
 var SCENA_W = 1600;
 var SCENA_H = 900;
 var scalaCorrente = 1;
+
+/* ============================================================
+   POSIZIONI IN PIXEL (1600x900) — dall'editor
+   Ogni coppia = 1 giocatore TU + 1 giocatore CPU nella stessa zona
+   ============================================================ */
+var POSIZIONI_COPPIE = [
+  { x: 630,  y: 630, angolo: 180 },  // #1  Z1 sup
+  { x: 600,  y: 760, angolo: 180 },  // #2  Z2 sup
+  { x: 760,  y: 575, angolo: 180 },  // #3  Z3 sup
+  { x: 720,  y: 835, angolo: 180 },  // #4  Z4 sup
+  { x: 880,  y: 620, angolo: 180 },  // #5  Z5 sup
+  { x: 880,  y: 760, angolo: 180 },  // #6  Z1 inf
+  { x: 1000, y: 575, angolo: 180 },  // #7  Z2 inf
+  { x: 1040, y: 835, angolo: 180 },  // #8  Z3 inf
+  { x: 1130, y: 630, angolo: 180 },  // #9  Z4 inf
+  { x: 1160, y: 760, angolo: 180 }   // #10 Z5 inf
+];
+
+/* Mappa: indice coppia → { zona, meta } */
+var MAPPA_COPPIE = [
+  { zona: 1, meta: 'sup' },  // #1
+  { zona: 2, meta: 'sup' },  // #2
+  { zona: 3, meta: 'sup' },  // #3
+  { zona: 4, meta: 'sup' },  // #4
+  { zona: 5, meta: 'sup' },  // #5
+  { zona: 1, meta: 'inf' },  // #6
+  { zona: 2, meta: 'inf' },  // #7
+  { zona: 3, meta: 'inf' },  // #8
+  { zona: 4, meta: 'inf' },  // #9
+  { zona: 5, meta: 'inf' }   // #10
+];
+
+var POSIZIONI_PORTIERI = [
+  { x: 470,  y: 640, squadra: 'tu'  },
+  { x: 1210, y: 640, squadra: 'cpu' }
+];
+
+var DISTANZA_COPPIA_PX = 50;
+
 function adattaScena() {
   var scena = document.getElementById('scena');
   var wrapper = document.getElementById('scena-wrapper');
@@ -925,70 +949,121 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
+/* ============================================================
+   RENDER CAMPO — VERSIONE A COORDINATE PIXEL
+   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
-  var zone = document.getElementById('zone');
-  zone.innerHTML = '';
-  for (var i=0;i<ZONE_CONFIG.length;i++) {
-    var z = ZONE_CONFIG[i];
-    var zona = document.createElement('div');
-    zona.className = 'zona';
-    zona.dataset.zona = z.id;
-    if (z.portiere) {
-      var sq = z.proprietario;
-      var por = null;
-      for (var k=0;k<stato.giocatori[sq].length;k++) { if (stato.giocatori[sq][k].zona === z.id) { por = stato.giocatori[sq][k]; break; } }
-      if (por) {
-        var wrapper = document.createElement('div');
-        var classeLato = (z.id === 0) ? 'portiere-sx' : 'portiere-dx';
-        wrapper.className = 'pedina-wrapper ' + por.squadra + ' portiere-wrapper ' + classeLato;
-        wrapper.dataset.giocatoreId = por.id;
-        wrapper.appendChild(creaNomeGiocatore(por));
-        wrapper.appendChild(creaPedinaEl(por));
-        wrapper.appendChild(creaInfoSotto(por));
-        zona.appendChild(wrapper);
-      }
-      zone.appendChild(zona);
-      continue;
+
+  var scena = document.getElementById('scena');
+
+  /* Rimuovi tutti gli elementi dinamici precedenti */
+  var vecchie = scena.querySelectorAll('.coppia-render, .portiere-render');
+  for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
+
+  /* ============================================================
+     1) DISEGNA LE 10 COPPIE DI MOVIMENTO
+     ============================================================ */
+  for (var idx = 0; idx < POSIZIONI_COPPIE.length; idx++) {
+    var p = POSIZIONI_COPPIE[idx];
+    var mappa = MAPPA_COPPIE[idx];
+    var zonaGioco = mappa.zona;
+    var metaGioco = mappa.meta;
+
+    var coppia = document.createElement('div');
+    coppia.className = 'coppia-render';
+    coppia.style.position = 'absolute';
+    coppia.style.left = p.x + 'px';
+    coppia.style.top = p.y + 'px';
+    coppia.style.transform = 'translate(-50%, -50%)';
+    coppia.style.zIndex = '10';
+
+    var rad = p.angolo * Math.PI / 180;
+    var dx = Math.cos(rad) * (DISTANZA_COPPIA_PX / 2);
+    var dy = Math.sin(rad) * (DISTANZA_COPPIA_PX / 2);
+
+    /* Prendi i giocatori TU e CPU della zona+meta corretti */
+    var tuG = stato.giocatori.tu.filter(function(g){
+      return g.zona === zonaGioco && !g.portiere && !g.espulso;
+    });
+    var cpuG = stato.giocatori.cpu.filter(function(g){
+      return g.zona === zonaGioco && !g.portiere && !g.espulso;
+    });
+
+    /* Scegli il giocatore in base alla meta (sup = indice 0, inf = indice 1) */
+    var indice = (metaGioco === 'sup') ? 0 : 1;
+    var gTU = tuG[indice] || tuG[0] || null;
+    var gCPU = cpuG[indice] || cpuG[0] || null;
+
+    /* Pedina TU (a sinistra della coppia: -dx, -dy) */
+    if (gTU) {
+      var wrapTU = document.createElement('div');
+      wrapTU.className = 'pedina-wrapper tu';
+      wrapTU.dataset.giocatoreId = gTU.id;
+      wrapTU.style.position = 'absolute';
+      wrapTU.style.left = (-dx) + 'px';
+      wrapTU.style.top = (-dy) + 'px';
+      wrapTU.style.transform = 'translate(-50%, -50%)';
+      wrapTU.style.display = 'flex';
+      wrapTU.style.flexDirection = 'column';
+      wrapTU.style.alignItems = 'center';
+      wrapTU.appendChild(creaNomeGiocatore(gTU));
+      wrapTU.appendChild(creaPedinaEl(gTU));
+      wrapTU.appendChild(creaInfoSotto(gTU));
+      coppia.appendChild(wrapTU);
     }
-    var tuG = stato.giocatori.tu.filter(function(g){ return g.zona === z.id && !g.portiere; });
-    var cpuG = stato.giocatori.cpu.filter(function(g){ return g.zona === z.id && !g.portiere; });
-    var ordine = stato.invertiCoppie ? ['cpu', 'tu'] : ['tu', 'cpu'];
-    var metaSup = document.createElement('div');
-    metaSup.className = 'meta-sup';
-    for (var oi=0; oi<ordine.length; oi++) {
-      var sqO = ordine[oi];
-      var gioc = sqO === 'tu' ? tuG[0] : cpuG[0];
-      if (gioc) {
-        var w = document.createElement('div');
-        w.className = 'pedina-wrapper ' + sqO;
-        w.dataset.giocatoreId = gioc.id;
-        w.appendChild(creaNomeGiocatore(gioc));
-        w.appendChild(creaPedinaEl(gioc));
-        w.appendChild(creaInfoSotto(gioc));
-        metaSup.appendChild(w);
-      }
+
+    /* Pedina CPU (a destra della coppia: +dx, +dy) */
+    if (gCPU) {
+      var wrapCPU = document.createElement('div');
+      wrapCPU.className = 'pedina-wrapper cpu';
+      wrapCPU.dataset.giocatoreId = gCPU.id;
+      wrapCPU.style.position = 'absolute';
+      wrapCPU.style.left = (dx) + 'px';
+      wrapCPU.style.top = (dy) + 'px';
+      wrapCPU.style.transform = 'translate(-50%, -50%)';
+      wrapCPU.style.display = 'flex';
+      wrapCPU.style.flexDirection = 'column';
+      wrapCPU.style.alignItems = 'center';
+      wrapCPU.appendChild(creaNomeGiocatore(gCPU));
+      wrapCPU.appendChild(creaPedinaEl(gCPU));
+      wrapCPU.appendChild(creaInfoSotto(gCPU));
+      coppia.appendChild(wrapCPU);
     }
-    zona.appendChild(metaSup);
-    var metaInf = document.createElement('div');
-    metaInf.className = 'meta-inf';
-    for (var oj=0; oj<ordine.length; oj++) {
-      var sqO2 = ordine[oj];
-      var gioc2 = sqO2 === 'tu' ? tuG[1] : cpuG[1];
-      if (gioc2) {
-        var w2 = document.createElement('div');
-        w2.className = 'pedina-wrapper ' + sqO2;
-        w2.dataset.giocatoreId = gioc2.id;
-        w2.appendChild(creaNomeGiocatore(gioc2));
-        w2.appendChild(creaPedinaEl(gioc2));
-        w2.appendChild(creaInfoSotto(gioc2));
-        metaInf.appendChild(w2);
-      }
-    }
-    zona.appendChild(metaInf);
-    zone.appendChild(zona);
+
+    scena.appendChild(coppia);
   }
+
+  /* ============================================================
+     2) DISEGNA I 2 PORTIERI
+     ============================================================ */
+  for (var k = 0; k < POSIZIONI_PORTIERI.length; k++) {
+    var pp = POSIZIONI_PORTIERI[k];
+    var porG = stato.giocatori[pp.squadra].filter(function(g){ return g.portiere && !g.espulso; });
+    if (porG.length === 0) continue;
+
+    var gPor = porG[0];
+    var wrapPor = document.createElement('div');
+    wrapPor.className = 'pedina-wrapper ' + pp.squadra + ' portiere-render';
+    wrapPor.dataset.giocatoreId = gPor.id;
+    wrapPor.style.position = 'absolute';
+    wrapPor.style.left = pp.x + 'px';
+    wrapPor.style.top = pp.y + 'px';
+    wrapPor.style.transform = 'translate(-50%, -50%)';
+    wrapPor.style.zIndex = '10';
+    wrapPor.style.display = 'flex';
+    wrapPor.style.flexDirection = 'column';
+    wrapPor.style.alignItems = 'center';
+    wrapPor.appendChild(creaNomeGiocatore(gPor));
+    wrapPor.appendChild(creaPedinaEl(gPor));
+    wrapPor.appendChild(creaInfoSotto(gPor));
+    scena.appendChild(wrapPor);
+  }
+
+  /* ============================================================
+     3) DISEGNA LA PALLA AI PIEDI DEL POSSESSORE
+     ============================================================ */
   if (!stato.pallaInAnimazione && stato.zonaPalla !== null && stato.possessore) {
     var idG = stato.giocatorePalla;
     if (!idG) {
@@ -998,34 +1073,42 @@ function renderCampo() {
     }
     if (idG) creaPallaAiPiedi(stato.zonaPalla, idG);
   }
+
   renderingCampoInCorso = false;
 }
 
 function creaPallaAiPiedi(zonaId, idG) {
   var v = document.querySelectorAll('.palla-centro');
-  for (var i=0;i<v.length;i++) v[i].remove();
+  for (var i = 0; i < v.length; i++) v[i].remove();
   var e = document.querySelectorAll('.evidenzia-coppia');
-  for (var j=0;j<e.length;j++) e[j].remove();
-  var zE = document.querySelector('.zona[data-zona="' + zonaId + '"]'); if (!zE) return;
-  var wrapperEl = document.querySelector('[data-giocatore-id="' + idG + '"]'); if (!wrapperEl) return;
-  var ped = wrapperEl.querySelector('.pedina'); if (!ped) ped = wrapperEl;
-  var r = ped.getBoundingClientRect();
-  var zR = zE.getBoundingClientRect();
-  var xP = ((r.left + r.width/2) - zR.left) / zR.width * 100;
-  var yP = (r.bottom - zR.top) / zR.height * 100;
+  for (var j = 0; j < e.length; j++) e[j].remove();
+
+  var wrapperEl = document.querySelector('[data-giocatore-id="' + idG + '"]');
+  if (!wrapperEl) return;
+
+  var scena = document.getElementById('scena');
+  var r = wrapperEl.getBoundingClientRect();
+  var box = scena.getBoundingClientRect();
+
+  var xPx = (r.left + r.width / 2 - box.left) / scalaCorrente;
+  var yPx = (r.bottom - box.top) / scalaCorrente;
 
   var ell = document.createElement('div');
   ell.className = 'evidenzia-coppia';
-  ell.style.left = xP + '%';
-  ell.style.top = yP + '%';
-  zE.appendChild(ell);
+  ell.style.left = xPx + 'px';
+  ell.style.top = yPx + 'px';
+  ell.style.position = 'absolute';
+  ell.style.transform = 'translate(-50%, -50%)';
+  scena.appendChild(ell);
 
   var p = document.createElement('div');
   p.className = 'palla-centro';
-  p.style.left = xP + '%';
-  p.style.top = yP + '%';
+  p.style.left = xPx + 'px';
+  p.style.top = yPx + 'px';
+  p.style.position = 'absolute';
+  p.style.transform = 'translate(-50%, -50%)';
   p.innerHTML = creaPalloneSVG();
-  zE.appendChild(p);
+  scena.appendChild(p);
 }
 
 function creaNomeGiocatore(g) { var el = document.createElement('div'); el.className = 'nome-giocatore'; el.textContent = g.nome; el.title = g.nome + ' (' + g.ruolo + ')'; return el; }
@@ -1243,12 +1326,15 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   var aX = (rA.left + rA.width/2 - box.left) / scalaCorrente;
   var aY = (rA.bottom - box.top) / scalaCorrente;
 
+  /* La palla volante è figlia della scena */
+  var p = document.getElementById('palla-volante');
+  if (p && p.parentNode !== scena) scena.appendChild(p);
+
   var v = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v.length;i++) v[i].remove();
   var e = document.querySelectorAll('.evidenzia-coppia');
   for (var j=0;j<e.length;j++) e[j].remove();
 
-  var p = document.getElementById('palla-volante');
   p.innerHTML = '<div class="palla-inner">' + creaPalloneSVG() + '</div>';
   var pi = p.querySelector('.palla-inner');
   p.style.transition = 'none';
@@ -1344,7 +1430,6 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
 
-  /* FIX: preserva translateX(-50%) durante la salita */
   wrapperB.style.transition = 'transform ' + (DURATA_SPOSTAMENTO_INIZIO/1000) + 's cubic-bezier(0.34,1.2,0.64,1)';
   wrapperB.style.transform = 'translate(-50%, -' + SALITA_CALCIO_INIZIO + 'px)';
 
@@ -1358,7 +1443,6 @@ function eseguiCalcioIniziale(squadra) {
 
     setTimeout(function() {
       animaPallaInZona(gB, gA, function() {
-        /* FIX: ritorno preservando translateX(-50%) */
         wrapperB.style.transition = 'transform ' + (DURATA_RITORNO/1000) + 's ease-out';
         wrapperB.style.transform = 'translate(-50%, 0)';
         setTimeout(finalizza, DURATA_RITORNO);
@@ -1751,7 +1835,6 @@ function animaScivolata(gVincitore, gPerdente) {
   wrapperV.parentNode.insertBefore(w, wrapperV);
   w.appendChild(wrapperV);
 
-  /* FIX: preserva translateX(-50%) + aggiunge lo spostamento */
   requestAnimationFrame(function() {
     w.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px)';
     pedV.classList.add('pg-in-scivolata');
@@ -1948,7 +2031,6 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
     var golSuperAtt = (bonusAtt === 'gol-super');
     var parataSuperAtt = (bonusDif === 'parata-super');
 
-    /* ====== GOL SUPER (attaccante) ====== */
     if (golSuperAtt) {
       var dP11 = Math.floor(Math.random()*11) + 1;
       var coppia = COPPIE_11[dP11];
@@ -1965,7 +2047,6 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
       return;
     }
 
-    /* ====== PARATA SUPER (portiere) ====== */
     if (parataSuperAtt) {
       var dP11b = Math.floor(Math.random()*11) + 1;
       var coppiaB = COPPIE_11[dP11b];
@@ -1977,8 +2058,6 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
         if (coppiaB.indexOf(tutteLeCaselle[k]) === -1) coperte.push(tutteLeCaselle[k]);
       }
       evidenziaCaselle(coperte);
-      /* MODIFICA 2: se dT ∈ coppia → GOAL (portiere verso centro)
-                        se dT ∉ coppia → PARATA (portiere verso dT) */
       var ppB;
       if (coppiaB.indexOf(dT) > -1) {
         ppB = CASELLE_PERC[5];
@@ -1993,7 +2072,6 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
       return;
     }
 
-    /* ====== PARATA NORMALE (1d4) ====== */
     var dP4 = Math.floor(Math.random()*4) + 1;
     var zona = ZONE_PORTIERE_4[dP4];
     document.getElementById('tiro-info').textContent = 'FASE 2 — Il portiere si butta (1d4)...';
