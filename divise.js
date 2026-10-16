@@ -1,5 +1,6 @@
 /* ============================================================
    DIVISE.JS - Database squadre, generatore SVG e rose 2026/27
+   Aggiornato a ottobre 2026 — formazioni tipo di ogni squadra
    ============================================================ */
 
 var SQUADRE = {
@@ -26,175 +27,162 @@ var SQUADRE = {
 };
 
 /* ============================================================
-   ROSE 2026/27 - dal sito Diretta.it (aggiornate agosto 2026)
+   ROSE 2026/27 - aggiornate a ottobre 2026
    
    Struttura per ogni squadra:
-   - portiere[0]      = POR titolare (Z0 per TU, Z6 per CPU)
+   - portiere[0]      = POR (Z0)
    - difensori[0..1]  = 2 DIF in Z1
-   - centrocampisti[0..5] = 6 CEN distribuiti così:
-       - indice 0, 1 → Z2
-       - indice 2, 3 → Z3
-       - indice 4, 5 → Z4
-   - difensori_alta[0..1] = 2 DIF in Z5
+   - centrocampisti[0..1] = 2 CEN in Z2
+   - centrocampisti[2..3] = 2 CEN in Z3
+   - centrocampisti[4..5] = 2 CEN in Z4
+   - difensori_alta[0..1] = 2 ATT in Z5
    - panchina: 1 POR, 2 DIF, 2 CEN, 2 ATT
    ============================================================ */
 var ROSE = {
   atalanta: {
     portiere: ['Carnesecchi'],
-    difensori: ['Hien', 'Kolasinac'],
-    centrocampisti: ['De Roon', 'Ederson', 'Pasalic', 'Samardzic', 'Sulemana', 'Zalewski'],
-    difensori_alta: ['Bellanova', 'Zappacosta'],
-    panchina: { por: ['Sportiello'], dif: ['Scalvini', 'Kossounou'], cen: ['Gaetano', 'Elmas'], att: ['Scamacca', 'Lookman'] }
+    difensori: ['Scalvini', 'Kristensen'],
+    centrocampisti: ['Hien', 'Kolasinac', 'Kessié', 'Gaetano', 'Ederson', 'De Ketelaere'],
+    difensori_alta: ['Scamacca', 'Rowe'],
+    panchina: { por: ['Sportiello'], dif: ['Bernasconi', 'Bellanova'], cen: ['Samardzic', 'Zappacosta'], att: ['Raspadori', 'Krstovic'] }
   },
   bologna: {
     portiere: ['Skorupski'],
-    difensori: ['Casale', 'Vitik'],
-    centrocampisti: ['Ferguson', 'Pobega', 'Moro', 'El Azzouzi', 'Amondarain', 'Ilic'],
-    difensori_alta: ['Holm', 'Miranda'],
-    panchina: { por: ['Pessina'], dif: ['Heggem', 'Zortea'], cen: ['Fabbian', 'Odgaard'], att: ['Dovbyk', 'Orsolini'] }
+    difensori: ['Heggem', 'Theate'],
+    centrocampisti: ['Zortea', 'Miranda', 'Pobega', 'Ferguson', 'Orsolini', 'Cambiaghi'],
+    difensori_alta: ['Dovbyk', 'Holm'],
+    panchina: { por: ['Pessina'], dif: ['Helland', 'Casale'], cen: ['Moro', 'Bernardeschi'], att: ['Piccoli', 'Vitik'] }
   },
   cagliari: {
     portiere: ['Caprile'],
-    difensori: ['Mina', 'Obert'],
-    centrocampisti: ['Deiola', 'Prati', 'Adopo', 'Fazzini', 'Cavuoti', 'Akarakiri'],
-    difensori_alta: ['Zappa', 'Rodriguez'],
-    panchina: { por: ['Radunovic'], dif: ['Idrissi', 'Zé Pedro'], cen: ['Winks', 'Fadera'], att: ['Esposito', 'Luvumbo'] }
+    difensori: ['Mina', 'Rodriguez'],
+    centrocampisti: ['Zè Pedro', 'Obert', 'Adopo', 'Winks', 'Romano', 'Maldini'],
+    difensori_alta: ['Mendy', 'Fazzini'],
+    panchina: { por: ['Radunovic'], dif: ['Sugawara', 'Deiola'], cen: ['Idrissi', 'Zé Pedro'], att: ['Nzola', 'Luvumbo'] }
   },
   como: {
-    portiere: ['Audero'],
-    difensori: ['Kempf', 'Dossena'],
-    centrocampisti: ['Mazzitelli', 'Caqueret', 'Paz', 'Da Cunha', 'Milla', 'Braunöder'],
-    difensori_alta: ['Van der Brempt', 'Valle'],
-    panchina: { por: ['Vigorito'], dif: ['Goldaniga', 'Chalobah'], cen: ['Perrone', 'Baturina'], att: ['Morata', 'Douvikas'] }
+    portiere: ['Butez'],
+    difensori: ['Chalobah', 'Ramon'],
+    centrocampisti: ['Yan Couto', 'Valle', 'Da Cunha', 'Perrone', 'Diao', 'Nico Paz'],
+    difensori_alta: ['Douvikas', 'Baturina'],
+    panchina: { por: ['Vigorito'], dif: ['Kaiki', 'Kempf'], cen: ['Milla', 'Rodriguez'], att: ['Kean', 'Caqueret'] }
   },
   fiorentina: {
     portiere: ['De Gea'],
-    difensori: ['Ranieri', 'Pongracic'],
-    centrocampisti: ['Mandragora', 'Fagioli', 'Fabbian', 'Brescianini', 'Ndour', 'Atta'],
-    difensori_alta: ['Dodô', 'Parisi'],
-    panchina: { por: ['Christensen'], dif: ['Dragusin', 'Jiménez'], cen: ['Oulai', 'Ricci'], att: ['Kean', 'Gudmundsson'] }
+    difensori: ['Dragusin', 'Ranieri'],
+    centrocampisti: ['Jimenez', 'Viery', 'Ndour', 'Fagioli', 'Atta', 'Mastantuono'],
+    difensori_alta: ['Pellegrino', 'Pedro Goncalves'],
+    panchina: { por: ['Christensen'], dif: ['Valdepenas', 'Pongracic'], cen: ['Oulai', 'Njie'], att: ['Beto', 'Kean'] }
   },
   frosinone: {
-    portiere: ['Pisseri'],
-    difensori: ['Cittadini', 'Bracaglia'],
-    centrocampisti: ['Grillitsch', 'Schmid', 'Calò', 'Koné', 'Koutsoupias', 'Gelli'],
-    difensori_alta: ['Oyono', 'Corrado'],
-    panchina: { por: ['Lolic'], dif: ['Fayed', 'Amey'], cen: ['Hasa', 'Cichella'], att: ['Zerbin', 'Raimondo'] }
+    portiere: ['Palmisani'],
+    difensori: ['Calvani', 'Monterisi'],
+    centrocampisti: ['Oyono', 'Bracaglia', 'Masini', 'Calò', 'Ghedjemis', 'Schmid'],
+    difensori_alta: ['Raimondo', 'Kvernadze'],
+    panchina: { por: ['Lolic'], dif: ['Terzic', 'Fayed'], cen: ['Grilitsch', 'Fini'], att: ['Zerbin', 'Cichella'] }
   },
   genoa: {
     portiere: ['Bijlow'],
-    difensori: ['Vásquez', 'Østigård'],
-    centrocampisti: ['Frendrup', 'Sow', 'Baldanzi', 'Traorè', 'Ellertsson', 'Masini'],
-    difensori_alta: ['Sabelli', 'Martin'],
-    panchina: { por: ['Sommariva'], dif: ['Matturro', 'Otoa'], cen: ['Amorim', 'Cuenca'], att: ['Messias', 'El Shaarawy'] }
+    difensori: ['Ostigard', 'Vasquez'],
+    centrocampisti: ['Ehizibue', 'Marcandalli', 'Frendrup', 'Sow', 'Baldanzi', 'Ellertsson'],
+    difensori_alta: ['Osmajic', 'Colombo'],
+    panchina: { por: ['Sommariva'], dif: ['Drameh', 'Matturro'], cen: ['Messias', 'El Shaarawy'], att: ['Vitinha', 'Sabelli'] }
   },
   inter: {
     portiere: ['Martinez'],
-    difensori: ['Bastoni', 'Akanji'],
-    centrocampisti: ['Barella', 'Calhanoglu', 'Mkhitaryan', 'Sučić', 'Zielinski', 'Frattesi'],
-    difensori_alta: ['Dimarco', 'Pavard'],
-    panchina: { por: ['Provedel'], dif: ['Bisseck', 'Stones'], cen: ['Asllani', 'Diouf'], att: ['Thuram', 'Esposito'] }
+    difensori: ['Akanji', 'Bastoni'],
+    centrocampisti: ['Bisseck', 'Dimarco', 'Barella', 'Calhanoglu', 'Zielinski', 'Diouf'],
+    difensori_alta: ['Lautaro', 'Thuram'],
+    panchina: { por: ['Provedel'], dif: ['Stones', 'Pavard'], cen: ['Sucic', 'Frattesi'], att: ['Pio Esposito', 'Spence'] }
   },
   juventus: {
     portiere: ['Vicario'],
-    difensori: ['Bremer', 'Gatti'],
-    centrocampisti: ['Locatelli', 'Koopmeiners', 'Thuram', 'McKennie', 'Douglas Luiz', 'Miretti'],
-    difensori_alta: ['Cambiaso', 'Kalulu'],
-    panchina: { por: ['Grabara'], dif: ['Kelly', 'Lucumí'], cen: ['Sarr', 'Arthur'], att: ['Kolo Muani', 'Yildiz'] }
+    difensori: ['Kalulu', 'Bremer'],
+    centrocampisti: ['Lucumì', 'Celik', 'Douglas Luiz', 'McKennie', 'Conceiçao', 'Yildiz'],
+    difensori_alta: ['Woltemade', 'Kolo Muani'],
+    panchina: { por: ['Grabara'], dif: ['Gatti', 'Cambiaso'], cen: ['Sarr', 'Koopmeiners'], att: ['Nico Gonzalez', 'Alajbegovic'] }
   },
   lazio: {
     portiere: ['Mandas'],
-    difensori: ['Romagnoli', 'Gigot'],
-    centrocampisti: ['Rovella', 'Cataldi', 'Vecino', 'Dele-Bashiru', 'Taylor', 'Belahyane'],
-    difensori_alta: ['Marusic', 'Tavares'],
-    panchina: { por: ['Furlanetto'], dif: ['Patric', 'Provstgaard'], cen: ['Przyborek', 'Vecino'], att: ['Dia', 'Zaccagni'] }
+    difensori: ['Doekhi', 'Provstgaard'],
+    centrocampisti: ['Marusic', 'Nuno Tavares', 'Taylor', 'Rovella', 'Frattesi', 'Cancellieri'],
+    difensori_alta: ['Noslin', 'Zaccagni'],
+    panchina: { por: ['Furlanetto'], dif: ['Sutalo', 'Patric'], cen: ['Floriani', 'Cataldi'], att: ['Isaksen', 'Pinamonti'] }
   },
   lecce: {
     portiere: ['Falcone'],
-    difensori: ['Gaspar', 'Jean'],
-    centrocampisti: ['Coulibaly', 'Maleh', 'Berisha', 'Gandelman', 'Kaba', 'Ngom'],
-    difensori_alta: ['Gallo', 'Veiga'],
-    panchina: { por: ['Penev'], dif: ['Siebert', 'Ndaba'], cen: ['Fofana', 'Gorter'], att: ['Pierotti', 'Stulic'] }
+    difensori: ['Gaspar', 'Tiago Gabriel'],
+    centrocampisti: ['D. Veiga', 'Gallo', 'Ilic', 'Ngom', 'Coulibaly', 'Pierotti'],
+    difensori_alta: ['Geubbels', 'Monteiro'],
+    panchina: { por: ['Penev'], dif: ['Siebert', 'Ndaba'], cen: ['Berisha', 'Fofana'], att: ["N'dri", 'Stulic'] }
   },
   milan: {
     portiere: ['Maignan'],
-    difensori: ['Tomori', 'Pavlovic'],
-    centrocampisti: ['Modric', 'Rabiot', 'Fofana', 'Loftus-Cheek', 'Ricci', 'Jashari'],
-    difensori_alta: ['Estupiñán', 'De Winter'],
-    panchina: { por: ['Terracciano'], dif: ['Gabbia', 'Gila'], cen: ['Bondo', 'Musah'], att: ['Ramos', 'Leão'] }
+    difensori: ['De Winter', 'Pavlovic'],
+    centrocampisti: ['Gila', 'Moreira', 'Modric', 'Rabiot', 'Chukwueze', 'Pulisic'],
+    difensori_alta: ['Cissé', 'Ramos'],
+    panchina: { por: ['Terracciano'], dif: ['Gabbia', 'Estupinan'], cen: ['Musah', 'Saelemaekers'], att: ['Loftus-Cheek', 'Leão'] }
   },
   monza: {
-    portiere: ['Pizzignacco'],
-    difensori: ['Antov', 'Carboni'],
-    centrocampisti: ['Pessina', 'Obiang', 'Ciurria', 'Akinsanmiro', 'Colombo', 'Galazzi'],
-    difensori_alta: ['Birindelli', 'Mangas'],
-    panchina: { por: ['Thiam'], dif: ['Ziolkowski', 'Lucchesi'], cen: ['Ondoa', 'Varela'], att: ['Cutrone', 'Mota'] }
+    portiere: ['Tornqvist'],
+    difensori: ['Ziolkowski', 'Carboni'],
+    centrocampisti: ['Kouadio', 'Mangas', 'Pessina', 'Folorunsho', 'Birindelli', 'Zeballos'],
+    difensori_alta: ['Robinson', 'Varela'],
+    panchina: { por: ['Thiam'], dif: ['Antov', 'Lucchesi'], cen: ['Akinsanmiro', 'Colpani'], att: ['Ngonge', 'Cutrone'] }
   },
   napoli: {
     portiere: ['Meret'],
-    difensori: ['Rrahmani', 'Buongiorno'],
-    centrocampisti: ['De Bruyne', 'McTominay', 'Lobotka', 'Anguissa', 'Gilmour', 'Folorunsho'],
-    difensori_alta: ['Di Lorenzo', 'Olivera'],
-    panchina: { por: ['Milinković-Savić'], dif: ['Beukema', 'Mazzocchi'], cen: ['Lindstrom', 'Cajuste'], att: ['Højlund', 'Neres'] }
+    difensori: ['Rrahmani', 'Beukema'],
+    centrocampisti: ['Di Lorenzo', 'Spinazzola', 'Lobotka', 'McTominay', 'De Bruyne', 'Politano'],
+    difensori_alta: ['Højlund', 'Lang'],
+    panchina: { por: ['Milinković-Savić'], dif: ['Buongiorno', 'Marianucci'], cen: ['Gilmour', 'Anguissa'], att: ['Neres', 'Lucca'] }
   },
   parma: {
     portiere: ['Corvi'],
-    difensori: ['Balogh', 'Valenti'],
-    centrocampisti: ['Bernabé', 'Keita', 'Nicolussi Caviglia', 'Ordoñez', 'Cremaschi', 'Sørensen'],
-    difensori_alta: ['Delprato', 'Valeri'],
-    panchina: { por: ['Daffara'], dif: ['Diego Carlos', 'Ndiaye'], cen: ['Plicco', 'Kouda'], att: ['Almqvist', 'Benedyczak'] }
+    difensori: ['Troilo', 'Diego Carlos'],
+    centrocampisti: ['Delprato', 'Lontani', 'Bernabé', 'Keita', 'Britschgi', 'Valeri'],
+    difensori_alta: ['Touré', 'Romero'],
+    panchina: { por: ['Daffara'], dif: ['Balogh', 'Ndiaye'], cen: ['Sierro', 'Fabbian'], att: ['Elphege', 'Benedyczak'] }
   },
   roma: {
     portiere: ['Svilar'],
-    difensori: ['Mancini', 'N\'Dicka'],
-    centrocampisti: ['Cristante', 'Koné', 'Pellegrini', 'Pisilli', 'Molina', 'Koulierakis'],
-    difensori_alta: ['Angeliño', 'Rensch'],
-    panchina: { por: ['Gollini'], dif: ['Hermoso', 'Ghilardi'], cen: ['Baldanzi', 'El Aynaoui'], att: ['Dybala', 'Soulé'] }
+    difensori: ['Mancini', 'Balerdi'],
+    centrocampisti: ['Hermoso', 'Wesley', 'Cristante', 'Kone', 'Molina', 'Soulé'],
+    difensori_alta: ['Dybala', 'Malen'],
+    panchina: { por: ['Gollini'], dif: ['Ndicka', 'Ghilardi'], cen: ['Lulli', 'Mora'], att: ['El Aynaoui', 'Baldanzi'] }
   },
   sassuolo: {
-    portiere: ['Turati'],
-    difensori: ['Idzes', 'Walukiewicz'],
-    centrocampisti: ['Matic', 'Thorstvedt', 'Boloca', 'Koné', 'Lipani', 'Iannoni'],
-    difensori_alta: ['Doig', 'Candé'],
-    panchina: { por: ['Muric'], dif: ['Odenthal', 'Miranda'], cen: ['Adžić', 'Caligara'], att: ['Berardi', 'Laurienté'] }
+    portiere: ['Muric'],
+    difensori: ['Idzes', 'Leysen'],
+    centrocampisti: ['Cinquegrano', 'Doig', 'Bakola', 'Matic', 'Thorstvedt', 'Berardi'],
+    difensori_alta: ['Esposito', 'Laurienté'],
+    panchina: { por: ['Turati'], dif: ['Obrador', 'Walukiewicz'], cen: ['Adzic', 'Volpato'], att: ['Bowie', 'Lipani'] }
   },
   torino: {
-    portiere: ['Israel'],
-    difensori: ['Coco', 'Comuzzo'],
-    centrocampisti: ['Ilic', 'Casadei', 'Vlasic', 'Gineitis', 'Anjorin', 'Oristanio'],
-    difensori_alta: ['Biraghi', 'Pedersen'],
-    panchina: { por: ['Paleari'], dif: ['Ismajli', 'Rodriguez'], cen: ['Ilkhan', 'Fitz-Jim'], att: ['Adams', 'Simeone'] }
+    portiere: ['Lucas Perri'],
+    difensori: ['Coco', 'Comert'],
+    centrocampisti: ['Comuzzo', 'Belghali', 'Mandragora', 'Fitz-Jim', 'Braganca', 'Cacciamani'],
+    difensori_alta: ['Vlasic', 'Simeone'],
+    panchina: { por: ['Paleari'], dif: ['Fortini', 'Ismajli'], cen: ['Gineitis', 'Casadei'], att: ['Adams', 'Anjorin'] }
   },
   udinese: {
     portiere: ['Okoye'],
-    difensori: ['Solet', 'Kabasele'],
-    centrocampisti: ['Karlström', 'Piotrowski', 'Ekkelenkamp', 'Chakvetadze', 'Miller', 'Zarraga'],
-    difensori_alta: ['Zemura', 'Zanoli'],
-    panchina: { por: ['Padelli'], dif: ['Bertola', 'Ebosse'], cen: ['Camara', 'Gómez'], att: ['Davis', 'Zaniolo'] }
+    difensori: ['Kabasele', 'Solet'],
+    centrocampisti: ['Abankwah', 'Vojvoda', 'Ekkelenkamp', 'Karlstrom', 'Piotrowski', 'Kamara'],
+    difensori_alta: ['Zaniolo', 'Davis'],
+    panchina: { por: ['Padelli'], dif: ['Alaba', 'Bertola'], cen: ['Miller', 'Unai Gomez'], att: ['Zarraga', 'Zanoli'] }
   },
   venezia: {
     portiere: ['Stankovic'],
-    difensori: ['Bella-Kotchap', 'Sverko'],
-    centrocampisti: ['Sohm', 'Busio', 'Duncan', 'Bohinen', 'Pérez', 'Fanne'],
-    difensori_alta: ['Haps', 'Correia'],
-    panchina: { por: ['Grandi'], dif: ['Schingtienne', 'Moreno'], cen: ['Basic', 'Lella'], att: ['Adams', 'Yeboah'] }
+    difensori: ['Schingtienne', 'Juan Jesus'],
+    centrocampisti: ['Bella-Kotchap', 'Adams', 'Basic', 'Busio', 'Kike Perez', 'Hainaut'],
+    difensori_alta: ['Correia', 'Yeboah'],
+    panchina: { por: ['Grandi'], dif: ['Mazzocchi', 'Moreno'], cen: ['Haps', 'Sohm'], att: ['Lella', 'Fanne'] }
   }
 };
 
 /* ============================================================
    GENERA SVG GIOCATORE CON GRUPPI ANIMABILI
-   Classi CSS usate dalle animazioni:
-   - .pg-testa        (testa, ruota per orientarsi)
-   - .pg-busto        (busto, ruota leggermente quando calcia)
-   - .pg-braccio-sx   (braccio sinistro, per parata)
-   - .pg-braccio-dx   (braccio destro, per parata)
-   - .pg-gamba-sx     (gamba sinistra, statica)
-   - .pg-gamba-dx     (gamba destra, animata per il calcio)
-   
-   IMPORTANTE: il pivot (transform-origin) dei bracci è alla SPALLA,
-   e il braccio è disegnato VERSO IL BASSO dal pivot. In questo modo
-   ruotandolo verso l'alto (rotate -140/-160 gradi per il sx e
-   140/160 per il dx) il braccio si solleva in modo naturale.
    ============================================================ */
 function creaGiocatoreSVG(divisa, animazione) {
   if (!divisa) divisa = { maglia: '#888888', pantaloncini: '#333333', calzettoni: '#888888' };
@@ -229,18 +217,12 @@ function creaGiocatoreSVG(divisa, animazione) {
   svg += '</g>';
   
   // BRACCIO SINISTRO
-  // Pivot alla spalla sinistra (12, 20). Braccio disegnato verso il basso.
-  // A riposo: rect da (8, 20) a (15, 34), mano in (11.5, 35)
-  // Rotazione -160°: il braccio si solleva verso l'alto-sinistra
   svg += '<g class="pg-braccio-sx" style="transform-origin: 12px 20px;">';
   svg += '<rect x="8" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
   svg += '<circle cx="11.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
   svg += '</g>';
   
   // BRACCIO DESTRO
-  // Pivot alla spalla destra (28, 20). Braccio disegnato verso il basso.
-  // A riposo: rect da (25, 20) a (32, 34), mano in (28.5, 35)
-  // Rotazione +160°: il braccio si solleva verso l'alto-destra
   svg += '<g class="pg-braccio-dx" style="transform-origin: 28px 20px;">';
   svg += '<rect x="25" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
   svg += '<circle cx="28.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
