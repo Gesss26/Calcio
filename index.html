@@ -94,14 +94,18 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ===== BANNER CARTE INGRANDITO DI 70PX VERSO IL BASSO ===== */
-  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; background: rgba(10,15,30,0.9); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 20px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; padding-bottom: 84px; }
+  /* ===== PANNELLO CARTE: DUE RIGHE ===== */
+  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; background: rgba(10,15,30,0.9); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 16px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
   .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
 
   .info-mano { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
   .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; }
   .info-mano .turno-label { font-size: 12px; color: #aaa; }
-  .mano-wrapper { display: flex; align-items: center; gap: 16px; flex-wrap: nowrap; justify-content: center; width: 100%; }
+
+  /* Riga alta: mazzi + seme + bonus */
+  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: nowrap; width: 100%; }
+  /* Riga bassa: carte del giocatore */
+  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: nowrap; width: 100%; }
 
   .pila-bonus-wrapper { flex-shrink: 0; }
   .pila-bonus { position: relative; width: 64px; height: 92px; }
@@ -110,7 +114,7 @@
   .pila-bonus .pila-carta { position: absolute; width: 64px; height: 92px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-bonus .pila-carta.bonus { background: linear-gradient(135deg, #fbbf24, #d97706); border: 2px solid #fff; }
   .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-  .pila-bonus .pila-count { position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px; border: 2px solid rgba(251,191,36,0.7); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px; border: 2px solid rgba(251,191,36,0.7); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
 
   .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.7); border: 3px solid #ffd700; border-radius: 14px; padding: 10px 16px; box-shadow: 0 0 22px rgba(255,215,0,0.5), inset 0 0 12px rgba(255,215,0,0.15); flex-shrink: 0; }
   .seme-grande .label { font-size: 11px; color: #ffd700; font-weight: 900; letter-spacing: 2px; }
@@ -120,18 +124,18 @@
   .mano-sezione .mano-label { font-size: 11px; font-weight: bold; text-transform: uppercase; }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  /* ===== CARTE INGRANDITE ===== */
-  .carte { display: flex; gap: 8px; flex-wrap: nowrap; justify-content: center; }
-  .carta { width: 78px; height: 112px; background: #fff; color: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7px 7px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+  /* ===== CARTE DEL GIOCATORE PIÙ GRANDI ===== */
+  .carte { display: flex; gap: 10px; flex-wrap: nowrap; justify-content: center; }
+  .carta { width: 92px; height: 132px; background: #fff; color: #222; border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
   .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 20px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 48px; line-height: 1; }
-  .carta .valore-basso { font-size: 20px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta .valore-alto { font-size: 22px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 56px; line-height: 1; }
+  .carta .valore-basso { font-size: 22px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
   .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-8px); box-shadow: 0 0 16px #ffd700; }
   .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
 
-  .pile-wrapper { display: flex; gap: 50px; align-items: center; flex-shrink: 0; }
+  .pile-wrapper { display: flex; gap: 40px; align-items: center; flex-shrink: 0; }
   .pila { position: relative; width: 64px; height: 92px; }
   .pila-titolo { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9); letter-spacing: 1.5px; }
   .pila-carte { position: relative; width: 100%; height: 100%; }
@@ -140,7 +144,7 @@
   .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
   .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count { position: absolute; bottom: -64px; left: 50%; transform: translateX(-50%); font-size: 15px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,215,0,0.6); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,215,0,0.6); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
   .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
   .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
@@ -162,16 +166,15 @@
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
   .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
-  /* ===== SOSTITUZIONI SPOSTATE SOTTO IMPOSTAZIONI ===== */
   .sost-panel { display: none; }
 
   .info-carte { display: flex; gap: 14px; font-size: 11px; color: #aaa; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 70px; }
+  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
   #azioni-container button { padding: 8px 20px; font-size: 13px; }
 
   button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 2px; }
-  button:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
+  button:hover:not(:disabled) { background: #4dabf7; color: #16213e; }
   button:disabled { opacity: 0.4; cursor: not-allowed; }
   button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
   button.primario:hover:not(:disabled) { background: #fff; }
@@ -366,7 +369,9 @@
             <div class="titolo" id="titolo-mano">Contrasto</div>
             <div class="turno-label" id="turno-label"></div>
           </div>
-          <div class="mano-wrapper">
+
+          <!-- RIGA ALTA: Mazzo Bonus + 3 Slot Bonus + Seme + Mazzo + Scarti -->
+          <div class="riga-alta">
             <div class="pila-bonus-wrapper">
               <div class="pila-bonus">
                 <div class="pila-titolo">BONUS</div>
@@ -374,21 +379,17 @@
                 <div class="pila-count" id="bonus-count">12</div>
               </div>
             </div>
-            <div class="seme-grande">
-              <span class="label">SEME</span>
-              <span class="seme" id="seme-guidatore">⚽</span>
-            </div>
-            <div class="mano-sezione tu">
-              <div class="mano-label">Tu (<span id="count-tu">7</span>)</div>
-              <div class="carte" id="carte-tu"></div>
-            </div>
             <div class="bonus-tu-wrapper">
-              <div class="bonus-label">Bonus</div>
+              <div class="bonus-label">Le tue carte Bonus</div>
               <div class="bonus-slots" id="bonus-slots-tu">
                 <div class="bonus-slot" data-slot="0"></div>
                 <div class="bonus-slot" data-slot="1"></div>
                 <div class="bonus-slot" data-slot="2"></div>
               </div>
+            </div>
+            <div class="seme-grande">
+              <span class="label">SEME</span>
+              <span class="seme" id="seme-guidatore">⚽</span>
             </div>
             <div class="pile-wrapper">
               <div class="pila">
@@ -403,6 +404,15 @@
               </div>
             </div>
           </div>
+
+          <!-- RIGA BASSA: Le 7 carte del giocatore -->
+          <div class="riga-bassa">
+            <div class="mano-sezione tu">
+              <div class="mano-label">Le tue carte (<span id="count-tu">7</span>)</div>
+              <div class="carte" id="carte-tu"></div>
+            </div>
+          </div>
+
           <div class="info-carte">
             <span>Mazzo: <strong id="info-mazzo">52</strong></span>
             <span>Scarti: <strong id="info-scarti">0</strong></span>
@@ -509,11 +519,11 @@ var POSIZIONI_COPPIE = [
   { x: 500,  y: 530, angolo: 180 },
   { x: 460,  y: 650, angolo: 180 },
   { x: 650,  y: 480, angolo: 180 },
-  { x: 610,  y: 800, angolo: 180 },
+  { x: 610,  y: 750, angolo: 180 },
   { x: 800,  y: 530, angolo: 180 },
   { x: 800,  y: 650, angolo: 180 },
   { x: 950,  y: 480, angolo: 180 },
-  { x: 980,  y: 800, angolo: 180 },
+  { x: 980,  y: 750, angolo: 180 },
   { x: 1110, y: 530, angolo: 180 },
   { x: 1130, y: 650, angolo: 180 }
 ];
