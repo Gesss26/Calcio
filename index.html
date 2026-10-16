@@ -94,8 +94,8 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ===== BANNER SUPERIORE DIMEZZATO (solo riga alta) ===== */
-  .banner-top { position: fixed; top: 48px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1000px; background: rgba(10,15,30,0.92); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 10px; padding: 8px 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 400; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
+  /* ===== BANNER SUPERIORE (solo mazzi + bonus) ===== */
+  .banner-top { position: fixed; top: 48px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1100px; background: rgba(10,15,30,0.92); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 10px; padding: 8px 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 400; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
   .banner-top.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
 
   .banner-top .info-mano { display: flex; align-items: center; gap: 10px; font-size: 10px; flex-wrap: nowrap; }
@@ -104,60 +104,67 @@
   .banner-top .bonus-cpu-info-inline { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,0.6); }
   .banner-top .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 11px; }
 
-  .banner-top .riga-alta { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: nowrap; }
+  .banner-top .riga-alta { display: flex; align-items: flex-end; justify-content: center; gap: 24px; flex-wrap: nowrap; }
 
+  /* ===== MAZZI ALLA STESSA DIMENSIONE DELLE CARTE (96x138) ===== */
   .pila-bonus-wrapper { flex-shrink: 0; }
-  .pila-bonus { position: relative; width: 44px; height: 62px; }
-  .pila-bonus .pila-titolo { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
+  .pila-bonus { position: relative; width: 96px; height: 138px; }
+  .pila-bonus .pila-titolo { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-bonus .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-bonus .pila-carta { position: absolute; width: 44px; height: 62px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-bonus .pila-carta { position: absolute; width: 96px; height: 138px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.5); }
   .pila-bonus .pila-carta.bonus { background: linear-gradient(135deg, #fbbf24, #d97706); border: 2px solid #fff; }
-  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-  .pila-bonus .pila-count { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(251,191,36,0.7); }
+  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 58px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 2px 4px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-count { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 2px 8px; border-radius: 5px; border: 1px solid rgba(251,191,36,0.7); }
 
-  .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 10px; padding: 4px 12px; box-shadow: 0 0 14px rgba(255,215,0,0.5); flex-shrink: 0; }
-  .seme-grande .label { font-size: 8px; color: #ffd700; font-weight: 900; letter-spacing: 1px; }
-  .seme-grande .seme { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); }
-
-  .pile-wrapper { display: flex; gap: 16px; align-items: center; flex-shrink: 0; }
-  .pila { position: relative; width: 44px; height: 62px; }
-  .pila-titolo { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
+  .pile-wrapper { display: flex; gap: 24px; align-items: flex-end; flex-shrink: 0; }
+  .pila { position: relative; width: 96px; height: 138px; }
+  .pila-titolo { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-carta { position: absolute; width: 44px; height: 62px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-carta { position: absolute; width: 96px; height: 138px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.5); }
   .pila-carta.dietro { background: linear-gradient(135deg, #4dabf7, #2563eb); border: 2px solid #fff; }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 58px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
-  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.6); }
+  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 48px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-count { position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 2px 8px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.6); }
   .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
   .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
-  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 8px; flex-shrink: 0; }
-  .bonus-tu-wrapper .bonus-label { font-size: 9px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
-  .bonus-slots { display: flex; gap: 5px; align-items: center; }
-  .bonus-slot { width: 40px; height: 56px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
-  .bonus-slot.pieno { border-style: solid; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.6); cursor: pointer; }
-  .bonus-slot.pieno:hover { transform: translateY(-3px); box-shadow: 0 0 16px rgba(255,215,0,0.9); }
-  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 20px; position: relative; overflow: hidden; color: #fff; }
-  .bonus-slot .bonus-carta .ang { position: absolute; font-size: 9px; }
-  .bonus-slot .bonus-carta .ang.tl { top: 1px; left: 2px; }
-  .bonus-slot .bonus-carta .ang.tr { top: 1px; right: 2px; }
-  .bonus-slot .bonus-carta .ang.bl { bottom: 1px; left: 2px; }
-  .bonus-slot .bonus-carta .ang.br { bottom: 1px; right: 2px; }
-  .bonus-slot .bonus-carta .nome-bonus { display: none; }
+  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 6px 10px; flex-shrink: 0; }
+  .bonus-tu-wrapper .bonus-label { font-size: 10px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
+  .bonus-slots { display: flex; gap: 8px; align-items: center; }
+  .bonus-slot { width: 96px; height: 138px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
+  .bonus-slot.pieno { border-style: solid; border-color: #ffd700; box-shadow: 0 0 14px rgba(255,215,0,0.6); cursor: pointer; }
+  .bonus-slot.pieno:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(255,215,0,0.9); }
+  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 46px; position: relative; overflow: hidden; color: #fff; }
+  .bonus-slot .bonus-carta .ang { position: absolute; font-size: 16px; }
+  .bonus-slot .bonus-carta .ang.tl { top: 4px; left: 6px; }
+  .bonus-slot .bonus-carta .ang.tr { top: 4px; right: 6px; }
+  .bonus-slot .bonus-carta .ang.bl { bottom: 4px; left: 6px; }
+  .bonus-slot .bonus-carta .ang.br { bottom: 4px; right: 6px; }
+  .bonus-slot .bonus-carta .nome-bonus { font-size: 9px; text-align: center; color: #fff; padding: 0 3px; line-height: 1; text-transform: uppercase; font-weight: bold; position: absolute; bottom: 12px; }
   .bonus-slot .bonus-carta.contrasto-sicuro { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 2px solid #fbbf24; }
   .bonus-slot .bonus-carta.parata-super { background: linear-gradient(135deg, #7c2d12, #ea580c); border: 2px solid #fed7aa; }
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
   .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
-  /* ===== OVERLAY CARTE CENTRALE (grandi) ===== */
+  /* ===== OVERLAY CARTE CENTRALE ===== */
   .carte-overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 550; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
   .carte-overlay.attivo { opacity: 1; pointer-events: auto; }
-  .carte-overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.55); pointer-events: none; }
+  .carte-overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.65); pointer-events: none; }
   .carte-overlay-inner { position: relative; background: rgba(10,15,30,0.95); border: 3px solid #ffd700; border-radius: 18px; padding: 16px 22px 18px; box-shadow: 0 12px 48px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 96%; }
   .carte-overlay-titolo { font-size: 14px; color: #ffd700; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
   .carte-overlay-sottotitolo { font-size: 12px; color: #aaa; text-align: center; margin-top: -6px; }
-  .carte-overlay-carte { display: flex; gap: 12px; flex-wrap: nowrap; justify-content: center; }
+  /* Riga con seme + 7 carte */
+  .carte-overlay-riga { display: flex; align-items: center; gap: 16px; flex-wrap: nowrap; justify-content: center; }
+  .carte-overlay-carte { display: flex; gap: 10px; flex-wrap: nowrap; justify-content: center; }
+
+  /* Seme guida come carta evidenziata */
+  .seme-carta-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .seme-carta-wrapper .seme-carta-label { font-size: 10px; color: #ffd700; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 1px 3px #000; }
+  .seme-carta { width: 96px; height: 138px; background: linear-gradient(135deg, #fff9c4, #ffe066); border: 4px solid #ffd700; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 24px rgba(255,215,0,0.9), 0 0 48px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.3); position: relative; animation: pulseSeme 2s infinite; }
+  @keyframes pulseSeme { 0%, 100% { box-shadow: 0 0 24px rgba(255,215,0,0.9), 0 0 48px rgba(255,215,0,0.5), inset 0 0 20px rgba(255,215,0,0.3); } 50% { box-shadow: 0 0 32px rgba(255,215,0,1), 0 0 64px rgba(255,215,0,0.7), inset 0 0 28px rgba(255,215,0,0.5); } }
+  .seme-carta .seme-emoji { font-size: 62px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5)); }
+
   .carte-overlay .carta { width: 96px; height: 138px; }
   .carte-overlay .carta .valore-alto { font-size: 24px; }
   .carte-overlay .carta .seme-centro { font-size: 58px; }
@@ -333,7 +340,7 @@
     <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
   </div>
 
-  <!-- BANNER SUPERIORE (solo riga alta) -->
+  <!-- BANNER SUPERIORE (solo mazzi + bonus, NO seme) -->
   <div class="banner-top" id="banner-top">
     <div class="info-mano">
       <div class="titolo" id="titolo-mano">Contrasto</div>
@@ -357,10 +364,6 @@
           <div class="bonus-slot" data-slot="1"></div>
           <div class="bonus-slot" data-slot="2"></div>
         </div>
-      </div>
-      <div class="seme-grande">
-        <span class="label">SEME</span>
-        <span class="seme" id="seme-guidatore">⚽</span>
       </div>
       <div class="pile-wrapper">
         <div class="pila">
@@ -396,7 +399,16 @@
   <div class="carte-overlay-inner">
     <div class="carte-overlay-titolo" id="carte-overlay-titolo">SCEGLI UNA CARTA</div>
     <div class="carte-overlay-sottotitolo" id="carte-overlay-sottotitolo">Seme: Palla ⚽</div>
-    <div class="carte-overlay-carte" id="carte-overlay-carte"></div>
+    <div class="carte-overlay-riga">
+      <!-- Seme guida come carta evidenziata -->
+      <div class="seme-carta-wrapper">
+        <div class="seme-carta-label">SEME</div>
+        <div class="seme-carta" id="seme-carta-overlay">
+          <span class="seme-emoji" id="seme-emoji-overlay">⚽</span>
+        </div>
+      </div>
+      <div class="carte-overlay-carte" id="carte-overlay-carte"></div>
+    </div>
     <div class="info-carte">
       <span>Mazzo: <strong id="info-mazzo">52</strong></span>
       <span>Scarti: <strong id="info-scarti">0</strong></span>
@@ -1369,19 +1381,17 @@ function avviaContrasto() {
     setTimeout(function() { consumaBonus('cpu', 'contrasto-sicuro'); mostraBonusBanner('🤖 CPU usa: ⭐ Contrasto Sicuro!'); setTimeout(function() { risolviContrastoAutomatico('cpu'); }, 1500); }, 800);
   }
   renderCampo(); renderHeader(); renderPannelloContrasto();
-  // Mostra overlay carte dopo un attimo
   setTimeout(function() { mostraCarteOverlay(); }, 300);
 }
 
 function renderPannelloContrasto() {
   var c = stato.contrasto; if (!c) return;
-  // Aggiorna banner top
   document.getElementById('titolo-mano').textContent = 'Contrasto Z' + c.zona + ' ' + stato.metaContesa;
-  document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
   document.getElementById('turno-label').textContent = 'Seme: ' + SEMI[c.semeGuida].nome;
-  // Aggiorna overlay carte
+  // Aggiorna overlay
   document.getElementById('carte-overlay-titolo').textContent = 'SCEGLI UNA CARTA — CONTRASTO Z' + c.zona;
   document.getElementById('carte-overlay-sottotitolo').textContent = 'Seme guida: ' + SEMI[c.semeGuida].emoji + ' ' + SEMI[c.semeGuida].nome;
+  document.getElementById('seme-emoji-overlay').textContent = SEMI[c.semeGuida].emoji;
   var contTu = document.getElementById('carte-overlay-carte');
   contTu.innerHTML = '';
   for (var i=0;i<stato.mani.tu.length;i++) {
@@ -1412,7 +1422,7 @@ function creaCartaEl(carta) { var el = document.createElement('div'); el.classNa
 function renderPilaMazzo() { var mp = document.getElementById('mazzo-pila'); mp.innerHTML = ''; var n = Math.min(stato.mazzo.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta dietro'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; mp.appendChild(el); } document.getElementById('mazzo-count').textContent = stato.mazzo.length; }
 function renderPilaScarti() { var sp = document.getElementById('scarti-pila'); if (!sp) return; sp.innerHTML = ''; var n = Math.min(stato.scarti.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta scarto'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; sp.appendChild(el); } document.getElementById('scarti-count').textContent = stato.scarti.length; }
 function renderPilaBonus() { var bp = document.getElementById('bonus-pila'); if (!bp) return; bp.innerHTML = ''; var n = Math.min(stato.mazzoBonus.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta bonus'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; bp.appendChild(el); } var bc = document.getElementById('bonus-count'); if (bc) bc.textContent = stato.mazzoBonus.length; }
-function renderBonusSlots() { var slots = document.querySelectorAll('#bonus-slots-tu .bonus-slot'); for (var i=0;i<slots.length;i++) { var s = slots[i]; s.innerHTML = ''; s.classList.remove('pieno'); if (i < stato.bonus.tu.length) { var tipo = stato.bonus.tu[i]; s.classList.add('pieno'); var info = NOMI_BONUS[tipo]; var c = document.createElement('div'); c.className = 'bonus-carta ' + tipo; c.innerHTML = '<span class="ang tl">' + info.icona + '</span>' + '<span class="ang tr">' + info.icona + '</span>' + '<span class="ang bl">' + info.icona + '</span>' + '<span class="ang br">' + info.icona + '</span>' + '<span>' + info.icona + '</span>'; s.appendChild(c); } } }
+function renderBonusSlots() { var slots = document.querySelectorAll('#bonus-slots-tu .bonus-slot'); for (var i=0;i<slots.length;i++) { var s = slots[i]; s.innerHTML = ''; s.classList.remove('pieno'); if (i < stato.bonus.tu.length) { var tipo = stato.bonus.tu[i]; s.classList.add('pieno'); var info = NOMI_BONUS[tipo]; var c = document.createElement('div'); c.className = 'bonus-carta ' + tipo; c.innerHTML = '<span class="ang tl">' + info.icona + '</span>' + '<span class="ang tr">' + info.icona + '</span>' + '<span class="ang bl">' + info.icona + '</span>' + '<span class="ang br">' + info.icona + '</span>' + '<span>' + info.icona + '</span>' + '<div class="nome-bonus">' + info.nome + '</div>'; s.appendChild(c); } } }
 
 function selezionaCartaTu(idx) { if (stato.contrasto.risolto) return; if (!stato.sostBloccate) { stato.sostBloccate = true; } selezioneCarta = idx; renderPannelloContrasto(); }
 function usaContrastoSicuroTU() { if (!haBonus('tu', 'contrasto-sicuro')) return; consumaBonus('tu', 'contrasto-sicuro'); mostraBonusBanner('🏆 TU usi: ⭐ Contrasto Sicuro!'); document.getElementById('azioni-container').innerHTML = ''; renderBonusSlots(); setTimeout(function() { risolviContrastoAutomatico('tu'); }, 1500); }
@@ -1450,7 +1460,6 @@ function confermaCarta() {
   else if (cartaTu.valore > cartaCpu.valore) esito = 'tu';
   else if (cartaCpu.valore > cartaTu.valore) esito = 'cpu';
   else esito = 'pareggio';
-  // Nasconde overlay carte per mostrare l'azione
   nascondiCarteOverlay();
   if (esito === 'pareggio') {
     log('🤝 Pareggio! Si rigioca.', 'highlight');
