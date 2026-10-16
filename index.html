@@ -94,18 +94,22 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ===== PANNELLO CARTE: DUE RIGHE ===== */
-  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; background: rgba(10,15,30,0.9); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 16px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 14px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
+  /* ===== PANNELLO CARTE — FUORI DALLA SCENA, NON SCALATO ===== */
+  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1400px; background: rgba(10,15,30,0.92); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 14px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
   .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
 
   .info-mano { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
   .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; }
   .info-mano .turno-label { font-size: 12px; color: #aaa; }
 
-  /* Riga alta: mazzi + seme + bonus */
-  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: nowrap; width: 100%; }
+  /* Riga alta: mazzo bonus + slot + seme + mazzo + scarti */
+  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: nowrap; width: 100%; }
   /* Riga bassa: carte del giocatore */
-  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: nowrap; width: 100%; }
+  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: nowrap; width: 100%; }
+
+  /* Bonus CPU info dentro il pannello */
+  .bonus-cpu-info-inline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,107,107,0.6); text-shadow: 0 1px 2px #000; }
+  .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 14px; }
 
   .pila-bonus-wrapper { flex-shrink: 0; }
   .pila-bonus { position: relative; width: 64px; height: 92px; }
@@ -114,7 +118,7 @@
   .pila-bonus .pila-carta { position: absolute; width: 64px; height: 92px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-bonus .pila-carta.bonus { background: linear-gradient(135deg, #fbbf24, #d97706); border: 2px solid #fff; }
   .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-  .pila-bonus .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px; border: 2px solid rgba(251,191,36,0.7); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px; border: 2px solid rgba(251,191,36,0.7); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
 
   .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.7); border: 3px solid #ffd700; border-radius: 14px; padding: 10px 16px; box-shadow: 0 0 22px rgba(255,215,0,0.5), inset 0 0 12px rgba(255,215,0,0.15); flex-shrink: 0; }
   .seme-grande .label { font-size: 11px; color: #ffd700; font-weight: 900; letter-spacing: 2px; }
@@ -124,13 +128,13 @@
   .mano-sezione .mano-label { font-size: 11px; font-weight: bold; text-transform: uppercase; }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  /* ===== CARTE DEL GIOCATORE PIÙ GRANDI ===== */
-  .carte { display: flex; gap: 10px; flex-wrap: nowrap; justify-content: center; }
-  .carta { width: 92px; height: 132px; background: #fff; color: #222; border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+  /* ===== CARTE DEL GIOCATORE ===== */
+  .carte { display: flex; gap: 8px; flex-wrap: nowrap; justify-content: center; }
+  .carta { width: 82px; height: 118px; background: #fff; color: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7px 7px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
   .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 22px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 56px; line-height: 1; }
-  .carta .valore-basso { font-size: 22px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta .valore-alto { font-size: 20px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 50px; line-height: 1; }
+  .carta .valore-basso { font-size: 20px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
   .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-8px); box-shadow: 0 0 16px #ffd700; }
   .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
@@ -144,7 +148,7 @@
   .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
   .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,215,0,0.6); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,215,0,0.6); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
   .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
   .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
@@ -170,7 +174,7 @@
 
   .info-carte { display: flex; gap: 14px; font-size: 11px; color: #aaa; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
   #azioni-container button { padding: 8px 20px; font-size: 13px; }
 
   button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 2px; }
@@ -180,9 +184,6 @@
   button.primario:hover:not(:disabled) { background: #fff; }
   button.bonus-btn { background: linear-gradient(135deg, #ffd700, #f59f00); color: #16213e; border-color: #fff; box-shadow: 0 0 14px rgba(255,215,0,0.6); animation: pulseBonus 1.5s infinite; }
   @keyframes pulseBonus { 0%, 100% { box-shadow: 0 0 14px rgba(255,215,0,0.6); } 50% { box-shadow: 0 0 24px rgba(255,215,0,1); } }
-
-  .bonus-cpu-info { position: absolute; top: 60px; left: 20px; font-size: 12px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px; border: 2px solid rgba(255,107,107,0.6); z-index: 20; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
-  .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
 
   .goal-banner { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
   .goal-banner.attivo { opacity: 1; }
@@ -360,68 +361,6 @@
 
     <div class="scena-wrapper" id="scena-wrapper">
       <div class="scena" id="scena">
-        <div class="bonus-cpu-info" id="bonus-cpu-info">
-          🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
-        </div>
-
-        <div class="carte-panel" id="carte-panel">
-          <div class="info-mano">
-            <div class="titolo" id="titolo-mano">Contrasto</div>
-            <div class="turno-label" id="turno-label"></div>
-          </div>
-
-          <!-- RIGA ALTA: Mazzo Bonus + 3 Slot Bonus + Seme + Mazzo + Scarti -->
-          <div class="riga-alta">
-            <div class="pila-bonus-wrapper">
-              <div class="pila-bonus">
-                <div class="pila-titolo">BONUS</div>
-                <div class="pila-carte" id="bonus-pila"></div>
-                <div class="pila-count" id="bonus-count">12</div>
-              </div>
-            </div>
-            <div class="bonus-tu-wrapper">
-              <div class="bonus-label">Le tue carte Bonus</div>
-              <div class="bonus-slots" id="bonus-slots-tu">
-                <div class="bonus-slot" data-slot="0"></div>
-                <div class="bonus-slot" data-slot="1"></div>
-                <div class="bonus-slot" data-slot="2"></div>
-              </div>
-            </div>
-            <div class="seme-grande">
-              <span class="label">SEME</span>
-              <span class="seme" id="seme-guidatore">⚽</span>
-            </div>
-            <div class="pile-wrapper">
-              <div class="pila">
-                <div class="pila-titolo">MAZZO</div>
-                <div class="pila-carte" id="mazzo-pila"></div>
-                <div class="pila-count mazzo" id="mazzo-count">0</div>
-              </div>
-              <div class="pila">
-                <div class="pila-titolo">SCARTI</div>
-                <div class="pila-carte" id="scarti-pila"></div>
-                <div class="pila-count scarto" id="scarti-count">0</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- RIGA BASSA: Le 7 carte del giocatore -->
-          <div class="riga-bassa">
-            <div class="mano-sezione tu">
-              <div class="mano-label">Le tue carte (<span id="count-tu">7</span>)</div>
-              <div class="carte" id="carte-tu"></div>
-            </div>
-          </div>
-
-          <div class="info-carte">
-            <span>Mazzo: <strong id="info-mazzo">52</strong></span>
-            <span>Scarti: <strong id="info-scarti">0</strong></span>
-            <span>Minuto: <strong id="info-minuto">0'</strong></span>
-            <span>Streak: <strong id="info-streak">0</strong>/3</span>
-          </div>
-          <div id="azioni-container"></div>
-        </div>
-
         <div class="campo-area">
           <div class="zone" id="zone"></div>
         </div>
@@ -429,6 +368,68 @@
         <div class="palla-volante" id="palla-volante"></div>
         <div class="flash-vincitore" id="flash"></div>
       </div>
+    </div>
+
+    <!-- PANNELLO CARTE FUORI DALLA SCENA — NON VIENE SCALATO -->
+    <div class="carte-panel" id="carte-panel">
+      <div class="info-mano">
+        <div class="titolo" id="titolo-mano">Contrasto</div>
+        <div class="turno-label" id="turno-label"></div>
+        <div class="bonus-cpu-info-inline" id="bonus-cpu-info">
+          🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
+        </div>
+      </div>
+
+      <!-- RIGA ALTA: Mazzo Bonus + 3 Slot Bonus + Seme + Mazzo + Scarti -->
+      <div class="riga-alta">
+        <div class="pila-bonus-wrapper">
+          <div class="pila-bonus">
+            <div class="pila-titolo">BONUS</div>
+            <div class="pila-carte" id="bonus-pila"></div>
+            <div class="pila-count" id="bonus-count">12</div>
+          </div>
+        </div>
+        <div class="bonus-tu-wrapper">
+          <div class="bonus-label">Le tue carte Bonus</div>
+          <div class="bonus-slots" id="bonus-slots-tu">
+            <div class="bonus-slot" data-slot="0"></div>
+            <div class="bonus-slot" data-slot="1"></div>
+            <div class="bonus-slot" data-slot="2"></div>
+          </div>
+        </div>
+        <div class="seme-grande">
+          <span class="label">SEME</span>
+          <span class="seme" id="seme-guidatore">⚽</span>
+        </div>
+        <div class="pile-wrapper">
+          <div class="pila">
+            <div class="pila-titolo">MAZZO</div>
+            <div class="pila-carte" id="mazzo-pila"></div>
+            <div class="pila-count mazzo" id="mazzo-count">0</div>
+          </div>
+          <div class="pila">
+            <div class="pila-titolo">SCARTI</div>
+            <div class="pila-carte" id="scarti-pila"></div>
+            <div class="pila-count scarto" id="scarti-count">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGA BASSA: Le 7 carte del giocatore -->
+      <div class="riga-bassa">
+        <div class="mano-sezione tu">
+          <div class="mano-label">Le tue carte (<span id="count-tu">7</span>)</div>
+          <div class="carte" id="carte-tu"></div>
+        </div>
+      </div>
+
+      <div class="info-carte">
+        <span>Mazzo: <strong id="info-mazzo">52</strong></span>
+        <span>Scarti: <strong id="info-scarti">0</strong></span>
+        <span>Minuto: <strong id="info-minuto">0'</strong></span>
+        <span>Streak: <strong id="info-streak">0</strong>/3</span>
+      </div>
+      <div id="azioni-container"></div>
     </div>
   </div>
 </div>
@@ -611,7 +612,6 @@ function resetCampionatoSalvato() {
 }
 
 var audioCtx = null;
-/* ===== VOLUMI SEPARATI ===== */
 var volumeMusica = 0.5;
 var volumeTifosi = 0.5;
 var volumeEffetti = 0.5;
@@ -721,10 +721,6 @@ function creaPalloneSVG() {
     '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#fff" opacity="0.55"/></svg>';
 }
 
-/* ============================================================
-   CORREZIONE FONDAMENTALE: zonaLogicaDi tiene conto della
-   posizione di TU sul campo (tuASinistra).
-   ============================================================ */
 function tuASinistra() {
   var casaASinistra = !stato.invertiCoppie;
   return (stato.tuECasa === casaASinistra);
@@ -768,11 +764,17 @@ function assegnaBonus(sq) {
     mostraBonusBanner('🤖 CPU ha guadagnato una carta Bonus!');
     log('🎁 CPU guadagna una carta Bonus (nascosta)', 'highlight');
   }
+  renderBonusCpuInfo();
   return true;
 }
 function mostraBonusBanner(testo) { var b = document.getElementById('bonus-banner'); b.textContent = testo; b.classList.add('attivo'); setTimeout(function() { b.classList.remove('attivo'); }, 3000); }
 function consumaBonus(sq, tipo) { var idx = stato.bonus[sq].indexOf(tipo); if (idx > -1) { stato.bonus[sq].splice(idx, 1); log('🎴 ' + (sq === 'tu' ? 'TU' : 'CPU') + ' usa: ' + NOMI_BONUS[tipo].nome, 'highlight'); return true; } return false; }
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
+
+function renderBonusCpuInfo() {
+  var bc = document.getElementById('bonus-cpu-count');
+  if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
+}
 
 function creaGiocatori(sq) {
   var g = []; var id = 0;
@@ -905,13 +907,9 @@ function renderHeader() {
   if (at) at.textContent = stato.direzioneAttaccoTU > 0 ? '→' : '←';
   var st = document.getElementById('info-streak');
   if (st) st.textContent = stato.streak.tu;
-  var bc = document.getElementById('bonus-cpu-count');
-  if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
+  renderBonusCpuInfo();
 }
 
-/* ============================================================
-   RENDER CAMPO
-   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -1432,6 +1430,7 @@ function renderPannelloContrasto() {
   var p = calcolaMinutoParziale(), t = calcolaMinutoTotale();
   document.getElementById('info-minuto').textContent = p + "' | " + t + "'";
   document.getElementById('info-streak').textContent = stato.streak.tu;
+  renderBonusCpuInfo();
   var azioni = '';
   if (!c.risolto) {
     azioni += '<button class="primario" id="btn-gioca" onclick="confermaCarta()" ' + (selezioneCarta === null ? 'disabled' : '') + '>GIOCA CARTA</button>';
@@ -1914,18 +1913,12 @@ function orientaPortiereVerso(c) {
   t.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)';
 }
 
-/* ============================================================
-   MODIFICA: Il portiere alza le braccia se para nei 3 settori
-   alti (caselle 1, 2, 3). Il controllo è basato sulla
-   coordinata Y della casella (y < 40%).
-   ============================================================ */
 function eseguiParataPortiereSettore(mX, mY) {
   var pt = document.getElementById('tiro-portiere');
   if (!pt) return;
   pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 10) + '%';
   pt.style.top = (PORTA_TOP + (mY/100)*PORTA_H - 20) + '%';
   pt.classList.add('pg-salta');
-  // Braccia in alto se la casella è nei settori alti (y < 40%)
   if (mY < 40) {
     pt.classList.add('pg-braccia-alte');
   } else {
@@ -2062,7 +2055,7 @@ function confermaSostituzione() {
 }
 
 function bloccaCoppiaContrasto() {
-  var zona = stato.zonaPalla, meta = stato.metaContesa, poss = stato.possessore;
+  var zona = stato.zonaPalla, meta = stato.metaContesta;
   if (zona === null || zona === undefined || !poss) return;
   var c = getCoppiaAttiva(zona, meta);
   var gP = poss === 'tu' ? c.tu : c.cpu;
