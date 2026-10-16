@@ -506,16 +506,16 @@ var SCENA_H = 900;
 var scalaCorrente = 1;
 
 var POSIZIONI_COPPIE = [
-  { x: 500,  y: 520, angolo: 180 },
-  { x: 460,  y: 670, angolo: 180 },
-  { x: 650,  y: 450, angolo: 180 },
-  { x: 610,  y: 770, angolo: 180 },
-  { x: 800,  y: 520, angolo: 180 },
-  { x: 800,  y: 670, angolo: 180 },
-  { x: 950,  y: 459, angolo: 180 },
-  { x: 980,  y: 770, angolo: 180 },
-  { x: 1110, y: 520, angolo: 180 },
-  { x: 1130, y: 670, angolo: 180 }
+  { x: 500,  y: 550, angolo: 180 },
+  { x: 460,  y: 700, angolo: 180 },
+  { x: 650,  y: 480, angolo: 180 },
+  { x: 610,  y: 800, angolo: 180 },
+  { x: 800,  y: 550, angolo: 180 },
+  { x: 800,  y: 700, angolo: 180 },
+  { x: 950,  y: 490, angolo: 180 },
+  { x: 980,  y: 800, angolo: 180 },
+  { x: 1110, y: 550, angolo: 180 },
+  { x: 1130, y: 700, angolo: 180 }
 ];
 
 var MAPPA_COPPIE = [
@@ -709,11 +709,8 @@ function tuASinistra() {
 function zonaLogicaDi(g) {
   var tuSin = tuASinistra();
   if (g.squadra === 'tu') {
-    // Se TU è a sinistra, la zona logica di TU coincide con la zona fisica.
-    // Se TU è a destra, la zona logica di TU è specchiata (6 - zona fisica).
     return tuSin ? g.zona : (6 - g.zona);
   } else {
-    // La CPU è sempre nella posizione opposta a TU.
     return tuSin ? (6 - g.zona) : g.zona;
   }
 }
@@ -878,8 +875,7 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO (semplificato: usa direttamente zonaGioco
-   perché zonaLogicaDi ora gestisce la specchiatura)
+   RENDER CAMPO
    ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -905,8 +901,6 @@ function renderCampo() {
     var rad = p.angolo * Math.PI / 180;
     var dx = Math.cos(rad) * (DISTANZA_COPPIA_PX / 2);
     var dy = Math.sin(rad) * (DISTANZA_COPPIA_PX / 2);
-    // zonaGioco è la zona logica per la CPU (che è sempre nella posizione opposta a TU)
-    // Per TU, la zona logica è la stessa di zonaGioco, ma zonaLogicaDi gestisce la specchiatura.
     var tuG = giocatoriInZona('tu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var cpuG = giocatoriInZona('cpu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var indice = (metaGioco === 'sup') ? 0 : 1;
@@ -1284,7 +1278,6 @@ function eseguiCalcioIniziale(squadra) {
   var zonaDest = 3 + dirAtt;
   if (zonaDest < 1) zonaDest = 1;
   if (zonaDest > 5) zonaDest = 5;
-  // Sicurezza: la palla non deve mai andare indietro
   if ((dirAtt > 0 && zonaDest < 3) || (dirAtt < 0 && zonaDest > 3)) {
     zonaDest = 3;
   }
@@ -1871,8 +1864,40 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
   }, 1200);
 }
 
-function orientaPortiereVerso(c) { var pt = document.getElementById('tiro-portiere'); if (!pt) return; var svg = pt.querySelector('svg'); if (!svg) return; var t = svg.querySelector('.pg-testa'); if (!t) return; t.style.transform = 'rotate(0deg) translateY(0)'; var x = CASELLE_PERC[c].x, y = CASELLE_PERC[c].y; var dx = 0; if (x < 40) dx = -12; else if (x > 60) dx = 12; var dy = 0; if (y < 40) dy = -2; else if (y > 60) dy = 2; t.style.transition = 'transform 0.5s cubic-bezier(0.34,1.2,0.64,1)'; t.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)'; }
-function eseguiParataPortiereSettore(mX, mY) { var pt = document.getElementById('tiro-portiere'); if (!pt) return; pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 10) + '%'; pt.style.top = (PORTA_TOP + (mY/100)*PORTA_H - 20) + '%'; pt.classList.add('pg-salta'); }
+function orientaPortiereVerso(c) {
+  var pt = document.getElementById('tiro-portiere');
+  if (!pt) return;
+  var svg = pt.querySelector('svg');
+  if (!svg) return;
+  var t = svg.querySelector('.pg-testa');
+  if (!t) return;
+  t.style.transform = 'rotate(0deg) translateY(0)';
+  var x = CASELLE_PERC[c].x, y = CASELLE_PERC[c].y;
+  var dx = 0; if (x < 40) dx = -12; else if (x > 60) dx = 12;
+  var dy = 0; if (y < 40) dy = -2; else if (y > 60) dy = 2;
+  t.style.transition = 'transform 0.5s cubic-bezier(0.34,1.2,0.64,1)';
+  t.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)';
+}
+
+/* ============================================================
+   MODIFICA: Il portiere alza le braccia se para nei 3 settori
+   alti (caselle 1, 2, 3). Il controllo è basato sulla
+   coordinata Y della casella (y < 40%).
+   ============================================================ */
+function eseguiParataPortiereSettore(mX, mY) {
+  var pt = document.getElementById('tiro-portiere');
+  if (!pt) return;
+  pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 10) + '%';
+  pt.style.top = (PORTA_TOP + (mY/100)*PORTA_H - 20) + '%';
+  pt.classList.add('pg-salta');
+  // Braccia in alto se la casella è nei settori alti (y < 40%)
+  if (mY < 40) {
+    pt.classList.add('pg-braccia-alte');
+  } else {
+    pt.classList.remove('pg-braccia-alte');
+  }
+}
+
 function mostraDadoFase3(dE) { var c = document.getElementById('tiro-dadi-info'); if (!c) return; c.innerHTML = '<div class="tiro-dadi-riga"><span class="tiro-dado-label">🎲 Esito:</span>' + '<div class="tiro-dado">' + dE + '</div></div>'; }
 function fase3TiroConGrafica(dT, att, dif) { var cs = mescola([1,2,3,4,5,6,7,8,9]); var cP = cs[0], cA = cs[1], cF = cs[2]; document.getElementById('tiro-info').textContent = 'FASE 3 — Esito del tiro...'; var dE = Math.floor(Math.random()*9) + 1; mostraDadoFase3(dE); setTimeout(function() { if (stato.partitaFinita) return; var esito, motivo; if (dE === cP) { esito = 'palo'; motivo = '🥅 PALO!'; suonaPalo(); } else if (dE === cA) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; } else if (dE === cF) { esito = 'fuori'; motivo = '❌ FUORI!'; suonaFuori(); } else { esito = 'goal'; motivo = '⚽ GOAL!'; } mostraEsitoTiroConGrafica(esito, dT, att, dif, motivo); }, 1000); }
 function fase3RigoreConGrafica(dT, att, dif) { var cs = mescola([1,2,3,4,5,6,7,8,9]); var cP = cs[0], cA = cs[1], cF = cs[2]; document.getElementById('tiro-info').textContent = 'FASE 3 — Esito del rigore...'; var dE = Math.floor(Math.random()*9) + 1; mostraDadoFase3(dE); setTimeout(function() { if (stato.partitaFinita) return; var esito, motivo; if (dE === cP) { esito = 'palo'; motivo = '🥅 PALO!'; suonaPalo(); } else if (dE === cA) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; } else if (dE === cF) { esito = 'fuori'; motivo = '❌ FUORI!'; suonaFuori(); } else { esito = 'goal'; motivo = '⚽ GOAL!'; } mostraEsitoTiroConGrafica(esito, dT, att, dif, motivo); }, 1200); }
