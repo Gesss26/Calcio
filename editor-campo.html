@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Editor Campo PX v2 — Calcio a Carte</title>
+<title>Editor Campo PX v3 — Calcio a Carte</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; }
@@ -19,21 +19,47 @@
 
   .wrapper { position: relative; width: 100vw; height: calc(100vh - 50px); display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; }
 
+  /* SCENA 1600x900 — stesso formato del gioco */
   .campo {
     position: relative;
     width: 1600px;
     height: 900px;
     transform-origin: center center;
-    background: url('campo.jpg') center/cover no-repeat;
+    background: url('Stadio.jpg') center/cover no-repeat;
     background-color: #1a472a;
-    border: 2px solid rgba(255,255,255,0.3);
   }
-  .campo::after {
+
+  /* Overlay campo da calcio (rettangolo verde con linee) — per riferimento visivo */
+  .campo-overlay {
+    position: absolute;
+    left: 18%;
+    top: 46%;
+    width: 64%;
+    height: 42%;
+    border: 2px dashed rgba(255,255,255,0.4);
+    background: rgba(0,100,0,0.15);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .campo-overlay::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.15) 100%);
-    pointer-events: none;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: rgba(255,255,255,0.5);
+  }
+  .campo-overlay::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 60px;
+    height: 60px;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .griglia { position: absolute; inset: 0; pointer-events: none; opacity: 0.25; z-index: 2; }
@@ -45,17 +71,6 @@
       linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
     background-size: 80px 80px;
-  }
-
-  .meta-campo {
-    position: absolute;
-    left: 800px;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    background: rgba(255,255,255,0.5);
-    pointer-events: none;
-    z-index: 2;
   }
 
   .coppia, .singolo {
@@ -172,9 +187,7 @@
     white-space: nowrap;
   }
 
-  /* ============================================================
-     PANNELLO DI CONTROLLO MANUALE (X, Y, CONFERMA)
-     ============================================================ */
+  /* Pannello di controllo manuale */
   .pannello-manuale {
     position: fixed;
     bottom: 20px;
@@ -289,6 +302,7 @@
   <button onclick="resetPosizioni()">🔄 RESET</button>
   <button class="pericolo" onclick="specchia()">↔ SPECCHIA</button>
   <button onclick="toggleGriglia()">🔲 Griglia</button>
+  <button onclick="toggleOverlay()">🟩 Overlay campo</button>
   <button onclick="toggleLinee()">📏 Linee coppie</button>
   <div class="info">
     Coppie: <span>10</span> + 2 portieri · 
@@ -299,14 +313,11 @@
 
 <div class="wrapper" id="wrapper">
   <div class="campo" id="campo">
-    <div class="meta-campo"></div>
+    <div class="campo-overlay" id="campo-overlay"></div>
     <div class="griglia" id="griglia"></div>
   </div>
 </div>
 
-<!-- ============================================================
-     PANNELLO DI CONTROLLO MANUALE
-     ============================================================ -->
 <div class="pannello-manuale">
   <h3>🎯 Controllo Manuale</h3>
   <div class="target-info vuoto" id="target-info">
@@ -372,27 +383,28 @@ var DISTANZA_COPPIA_PX = 50;
    POSIZIONI INIZIALI — coordinate in PIXEL (0-1600, 0-900)
    ============================================================ */
 var POSIZIONI_COPPIE_DEFAULT = [
-  { x: 250, y: 570, angolo: 0 },
-  { x: 400, y: 650, angolo: 0 },
-  { x: 500, y: 750, angolo: 0 },
-  { x: 950, y: 750, angolo: 0 },
-  { x: 700, y: 700, angolo: 0 },
-  { x: 900, y: 700, angolo: 0 },
-  { x: 650, y: 800, angolo: 0 },
-  { x: 1050, y: 800, angolo: 0 },
-  { x: 1200, y: 650, angolo: 0 },
-  { x: 1350, y: 570, angolo: 0 }
+  { x: 630,  y: 630, angolo: 180 },
+  { x: 600,  y: 760, angolo: 180 },
+  { x: 760,  y: 575, angolo: 180 },
+  { x: 720,  y: 835, angolo: 180 },
+  { x: 880,  y: 620, angolo: 180 },
+  { x: 880,  y: 760, angolo: 180 },
+  { x: 1000, y: 575, angolo: 180 },
+  { x: 1040, y: 835, angolo: 180 },
+  { x: 1130, y: 630, angolo: 180 },
+  { x: 1160, y: 760, angolo: 180 }
 ];
 
 var POSIZIONI_PORTIERI_DEFAULT = [
-  { x: 120, y: 600, squadra: 'tu'  },
-  { x: 1480, y: 600, squadra: 'cpu' }
+  { x: 470,  y: 640, squadra: 'tu'  },
+  { x: 1210, y: 640, squadra: 'cpu' }
 ];
 
 var posizioni = JSON.parse(JSON.stringify(POSIZIONI_COPPIE_DEFAULT));
 var posizioniPortieri = JSON.parse(JSON.stringify(POSIZIONI_PORTIERI_DEFAULT));
 var scalaCorrente = 1;
 var mostraLinee = true;
+var mostraOverlay = true;
 var ultimaSelezione = null;
 
 /* ============================================================
@@ -540,6 +552,7 @@ function abilitaDragCoppia(el, idx) {
     ultimaSelezione = { tipo: 'coppia', idx: idx };
     aggiornaPannello();
     aggiornaPosCorrente('coppia', idx);
+    disegnaCampo();
   }
 
   function onMove(e) {
@@ -605,6 +618,7 @@ function abilitaDragPortiere(el, idx) {
     ultimaSelezione = { tipo: 'portiere', idx: idx };
     aggiornaPannello();
     aggiornaPosCorrente('portiere', idx);
+    disegnaCampo();
   }
 
   function onMove(e) {
@@ -808,6 +822,12 @@ function specchia() {
 function toggleGriglia() {
   var g = document.getElementById('griglia');
   g.style.display = g.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleOverlay() {
+  mostraOverlay = !mostraOverlay;
+  var o = document.getElementById('campo-overlay');
+  o.style.display = mostraOverlay ? 'block' : 'none';
 }
 
 function toggleLinee() {
