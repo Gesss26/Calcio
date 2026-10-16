@@ -94,81 +94,83 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ===== PANNELLO CARTE — FISSO SOPRA TUTTO ===== */
-  .carte-panel { position: fixed; top: 50px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1500px; background: rgba(10,15,30,0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.6); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.8); transition: opacity 0.3s, transform 0.3s; }
-  .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
+  /* ===== PANNELLO CARTE — COMPATTO, IN BASSO ===== */
+  .carte-panel { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); width: 98%; max-width: 1500px; background: rgba(10,15,30,0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.6); border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 500; box-shadow: 0 -8px 32px rgba(0,0,0,0.8); transition: opacity 0.3s, transform 0.3s; }
+  .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
 
-  .info-mano { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
-  .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; }
-  .info-mano .turno-label { font-size: 12px; color: #aaa; }
-  .bonus-cpu-info-inline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,107,107,0.6); text-shadow: 0 1px 2px #000; }
-  .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 14px; }
+  .info-mano { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; justify-content: center; font-size: 11px; }
+  .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .info-mano .turno-label { font-size: 11px; color: #aaa; }
+  .bonus-cpu-info-inline { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,0.6); }
+  .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 12px; }
 
-  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: nowrap; width: 100%; }
-  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: nowrap; width: 100%; }
+  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: nowrap; width: 100%; }
+  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap; width: 100%; }
 
+  /* Pila bonus */
   .pila-bonus-wrapper { flex-shrink: 0; }
-  .pila-bonus { position: relative; width: 64px; height: 92px; }
-  .pila-bonus .pila-titolo { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9); letter-spacing: 1px; }
+  .pila-bonus { position: relative; width: 48px; height: 68px; }
+  .pila-bonus .pila-titolo { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-bonus .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-bonus .pila-carta { position: absolute; width: 64px; height: 92px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-bonus .pila-carta { position: absolute; width: 48px; height: 68px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-bonus .pila-carta.bonus { background: linear-gradient(135deg, #fbbf24, #d97706); border: 2px solid #fff; }
-  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 40px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-  .pila-bonus .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 3px 10px; border-radius: 8px; border: 2px solid rgba(251,191,36,0.7); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-count { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(251,191,36,0.7); }
 
-  .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.7); border: 3px solid #ffd700; border-radius: 14px; padding: 10px 16px; box-shadow: 0 0 22px rgba(255,215,0,0.5), inset 0 0 12px rgba(255,215,0,0.15); flex-shrink: 0; }
-  .seme-grande .label { font-size: 11px; color: #ffd700; font-weight: 900; letter-spacing: 2px; }
-  .seme-grande .seme { font-size: 52px; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.9)); }
+  .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 10px; padding: 4px 10px; box-shadow: 0 0 16px rgba(255,215,0,0.5); flex-shrink: 0; }
+  .seme-grande .label { font-size: 8px; color: #ffd700; font-weight: 900; letter-spacing: 1px; }
+  .seme-grande .seme { font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); }
 
-  .mano-sezione { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 6px 12px; flex-shrink: 0; }
-  .mano-sezione .mano-label { font-size: 11px; font-weight: bold; text-transform: uppercase; }
+  .mano-sezione { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 8px; flex-shrink: 0; }
+  .mano-sezione .mano-label { font-size: 9px; font-weight: bold; text-transform: uppercase; }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  .carte { display: flex; gap: 8px; flex-wrap: nowrap; justify-content: center; }
-  .carta { width: 82px; height: 118px; background: #fff; color: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7px 7px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+  /* Carte del giocatore compatte */
+  .carte { display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; }
+  .carta { width: 58px; height: 84px; background: #fff; color: #222; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 5px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
   .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 20px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 50px; line-height: 1; }
-  .carta .valore-basso { font-size: 20px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
-  .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-8px); box-shadow: 0 0 16px #ffd700; }
-  .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
-  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
+  .carta .valore-alto { font-size: 14px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 34px; line-height: 1; }
+  .carta .valore-basso { font-size: 14px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-6px); box-shadow: 0 0 14px #ffd700; }
+  .carta.seme-guidatore { box-shadow: 0 0 6px rgba(255,215,0,0.7); }
+  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 14px #4ade80; }
 
-  .pile-wrapper { display: flex; gap: 40px; align-items: center; flex-shrink: 0; }
-  .pila { position: relative; width: 64px; height: 92px; }
-  .pila-titolo { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000, 0 0 8px rgba(0,0,0,0.9); letter-spacing: 1.5px; }
+  .pile-wrapper { display: flex; gap: 20px; align-items: center; flex-shrink: 0; }
+  .pila { position: relative; width: 48px; height: 68px; }
+  .pila-titolo { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-carta { position: absolute; width: 64px; height: 92px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-carta { position: absolute; width: 48px; height: 68px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-carta.dietro { background: linear-gradient(135deg, #4dabf7, #2563eb); border: 2px solid #fff; }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
-  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 32px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count { position: absolute; bottom: -56px; left: 50%; transform: translateX(-50%); font-size: 13px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 4px 12px; border-radius: 8px; border: 2px solid rgba(255,215,0,0.6); text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-count { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.6); }
   .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
   .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
-  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 6px 10px; flex-shrink: 0; }
-  .bonus-tu-wrapper .bonus-label { font-size: 11px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
-  .bonus-slots { display: flex; gap: 8px; align-items: center; }
-  .bonus-slot { width: 56px; height: 80px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
-  .bonus-slot.pieno { border-style: solid; border-color: #ffd700; box-shadow: 0 0 14px rgba(255,215,0,0.6); cursor: pointer; }
-  .bonus-slot.pieno:hover { transform: translateY(-4px); box-shadow: 0 0 20px rgba(255,215,0,0.9); }
-  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 32px; position: relative; overflow: hidden; color: #fff; }
-  .bonus-slot .bonus-carta .ang { position: absolute; font-size: 12px; }
-  .bonus-slot .bonus-carta .ang.tl { top: 2px; left: 3px; }
-  .bonus-slot .bonus-carta .ang.tr { top: 2px; right: 3px; }
-  .bonus-slot .bonus-carta .ang.bl { bottom: 2px; left: 3px; }
-  .bonus-slot .bonus-carta .ang.br { bottom: 2px; right: 3px; }
-  .bonus-slot .bonus-carta .nome-bonus { font-size: 7px; text-align: center; color: #fff; padding: 0 2px; line-height: 1; text-transform: uppercase; font-weight: bold; position: absolute; bottom: 10px; }
+  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 6px; flex-shrink: 0; }
+  .bonus-tu-wrapper .bonus-label { font-size: 9px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
+  .bonus-slots { display: flex; gap: 5px; align-items: center; }
+  .bonus-slot { width: 42px; height: 60px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
+  .bonus-slot.pieno { border-style: solid; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.6); cursor: pointer; }
+  .bonus-slot.pieno:hover { transform: translateY(-3px); box-shadow: 0 0 16px rgba(255,215,0,0.9); }
+  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 22px; position: relative; overflow: hidden; color: #fff; }
+  .bonus-slot .bonus-carta .ang { position: absolute; font-size: 9px; }
+  .bonus-slot .bonus-carta .ang.tl { top: 1px; left: 2px; }
+  .bonus-slot .bonus-carta .ang.tr { top: 1px; right: 2px; }
+  .bonus-slot .bonus-carta .ang.bl { bottom: 1px; left: 2px; }
+  .bonus-slot .bonus-carta .ang.br { bottom: 1px; right: 2px; }
+  .bonus-slot .bonus-carta .nome-bonus { display: none; }
   .bonus-slot .bonus-carta.contrasto-sicuro { background: linear-gradient(135deg, #1e3a8a, #3b82f6); border: 2px solid #fbbf24; }
   .bonus-slot .bonus-carta.parata-super { background: linear-gradient(135deg, #7c2d12, #ea580c); border: 2px solid #fed7aa; }
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
   .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
-  .info-carte { display: flex; gap: 14px; font-size: 11px; color: #aaa; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); }
+  .info-carte { display: flex; gap: 10px; font-size: 10px; color: #aaa; background: rgba(0,0,0,0.4); padding: 2px 10px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  #azioni-container button { padding: 8px 20px; font-size: 13px; }
+  #azioni-container { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  #azioni-container button { padding: 6px 16px; font-size: 12px; }
 
   button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 2px; }
   button:hover:not(:disabled) { background: #4dabf7; color: #16213e; }
@@ -183,14 +185,6 @@
   .goal-banner.tu { background: radial-gradient(circle, rgba(77,171,247,0.85), rgba(0,0,0,0.95)); }
   .goal-banner.cpu { background: radial-gradient(circle, rgba(255,107,107,0.85), rgba(0,0,0,0.95)); }
   .goal-banner-text { font-size: 72px; font-weight: 900; color: #ffd700; text-shadow: 0 0 40px #ffd700, 0 0 80px #ffd700, 0 6px 12px #000; letter-spacing: 6px; font-family: 'Impact', 'Arial Black', sans-serif; }
-
-  .moneta-banner { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 97; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
-  .moneta-banner.attivo { opacity: 1; }
-  .moneta-banner.tu { background: radial-gradient(circle, rgba(77,171,247,0.9), rgba(0,0,0,0.85)); }
-  .moneta-banner.cpu { background: radial-gradient(circle, rgba(255,107,107,0.9), rgba(0,0,0,0.85)); }
-  .moneta-banner-text { font-size: 42px; font-weight: 900; color: #fff; letter-spacing: 4px; font-family: 'Impact', 'Arial Black', sans-serif; text-align: center; padding: 20px 40px; background: rgba(0,0,0,0.6); border-radius: 20px; border: 4px solid #ffd700; }
-  .moneta-banner.tu .moneta-banner-text { border-color: #4dabf7; color: #4dabf7; }
-  .moneta-banner.cpu .moneta-banner-text { border-color: #ff6b6b; color: #ff6b6b; }
 
   .moneta-animazione { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 99; background: rgba(0,0,0,0.85); }
   .moneta-animazione.nascosta { display: none; }
@@ -306,8 +300,10 @@
     .info-top { font-size: 8px; right: 60px; line-height: 1.05; }
     .btn-icona { width: 24px; height: 24px; font-size: 11px; border-width: 1px; border-radius: 5px; }
     .topbar-buttons { gap: 2px; right: 6px; top: 36px; }
-    .btn-toggle-panel { display: flex; position: absolute; top: 4px; right: 4px; z-index: 50; width: 26px; height: 26px; background: rgba(255,215,0,0.9); color: #16213e; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
-    .btn-toggle-panel:active { background: #fff; }
+    .carte-panel { padding: 4px 8px; gap: 4px; bottom: 4px; }
+    .carta { width: 48px; height: 68px; }
+    .carta .seme-centro { font-size: 28px; }
+    .carta .valore-alto, .carta .valore-basso { font-size: 12px; }
   }
 </style>
 </head>
@@ -349,8 +345,6 @@
   </div>
 
   <div class="area-gioco">
-    <button class="btn-toggle-panel" id="btn-toggle-panel" onclick="togglePannelloCarte()" title="Mostra/nascondi carte">▼</button>
-
     <div class="scena-wrapper" id="scena-wrapper">
       <div class="scena" id="scena">
         <div class="campo-area">
@@ -363,7 +357,7 @@
     </div>
   </div>
 
-  <!-- PANNELLO CARTE FISSO SOPRA TUTTO -->
+  <!-- PANNELLO CARTE COMPATTO IN BASSO -->
   <div class="carte-panel" id="carte-panel">
     <div class="info-mano">
       <div class="titolo" id="titolo-mano">Contrasto</div>
@@ -426,9 +420,6 @@
 
 <div class="goal-banner" id="goal-banner">
   <div class="goal-banner-text" id="goal-banner-text">GGGOOOAAALLL</div>
-</div>
-<div class="moneta-banner" id="moneta-banner">
-  <div class="moneta-banner-text" id="moneta-banner-text">TU VINCI IL SORTEGGIO</div>
 </div>
 
 <div class="moneta-animazione nascosta" id="moneta-animazione">
@@ -1399,7 +1390,7 @@ function renderPannelloContrasto() {
   var c = stato.contrasto; if (!c) return;
   document.getElementById('titolo-mano').textContent = 'Contrasto Z' + c.zona + ' ' + stato.metaContesa;
   document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
-  document.getElementById('turno-label').textContent = 'Seme guida: ' + SEMI[c.semeGuida].nome;
+  document.getElementById('turno-label').textContent = 'Seme: ' + SEMI[c.semeGuida].nome;
   var contTu = document.getElementById('carte-tu');
   contTu.innerHTML = '';
   for (var i=0;i<stato.mani.tu.length;i++) {
@@ -1424,16 +1415,16 @@ function renderPannelloContrasto() {
   var azioni = '';
   if (!c.risolto) {
     azioni += '<button class="primario" id="btn-gioca" onclick="confermaCarta()" ' + (selezioneCarta === null ? 'disabled' : '') + '>GIOCA CARTA</button>';
-    if (haBonus('tu', 'contrasto-sicuro')) { azioni += ' <button class="bonus-btn" onclick="usaContrastoSicuroTU()">⭐ USA CONTRASTO SICURO</button>'; }
+    if (haBonus('tu', 'contrasto-sicuro')) { azioni += ' <button class="bonus-btn" onclick="usaContrastoSicuroTU()">⭐ CONTRASTO SICURO</button>'; }
   }
   document.getElementById('azioni-container').innerHTML = azioni;
 }
 
 function creaCartaEl(carta) { var el = document.createElement('div'); el.className = 'carta'; el.innerHTML = '<div class="valore-alto">' + carta.label + '</div>' + '<div class="seme-centro">' + SEMI[carta.seme].emoji + '</div>' + '<div class="valore-basso">' + carta.label + '</div>'; return el; }
-function renderPilaMazzo() { var mp = document.getElementById('mazzo-pila'); mp.innerHTML = ''; var n = Math.min(stato.mazzo.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta dietro'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; mp.appendChild(el); } document.getElementById('mazzo-count').textContent = stato.mazzo.length + ' carte'; }
-function renderPilaScarti() { var sp = document.getElementById('scarti-pila'); if (!sp) return; sp.innerHTML = ''; var n = Math.min(stato.scarti.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta scarto'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; sp.appendChild(el); } document.getElementById('scarti-count').textContent = stato.scarti.length + ' carte'; }
-function renderPilaBonus() { var bp = document.getElementById('bonus-pila'); if (!bp) return; bp.innerHTML = ''; var n = Math.min(stato.mazzoBonus.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta bonus'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; bp.appendChild(el); } var bc = document.getElementById('bonus-count'); if (bc) bc.textContent = stato.mazzoBonus.length + ' carte'; }
-function renderBonusSlots() { var slots = document.querySelectorAll('#bonus-slots-tu .bonus-slot'); for (var i=0;i<slots.length;i++) { var s = slots[i]; s.innerHTML = ''; s.classList.remove('pieno'); if (i < stato.bonus.tu.length) { var tipo = stato.bonus.tu[i]; s.classList.add('pieno'); var info = NOMI_BONUS[tipo]; var c = document.createElement('div'); c.className = 'bonus-carta ' + tipo; c.innerHTML = '<span class="ang tl">' + info.icona + '</span>' + '<span class="ang tr">' + info.icona + '</span>' + '<span class="ang bl">' + info.icona + '</span>' + '<span class="ang br">' + info.icona + '</span>' + '<span>' + info.icona + '</span>' + '<div class="nome-bonus">' + info.nome + '</div>'; s.appendChild(c); } } }
+function renderPilaMazzo() { var mp = document.getElementById('mazzo-pila'); mp.innerHTML = ''; var n = Math.min(stato.mazzo.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta dietro'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; mp.appendChild(el); } document.getElementById('mazzo-count').textContent = stato.mazzo.length; }
+function renderPilaScarti() { var sp = document.getElementById('scarti-pila'); if (!sp) return; sp.innerHTML = ''; var n = Math.min(stato.scarti.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta scarto'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; sp.appendChild(el); } document.getElementById('scarti-count').textContent = stato.scarti.length; }
+function renderPilaBonus() { var bp = document.getElementById('bonus-pila'); if (!bp) return; bp.innerHTML = ''; var n = Math.min(stato.mazzoBonus.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta bonus'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; bp.appendChild(el); } var bc = document.getElementById('bonus-count'); if (bc) bc.textContent = stato.mazzoBonus.length; }
+function renderBonusSlots() { var slots = document.querySelectorAll('#bonus-slots-tu .bonus-slot'); for (var i=0;i<slots.length;i++) { var s = slots[i]; s.innerHTML = ''; s.classList.remove('pieno'); if (i < stato.bonus.tu.length) { var tipo = stato.bonus.tu[i]; s.classList.add('pieno'); var info = NOMI_BONUS[tipo]; var c = document.createElement('div'); c.className = 'bonus-carta ' + tipo; c.innerHTML = '<span class="ang tl">' + info.icona + '</span>' + '<span class="ang tr">' + info.icona + '</span>' + '<span class="ang bl">' + info.icona + '</span>' + '<span class="ang br">' + info.icona + '</span>' + '<span>' + info.icona + '</span>'; s.appendChild(c); } } }
 
 function selezionaCartaTu(idx) { if (stato.contrasto.risolto) return; if (!stato.sostBloccate) { stato.sostBloccate = true; var bs = document.getElementById('btn-sost'); if (bs) bs.disabled = true; } selezioneCarta = idx; renderPannelloContrasto(); }
 function usaContrastoSicuroTU() { if (!haBonus('tu', 'contrasto-sicuro')) return; consumaBonus('tu', 'contrasto-sicuro'); mostraBonusBanner('🏆 TU usi: ⭐ Contrasto Sicuro!'); document.getElementById('azioni-container').innerHTML = ''; renderBonusSlots(); setTimeout(function() { risolviContrastoAutomatico('tu'); }, 1500); }
