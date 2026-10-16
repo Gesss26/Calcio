@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Editor Campo PX v2 — Calcio a Carte</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+  html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; }
+
+  .toolbar { display: flex; gap: 10px; align-items: center; padding: 8px 14px; background: #16213e; border-bottom: 2px solid #0f3460; flex-wrap: wrap; position: relative; z-index: 500; }
+  .toolbar button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; }
+  .toolbar button:hover { background: #4dabf7; color: #0f3460; }
+  .toolbar button.primario { background: #ffd700; color: #16213e; border-color: #ffd700; }
+  .toolbar button.primario:hover { background: #fff; }
+  .toolbar button.pericolo { background: #8B2020; border-color: #ff6b6b; }
+  .toolbar .info { font-size: 12px; color: #aaa; margin-left: auto; }
+  .toolbar .info span { color: #ffd700; font-weight: bold; }
+
+  .wrapper { position: relative; width: 100vw; height: calc(100vh - 50px); display: flex; align-items: center; justify-content: center; background: #000; overflow: hidden; }
+
+  .campo {
+    position: relative;
+    width: 1600px;
+    height: 900px;
+    transform-origin: center center;
+    background: url('campo.jpg') center/cover no-repeat;
+    background-color: #1a472a;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .campo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 50%, rgba(0,0,0,0.15) 100%);
+    pointer-events: none;
+  }
+
+  .griglia { position: absolute; inset: 0; pointer-events: none; opacity: 0.25; z-index: 2; }
+  .griglia::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+
+  .meta-campo {
+    position: absolute;
+    left: 800px;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: rgba(255,255,255,0.5);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .coppia, .singolo {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    z-index: 10;
+    padding: 40px;
+    margin: -40px;
+  }
+  .coppia:active, .singolo:active { cursor: grabbing; }
+  .coppia.trascinando, .singolo.trascinando { z-index: 100; cursor: grabbing; }
+  .coppia.selezionata, .singolo.selezionato { outline: 2px dashed #ffd700; outline-offset: 8px; border-radius: 4px; }
+
+  .coppia .linea {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 3px;
+    background: rgba(255,215,0,0.7);
+    pointer-events: none;
+    transform-origin: 0 50%;
+    z-index: 1;
+  }
+
+  .coppia .cerchio {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.9), rgba(255,215,0,0.2));
+    border: 2px solid #ffd700;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: 0 0 14px rgba(255,215,0,0.8);
+  }
+
+  .singolo .cerchio-portiere {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,197,94,0.4), rgba(34,197,94,0.1));
+    border: 2px dashed #22c55e;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .pedina-editor {
+    position: absolute;
+    width: 60px;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .pedina-editor .nome {
+    font-size: 10px;
+    font-weight: 900;
+    color: #fff;
+    background: rgba(0,0,0,0.85);
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.4);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    margin-bottom: 2px;
+  }
+  .pedina-editor .icona {
+    width: 34px;
+    height: 44px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 3px 5px rgba(0,0,0,0.9));
+  }
+  .pedina-editor.tu .nome { color: #4dabf7; }
+  .pedina-editor.cpu .nome { color: #ff6b6b; }
+  .pedina-editor.cpu .icona svg { transform: scaleX(-1); }
+  .pedina-editor .info {
+    font-size: 9px;
+    font-weight: 900;
+    color: #4ade80;
+    background: rgba(0,0,0,0.85);
+    padding: 1px 3px;
+    border-radius: 3px;
+    margin-top: 2px;
+    font-family: 'Courier New', monospace;
+    display: inline-block;
+  }
+  .pedina-editor .info .falli { color: #ff8a8a; margin-left: 4px; }
+  .pedina-editor .info .cart { color: #555; margin-left: 4px; }
+  .pedina-editor .slot {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    color: #ffd700;
+    background: rgba(0,0,0,0.95);
+    padding: 1px 5px;
+    border-radius: 8px;
+    border: 1px solid #ffd700;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     PANNELLO DI CONTROLLO MANUALE (X, Y, CONFERMA)
+     ============================================================ */
+  .pannello-manuale {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(22, 33, 62, 0.98);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    padding: 14px 16px;
+    z-index: 400;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    font-size: 13px;
+    min-width: 260px;
+  }
+  .pannello-manuale h3 {
+    color: #ffd700;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .pannello-manuale .riga {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .pannello-manuale .riga label {
+    width: 30px;
+    color: #aaa;
+    font-weight: bold;
+  }
+  .pannello-manuale .riga input {
+    flex: 1;
+    background: #0a0a15;
+    border: 2px solid #0f3460;
+    color: #4ade80;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+  }
+  .pannello-manuale .riga input:focus {
+    outline: none;
+    border-color: #4dabf7;
+  }
+  .pannello-manuale .azioni {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .pannello-manuale .azioni button {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    border: 2px solid;
+  }
+  .pannello-manuale .azioni button.conferma {
+    background: #22c55e;
+    color: #0a0a15;
+    border-color: #22c55e;
+  }
+  .pannello-manuale .azioni button.conferma:hover {
+    background: #4ade80;
+  }
+  .pannello-manuale .azioni button.annulla {
+    background: #8B2020;
+    color: #fff;
+    border-color: #ff6b6b;
+  }
+  .pannello-manuale .azioni button.annulla:hover {
+    background: #ff6b6b;
+  }
+  .pannello-manuale .target-info {
+    font-size: 11px;
+    color: #ffd700;
+    background: rgba(255,215,0,0.1);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border-left: 3px solid #ffd700;
+  }
+  .pannello-manuale .target-info span {
+    color: #fff;
+    font-weight: bold;
+  }
+  .pannello-manuale .target-info.vuoto {
+    color: #888;
+    border-left-color: #555;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .modale { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 999; display: none; align-items: center; justify-content: center; }
+  .modale.aperto { display: flex; }
+  .modale-box { background: #16213e; border: 3px solid #ffd700; border-radius: 14px; padding: 20px; max-width: 800px; width: 92%; max-height: 90vh; overflow-y: auto; }
+  .modale-box h2 { color: #ffd700; margin-bottom: 12px; }
+  .modale-box textarea { width: 100%; height: 400px; background: #0a0a15; color: #4ade80; border: 2px solid #0f3460; border-radius: 8px; padding: 12px; font-family: 'Courier New', monospace; font-size: 11px; resize: vertical; }
+  .modale-box .azioni { display: flex; gap: 10px; margin-top: 12px; }
+  .modale-box .azioni button { padding: 10px 20px; font-size: 13px; font-weight: bold; border-radius: 8px; cursor: pointer; background: #0f3460; color: #fff; border: 2px solid #4dabf7; }
+  .modale-box .azioni button.primario { background: #ffd700; color: #16213e; border: 2px solid #ffd700; }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="primario" onclick="esportaJSON()">📋 ESPORTA JSON</button>
+  <button onclick="apriImporta()">📥 IMPORTA JSON</button>
+  <button onclick="resetPosizioni()">🔄 RESET</button>
+  <button class="pericolo" onclick="specchia()">↔ SPECCHIA</button>
+  <button onclick="toggleGriglia()">🔲 Griglia</button>
+  <button onclick="toggleLinee()">📏 Linee coppie</button>
+  <div class="info">
+    Coppie: <span>10</span> + 2 portieri · 
+    Selezionata: <span id="pos-corrente">—</span> · 
+    <span style="color:#ffd700">Trascina · Click dx = ruota 45°</span>
+  </div>
+</div>
+
+<div class="wrapper" id="wrapper">
+  <div class="campo" id="campo">
+    <div class="meta-campo"></div>
+    <div class="griglia" id="griglia"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PANNELLO DI CONTROLLO MANUALE
+     ============================================================ -->
+<div class="pannello-manuale">
+  <h3>🎯 Controllo Manuale</h3>
+  <div class="target-info vuoto" id="target-info">
+    Nessuna selezione — clicca su una pedina
+  </div>
+  <div class="riga">
+    <label>X</label>
+    <input type="number" id="input-x" min="0" max="1600" step="1" placeholder="0-1600" disabled>
+  </div>
+  <div class="riga">
+    <label>Y</label>
+    <input type="number" id="input-y" min="0" max="900" step="1" placeholder="0-900" disabled>
+  </div>
+  <div class="azioni">
+    <button class="conferma" id="btn-conferma" onclick="confermaPosizione()" disabled>✅ CONFERMA</button>
+    <button class="annulla" onclick="annullaSelezione()">✖ DESELEZIONA</button>
+  </div>
+</div>
+
+<div class="modale" id="modale-export">
+  <div class="modale-box">
+    <h2>📋 JSON Posizioni (in PIXEL 1600x900)</h2>
+    <p style="font-size:12px;color:#aaa;margin-bottom:10px">Copia questo codice e incollalo nel gioco.</p>
+    <textarea id="output-json" readonly></textarea>
+    <div class="azioni">
+      <button class="primario" onclick="copiaJSON()">📋 COPIA</button>
+      <button onclick="chiudiModale()">CHIUDI</button>
+    </div>
+  </div>
+</div>
+
+<div class="modale" id="modale-import">
+  <div class="modale-box">
+    <h2>📥 Importa JSON</h2>
+    <p style="font-size:12px;color:#aaa;margin-bottom:10px">Incolla il JSON delle posizioni (in pixel).</p>
+    <textarea id="input-json" placeholder="Incolla qui il JSON..."></textarea>
+    <div class="azioni">
+      <button class="primario" onclick="importaJSON()">IMPORTA</button>
+      <button onclick="chiudiModaleImport()">ANNULLA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIGURAZIONE
+   ============================================================ */
+var NOMI_TU_MOVIMENTO = [
+  'Sabelli', 'Bani', 'Vasquez', 'Martin', 'Badelj',
+  'Frendrup', 'Malinovskyi', 'Messias', 'Vitinha', 'Retegui'
+];
+var NOMI_CPU_MOVIMENTO = [
+  'Danilo', 'Bremer', 'Gatti', 'Cambiaso', 'Locatelli',
+  'Thuram', 'McKennie', 'Yildiz', 'Vlahovic', 'Chiesa'
+];
+
+var NOME_POR_TU = 'Gollini';
+var NOME_POR_CPU = 'Di Gregorio';
+
+var DISTANZA_COPPIA_PX = 50;
+
+/* ============================================================
+   POSIZIONI INIZIALI — coordinate in PIXEL (0-1600, 0-900)
+   ============================================================ */
+var POSIZIONI_COPPIE_DEFAULT = [
+  { x: 250, y: 570, angolo: 0 },
+  { x: 400, y: 650, angolo: 0 },
+  { x: 500, y: 750, angolo: 0 },
+  { x: 950, y: 750, angolo: 0 },
+  { x: 700, y: 700, angolo: 0 },
+  { x: 900, y: 700, angolo: 0 },
+  { x: 650, y: 800, angolo: 0 },
+  { x: 1050, y: 800, angolo: 0 },
+  { x: 1200, y: 650, angolo: 0 },
+  { x: 1350, y: 570, angolo: 0 }
+];
+
+var POSIZIONI_PORTIERI_DEFAULT = [
+  { x: 120, y: 600, squadra: 'tu'  },
+  { x: 1480, y: 600, squadra: 'cpu' }
+];
+
+var posizioni = JSON.parse(JSON.stringify(POSIZIONI_COPPIE_DEFAULT));
+var posizioniPortieri = JSON.parse(JSON.stringify(POSIZIONI_PORTIERI_DEFAULT));
+var scalaCorrente = 1;
+var mostraLinee = true;
+var ultimaSelezione = null;
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function adattaScala() {
+  var wrapper = document.getElementById('wrapper');
+  var campo = document.getElementById('campo');
+  var w = wrapper.clientWidth, h = wrapper.clientHeight;
+  scalaCorrente = Math.min(w / 1600, h / 900);
+  campo.style.transform = 'scale(' + scalaCorrente + ')';
+}
+
+function creaPedinaHTML(nome, sq) {
+  var colore = sq === 'tu' ? '#2563eb' : '#dc2626';
+  var coloreScuro = sq === 'tu' ? '#1e3a8a' : '#7f1d1d';
+  var svg = '<svg viewBox="0 0 40 50" width="34" height="44">' +
+    '<ellipse cx="20" cy="48" rx="8" ry="2" fill="rgba(0,0,0,0.4)"/>' +
+    '<rect x="13" y="20" width="14" height="22" rx="3" fill="' + colore + '" stroke="#fff" stroke-width="1.2"/>' +
+    '<circle cx="20" cy="12" r="7" fill="#fcd5b4" stroke="#333" stroke-width="1"/>' +
+    '<path d="M 13 8 Q 20 3 27 8 L 27 12 Q 20 8 13 12 Z" fill="' + coloreScuro + '"/>' +
+    '<rect x="7" y="22" width="6" height="14" rx="2" fill="' + colore + '" stroke="#fff" stroke-width="0.8"/>' +
+    '<rect x="27" y="22" width="6" height="14" rx="2" fill="' + colore + '" stroke="#fff" stroke-width="0.8"/>' +
+    '<rect x="14" y="42" width="5" height="6" fill="#1a1a1a"/>' +
+    '<rect x="21" y="42" width="5" height="6" fill="#1a1a1a"/>' +
+    '</svg>';
+  return '<div class="nome">' + nome + '</div>' +
+         '<div class="icona">' + svg + '</div>' +
+         '<div class="info">10 <span class="falli">0</span><span class="cart">·</span></div>';
+}
+
+function disegnaCampo() {
+  var campo = document.getElementById('campo');
+  var vecchie = campo.querySelectorAll('.coppia, .singolo');
+  for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
+
+  /* 1) Disegna le 10 coppie di movimento */
+  for (var idx = 0; idx < posizioni.length; idx++) {
+    var p = posizioni[idx];
+    var coppia = document.createElement('div');
+    coppia.className = 'coppia';
+    coppia.dataset.idx = idx;
+    coppia.dataset.tipo = 'coppia';
+    coppia.style.left = p.x + 'px';
+    coppia.style.top = p.y + 'px';
+
+    if (ultimaSelezione && ultimaSelezione.tipo === 'coppia' && ultimaSelezione.idx === idx) {
+      coppia.classList.add('selezionata');
+    }
+
+    var rad = p.angolo * Math.PI / 180;
+    var dx = Math.cos(rad) * (DISTANZA_COPPIA_PX / 2);
+    var dy = Math.sin(rad) * (DISTANZA_COPPIA_PX / 2);
+
+    var linea = document.createElement('div');
+    linea.className = 'linea';
+    linea.style.width = DISTANZA_COPPIA_PX + 'px';
+    linea.style.transform = 'rotate(' + p.angolo + 'deg)';
+    linea.style.transformOrigin = '0 50%';
+    linea.style.left = (-DISTANZA_COPPIA_PX / 2) + 'px';
+    linea.style.top = '0';
+    if (!mostraLinee) linea.style.display = 'none';
+    coppia.appendChild(linea);
+
+    var cerchio = document.createElement('div');
+    cerchio.className = 'cerchio';
+    coppia.appendChild(cerchio);
+
+    var pedTU = document.createElement('div');
+    pedTU.className = 'pedina-editor tu';
+    pedTU.style.left = (-dx) + 'px';
+    pedTU.style.top = (-dy) + 'px';
+    pedTU.innerHTML = '<div class="slot">#' + (idx + 1) + ' TU</div>' + creaPedinaHTML(NOMI_TU_MOVIMENTO[idx], 'tu');
+    coppia.appendChild(pedTU);
+
+    var pedCPU = document.createElement('div');
+    pedCPU.className = 'pedina-editor cpu';
+    pedCPU.style.left = (dx) + 'px';
+    pedCPU.style.top = (dy) + 'px';
+    pedCPU.innerHTML = '<div class="slot">#' + (idx + 1) + ' CPU</div>' + creaPedinaHTML(NOMI_CPU_MOVIMENTO[idx], 'cpu');
+    coppia.appendChild(pedCPU);
+
+    abilitaDragCoppia(coppia, idx);
+    campo.appendChild(coppia);
+  }
+
+  /* 2) Disegna i 2 portieri singoli */
+  for (var k = 0; k < posizioniPortieri.length; k++) {
+    var pp = posizioniPortieri[k];
+    var single = document.createElement('div');
+    single.className = 'singolo';
+    single.dataset.idx = k;
+    single.dataset.tipo = 'portiere';
+    single.dataset.squadra = pp.squadra;
+    single.style.left = pp.x + 'px';
+    single.style.top = pp.y + 'px';
+
+    if (ultimaSelezione && ultimaSelezione.tipo === 'portiere' && ultimaSelezione.idx === k) {
+      single.classList.add('selezionato');
+    }
+
+    var cerchione = document.createElement('div');
+    cerchione.className = 'cerchio-portiere';
+    single.appendChild(cerchione);
+
+    var pedPor = document.createElement('div');
+    pedPor.className = 'pedina-editor ' + pp.squadra;
+    pedPor.innerHTML = '<div class="slot">🧤 POR ' + pp.squadra.toUpperCase() + '</div>' +
+                       creaPedinaHTML(pp.squadra === 'tu' ? NOME_POR_TU : NOME_POR_CPU, pp.squadra);
+    single.appendChild(pedPor);
+
+    abilitaDragPortiere(single, k);
+    campo.appendChild(single);
+  }
+}
+
+/* ============================================================
+   DRAG — COPPIE
+   ============================================================ */
+function abilitaDragCoppia(el, idx) {
+  var dragging = false;
+  var startX, startY;
+  var startLeftPx, startTopPx;
+
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onDown, { passive: false });
+
+  function onDown(e) {
+    if (e.button === 2) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragging = true;
+    el.classList.add('trascinando');
+
+    var pt = getPoint(e);
+    startX = pt.x; startY = pt.y;
+    startLeftPx = posizioni[idx].x;
+    startTopPx = posizioni[idx].y;
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+
+    ultimaSelezione = { tipo: 'coppia', idx: idx };
+    aggiornaPannello();
+    aggiornaPosCorrente('coppia', idx);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    var pt = getPoint(e);
+    var deltaXPx = (pt.x - startX) / scalaCorrente;
+    var deltaYPx = (pt.y - startY) / scalaCorrente;
+    var newX = Math.max(0, Math.min(1600, startLeftPx + deltaXPx));
+    var newY = Math.max(0, Math.min(900, startTopPx + deltaYPx));
+    posizioni[idx].x = Math.round(newX);
+    posizioni[idx].y = Math.round(newY);
+    el.style.left = posizioni[idx].x + 'px';
+    el.style.top = posizioni[idx].y + 'px';
+    aggiornaPannello();
+    aggiornaPosCorrente('coppia', idx);
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    el.classList.remove('trascinando');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchend', onUp);
+  }
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+}
+
+/* ============================================================
+   DRAG — PORTIERI
+   ============================================================ */
+function abilitaDragPortiere(el, idx) {
+  var dragging = false;
+  var startX, startY;
+  var startLeftPx, startTopPx;
+
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onDown, { passive: false });
+
+  function onDown(e) {
+    if (e.button === 2) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragging = true;
+    el.classList.add('trascinando');
+
+    var pt = getPoint(e);
+    startX = pt.x; startY = pt.y;
+    startLeftPx = posizioniPortieri[idx].x;
+    startTopPx = posizioniPortieri[idx].y;
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchend', onUp);
+
+    ultimaSelezione = { tipo: 'portiere', idx: idx };
+    aggiornaPannello();
+    aggiornaPosCorrente('portiere', idx);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    e.preventDefault();
+    var pt = getPoint(e);
+    var deltaXPx = (pt.x - startX) / scalaCorrente;
+    var deltaYPx = (pt.y - startY) / scalaCorrente;
+    var newX = Math.max(0, Math.min(1600, startLeftPx + deltaXPx));
+    var newY = Math.max(0, Math.min(900, startTopPx + deltaYPx));
+    posizioniPortieri[idx].x = Math.round(newX);
+    posizioniPortieri[idx].y = Math.round(newY);
+    el.style.left = posizioniPortieri[idx].x + 'px';
+    el.style.top = posizioniPortieri[idx].y + 'px';
+    aggiornaPannello();
+    aggiornaPosCorrente('portiere', idx);
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    el.classList.remove('trascinando');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchend', onUp);
+  }
+
+  function getPoint(e) {
+    if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  }
+}
+
+/* ============================================================
+   PANNELLO MANUALE — aggiornamento e conferma
+   ============================================================ */
+function aggiornaPannello() {
+  var info = document.getElementById('target-info');
+  var inputX = document.getElementById('input-x');
+  var inputY = document.getElementById('input-y');
+  var btn = document.getElementById('btn-conferma');
+
+  if (!ultimaSelezione) {
+    info.className = 'target-info vuoto';
+    info.innerHTML = 'Nessuna selezione — clicca su una pedina';
+    inputX.value = ''; inputY.value = '';
+    inputX.disabled = true; inputY.disabled = true;
+    btn.disabled = true;
+    return;
+  }
+
+  var p, nome;
+  if (ultimaSelezione.tipo === 'coppia') {
+    p = posizioni[ultimaSelezione.idx];
+    nome = 'Coppia #' + (ultimaSelezione.idx + 1) + ' (TU + CPU)';
+  } else {
+    p = posizioniPortieri[ultimaSelezione.idx];
+    nome = 'Portiere ' + p.squadra.toUpperCase();
+  }
+
+  info.className = 'target-info';
+  info.innerHTML = 'Selezionato: <span>' + nome + '</span>';
+  inputX.value = p.x;
+  inputY.value = p.y;
+  inputX.disabled = false;
+  inputY.disabled = false;
+  btn.disabled = false;
+}
+
+function confermaPosizione() {
+  if (!ultimaSelezione) return;
+  var newX = parseInt(document.getElementById('input-x').value);
+  var newY = parseInt(document.getElementById('input-y').value);
+  if (isNaN(newX) || isNaN(newY)) { alert('❌ Inserisci valori numerici validi.'); return; }
+  newX = Math.max(0, Math.min(1600, newX));
+  newY = Math.max(0, Math.min(900, newY));
+
+  if (ultimaSelezione.tipo === 'coppia') {
+    posizioni[ultimaSelezione.idx].x = newX;
+    posizioni[ultimaSelezione.idx].y = newY;
+  } else {
+    posizioniPortieri[ultimaSelezione.idx].x = newX;
+    posizioniPortieri[ultimaSelezione.idx].y = newY;
+  }
+  disegnaCampo();
+  aggiornaPannello();
+  aggiornaPosCorrente(ultimaSelezione.tipo, ultimaSelezione.idx);
+}
+
+function annullaSelezione() {
+  ultimaSelezione = null;
+  aggiornaPannello();
+  disegnaCampo();
+  document.getElementById('pos-corrente').textContent = '—';
+}
+
+function aggiornaPosCorrente(tipo, idx) {
+  if (tipo === 'coppia') {
+    var p = posizioni[idx];
+    document.getElementById('pos-corrente').textContent = 'Coppia #' + (idx + 1) + ' (x:' + p.x + 'px y:' + p.y + 'px)';
+  } else {
+    var pp = posizioniPortieri[idx];
+    document.getElementById('pos-corrente').textContent = 'Portiere ' + pp.squadra.toUpperCase() + ' (x:' + pp.x + 'px y:' + pp.y + 'px)';
+  }
+}
+
+/* ============================================================
+   ROTAZIONE COPPIA
+   ============================================================ */
+document.addEventListener('contextmenu', function(e) {
+  var coppia = e.target.closest('.coppia');
+  if (coppia) {
+    e.preventDefault();
+    var idx = parseInt(coppia.dataset.idx);
+    posizioni[idx].angolo = (posizioni[idx].angolo + 45) % 360;
+    disegnaCampo();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'r' || e.key === 'R') {
+    if (ultimaSelezione && ultimaSelezione.tipo === 'coppia') {
+      posizioni[ultimaSelezione.idx].angolo = (posizioni[ultimaSelezione.idx].angolo + 45) % 360;
+      disegnaCampo();
+    }
+  }
+  if (e.key === 'Enter' && ultimaSelezione) {
+    confermaPosizione();
+  }
+  if (e.key === 'Escape') {
+    annullaSelezione();
+  }
+});
+
+/* ============================================================
+   AZIONI TOOLBAR
+   ============================================================ */
+function esportaJSON() {
+  var out =
+    '/* 10 coppie di movimento (indice 0-9) — coordinate in PIXEL (1600x900) */\n' +
+    'var POSIZIONI_COPPIE = ' + JSON.stringify(posizioni, null, 2) + ';\n\n' +
+    '/* 2 portieri singoli (0 = TU, 1 = CPU) — coordinate in PIXEL */\n' +
+    'var POSIZIONI_PORTIERI = ' + JSON.stringify(posizioniPortieri, null, 2) + ';';
+  document.getElementById('output-json').value = out;
+  document.getElementById('modale-export').classList.add('aperto');
+}
+function copiaJSON() {
+  var ta = document.getElementById('output-json');
+  ta.select();
+  document.execCommand('copy');
+  alert('✅ JSON copiato negli appunti!');
+}
+function chiudiModale() { document.getElementById('modale-export').classList.remove('aperto'); }
+
+function apriImporta() { document.getElementById('modale-import').classList.add('aperto'); }
+function chiudiModaleImport() { document.getElementById('modale-import').classList.remove('aperto'); }
+function importaJSON() {
+  try {
+    var txt = document.getElementById('input-json').value.trim();
+    var mCoppie = txt.match(/POSIZIONI_COPPIE\s*=\s*(\[[\s\S]*?\]);/);
+    var mPort = txt.match(/POSIZIONI_PORTIERI\s*=\s*(\[[\s\S]*?\]);/);
+    if (mCoppie && mPort) {
+      posizioni = JSON.parse(mCoppie[1]);
+      posizioniPortieri = JSON.parse(mPort[1]);
+      ultimaSelezione = null;
+      aggiornaPannello();
+      disegnaCampo();
+      chiudiModaleImport();
+      alert('✅ Posizioni importate!');
+    } else {
+      alert('❌ JSON non valido: servono POSIZIONI_COPPIE e POSIZIONI_PORTIERI.');
+    }
+  } catch (err) {
+    alert('❌ Errore: ' + err.message);
+  }
+}
+
+function resetPosizioni() {
+  if (!confirm('Vuoi resettare tutte le posizioni?')) return;
+  posizioni = JSON.parse(JSON.stringify(POSIZIONI_COPPIE_DEFAULT));
+  posizioniPortieri = JSON.parse(JSON.stringify(POSIZIONI_PORTIERI_DEFAULT));
+  ultimaSelezione = null;
+  aggiornaPannello();
+  disegnaCampo();
+}
+
+function specchia() {
+  for (var i = 0; i < posizioni.length; i++) {
+    posizioni[i].x = Math.round(1600 - posizioni[i].x);
+    posizioni[i].angolo = (posizioni[i].angolo + 180) % 360;
+  }
+  for (var k = 0; k < posizioniPortieri.length; k++) {
+    posizioniPortieri[k].x = Math.round(1600 - posizioniPortieri[k].x);
+  }
+  ultimaSelezione = null;
+  aggiornaPannello();
+  disegnaCampo();
+}
+
+function toggleGriglia() {
+  var g = document.getElementById('griglia');
+  g.style.display = g.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleLinee() {
+  mostraLinee = !mostraLinee;
+  disegnaCampo();
+}
+
+/* ============================================================
+   AVVIO
+   ============================================================ */
+window.addEventListener('resize', adattaScala);
+window.addEventListener('orientationchange', function() { setTimeout(adattaScala, 250); });
+
+adattaScala();
+disegnaCampo();
+aggiornaPannello();
+setTimeout(adattaScala, 100);
+setTimeout(adattaScala, 400);
+</script>
+</body>
+</html>
