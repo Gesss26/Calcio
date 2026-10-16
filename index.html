@@ -182,12 +182,8 @@
   .bonus-cpu-info { position: absolute; top: 60px; left: 20px; font-size: 12px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px; border: 2px solid rgba(255,107,107,0.6); z-index: 20; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
   .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
 
-  .panchina { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,20,0.9); backdrop-filter: blur(8px); border-top: 2px solid #0f3460; padding: 6px 8px; display: flex; justify-content: space-around; align-items: center; gap: 4px; z-index: 25; min-height: 70px; }
-  .panchina-titolo { font-size: 10px; color: #ffd700; font-weight: bold; writing-mode: vertical-rl; letter-spacing: 2px; }
-  .panchina-giocatore { display: flex; flex-direction: column; align-items: center; padding: 3px; }
-  .panchina-giocatore.in-ombra { opacity: 0.25; filter: grayscale(1); }
-  .panchina-giocatore .pedina { transform: scale(0.85); width: 30px; height: 40px; }
-  .panchina-giocatore .panchina-nome { font-size: 9px; color: #ccc; margin-top: 2px; font-weight: bold; }
+  /* PANCHINA RIMOSSA */
+  .panchina, .btn-toggle-panchina { display: none !important; }
 
   .goal-banner { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 96; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
   .goal-banner.attivo { opacity: 1; }
@@ -300,7 +296,7 @@
   .impostazioni-grid button { padding: 16px 20px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .impostazioni-info { font-size: 12px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
 
-  .btn-toggle-panel, .btn-toggle-panchina { display: none; }
+  .btn-toggle-panel { display: none; }
 
   @media (orientation: landscape) and (max-height: 600px) {
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
@@ -312,14 +308,6 @@
     .topbar-buttons { gap: 2px; right: 4px; }
     .btn-toggle-panel { display: flex; position: absolute; top: 4px; right: 4px; z-index: 50; width: 26px; height: 26px; background: rgba(255,215,0,0.9); color: #16213e; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
     .btn-toggle-panel:active { background: #fff; }
-    .panchina { position: fixed; bottom: 0; left: 0; right: 0; min-height: 44px; padding: 2px 4px; z-index: 60; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.3,0.64,1); background: rgba(10,10,20,0.95); backdrop-filter: blur(8px); }
-    .panchina.aperta { transform: translateY(0); }
-    .panchina-titolo { font-size: 7px; letter-spacing: 1px; }
-    .panchina-giocatore { padding: 1px; }
-    .panchina-giocatore .pedina { transform: scale(0.6); width: 20px; height: 26px; }
-    .panchina-giocatore .panchina-nome { font-size: 6px; margin-top: 0; }
-    .btn-toggle-panchina { display: flex; position: fixed; bottom: 4px; left: 4px; z-index: 65; width: 30px; height: 30px; background: rgba(15,52,96,0.9); color: #4dabf7; border: 2px solid #4dabf7; border-radius: 7px; font-size: 14px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.7); }
-    .btn-toggle-panchina:active { background: #4dabf7; color: #16213e; }
   }
 </style>
 </head>
@@ -435,11 +423,9 @@
       </div>
     </div>
   </div>
-
-  <div class="panchina" id="panchina"></div>
 </div>
 
-<button class="btn-toggle-panchina" id="btn-toggle-panchina" onclick="togglePanchina()" title="Panchina">🪑</button>
+<!-- PANCHINA RIMOSSA -->
 
 <div class="goal-banner" id="goal-banner">
   <div class="goal-banner-text" id="goal-banner-text">GGGOOOAAALLL</div>
@@ -557,7 +543,7 @@ var SCENA_H = 900;
 var scalaCorrente = 1;
 
 /* ============================================================
-   POSIZIONI IN PIXEL (1600x900) — coordinate aggiornate
+   POSIZIONI IN PIXEL (1600x900)
    ============================================================ */
 var POSIZIONI_COPPIE = [
   { x: 520,  y: 570, angolo: 180 },
@@ -604,11 +590,9 @@ function adattaScena() {
 window.addEventListener('resize', adattaScena);
 window.addEventListener('orientationchange', function() { setTimeout(adattaScena, 250); });
 
-var panchinaAperta = false;
 function mostraPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.remove('nascosto'); }
 function nascondiPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.add('nascosto'); }
 function togglePannelloCarte() { var p = document.getElementById('carte-panel'); if (!p) return; if (p.classList.contains('nascosto')) p.classList.remove('nascosto'); else p.classList.add('nascosto'); }
-function togglePanchina() { var p = document.getElementById('panchina'); if (!p) return; panchinaAperta = !panchinaAperta; p.classList.toggle('aperta', panchinaAperta); }
 
 var ammonizioni = null;
 function caricaAmmonizioniDaLocalStorage() { try { var s = localStorage.getItem('campionato_ammonizioni'); if (s) return JSON.parse(s); } catch(e){} return null; }
@@ -709,7 +693,7 @@ var stato = {
   zonaPalla:3, possessore:null, giocatorePalla:null, metaContesa:'inf',
   pallaInAnimazione:false, azioneTiroDaPalo:null,
   mazzo:[], scarti:[], mazzoBonus:[],
-  mani:{ tu:[], cpu:[] }, giocatori:{ tu:[], cpu:[] }, panchina:{ tu:[], cpu:[] },
+  mani:{ tu:[], cpu:[] }, giocatori:{ tu:[], cpu:[] },
   monetaVinta:null, partitaFinita:false, sostBloccate:false,
   semeGuidaPrecedente:null, direzioneAttaccoTU:1, invertiCoppie:false,
   bonus: { tu: [], cpu: [] }, bonusUsatoQuestoTiro: { tu:null, cpu:null }, streak: { tu:0, cpu:0 },
@@ -863,14 +847,10 @@ function applicaSqualifiche(sq) {
   }
 }
 
-/* ============================================================
-   MENU PRINCIPALE
-   ============================================================ */
 function mostraMenuPrincipale() {
   mostraVistaCampo();
   nascondiBannerMano();
   fermaSottofondo();
-  /* Ferma eventuali timer di tiro/bonus in corso */
   if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
   var ov = document.getElementById('tiro-overlay');
   if (ov) ov.remove();
@@ -889,10 +869,6 @@ function mostraMenuPrincipale() {
       '<div style="margin-top:16px"><button onclick="apriImpostazioni()">⚙️ Impostazioni</button></div>' +
     '</div>';
 }
-
-/* ============================================================
-   IMPOSTAZIONI
-   ============================================================ */
 function apriImpostazioni() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
@@ -910,10 +886,6 @@ function apriImpostazioni() {
 function apriEditorCampo() {
   window.open('editor-campo-px-v3.html', '_blank');
 }
-
-/* ============================================================
-   RIAVVIA PARTITA
-   ============================================================ */
 function riavviaPartita() {
   if (!confirm('Vuoi davvero riavviare la partita?\nTutti i progressi andranno persi.')) return;
   fermaSottofondo();
@@ -962,9 +934,6 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
-/* ============================================================
-   RENDER CAMPO — VERSIONE A COORDINATE PIXEL
-   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -1147,14 +1116,6 @@ function creaPedinaEl(g, anim) {
   el.innerHTML = creaGiocatoreSVG(div, anim);
   return el;
 }
-function renderPanchina() {
-  var p = document.getElementById('panchina');
-  p.innerHTML = '';
-  var tT = document.createElement('div'); tT.className = 'panchina-titolo'; tT.textContent = SQUADRE[stato.squadraTU].nome; p.appendChild(tT);
-  for (var i=0;i<stato.panchina.tu.length;i++) { var g = stato.panchina.tu[i]; var el = document.createElement('div'); el.className = 'panchina-giocatore tu'; if (g.entrato) el.classList.add('in-ombra'); el.innerHTML = '<div class="pedina tu">' + creaGiocatoreSVG(stato.divise.tu, 'fermo') + '</div>' + '<div class="panchina-nome">' + g.nome + '</div>'; p.appendChild(el); }
-  var tC = document.createElement('div'); tC.className = 'panchina-titolo'; tC.textContent = SQUADRE[stato.squadraCPU].nome; p.appendChild(tC);
-  for (var j=0;j<stato.panchina.cpu.length;j++) { var g2 = stato.panchina.cpu[j]; var el2 = document.createElement('div'); el2.className = 'panchina-giocatore cpu'; if (g2.entrato) el2.classList.add('in-ombra'); el2.innerHTML = '<div class="pedina cpu">' + creaGiocatoreSVG(stato.divise.cpu, 'fermo') + '</div>' + '<div class="panchina-nome">' + g2.nome + '</div>'; p.appendChild(el2); }
-}
 
 function nascondiEvidenzia() { var els = document.querySelectorAll('.evidenzia-coppia'); for (var i=0;i<els.length;i++) els[i].remove(); }
 
@@ -1237,7 +1198,6 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   setTimeout(adattaScena, 400);
 
   renderCampo();
-  renderPanchina();
   renderHeader();
   chiudiModale();
   document.getElementById('modale-box').innerHTML =
@@ -2318,7 +2278,7 @@ function confermaSostituzione() {
   stato.giocatori[sq][idx] = n; pan.entrato = true;
   stato.statistiche[sq].sostituzioni++;
   selezioneSost = { campo:null, panchina:null };
-  renderCampo(); renderPanchina(); renderModaleSostituzioni();
+  renderCampo(); renderModaleSostituzioni();
 }
 
 function bloccaCoppiaContrasto() {
@@ -2361,7 +2321,6 @@ function mostraFestaCampionato(sqVincitrice) {
   document.getElementById('modale').classList.remove('nascosto');
 }
 
-/* Espone la funzione globalmente */
 window.mostraFestaCampionato = mostraFestaCampionato;
 
 try {
