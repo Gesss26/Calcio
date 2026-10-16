@@ -566,25 +566,43 @@ var SCENA_W = 1600;
 var SCENA_H = 900;
 var scalaCorrente = 1;
 
-/* 10 coppie di movimento (indice 0-9) — coordinate in PIXEL (1600x900) */
+/* ============================================================
+   POSIZIONI IN PIXEL (1600x900) — dall'editor v4
+   Ogni coppia = 1 giocatore TU + 1 giocatore CPU nella stessa zona
+   ============================================================ */
 var POSIZIONI_COPPIE = [
-  { x: 580,  y: 550, angolo: 180 },  // #1  Z1 sup
-  { x: 550,  y: 680, angolo: 180 },  // #2  Z2 sup
-  { x: 710,  y: 495, angolo: 180 },  // #3  Z3 sup
-  { x: 670,  y: 755, angolo: 180 },  // #4  Z4 sup
-  { x: 830,  y: 540, angolo: 180 },  // #5  Z5 sup
-  { x: 830,  y: 680, angolo: 180 },  // #6  Z1 inf
-  { x: 950,  y: 495, angolo: 180 },  // #7  Z2 inf
-  { x: 990,  y: 755, angolo: 180 },  // #8  Z3 inf
-  { x: 1080, y: 550, angolo: 180 },  // #9  Z4 inf
-  { x: 1110, y: 680, angolo: 180 }   // #10 Z5 inf
+  { x: 630,  y: 630, angolo: 180 },  // #1  Z1 sup
+  { x: 600,  y: 760, angolo: 180 },  // #2  Z2 sup
+  { x: 760,  y: 575, angolo: 180 },  // #3  Z3 sup
+  { x: 720,  y: 835, angolo: 180 },  // #4  Z4 sup
+  { x: 880,  y: 620, angolo: 180 },  // #5  Z5 sup
+  { x: 880,  y: 760, angolo: 180 },  // #6  Z1 inf
+  { x: 1000, y: 575, angolo: 180 },  // #7  Z2 inf
+  { x: 1040, y: 835, angolo: 180 },  // #8  Z3 inf
+  { x: 1130, y: 630, angolo: 180 },  // #9  Z4 inf
+  { x: 1160, y: 760, angolo: 180 }   // #10 Z5 inf
 ];
 
-/* 2 portieri singoli (0 = TU, 1 = CPU) — coordinate in PIXEL */
-var POSIZIONI_PORTIERI = [
-  { x: 340,  y: 620, squadra: 'tu'  },
-  { x: 1250, y: 620, squadra: 'cpu' }
+/* Mappa: indice coppia → { zona, meta } */
+var MAPPA_COPPIE = [
+  { zona: 1, meta: 'sup' },  // #1
+  { zona: 2, meta: 'sup' },  // #2
+  { zona: 3, meta: 'sup' },  // #3
+  { zona: 4, meta: 'sup' },  // #4
+  { zona: 5, meta: 'sup' },  // #5
+  { zona: 1, meta: 'inf' },  // #6
+  { zona: 2, meta: 'inf' },  // #7
+  { zona: 3, meta: 'inf' },  // #8
+  { zona: 4, meta: 'inf' },  // #9
+  { zona: 5, meta: 'inf' }   // #10
 ];
+
+var POSIZIONI_PORTIERI = [
+  { x: 470,  y: 640, squadra: 'tu'  },
+  { x: 1210, y: 640, squadra: 'cpu' }
+];
+
+var DISTANZA_COPPIA_PX = 50;
 var DISTANZA_COPPIA_PX = 50;
 
 function adattaScena() {
