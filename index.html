@@ -94,68 +94,51 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  /* ===== PANNELLO CARTE — COMPATTO, IN BASSO ===== */
-  .carte-panel { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); width: 98%; max-width: 1500px; background: rgba(10,15,30,0.95); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.6); border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 500; box-shadow: 0 -8px 32px rgba(0,0,0,0.8); transition: opacity 0.3s, transform 0.3s; }
-  .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+  /* ===== BANNER SUPERIORE DIMEZZATO (solo riga alta) ===== */
+  .banner-top { position: fixed; top: 48px; left: 50%; transform: translateX(-50%); width: 96%; max-width: 1000px; background: rgba(10,15,30,0.92); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 10px; padding: 8px 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 400; box-shadow: 0 4px 20px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
+  .banner-top.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
 
-  .info-mano { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; justify-content: center; font-size: 11px; }
-  .info-mano .titolo { font-size: 12px; color: #ffd700; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-  .info-mano .turno-label { font-size: 11px; color: #aaa; }
-  .bonus-cpu-info-inline { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,0.6); }
-  .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 12px; }
+  .banner-top .info-mano { display: flex; align-items: center; gap: 10px; font-size: 10px; flex-wrap: nowrap; }
+  .banner-top .info-mano .titolo { font-size: 11px; color: #ffd700; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+  .banner-top .info-mano .turno-label { font-size: 10px; color: #aaa; }
+  .banner-top .bonus-cpu-info-inline { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.6); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,0.6); }
+  .banner-top .bonus-cpu-info-inline .carte-bonus { letter-spacing: 1px; font-size: 11px; }
 
-  .riga-alta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: nowrap; width: 100%; }
-  .riga-bassa { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: nowrap; width: 100%; }
+  .banner-top .riga-alta { display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: nowrap; }
 
-  /* Pila bonus */
   .pila-bonus-wrapper { flex-shrink: 0; }
-  .pila-bonus { position: relative; width: 48px; height: 68px; }
-  .pila-bonus .pila-titolo { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
+  .pila-bonus { position: relative; width: 44px; height: 62px; }
+  .pila-bonus .pila-titolo { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-bonus .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-bonus .pila-carta { position: absolute; width: 48px; height: 68px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-bonus .pila-carta { position: absolute; width: 44px; height: 62px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-bonus .pila-carta.bonus { background: linear-gradient(135deg, #fbbf24, #d97706); border: 2px solid #fff; }
-  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 30px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
-  .pila-bonus .pila-count { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(251,191,36,0.7); }
+  .pila-bonus .pila-carta.bonus::after { content: '★'; color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; height: 100%; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+  .pila-bonus .pila-count { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #fbbf24; font-weight: 900; white-space: nowrap; background: rgba(46,26,10,0.95); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(251,191,36,0.7); }
 
-  .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 10px; padding: 4px 10px; box-shadow: 0 0 16px rgba(255,215,0,0.5); flex-shrink: 0; }
+  .seme-grande { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.7); border: 2px solid #ffd700; border-radius: 10px; padding: 4px 12px; box-shadow: 0 0 14px rgba(255,215,0,0.5); flex-shrink: 0; }
   .seme-grande .label { font-size: 8px; color: #ffd700; font-weight: 900; letter-spacing: 1px; }
-  .seme-grande .seme { font-size: 32px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); }
+  .seme-grande .seme { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.9)); }
 
-  .mano-sezione { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 8px; flex-shrink: 0; }
-  .mano-sezione .mano-label { font-size: 9px; font-weight: bold; text-transform: uppercase; }
-  .mano-sezione.tu .mano-label { color: #4dabf7; }
-
-  /* Carte del giocatore compatte */
-  .carte { display: flex; gap: 5px; flex-wrap: nowrap; justify-content: center; }
-  .carta { width: 58px; height: 84px; background: #fff; color: #222; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 4px 5px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
-  .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 14px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 34px; line-height: 1; }
-  .carta .valore-basso { font-size: 14px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
-  .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-6px); box-shadow: 0 0 14px #ffd700; }
-  .carta.seme-guidatore { box-shadow: 0 0 6px rgba(255,215,0,0.7); }
-  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 14px #4ade80; }
-
-  .pile-wrapper { display: flex; gap: 20px; align-items: center; flex-shrink: 0; }
-  .pila { position: relative; width: 48px; height: 68px; }
-  .pila-titolo { position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
+  .pile-wrapper { display: flex; gap: 16px; align-items: center; flex-shrink: 0; }
+  .pila { position: relative; width: 44px; height: 62px; }
+  .pila-titolo { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; text-shadow: 0 1px 3px #000; letter-spacing: 1px; }
   .pila-carte { position: relative; width: 100%; height: 100%; }
-  .pila-carta { position: absolute; width: 48px; height: 68px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .pila-carta { position: absolute; width: 44px; height: 62px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
   .pila-carta.dietro { background: linear-gradient(135deg, #4dabf7, #2563eb); border: 2px solid #fff; }
-  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 28px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-carta.dietro::after { content: '🂠'; color: #fff; font-size: 26px; display: flex; align-items: center; justify-content: center; height: 100%; }
   .pila-carta.scarto { background: linear-gradient(135deg, #f59f00, #b45309); border: 2px solid #fff; }
-  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; height: 100%; }
-  .pila-count { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.6); }
+  .pila-carta.scarto::after { content: '🗑'; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; height: 100%; }
+  .pila-count { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #ffd700; font-weight: 900; white-space: nowrap; background: rgba(0,0,0,0.9); padding: 1px 6px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.6); }
   .pila-count.mazzo { border-color: #4dabf7; color: #4dabf7; background: rgba(10,26,46,0.95); }
   .pila-count.scarto { border-color: #f59f00; color: #ffb84d; background: rgba(46,26,10,0.95); }
 
-  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 6px; flex-shrink: 0; }
+  .bonus-tu-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; background: rgba(0,0,0,0.35); border-radius: 8px; padding: 3px 8px; flex-shrink: 0; }
   .bonus-tu-wrapper .bonus-label { font-size: 9px; font-weight: bold; color: #ffd700; text-transform: uppercase; letter-spacing: 1px; }
   .bonus-slots { display: flex; gap: 5px; align-items: center; }
-  .bonus-slot { width: 42px; height: 60px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
+  .bonus-slot { width: 40px; height: 56px; border: 2px dashed rgba(255,215,0,0.4); border-radius: 6px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); position: relative; transition: all 0.3s; }
   .bonus-slot.pieno { border-style: solid; border-color: #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.6); cursor: pointer; }
   .bonus-slot.pieno:hover { transform: translateY(-3px); box-shadow: 0 0 16px rgba(255,215,0,0.9); }
-  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 22px; position: relative; overflow: hidden; color: #fff; }
+  .bonus-slot .bonus-carta { width: 100%; height: 100%; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 20px; position: relative; overflow: hidden; color: #fff; }
   .bonus-slot .bonus-carta .ang { position: absolute; font-size: 9px; }
   .bonus-slot .bonus-carta .ang.tl { top: 1px; left: 2px; }
   .bonus-slot .bonus-carta .ang.tr { top: 1px; right: 2px; }
@@ -167,10 +150,32 @@
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
   .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
-  .info-carte { display: flex; gap: 10px; font-size: 10px; color: #aaa; background: rgba(0,0,0,0.4); padding: 2px 10px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.3); }
+  /* ===== OVERLAY CARTE CENTRALE (grandi) ===== */
+  .carte-overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 550; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+  .carte-overlay.attivo { opacity: 1; pointer-events: auto; }
+  .carte-overlay::before { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.55); pointer-events: none; }
+  .carte-overlay-inner { position: relative; background: rgba(10,15,30,0.95); border: 3px solid #ffd700; border-radius: 18px; padding: 16px 22px 18px; box-shadow: 0 12px 48px rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; gap: 12px; max-width: 96%; }
+  .carte-overlay-titolo { font-size: 14px; color: #ffd700; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
+  .carte-overlay-sottotitolo { font-size: 12px; color: #aaa; text-align: center; margin-top: -6px; }
+  .carte-overlay-carte { display: flex; gap: 12px; flex-wrap: nowrap; justify-content: center; }
+  .carte-overlay .carta { width: 96px; height: 138px; }
+  .carte-overlay .carta .valore-alto { font-size: 24px; }
+  .carte-overlay .carta .seme-centro { font-size: 58px; }
+  .carte-overlay .carta .valore-basso { font-size: 24px; }
+  .carte-overlay-azioni { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+  .carte-overlay-azioni button { padding: 10px 24px; font-size: 14px; }
+
+  .carta { background: #fff; color: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7px 8px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+  .carta:hover { transform: translateY(-4px); }
+  .carta .valore-alto { font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { line-height: 1; }
+  .carta .valore-basso { font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-8px); box-shadow: 0 0 20px #ffd700; }
+  .carta.seme-guidatore { box-shadow: 0 0 10px rgba(255,215,0,0.9); }
+  .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
+
+  .info-carte { display: flex; gap: 10px; font-size: 10px; color: #aaa; background: rgba(0,0,0,0.4); padding: 3px 10px; border-radius: 5px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-  #azioni-container { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
-  #azioni-container button { padding: 6px 16px; font-size: 12px; }
 
   button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 2px; }
   button:hover:not(:disabled) { background: #4dabf7; color: #16213e; }
@@ -283,28 +288,12 @@
   .impostazioni-grid button { padding: 16px 20px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .impostazioni-info { font-size: 12px; color: #aaa; margin-bottom: 16px; line-height: 1.5; }
 
-  .btn-toggle-panel { display: none; }
-
   .volume-control { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,215,0,0.3); margin: 4px 0; }
   .volume-control label { font-size: 12px; color: #ffd700; min-width: 60px; text-align: left; font-weight: bold; }
   .volume-control input[type=range] { flex: 1; height: 6px; -webkit-appearance: none; background: #0f3460; border-radius: 3px; outline: none; }
   .volume-control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
   .volume-control input[type=range]::-moz-range-thumb { width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
   .volume-control .vol-val { font-size: 11px; color: #aaa; min-width: 35px; text-align: right; font-family: monospace; }
-
-  @media (orientation: landscape) and (max-height: 600px) {
-    .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
-    .risultato { font-size: 14px; letter-spacing: 0.5px; }
-    .risultato .sep { margin: 0 5px; }
-    .minuto { font-size: 10px; padding: 1px 5px; min-width: 55px; border-radius: 4px; }
-    .info-top { font-size: 8px; right: 60px; line-height: 1.05; }
-    .btn-icona { width: 24px; height: 24px; font-size: 11px; border-width: 1px; border-radius: 5px; }
-    .topbar-buttons { gap: 2px; right: 6px; top: 36px; }
-    .carte-panel { padding: 4px 8px; gap: 4px; bottom: 4px; }
-    .carta { width: 48px; height: 68px; }
-    .carta .seme-centro { font-size: 28px; }
-    .carta .valore-alto, .carta .valore-basso { font-size: 12px; }
-  }
 </style>
 </head>
 <body>
@@ -344,21 +333,8 @@
     <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
   </div>
 
-  <div class="area-gioco">
-    <div class="scena-wrapper" id="scena-wrapper">
-      <div class="scena" id="scena">
-        <div class="campo-area">
-          <div class="zone" id="zone"></div>
-        </div>
-
-        <div class="palla-volante" id="palla-volante"></div>
-        <div class="flash-vincitore" id="flash"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PANNELLO CARTE COMPATTO IN BASSO -->
-  <div class="carte-panel" id="carte-panel">
+  <!-- BANNER SUPERIORE (solo riga alta) -->
+  <div class="banner-top" id="banner-top">
     <div class="info-mano">
       <div class="titolo" id="titolo-mano">Contrasto</div>
       <div class="turno-label" id="turno-label"></div>
@@ -366,7 +342,6 @@
         🤖 CPU Bonus: <span class="carte-bonus" id="bonus-cpu-count">—</span>
       </div>
     </div>
-
     <div class="riga-alta">
       <div class="pila-bonus-wrapper">
         <div class="pila-bonus">
@@ -376,7 +351,7 @@
         </div>
       </div>
       <div class="bonus-tu-wrapper">
-        <div class="bonus-label">Le tue carte Bonus</div>
+        <div class="bonus-label">I TUOI BONUS</div>
         <div class="bonus-slots" id="bonus-slots-tu">
           <div class="bonus-slot" data-slot="0"></div>
           <div class="bonus-slot" data-slot="1"></div>
@@ -400,21 +375,34 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="riga-bassa">
-      <div class="mano-sezione tu">
-        <div class="mano-label">Le tue carte (<span id="count-tu">7</span>)</div>
-        <div class="carte" id="carte-tu"></div>
+  <div class="area-gioco">
+    <div class="scena-wrapper" id="scena-wrapper">
+      <div class="scena" id="scena">
+        <div class="campo-area">
+          <div class="zone" id="zone"></div>
+        </div>
+
+        <div class="palla-volante" id="palla-volante"></div>
+        <div class="flash-vincitore" id="flash"></div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- OVERLAY CARTE CENTRALE -->
+<div class="carte-overlay" id="carte-overlay">
+  <div class="carte-overlay-inner">
+    <div class="carte-overlay-titolo" id="carte-overlay-titolo">SCEGLI UNA CARTA</div>
+    <div class="carte-overlay-sottotitolo" id="carte-overlay-sottotitolo">Seme: Palla ⚽</div>
+    <div class="carte-overlay-carte" id="carte-overlay-carte"></div>
     <div class="info-carte">
       <span>Mazzo: <strong id="info-mazzo">52</strong></span>
       <span>Scarti: <strong id="info-scarti">0</strong></span>
-      <span>Minuto: <strong id="info-minuto">0'</strong></span>
       <span>Streak: <strong id="info-streak">0</strong>/3</span>
     </div>
-    <div id="azioni-container"></div>
+    <div class="carte-overlay-azioni" id="azioni-container"></div>
   </div>
 </div>
 
@@ -542,9 +530,10 @@ function adattaScena() {
 window.addEventListener('resize', adattaScena);
 window.addEventListener('orientationchange', function() { setTimeout(adattaScena, 250); });
 
-function mostraPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.remove('nascosto'); }
-function nascondiPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.add('nascosto'); }
-function togglePannelloCarte() { var p = document.getElementById('carte-panel'); if (!p) return; if (p.classList.contains('nascosto')) p.classList.remove('nascosto'); else p.classList.add('nascosto'); }
+function mostraBannerTop() { var p = document.getElementById('banner-top'); if (p) p.classList.remove('nascosto'); }
+function nascondiBannerTop() { var p = document.getElementById('banner-top'); if (p) p.classList.add('nascosto'); }
+function mostraCarteOverlay() { var o = document.getElementById('carte-overlay'); if (o) o.classList.add('attivo'); }
+function nascondiCarteOverlay() { var o = document.getElementById('carte-overlay'); if (o) o.classList.remove('attivo'); }
 
 var ammonizioni = null;
 function caricaAmmonizioniDaLocalStorage() { try { var s = localStorage.getItem('campionato_ammonizioni'); if (s) return JSON.parse(s); } catch(e){} return null; }
@@ -807,7 +796,8 @@ function applicaSqualifiche(sq) {
 }
 
 function mostraMenuPrincipale() {
-  mostraVistaCampo();
+  nascondiCarteOverlay();
+  nascondiBannerTop();
   nascondiBannerMano();
   fermaSottofondo();
   if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
@@ -883,7 +873,6 @@ function renderHeader() {
   document.getElementById('minuto-parziale').textContent = p + "'";
   document.getElementById('minuto-totale').textContent = t + "'";
   document.getElementById('zona-palla').textContent = 'Z' + stato.zonaPalla;
-  var im = document.getElementById('info-minuto'); if (im) im.textContent = p + "' | " + t + "'";
   var at = document.getElementById('attacco-lato');
   if (at) at.textContent = stato.direzioneAttaccoTU > 0 ? '→' : '←';
   var st = document.getElementById('info-streak');
@@ -1218,12 +1207,9 @@ function mostraAnimazioneMonetaConflitto(vincente, cb) {
   setTimeout(function() { anim.classList.add('nascosta'); if (cb) cb(); }, 3200);
 }
 
-function mostraVistaCampo() { nascondiPannelloCarte(); }
-function mostraVistaCarte() { mostraPannelloCarte(); }
-
 function animaPallaInZona(gDa, gA, cb, saltaZone) {
   suonaCalcio();
-  mostraVistaCampo();
+  nascondiCarteOverlay();
   var scena = document.getElementById('scena');
   var box = scena.getBoundingClientRect();
   var wrapperD = document.querySelector('[data-giocatore-id="' + gDa.id + '"]');
@@ -1271,7 +1257,7 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
 }
 
 function eseguiCalcioIniziale(squadra) {
-  mostraVistaCampo();
+  nascondiCarteOverlay();
   var v0 = document.querySelectorAll('.palla-centro');
   for (var i=0;i<v0.length;i++) v0[i].remove();
   nascondiEvidenzia();
@@ -1356,8 +1342,7 @@ function eseguiCalcioIniziale(squadra) {
 function avviaContrasto() {
   if (stato.partitaFinita) return;
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
-  mostraVistaCarte();
-  var btnSost = document.getElementById('btn-sost'); if (btnSost) btnSost.disabled = false;
+  mostraBannerTop();
   stato.sostBloccate = false;
   var zona = stato.zonaPalla;
   var poss = stato.possessore;
@@ -1384,14 +1369,20 @@ function avviaContrasto() {
     setTimeout(function() { consumaBonus('cpu', 'contrasto-sicuro'); mostraBonusBanner('🤖 CPU usa: ⭐ Contrasto Sicuro!'); setTimeout(function() { risolviContrastoAutomatico('cpu'); }, 1500); }, 800);
   }
   renderCampo(); renderHeader(); renderPannelloContrasto();
+  // Mostra overlay carte dopo un attimo
+  setTimeout(function() { mostraCarteOverlay(); }, 300);
 }
 
 function renderPannelloContrasto() {
   var c = stato.contrasto; if (!c) return;
+  // Aggiorna banner top
   document.getElementById('titolo-mano').textContent = 'Contrasto Z' + c.zona + ' ' + stato.metaContesa;
   document.getElementById('seme-guidatore').textContent = SEMI[c.semeGuida].emoji;
   document.getElementById('turno-label').textContent = 'Seme: ' + SEMI[c.semeGuida].nome;
-  var contTu = document.getElementById('carte-tu');
+  // Aggiorna overlay carte
+  document.getElementById('carte-overlay-titolo').textContent = 'SCEGLI UNA CARTA — CONTRASTO Z' + c.zona;
+  document.getElementById('carte-overlay-sottotitolo').textContent = 'Seme guida: ' + SEMI[c.semeGuida].emoji + ' ' + SEMI[c.semeGuida].nome;
+  var contTu = document.getElementById('carte-overlay-carte');
   contTu.innerHTML = '';
   for (var i=0;i<stato.mani.tu.length;i++) {
     (function(idx) {
@@ -1404,12 +1395,9 @@ function renderPannelloContrasto() {
       contTu.appendChild(el);
     })(i);
   }
-  document.getElementById('count-tu').textContent = stato.mani.tu.length;
   renderPilaMazzo(); renderPilaScarti(); renderPilaBonus(); renderBonusSlots();
   document.getElementById('info-mazzo').textContent = stato.mazzo.length;
   document.getElementById('info-scarti').textContent = stato.scarti.length;
-  var p = calcolaMinutoParziale(), t = calcolaMinutoTotale();
-  document.getElementById('info-minuto').textContent = p + "' | " + t + "'";
   document.getElementById('info-streak').textContent = stato.streak.tu;
   renderBonusCpuInfo();
   var azioni = '';
@@ -1426,14 +1414,14 @@ function renderPilaScarti() { var sp = document.getElementById('scarti-pila'); i
 function renderPilaBonus() { var bp = document.getElementById('bonus-pila'); if (!bp) return; bp.innerHTML = ''; var n = Math.min(stato.mazzoBonus.length, 4); for (var i=0;i<n;i++) { var el = document.createElement('div'); el.className = 'pila-carta bonus'; el.style.left = (i*2) + 'px'; el.style.top = (i*2) + 'px'; bp.appendChild(el); } var bc = document.getElementById('bonus-count'); if (bc) bc.textContent = stato.mazzoBonus.length; }
 function renderBonusSlots() { var slots = document.querySelectorAll('#bonus-slots-tu .bonus-slot'); for (var i=0;i<slots.length;i++) { var s = slots[i]; s.innerHTML = ''; s.classList.remove('pieno'); if (i < stato.bonus.tu.length) { var tipo = stato.bonus.tu[i]; s.classList.add('pieno'); var info = NOMI_BONUS[tipo]; var c = document.createElement('div'); c.className = 'bonus-carta ' + tipo; c.innerHTML = '<span class="ang tl">' + info.icona + '</span>' + '<span class="ang tr">' + info.icona + '</span>' + '<span class="ang bl">' + info.icona + '</span>' + '<span class="ang br">' + info.icona + '</span>' + '<span>' + info.icona + '</span>'; s.appendChild(c); } } }
 
-function selezionaCartaTu(idx) { if (stato.contrasto.risolto) return; if (!stato.sostBloccate) { stato.sostBloccate = true; var bs = document.getElementById('btn-sost'); if (bs) bs.disabled = true; } selezioneCarta = idx; renderPannelloContrasto(); }
+function selezionaCartaTu(idx) { if (stato.contrasto.risolto) return; if (!stato.sostBloccate) { stato.sostBloccate = true; } selezioneCarta = idx; renderPannelloContrasto(); }
 function usaContrastoSicuroTU() { if (!haBonus('tu', 'contrasto-sicuro')) return; consumaBonus('tu', 'contrasto-sicuro'); mostraBonusBanner('🏆 TU usi: ⭐ Contrasto Sicuro!'); document.getElementById('azioni-container').innerHTML = ''; renderBonusSlots(); setTimeout(function() { risolviContrastoAutomatico('tu'); }, 1500); }
 function risolviContrastoAutomatico(vincente) {
   var c = stato.contrasto;
   if (!c || c.risolto) return;
   c.risolto = true; c.vincitore = vincente; c.motivoFallo = null;
   flashVincitore(vincente);
-  mostraVistaCampo();
+  nascondiCarteOverlay();
   stato.streak[vincente]++;
   if (stato.streak[vincente] >= STREAK_PER_BONUS) { stato.streak[vincente] = 0; assegnaBonus(vincente); }
   var perdente = vincente === 'tu' ? 'cpu' : 'tu';
@@ -1462,13 +1450,14 @@ function confermaCarta() {
   else if (cartaTu.valore > cartaCpu.valore) esito = 'tu';
   else if (cartaCpu.valore > cartaTu.valore) esito = 'cpu';
   else esito = 'pareggio';
+  // Nasconde overlay carte per mostrare l'azione
+  nascondiCarteOverlay();
   if (esito === 'pareggio') {
     log('🤝 Pareggio! Si rigioca.', 'highlight');
     selezioneCarta = null;
     c.cartaTu = null; c.cartaCpu = null;
     c.semeGuida = scegliSemeGuida();
-    renderPannelloContrasto();
-    setTimeout(function() { mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio'); setTimeout(function() { nascondiBannerMano(); renderPannelloContrasto(); }, 2500); }, 400);
+    setTimeout(function() { mostraBannerMano('pareggio', cartaTu, cartaCpu, c.semeGuida, 'Pareggio'); setTimeout(function() { nascondiBannerMano(); renderPannelloContrasto(); mostraCarteOverlay(); }, 2500); }, 400);
     return;
   }
   c.risolto = true;
@@ -1547,7 +1536,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   for (var j=0;j<stato.giocatori[c.difensore].length;j++) if (stato.giocatori[c.difensore][j].id === c.giocatoreAvv) { gA = stato.giocatori[c.difensore][j]; break; }
   if (gP && !gP.portiere && !gP.espulso) gP.stamina = Math.max(0, gP.stamina - 1);
   if (gA && !gA.portiere && !gA.espulso) gA.stamina = Math.max(0, gA.stamina - 1);
-  mostraVistaCampo();
+  nascondiCarteOverlay();
   if (motivoFallo) {
     suonaFischietto('fallo');
     var sqF = motivoFallo;
@@ -1981,6 +1970,8 @@ function fineTempoOPartita() {
 function mostraFinestraFineTempo(cb) { var h = '<div style="text-align:center;padding:10px">' + '<h2 style="color:#ffd700;margin-bottom:12px">⏸️ FINE PRIMO TEMPO</h2>' + '<p style="font-size:32px;font-weight:bold;margin:12px 0">' + '<span style="color:#4dabf7">' + stato.punteggio.tu + '</span> - <span style="color:#ff6b6b">' + stato.punteggio.cpu + '</span>' + '</p><p style="font-size:14px;color:#ffd700;margin:8px 0">🔄 Cambio campo!</p>' + '<p style="font-size:12px;color:#aaa">Ripresa tra 3 secondi...</p></div>'; document.getElementById('modale-box').innerHTML = h; document.getElementById('modale').classList.remove('nascosto'); setTimeout(function() { document.getElementById('modale').classList.add('nascosto'); if (cb) cb(); }, 3000); }
 function finePartita() {
   stato.partitaFinita = true; suonaFischietto('fine-partita'); fermaSottofondo(); salvaAmmonizioniInLocalStorage();
+  nascondiBannerTop();
+  nascondiCarteOverlay();
   if (TORNEO_MODE === 'seriea') { salvaRisultatoTorneo(); return; }
   var msg = stato.punteggio.tu > stato.punteggio.cpu ? '🏆 HAI VINTO!' : stato.punteggio.cpu > stato.punteggio.tu ? '😢 CPU vince' : '🤝 Pareggio';
   document.getElementById('modale-box').innerHTML = '<h2>FINE PARTITA</h2>' + '<p style="font-size:36px;font-weight:bold;margin:10px 0">' + '<span style="color:#4dabf7">' + stato.punteggio.tu + '</span> - <span style="color:#ff6b6b">' + stato.punteggio.cpu + '</span>' + '</p><p style="font-size:18px;color:#ffd700;margin:12px 0">' + msg + '</p>' + '<button class="primario" onclick="location.reload()">NUOVA PARTITA</button>' + '<button onclick="mostraMenuPrincipale()">MENU</button>';
