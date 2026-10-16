@@ -506,7 +506,6 @@ var scalaCorrente = 1;
 
 /* ============================================================
    POSIZIONI PIXEL DELLE COPPIE (1600x900)
-   Ogni coppia = TU a sinistra, CPU a destra
    ============================================================ */
 var POSIZIONI_COPPIE = [
   { x: 520,  y: 570, angolo: 180 },  // #1  Z1 sup
@@ -521,18 +520,17 @@ var POSIZIONI_COPPIE = [
   { x: 1150, y: 720, angolo: 180 }   // #10 Z5 inf
 ];
 
-/* Mappa corretta: ogni coppia associata alla zona/meta in base alla posizione visiva */
 var MAPPA_COPPIE = [
-  { zona: 1, meta: 'sup' },  // #1  (x=520,  y=570)
-  { zona: 1, meta: 'inf' },  // #2  (x=480,  y=720)
-  { zona: 2, meta: 'sup' },  // #3  (x=670,  y=500)
-  { zona: 2, meta: 'inf' },  // #4  (x=630,  y=820)
-  { zona: 3, meta: 'sup' },  // #5  (x=820,  y=570)
-  { zona: 3, meta: 'inf' },  // #6  (x=820,  y=720)
-  { zona: 4, meta: 'sup' },  // #7  (x=972,  y=509)
-  { zona: 4, meta: 'inf' },  // #8  (x=1000, y=820)
-  { zona: 5, meta: 'sup' },  // #9  (x=1120, y=570)
-  { zona: 5, meta: 'inf' }   // #10 (x=1150, y=720)
+  { zona: 1, meta: 'sup' },
+  { zona: 1, meta: 'inf' },
+  { zona: 2, meta: 'sup' },
+  { zona: 2, meta: 'inf' },
+  { zona: 3, meta: 'sup' },
+  { zona: 3, meta: 'inf' },
+  { zona: 4, meta: 'sup' },
+  { zona: 4, meta: 'inf' },
+  { zona: 5, meta: 'sup' },
+  { zona: 5, meta: 'inf' }
 ];
 
 var POSIZIONI_PORTIERI = [
@@ -544,15 +542,14 @@ var DISTANZA_COPPIA_PX = 50;
 
 /* ============================================================
    ROSE REALI (override per Juventus e Napoli)
-   Formato: 11 titolari (1 POR, 4 DIF, 3 CEN, 3 ATT) + 7 panchina
    ============================================================ */
 var ROSE_REALI = {
   juventus: {
     nome: 'Juventus',
     portiere: ['Vicario', 'Grabara'],
-    difensori: ['Kalulu', 'Bremer', 'Lucumì', 'Celik'],           // 2 terzini + 2 centrali
-    centrocampisti: ['Locatelli', 'Sarr', 'McKennie'],             // regista + 2 mezzali
-    attaccanti: ['Conceição', 'Yildiz', 'Kolo Muani'],             // ala dx + ala sx + centravanti
+    difensori: ['Kalulu', 'Bremer', 'Lucumì', 'Celik'],
+    centrocampisti: ['Locatelli', 'Sarr', 'McKennie'],
+    attaccanti: ['Conceição', 'Yildiz', 'Kolo Muani'],
     panchina: {
       por: ['Grabara'],
       dif: ['Gatti', 'Cambiaso'],
@@ -575,9 +572,6 @@ var ROSE_REALI = {
   }
 };
 
-/* ============================================================
-   ADATTA SCENA
-   ============================================================ */
 function adattaScena() {
   var scena = document.getElementById('scena');
   var wrapper = document.getElementById('scena-wrapper');
@@ -699,9 +693,6 @@ var SEMI = { palla:{emoji:'⚽',nome:'Palla'}, coppa:{emoji:'🏆',nome:'Coppa'}
 var SEMI_KEYS = Object.keys(SEMI);
 var VALORI = [ {valore:14,label:'A'},{valore:13,label:'K'},{valore:12,label:'Q'},{valore:11,label:'J'},{valore:10,label:'10'},{valore:9,label:'9'},{valore:8,label:'8'},{valore:7,label:'7'},{valore:6,label:'6'},{valore:5,label:'5'},{valore:4,label:'4'},{valore:3,label:'3'},{valore:2,label:'2'} ];
 
-/* ============================================================
-   MAZZO
-   ============================================================ */
 function creaMazzoPoker() { var mazzo=[], id=0; for (var i=0;i<SEMI_KEYS.length;i++){ for (var j=0;j<VALORI.length;j++){ mazzo.push({id:'c'+(id++), seme:SEMI_KEYS[i], valore:VALORI[j].valore, label:VALORI[j].label}); } } return mescola(mazzo); }
 function mescola(arr) { var a=arr.slice(); for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function creaMazzoBonus() { var m = []; for (var i=0;i<3;i++) m.push('contrasto-sicuro'); for (var j=0;j<3;j++) m.push('parata-super'); for (var k=0;k<3;k++) m.push('gol-super'); for (var l=0;l<3;l++) m.push('passaggio-lungo'); return mescola(m); }
@@ -748,12 +739,6 @@ function creaPalloneSVG() {
     '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#fff" opacity="0.55"/></svg>';
 }
 
-/* ============================================================
-   ZONE LOGICHE
-   zonaLogicaDi(g) = zona logica (dal punto di vista TU)
-   Per il TU: zona fisica == zona logica
-   Per la CPU: zona logica = 6 - zona fisica
-   ============================================================ */
 function zonaLogicaDi(g) { return g.squadra === 'tu' ? g.zona : (6 - g.zona); }
 function giocatoriInZona(sq, zonaLogica, escludiPortiere) {
   return stato.giocatori[sq].filter(function(g){
@@ -790,20 +775,15 @@ function mostraBonusBanner(testo) { var b = document.getElementById('bonus-banne
 function consumaBonus(sq, tipo) { var idx = stato.bonus[sq].indexOf(tipo); if (idx > -1) { stato.bonus[sq].splice(idx, 1); log('🎴 ' + (sq === 'tu' ? 'TU' : 'CPU') + ' usa: ' + NOMI_BONUS[tipo].nome, 'highlight'); return true; } return false; }
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
 
-/* ============================================================
-   CREAZIONE GIOCATORI E PANCHINA
-   Usa ROSE_REALI se disponibile per la squadra, altrimenti ROSE
-   ============================================================ */
 function getRosa(sqId) {
   if (ROSE_REALI[sqId]) {
     var r = ROSE_REALI[sqId];
-    // Adatta al formato usato da creaGiocatori
     return {
       nome: r.nome,
       portiere: r.portiere,
-      difensori: r.difensori.slice(0,2),          // 2 per Z1
-      difensori_alta: r.difensori.slice(2,4),     // 2 per Z5
-      centrocampisti: r.centrocampisti.concat(r.attaccanti.slice(0,3))  // 6 per Z2-Z3-Z4
+      difensori: r.difensori.slice(0,2),
+      difensori_alta: r.difensori.slice(2,4),
+      centrocampisti: r.centrocampisti.concat(r.attaccanti.slice(0,3))
     };
   }
   return ROSE[sqId];
@@ -815,17 +795,14 @@ function creaGiocatori(sq) {
   var rosa = getRosa(sqId); if (!rosa) return g;
   function z(zonaLogica) { return sq === 'tu' ? zonaLogica : (6 - zonaLogica); }
 
-  // Portiere
   g.push({ id:sq+'_'+(id++), squadra:sq, zona:z(0), ruolo:'POR', portiere:true,
     stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false,
     nome: rosa.portiere[0] });
 
-  // 2 Difensori (Z1 logica)
   for (var i=0;i<2;i++) g.push({ id:sq+'_'+(id++), squadra:sq, zona:z(1), ruolo:'DIF', portiere:false,
     stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false,
     nome: rosa.difensori[i] || ('DIF'+(i+1)) });
 
-  // 6 Centrocampisti (2 in Z2, 2 in Z3, 2 in Z4 logiche)
   var cen = rosa.centrocampisti;
   for (var zz=2; zz<=4; zz++) for (var k=0;k<2;k++) {
     var idx = (zz-2)*2 + k;
@@ -834,7 +811,6 @@ function creaGiocatori(sq) {
       nome: cen[idx] || ('CEN'+(idx+1)) });
   }
 
-  // 2 Difensori alti (Z5 logica)
   for (var j=0;j<2;j++) g.push({ id:sq+'_'+(id++), squadra:sq, zona:z(5), ruolo:'DIF', portiere:false,
     stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false,
     nome: rosa.difensori_alta[j] || ('DIF'+(j+3)) });
@@ -914,8 +890,8 @@ function renderHeader() {
   var sqCasa, sqTrasf;
   if (URL_CASA && URL_TRASFERTA) { sqCasa = URL_CASA; sqTrasf = URL_TRASFERTA; }
   else { sqCasa = stato.squadraTU; sqTrasf = stato.squadraCPU; }
-  var nomeCasa = SQUADRE[sqCasa] ? SQUADRE[sqCasa].nome : sqCasa;
-  var nomeTrasf = SQUADRE[sqTrasf] ? SQUADRE[sqTrasf].nome : sqTrasf;
+  var nomeCasa = (SQUADRE[sqCasa] && SQUADRE[sqCasa].nome) ? SQUADRE[sqCasa].nome : (ROSE_REALI[sqCasa] ? ROSE_REALI[sqCasa].nome : sqCasa);
+  var nomeTrasf = (SQUADRE[sqTrasf] && SQUADRE[sqTrasf].nome) ? SQUADRE[sqTrasf].nome : (ROSE_REALI[sqTrasf] ? ROSE_REALI[sqTrasf].nome : sqTrasf);
   var golCasa, golTrasf;
   if (sqCasa === stato.squadraTU) { golCasa = stato.punteggio.tu; golTrasf = stato.punteggio.cpu; }
   else { golCasa = stato.punteggio.cpu; golTrasf = stato.punteggio.tu; }
@@ -938,10 +914,6 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
-/* ============================================================
-   RENDER CAMPO
-   TU a sinistra, CPU a destra in ogni coppia
-   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -969,14 +941,14 @@ function renderCampo() {
     var indice = (metaGioco === 'sup') ? 0 : 1;
     var gTU = tuG[indice] || tuG[0] || null;
     var gCPU = cpuG[indice] || cpuG[0] || null;
-    // TU a SINISTRA: usa -dx
+    // TU a SINISTRA: usa (dx) che con angolo=180 è negativo (-25) → sinistra
     if (gTU) {
       var wrapTU = document.createElement('div');
       wrapTU.className = 'pedina-wrapper tu';
       wrapTU.dataset.giocatoreId = gTU.id;
       wrapTU.style.position = 'absolute';
-      wrapTU.style.left = (-dx) + 'px';
-      wrapTU.style.top = (-dy) + 'px';
+      wrapTU.style.left = (dx) + 'px';
+      wrapTU.style.top = (dy) + 'px';
       wrapTU.style.transform = 'translate(-50%, -50%)';
       wrapTU.style.display = 'flex';
       wrapTU.style.flexDirection = 'column';
@@ -986,14 +958,14 @@ function renderCampo() {
       wrapTU.appendChild(creaInfoSotto(gTU));
       coppia.appendChild(wrapTU);
     }
-    // CPU a DESTRA: usa +dx
+    // CPU a DESTRA: usa (-dx) che con angolo=180 è positivo (+25) → destra
     if (gCPU) {
       var wrapCPU = document.createElement('div');
       wrapCPU.className = 'pedina-wrapper cpu';
       wrapCPU.dataset.giocatoreId = gCPU.id;
       wrapCPU.style.position = 'absolute';
-      wrapCPU.style.left = (dx) + 'px';
-      wrapCPU.style.top = (dy) + 'px';
+      wrapCPU.style.left = (-dx) + 'px';
+      wrapCPU.style.top = (-dy) + 'px';
       wrapCPU.style.transform = 'translate(-50%, -50%)';
       wrapCPU.style.display = 'flex';
       wrapCPU.style.flexDirection = 'column';
@@ -1106,9 +1078,6 @@ function creaPedinaEl(g, anim) {
 }
 function nascondiEvidenzia() { var els = document.querySelectorAll('.evidenzia-coppia'); for (var i=0;i<els.length;i++) els[i].remove(); }
 
-/* ============================================================
-   SETUP PARTITA
-   ============================================================ */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
