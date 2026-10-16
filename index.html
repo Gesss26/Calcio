@@ -697,7 +697,27 @@ function creaPalloneSVG() {
     '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#fff" opacity="0.55"/></svg>';
 }
 
-function zonaLogicaDi(g) { return g.squadra === 'tu' ? g.zona : (6 - g.zona); }
+/* ============================================================
+   CORREZIONE FONDAMENTALE: zonaLogicaDi tiene conto della
+   posizione di TU sul campo (tuASinistra).
+   ============================================================ */
+function tuASinistra() {
+  var casaASinistra = !stato.invertiCoppie;
+  return (stato.tuECasa === casaASinistra);
+}
+
+function zonaLogicaDi(g) {
+  var tuSin = tuASinistra();
+  if (g.squadra === 'tu') {
+    // Se TU è a sinistra, la zona logica di TU coincide con la zona fisica.
+    // Se TU è a destra, la zona logica di TU è specchiata (6 - zona fisica).
+    return tuSin ? g.zona : (6 - g.zona);
+  } else {
+    // La CPU è sempre nella posizione opposta a TU.
+    return tuSin ? (6 - g.zona) : g.zona;
+  }
+}
+
 function giocatoriInZona(sq, zonaLogica, escludiPortiere) {
   return stato.giocatori[sq].filter(function(g){
     if (escludiPortiere && g.portiere) return false;
@@ -858,7 +878,8 @@ function renderHeader() {
 }
 
 /* ============================================================
-   RENDER CAMPO
+   RENDER CAMPO (semplificato: usa direttamente zonaGioco
+   perché zonaLogicaDi ora gestisce la specchiatura)
    ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -867,8 +888,7 @@ function renderCampo() {
   var vecchie = scena.querySelectorAll('.coppia-render, .portiere-render');
   for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
 
-  var casaASinistra = !stato.invertiCoppie;
-  var tuASinistra = (stato.tuECasa === casaASinistra);
+  var tuSin = tuASinistra();
 
   for (var idx = 0; idx < POSIZIONI_COPPIE.length; idx++) {
     var p = POSIZIONI_COPPIE[idx];
@@ -885,15 +905,16 @@ function renderCampo() {
     var rad = p.angolo * Math.PI / 180;
     var dx = Math.cos(rad) * (DISTANZA_COPPIA_PX / 2);
     var dy = Math.sin(rad) * (DISTANZA_COPPIA_PX / 2);
-    var zonaTU = tuASinistra ? zonaGioco : (6 - zonaGioco);
-    var tuG = giocatoriInZona('tu', zonaTU, false).filter(function(g){ return !g.portiere && !g.espulso; });
+    // zonaGioco è la zona logica per la CPU (che è sempre nella posizione opposta a TU)
+    // Per TU, la zona logica è la stessa di zonaGioco, ma zonaLogicaDi gestisce la specchiatura.
+    var tuG = giocatoriInZona('tu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var cpuG = giocatoriInZona('cpu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var indice = (metaGioco === 'sup') ? 0 : 1;
     var gTU = tuG[indice] || tuG[0] || null;
     var gCPU = cpuG[indice] || cpuG[0] || null;
 
-    var dxTU = tuASinistra ? (dx) : (-dx);
-    var dxCPU = tuASinistra ? (-dx) : (dx);
+    var dxTU = tuSin ? (dx) : (-dx);
+    var dxCPU = tuSin ? (-dx) : (dx);
 
     if (gTU) {
       var wrapTU = document.createElement('div');
@@ -901,7 +922,7 @@ function renderCampo() {
       wrapTU.dataset.giocatoreId = gTU.id;
       wrapTU.style.position = 'absolute';
       wrapTU.style.left = dxTU + 'px';
-      wrapTU.style.top = (dy * (tuASinistra ? 1 : -1)) + 'px';
+      wrapTU.style.top = (dy * (tuSin ? 1 : -1)) + 'px';
       wrapTU.style.transform = 'translate(-50%, -50%)';
       wrapTU.style.display = 'flex';
       wrapTU.style.flexDirection = 'column';
@@ -917,7 +938,7 @@ function renderCampo() {
       wrapCPU.dataset.giocatoreId = gCPU.id;
       wrapCPU.style.position = 'absolute';
       wrapCPU.style.left = dxCPU + 'px';
-      wrapCPU.style.top = (dy * (tuASinistra ? -1 : 1)) + 'px';
+      wrapCPU.style.top = (dy * (tuSin ? -1 : 1)) + 'px';
       wrapCPU.style.transform = 'translate(-50%, -50%)';
       wrapCPU.style.display = 'flex';
       wrapCPU.style.flexDirection = 'column';
@@ -930,8 +951,8 @@ function renderCampo() {
     scena.appendChild(coppia);
   }
 
-  var portiereTU_index = tuASinistra ? 0 : 1;
-  var portiereCPU_index = tuASinistra ? 1 : 0;
+  var portiereTU_index = tuSin ? 0 : 1;
+  var portiereCPU_index = tuSin ? 1 : 0;
   var gPorTU = stato.giocatori.tu.filter(function(g){ return g.portiere && !g.espulso; })[0];
   var gPorCPU = stato.giocatori.cpu.filter(function(g){ return g.portiere && !g.espulso; })[0];
   if (gPorTU) {
@@ -1241,11 +1262,6 @@ function animaPallaInZona(gDa, gA, cb, saltaZone) {
   requestAnimationFrame(anima);
 }
 
-/* ============================================================
-   CALCIO D'INIZIO CORRETTO
-   - Non passa mai indietro
-   - La direzione è sempre coerente con l'attacco
-   ============================================================ */
 function eseguiCalcioIniziale(squadra) {
   mostraVistaCampo();
   var v0 = document.querySelectorAll('.palla-centro');
@@ -1265,34 +1281,21 @@ function eseguiCalcioIniziale(squadra) {
     return;
   }
   var dirAtt = direzionePerSquadra(squadra);
-  // Zona di destinazione: sempre in avanti (o laterale), mai indietro
   var zonaDest = 3 + dirAtt;
   if (zonaDest < 1) zonaDest = 1;
   if (zonaDest > 5) zonaDest = 5;
-  // Se per qualche motivo la zona di destinazione è "dietro" rispetto alla zona 3,
-  // forza il passaggio laterale (resta in Z3)
+  // Sicurezza: la palla non deve mai andare indietro
   if ((dirAtt > 0 && zonaDest < 3) || (dirAtt < 0 && zonaDest > 3)) {
     zonaDest = 3;
   }
   var compagni = giocatoriInZona(squadra, zonaDest, false).filter(function(g){
     return !g.portiere && !g.espulso;
   });
-  // Se non ci sono compagni in zonaDest, prova in Z3 (laterale)
   if (compagni.length === 0 && zonaDest !== 3) {
     zonaDest = 3;
     compagni = giocatoriInZona(squadra, 3, false).filter(function(g){
       return !g.portiere && !g.espulso && g.id !== gB.id;
     });
-  }
-  // Se ancora nessuno, prova in avanti di 2 zone
-  if (compagni.length === 0) {
-    var z2 = 3 + dirAtt * 2;
-    if (z2 >= 1 && z2 <= 5) {
-      zonaDest = z2;
-      compagni = giocatoriInZona(squadra, z2, false).filter(function(g){
-        return !g.portiere && !g.espulso;
-      });
-    }
   }
   var gA = compagni[0];
   stato.zonaPalla = 3; stato.metaContesa = 'inf';
@@ -1300,7 +1303,6 @@ function eseguiCalcioIniziale(squadra) {
   renderCampo(); renderHeader();
   aggiornaSottofondoPerZona(3);
   if (!gA) {
-    // Nessun compagno: la palla resta a gB, si procede al contrasto
     stato.pallaInAnimazione = false;
     stato.possessore = squadra;
     stato.giocatorePalla = gB.id;
@@ -1923,12 +1925,6 @@ function gestisciAngolo(att, dif) { if (stato.partitaFinita) return; log('🚩 A
 function gestisciFuori(att, dif) { log('❌ Fuori!'); gestisciParata(att, dif); }
 function flashVincitore(sq) { var f = document.getElementById('flash'); f.classList.remove('tu','cpu','attivo'); void f.offsetWidth; f.classList.add(sq, 'attivo'); setTimeout(function() { f.classList.remove('attivo'); }, 600); }
 
-/* ============================================================
-   FINE TEMPO / PARTITA
-   Il calcio d'inizio del 2° tempo va alla squadra che NON ha
-   vinto la moneta (regola del calcio). Il cambio campo avviene
-   correttamente.
-   ============================================================ */
 function fineTempoOPartita() {
   if (stato.partitaFinita) return;
   if (stato.tempo === 1) {
@@ -1943,7 +1939,6 @@ function fineTempoOPartita() {
     renderHeader();
     mostraFinestraFineTempo(function() { 
       if (stato.partitaFinita) return; 
-      // Il calcio d'inizio del secondo tempo va a chi NON ha vinto la moneta
       var chiBatte = stato.monetaVinta === 'tu' ? 'cpu' : 'tu';
       eseguiCalcioIniziale(chiBatte); 
     });
