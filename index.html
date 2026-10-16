@@ -30,8 +30,9 @@
   .minuto { font-size: 15px; font-weight: bold; color: #ffd700; background: rgba(0,0,0,0.5); padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.4); min-width: 90px; text-align: center; }
   .info-top { position: absolute; right: 84px; top: 50%; transform: translateY(-50%); font-size: 11px; text-align: right; line-height: 1.3; color: #aaa; }
   .info-top span { color: #ffd700; font-weight: bold; }
-  .topbar-buttons { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; }
-  .btn-icona { width: 34px; height: 34px; background: #0f3460; color: #fff; border: 2px solid #4dabf7; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  /* Bottoni topbar spostati sotto la topbar, in alto a destra dell'area gioco */
+  .topbar-buttons { position: fixed; top: 58px; right: 10px; z-index: 60; display: flex; gap: 4px; }
+  .btn-icona { width: 34px; height: 34px; background: #0f3460; color: #fff; border: 2px solid #4dabf7; border-radius: 8px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
   .btn-icona:hover:not(:disabled) { background: #4dabf7; color: #0f3460; }
   .btn-icona:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -303,7 +304,7 @@
     .minuto { font-size: 10px; padding: 1px 5px; min-width: 55px; border-radius: 4px; }
     .info-top { font-size: 8px; right: 60px; line-height: 1.05; }
     .btn-icona { width: 24px; height: 24px; font-size: 11px; border-width: 1px; border-radius: 5px; }
-    .topbar-buttons { gap: 2px; right: 4px; }
+    .topbar-buttons { gap: 2px; right: 6px; top: 36px; }
     .btn-toggle-panel { display: flex; position: absolute; top: 4px; right: 4px; z-index: 50; width: 26px; height: 26px; background: rgba(255,215,0,0.9); color: #16213e; border: none; border-radius: 6px; font-size: 13px; font-weight: bold; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
     .btn-toggle-panel:active { background: #fff; }
   }
@@ -339,10 +340,11 @@
       Tempo <span id="tempo">1°</span> · Mano <span id="mano">1</span>/46<br>
       Palla <span id="zona-palla">Z3</span> · <span id="attacco-lato">→</span>
     </div>
-    <div class="topbar-buttons">
-      <button class="btn-icona" onclick="apriLog()">📋</button>
-      <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
-    </div>
+  </div>
+
+  <div class="topbar-buttons">
+    <button class="btn-icona" onclick="apriLog()">📋</button>
+    <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
   </div>
 
   <div class="area-gioco">
@@ -812,10 +814,12 @@ function apriImpostazioni() {
       '<button class="primario" onclick="esportaCampionato()">💾 Salva campionato su file</button>' +
       '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
+      '<button onclick="apriEditorCampo()">🎯 Apri Editor Campo</button>' +
       '<button onclick="chiudiModale()">← Chiudi</button>' +
     '</div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
 }
+function apriEditorCampo() { window.open('editor-campo-px-v3.html', '_blank'); }
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 function apriLog() {
@@ -856,7 +860,8 @@ function renderHeader() {
 
 /* ============================================================
    RENDER CAMPO
-   TU a sinistra se (tuECasa && !invertiCoppie) || (!tuECasa && invertiCoppie)
+   TU a sinistra se (tuECasa === !invertiCoppie)
+   Specchiatura zone TU quando TU è a destra
    ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
@@ -865,10 +870,8 @@ function renderCampo() {
   var vecchie = scena.querySelectorAll('.coppia-render, .portiere-render');
   for (var i = 0; i < vecchie.length; i++) vecchie[i].remove();
 
-  // Calcolo posizione orizzontale di TU/CPU
-  // Al 1° tempo: TU a sinistra se TU è in casa
-  // Al 2° tempo (invertiCoppie=true): tutto si specchia
-   var casaASinistra = !stato.invertiCoppie;
+  // Casa a sinistra al 1° tempo. Se invertiCoppie, casa a destra.
+  var casaASinistra = !stato.invertiCoppie;
   var tuASinistra = (stato.tuECasa === casaASinistra);
 
   for (var idx = 0; idx < POSIZIONI_COPPIE.length; idx++) {
@@ -886,13 +889,15 @@ function renderCampo() {
     var rad = p.angolo * Math.PI / 180;
     var dx = Math.cos(rad) * (DISTANZA_COPPIA_PX / 2);
     var dy = Math.sin(rad) * (DISTANZA_COPPIA_PX / 2);
-    var tuG = giocatoriInZona('tu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
+    // Zona per i giocatori TU: specchia se TU è a destra (Z1<->Z5, Z2<->Z4)
+    var zonaTU = tuASinistra ? zonaGioco : (6 - zonaGioco);
+    var tuG = giocatoriInZona('tu', zonaTU, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var cpuG = giocatoriInZona('cpu', zonaGioco, false).filter(function(g){ return !g.portiere && !g.espulso; });
     var indice = (metaGioco === 'sup') ? 0 : 1;
     var gTU = tuG[indice] || tuG[0] || null;
     var gCPU = cpuG[indice] || cpuG[0] || null;
 
-    // dx negativo (angolo 180) → sinistra. dxTU e dxCPU dipendono da tuASinistra
+    // dxTU e dxCPU: chi è a sinistra visivamente
     var dxTU = tuASinistra ? (dx) : (-dx);
     var dxCPU = tuASinistra ? (-dx) : (dx);
 
@@ -985,7 +990,6 @@ function renderCampo() {
   renderingCampoInCorso = false;
 }
 
-/* FIX palla ai piedi: usa .pedina invece del wrapper (che include nome + info + barra) */
 function creaPallaAiPiedi(zonaId, idG) {
   var v = document.querySelectorAll('.palla-centro');
   for (var i = 0; i < v.length; i++) v[i].remove();
@@ -993,7 +997,6 @@ function creaPallaAiPiedi(zonaId, idG) {
   for (var j = 0; j < e.length; j++) e[j].remove();
   var wrapperEl = document.querySelector('[data-giocatore-id="' + idG + '"]');
   if (!wrapperEl) return;
-  // Usa la pedina interna per calcolare la posizione ai piedi
   var pedinaEl = wrapperEl.querySelector('.pedina') || wrapperEl;
   var scena = document.getElementById('scena');
   var r = pedinaEl.getBoundingClientRect();
@@ -1111,16 +1114,14 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   ZONE_CONFIG[0].proprietario = 'tu';
   ZONE_CONFIG[6].proprietario = 'cpu';
 
-  // Stabilisci se TU è la squadra in casa
   if (casaSquadra) {
     stato.tuECasa = (casaSquadra === sqTU);
   } else if (URL_CASA) {
     stato.tuECasa = (URL_CASA === sqTU);
   } else {
-    stato.tuECasa = true; // default: TU in casa
+    stato.tuECasa = true;
   }
 
-  // Direzione di attacco TU: se TU è a sinistra, attacca verso destra (+1)
   if (stato.tuECasa) {
     stato.direzioneAttaccoTU = 1;
   } else {
@@ -1928,9 +1929,6 @@ function salvaRisultatoTorneo() {
   setTimeout(function() { location.href = 'seriea2027.html?risultato=' + encodeURIComponent(PARTITA_TORNEO); }, 1500);
 }
 
-/* ============================================================
-   SOSTITUZIONI
-   ============================================================ */
 function apriSostituzioni() {
   if (stato.sostBloccate) { alert('Sostituzioni bloccate durante il contrasto.'); return; }
   if (stato.partitaFinita) return;
