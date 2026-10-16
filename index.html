@@ -94,7 +94,8 @@
   .flash-vincitore.attivo { animation: flash 0.5s ease-out; }
   @keyframes flash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
-  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; background: rgba(10,15,30,0.9); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 20px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; }
+  /* ===== BANNER CARTE INGRANDITO DI 70PX VERSO IL BASSO ===== */
+  .carte-panel { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 96%; background: rgba(10,15,30,0.9); backdrop-filter: blur(10px); border: 2px solid rgba(255,215,0,0.5); border-radius: 12px; padding: 20px 14px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 30; box-shadow: 0 8px 32px rgba(0,0,0,0.7); transition: opacity 0.3s, transform 0.3s; padding-bottom: 84px; }
   .carte-panel.nascosto { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(-20px); }
 
   .info-mano { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; font-size: 12px; }
@@ -119,12 +120,13 @@
   .mano-sezione .mano-label { font-size: 11px; font-weight: bold; text-transform: uppercase; }
   .mano-sezione.tu .mano-label { color: #4dabf7; }
 
-  .carte { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: center; }
-  .carta { width: 64px; height: 92px; background: #fff; color: #222; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 6px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
+  /* ===== CARTE INGRANDITE ===== */
+  .carte { display: flex; gap: 8px; flex-wrap: nowrap; justify-content: center; }
+  .carta { width: 78px; height: 112px; background: #fff; color: #222; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7px 7px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 3px 6px rgba(0,0,0,0.5); transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s; position: relative; }
   .carta:hover { transform: translateY(-4px); }
-  .carta .valore-alto { font-size: 17px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
-  .carta .seme-centro { font-size: 40px; line-height: 1; }
-  .carta .valore-basso { font-size: 17px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
+  .carta .valore-alto { font-size: 20px; font-weight: 900; align-self: flex-start; font-family: 'Georgia', serif; }
+  .carta .seme-centro { font-size: 48px; line-height: 1; }
+  .carta .valore-basso { font-size: 20px; font-weight: 900; align-self: flex-end; transform: rotate(180deg); font-family: 'Georgia', serif; }
   .carta.selezionata { border-color: #ffd700; background: #fff9c4; transform: translateY(-8px); box-shadow: 0 0 16px #ffd700; }
   .carta.seme-guidatore { box-shadow: 0 0 8px rgba(255,215,0,0.7); }
   .carta.vincitrice { border-color: #4ade80; box-shadow: 0 0 16px #4ade80; }
@@ -160,16 +162,12 @@
   .bonus-slot .bonus-carta.gol-super { background: linear-gradient(135deg, #14532d, #22c55e); border: 2px solid #bbf7d0; }
   .bonus-slot .bonus-carta.passaggio-lungo { background: linear-gradient(135deg, #581c87, #a855f7); border: 2px solid #e9d5ff; }
 
-  .sost-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.35); border-radius: 10px; padding: 6px 10px; flex-shrink: 0; }
-  .sost-panel .sost-btn { background: linear-gradient(135deg, #0f3460, #16213e); border: 2px solid #4dabf7; border-radius: 10px; padding: 10px 16px; cursor: pointer; color: #fff; font-weight: bold; font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: all 0.25s; }
-  .sost-panel .sost-btn:hover:not(:disabled) { background: linear-gradient(135deg, #4dabf7, #2563eb); border-color: #ffd700; }
-  .sost-panel .sost-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .sost-panel .sost-btn .icona { font-size: 24px; }
-  .sost-panel .sost-btn .testo { font-size: 10px; }
+  /* ===== SOSTITUZIONI SPOSTATE SOTTO IMPOSTAZIONI ===== */
+  .sost-panel { display: none; }
 
   .info-carte { display: flex; gap: 14px; font-size: 11px; color: #aaa; background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.3); }
   .info-carte strong { color: #ffd700; }
-  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  #azioni-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 70px; }
   #azioni-container button { padding: 8px 20px; font-size: 13px; }
 
   button { background: #0f3460; color: #fff; border: 2px solid #4dabf7; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; margin: 2px; }
@@ -296,6 +294,14 @@
 
   .btn-toggle-panel { display: none; }
 
+  /* ===== VOLUMI AUDIO ===== */
+  .volume-control { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,215,0,0.3); margin: 4px 0; }
+  .volume-control label { font-size: 12px; color: #ffd700; min-width: 60px; text-align: left; font-weight: bold; }
+  .volume-control input[type=range] { flex: 1; height: 6px; -webkit-appearance: none; background: #0f3460; border-radius: 3px; outline: none; }
+  .volume-control input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+  .volume-control input[type=range]::-moz-range-thumb { width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
+  .volume-control .vol-val { font-size: 11px; color: #aaa; min-width: 35px; text-align: right; font-family: monospace; }
+
   @media (orientation: landscape) and (max-height: 600px) {
     .topbar { min-height: 30px; padding: 2px 6px; border-bottom-width: 1px; }
     .risultato { font-size: 14px; letter-spacing: 0.5px; }
@@ -395,12 +401,6 @@
                 <div class="pila-carte" id="scarti-pila"></div>
                 <div class="pila-count scarto" id="scarti-count">0</div>
               </div>
-            </div>
-            <div class="sost-panel">
-              <button class="sost-btn" id="btn-sost" onclick="apriSostituzioni()">
-                <div class="icona">🔄</div>
-                <div class="testo">SOSTITUZIONI</div>
-              </button>
             </div>
           </div>
           <div class="info-carte">
@@ -506,16 +506,16 @@ var SCENA_H = 900;
 var scalaCorrente = 1;
 
 var POSIZIONI_COPPIE = [
-  { x: 500,  y: 550, angolo: 180 },
-  { x: 460,  y: 700, angolo: 180 },
+  { x: 500,  y: 530, angolo: 180 },
+  { x: 460,  y: 650, angolo: 180 },
   { x: 650,  y: 480, angolo: 180 },
   { x: 610,  y: 800, angolo: 180 },
-  { x: 800,  y: 550, angolo: 180 },
-  { x: 800,  y: 700, angolo: 180 },
-  { x: 950,  y: 490, angolo: 180 },
+  { x: 800,  y: 530, angolo: 180 },
+  { x: 800,  y: 650, angolo: 180 },
+  { x: 950,  y: 480, angolo: 180 },
   { x: 980,  y: 800, angolo: 180 },
-  { x: 1110, y: 550, angolo: 180 },
-  { x: 1130, y: 700, angolo: 180 }
+  { x: 1110, y: 530, angolo: 180 },
+  { x: 1130, y: 650, angolo: 180 }
 ];
 
 var MAPPA_COPPIE = [
@@ -532,8 +532,8 @@ var MAPPA_COPPIE = [
 ];
 
 var POSIZIONI_PORTIERI = [
-  { x: 350,  y: 620 },
-  { x: 1250, y: 620 }
+  { x: 400,  y: 570 },
+  { x: 1200, y: 570 }
 ];
 
 var DISTANZA_COPPIA_PX = 50;
@@ -601,22 +601,36 @@ function resetCampionatoSalvato() {
 }
 
 var audioCtx = null;
+/* ===== VOLUMI SEPARATI ===== */
+var volumeMusica = 0.5;
+var volumeTifosi = 0.5;
+var volumeEffetti = 0.5;
+
+function aggiornaVolumeSottofondo() {
+  if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return;
+  var ora = audioCtx.currentTime;
+  var target = (stato.zonaPalla === 1 || stato.zonaPalla === 5) ? 0.14 * volumeTifosi : 
+               (stato.zonaPalla === 0 || stato.zonaPalla === 6) ? 0.05 * volumeTifosi : 0.04 * volumeTifosi;
+  sottofondo.gain.gain.cancelScheduledValues(ora);
+  sottofondo.gain.gain.linearRampToValueAtTime(target, ora + 0.6);
+}
+
 function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
-function suonaFischietto(tipo) { tipo = tipo || 'fallo'; initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata, fb, fm; if (tipo === 'fallo') { durata=0.4; fb=2200; fm=30; } else if (tipo === 'fine-tempo') { durata=1.2; fb=2400; fm=25; } else if (tipo === 'fine-partita') { durata=1.8; fb=2500; fm=20; } else { durata=0.3; fb=2200; fm=30; } var o = audioCtx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(fb, ora); var l = audioCtx.createOscillator(); l.frequency.setValueAtTime(fm, ora); var lg = audioCtx.createGain(); lg.gain.setValueAtTime(30, ora); l.connect(lg); lg.connect(o.frequency); var g = audioCtx.createGain(); g.gain.setValueAtTime(0, ora); g.gain.linearRampToValueAtTime(0.25, ora+0.05); g.gain.linearRampToValueAtTime(0.25, ora+durata-0.1); g.gain.linearRampToValueAtTime(0, ora+durata); o.connect(g); g.connect(audioCtx.destination); o.start(ora); l.start(ora); o.stop(ora+durata); l.stop(ora+durata); }
-function suonaCalcio() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var o = audioCtx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(180, ora); o.frequency.exponentialRampToValueAtTime(50, ora+0.12); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.35, ora); g.gain.exponentialRampToValueAtTime(0.001, ora+0.18); o.connect(g); g.connect(audioCtx.destination); o.start(ora); o.stop(ora+0.2); }
-function suonaScivolata() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 0.5; var bs = Math.floor(audioCtx.sampleRate * durata); var buffer = audioCtx.createBuffer(1, bs, audioCtx.sampleRate); var data = buffer.getChannelData(0); for (var i=0;i<bs;i++){ var t=i/bs; data[i]=(Math.random()*2-1)*(1-t); } var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(1200, ora); f.frequency.exponentialRampToValueAtTime(400, ora+durata); f.Q.value = 2; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.22, ora+0.05); g.gain.exponentialRampToValueAtTime(0.001, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
-function suonaPalo() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var o1 = audioCtx.createOscillator(); o1.type='triangle'; o1.frequency.setValueAtTime(1400, ora); o1.frequency.exponentialRampToValueAtTime(600, ora+0.08); var g1 = audioCtx.createGain(); g1.gain.setValueAtTime(0.5, ora); g1.gain.exponentialRampToValueAtTime(0.001, ora+0.25); o1.connect(g1); g1.connect(audioCtx.destination); o1.start(ora); o1.stop(ora+0.3); }
-function suonaFuori() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 0.6; var bs = Math.floor(audioCtx.sampleRate * durata); var buffer = audioCtx.createBuffer(1, bs, audioCtx.sampleRate); var data = buffer.getChannelData(0); for (var i=0;i<bs;i++){ var t=i/bs; data[i]=(Math.random()*2-1)*(1-t*0.8); } var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='highpass'; f.frequency.setValueAtTime(2500, ora); f.frequency.exponentialRampToValueAtTime(800, ora+durata); var gN = audioCtx.createGain(); gN.gain.setValueAtTime(0.0, ora); gN.gain.linearRampToValueAtTime(0.18, ora+0.05); gN.gain.exponentialRampToValueAtTime(0.001, ora+durata); noise.connect(f); f.connect(gN); gN.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
+function suonaFischietto(tipo) { tipo = tipo || 'fallo'; initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata, fb, fm; if (tipo === 'fallo') { durata=0.4; fb=2200; fm=30; } else if (tipo === 'fine-tempo') { durata=1.2; fb=2400; fm=25; } else if (tipo === 'fine-partita') { durata=1.8; fb=2500; fm=20; } else { durata=0.3; fb=2200; fm=30; } var o = audioCtx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(fb, ora); var l = audioCtx.createOscillator(); l.frequency.setValueAtTime(fm, ora); var lg = audioCtx.createGain(); lg.gain.setValueAtTime(30, ora); l.connect(lg); lg.connect(o.frequency); var g = audioCtx.createGain(); g.gain.setValueAtTime(0, ora); g.gain.linearRampToValueAtTime(0.25 * volumeEffetti, ora+0.05); g.gain.linearRampToValueAtTime(0.25 * volumeEffetti, ora+durata-0.1); g.gain.linearRampToValueAtTime(0, ora+durata); o.connect(g); g.connect(audioCtx.destination); o.start(ora); l.start(ora); o.stop(ora+durata); l.stop(ora+durata); }
+function suonaCalcio() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var o = audioCtx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(180, ora); o.frequency.exponentialRampToValueAtTime(50, ora+0.12); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.35 * volumeEffetti, ora); g.gain.exponentialRampToValueAtTime(0.001, ora+0.18); o.connect(g); g.connect(audioCtx.destination); o.start(ora); o.stop(ora+0.2); }
+function suonaScivolata() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 0.5; var bs = Math.floor(audioCtx.sampleRate * durata); var buffer = audioCtx.createBuffer(1, bs, audioCtx.sampleRate); var data = buffer.getChannelData(0); for (var i=0;i<bs;i++){ var t=i/bs; data[i]=(Math.random()*2-1)*(1-t); } var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(1200, ora); f.frequency.exponentialRampToValueAtTime(400, ora+durata); f.Q.value = 2; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.22 * volumeEffetti, ora+0.05); g.gain.exponentialRampToValueAtTime(0.001, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
+function suonaPalo() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var o1 = audioCtx.createOscillator(); o1.type='triangle'; o1.frequency.setValueAtTime(1400, ora); o1.frequency.exponentialRampToValueAtTime(600, ora+0.08); var g1 = audioCtx.createGain(); g1.gain.setValueAtTime(0.5 * volumeEffetti, ora); g1.gain.exponentialRampToValueAtTime(0.001, ora+0.25); o1.connect(g1); g1.connect(audioCtx.destination); o1.start(ora); o1.stop(ora+0.3); }
+function suonaFuori() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 0.6; var bs = Math.floor(audioCtx.sampleRate * durata); var buffer = audioCtx.createBuffer(1, bs, audioCtx.sampleRate); var data = buffer.getChannelData(0); for (var i=0;i<bs;i++){ var t=i/bs; data[i]=(Math.random()*2-1)*(1-t*0.8); } var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='highpass'; f.frequency.setValueAtTime(2500, ora); f.frequency.exponentialRampToValueAtTime(800, ora+durata); var gN = audioCtx.createGain(); gN.gain.setValueAtTime(0.0, ora); gN.gain.linearRampToValueAtTime(0.18 * volumeEffetti, ora+0.05); gN.gain.exponentialRampToValueAtTime(0.001, ora+durata); noise.connect(f); f.connect(gN); gN.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
 function creaBufferRumoreRosa(durataSecondi) { if (!audioCtx) return null; var sr = audioCtx.sampleRate; var bs = Math.floor(sr * durataSecondi); var buffer = audioCtx.createBuffer(1, bs, sr); var data = buffer.getChannelData(0); var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0; for (var i=0;i<bs;i++){ var w = Math.random()*2-1; b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856; b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980; data[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926; } return buffer; }
-function suonaEsultanza() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 3.0; var buffer = creaBufferRumoreRosa(durata); if (!buffer) return; var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(500, ora); f.frequency.linearRampToValueAtTime(900, ora+0.4); f.frequency.linearRampToValueAtTime(600, ora+durata); f.Q.value = 0.7; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.55, ora+0.25); g.gain.linearRampToValueAtTime(0.5, ora+1.6); g.gain.linearRampToValueAtTime(0.0, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
-function suonaTensione() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 2.5; var buffer = creaBufferRumoreRosa(durata); if (!buffer) return; var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(350, ora); f.frequency.linearRampToValueAtTime(550, ora+1.0); f.frequency.linearRampToValueAtTime(450, ora+durata); f.Q.value = 0.9; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.22, ora+0.4); g.gain.linearRampToValueAtTime(0.20, ora+1.8); g.gain.linearRampToValueAtTime(0.0, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
-function suonaBonus() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var note = [523, 659, 784, 1047]; for (var i=0;i<note.length;i++) { var o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(note[i], ora + i*0.1); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora + i*0.1); g.gain.linearRampToValueAtTime(0.2, ora + i*0.1 + 0.03); g.gain.exponentialRampToValueAtTime(0.001, ora + i*0.1 + 0.25); o.connect(g); g.connect(audioCtx.destination); o.start(ora + i*0.1); o.stop(ora + i*0.1 + 0.3); } }
-function suonaMoneta() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; for (var i=0;i<6;i++) { var o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(800 + i*100, ora + i*0.25); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora + i*0.25); g.gain.linearRampToValueAtTime(0.15, ora + i*0.25 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, ora + i*0.25 + 0.2); o.connect(g); g.connect(audioCtx.destination); o.start(ora + i*0.25); o.stop(ora + i*0.25 + 0.25); } }
+function suonaEsultanza() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 3.0; var buffer = creaBufferRumoreRosa(durata); if (!buffer) return; var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(500, ora); f.frequency.linearRampToValueAtTime(900, ora+0.4); f.frequency.linearRampToValueAtTime(600, ora+durata); f.Q.value = 0.7; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.55 * volumeTifosi, ora+0.25); g.gain.linearRampToValueAtTime(0.5 * volumeTifosi, ora+1.6); g.gain.linearRampToValueAtTime(0.0, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
+function suonaTensione() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata = 2.5; var buffer = creaBufferRumoreRosa(durata); if (!buffer) return; var noise = audioCtx.createBufferSource(); noise.buffer = buffer; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.setValueAtTime(350, ora); f.frequency.linearRampToValueAtTime(550, ora+1.0); f.frequency.linearRampToValueAtTime(450, ora+durata); f.Q.value = 0.9; var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora); g.gain.linearRampToValueAtTime(0.22 * volumeTifosi, ora+0.4); g.gain.linearRampToValueAtTime(0.20 * volumeTifosi, ora+1.8); g.gain.linearRampToValueAtTime(0.0, ora+durata); noise.connect(f); f.connect(g); g.connect(audioCtx.destination); noise.start(ora); noise.stop(ora+durata); }
+function suonaBonus() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; var note = [523, 659, 784, 1047]; for (var i=0;i<note.length;i++) { var o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(note[i], ora + i*0.1); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora + i*0.1); g.gain.linearRampToValueAtTime(0.2 * volumeEffetti, ora + i*0.1 + 0.03); g.gain.exponentialRampToValueAtTime(0.001, ora + i*0.1 + 0.25); o.connect(g); g.connect(audioCtx.destination); o.start(ora + i*0.1); o.stop(ora + i*0.1 + 0.3); } }
+function suonaMoneta() { initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime; for (var i=0;i<6;i++) { var o = audioCtx.createOscillator(); o.type='triangle'; o.frequency.setValueAtTime(800 + i*100, ora + i*0.25); var g = audioCtx.createGain(); g.gain.setValueAtTime(0.0, ora + i*0.25); g.gain.linearRampToValueAtTime(0.15 * volumeEffetti, ora + i*0.25 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, ora + i*0.25 + 0.2); o.connect(g); g.connect(audioCtx.destination); o.start(ora + i*0.25); o.stop(ora + i*0.25 + 0.25); } }
 
 var sottofondo = { source:null, gain:null, filtro:null, attivo:false, volumeTarget:0.04 };
-function avviaSottofondo() { initAudio(); if (!audioCtx || sottofondo.attivo) return; var buffer = creaBufferRumoreRosa(4.0); if (!buffer) return; var source = audioCtx.createBufferSource(); source.buffer = buffer; source.loop = true; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value = 500; f.Q.value = 0.5; var g = audioCtx.createGain(); g.gain.value = 0.0; source.connect(f); f.connect(g); g.connect(audioCtx.destination); source.start(0); sottofondo.source=source; sottofondo.gain=g; sottofondo.filtro=f; sottofondo.attivo = true; sottofondo.volumeTarget = 0.04; }
+function avviaSottofondo() { initAudio(); if (!audioCtx || sottofondo.attivo) return; var buffer = creaBufferRumoreRosa(4.0); if (!buffer) return; var source = audioCtx.createBufferSource(); source.buffer = buffer; source.loop = true; var f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value = 500; f.Q.value = 0.5; var g = audioCtx.createGain(); g.gain.value = 0.0; source.connect(f); f.connect(g); g.connect(audioCtx.destination); source.start(0); sottofondo.source=source; sottofondo.gain=g; sottofondo.filtro=f; sottofondo.attivo = true; sottofondo.volumeTarget = 0.04 * volumeTifosi; }
 function fermaSottofondo() { if (!sottofondo.attivo || !sottofondo.source) return; try { sottofondo.gain.gain.cancelScheduledValues(audioCtx.currentTime); sottofondo.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3); setTimeout(function() { if (sottofondo.source) { try { sottofondo.source.stop(); } catch(e){} sottofondo.source = null; } sottofondo.attivo = false; }, 400); } catch(e){} }
-function aggiornaSottofondoPerZona(zona) { if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return; var ora = audioCtx.currentTime, target; if (zona === 1 || zona === 5) { target = 0.14; sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora+0.6); } else if (zona === 0 || zona === 6) { target = 0.05; sottofondo.filtro.frequency.linearRampToValueAtTime(400, ora+0.6); } else { target = 0.04; sottofondo.filtro.frequency.linearRampToValueAtTime(500, ora+0.6); } sottofondo.volumeTarget = target; sottofondo.gain.gain.cancelScheduledValues(ora); sottofondo.gain.gain.linearRampToValueAtTime(target, ora+0.6); }
+function aggiornaSottofondoPerZona(zona) { if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return; var ora = audioCtx.currentTime, target; if (zona === 1 || zona === 5) { target = 0.14 * volumeTifosi; sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora+0.6); } else if (zona === 0 || zona === 6) { target = 0.05 * volumeTifosi; sottofondo.filtro.frequency.linearRampToValueAtTime(400, ora+0.6); } else { target = 0.04 * volumeTifosi; sottofondo.filtro.frequency.linearRampToValueAtTime(500, ora+0.6); } sottofondo.volumeTarget = target; sottofondo.gain.gain.cancelScheduledValues(ora); sottofondo.gain.gain.linearRampToValueAtTime(target, ora+0.6); }
 
 var stato = {
   tipoPartita:'1P', squadraTU:'juventus', squadraCPU:'napoli', divise:{ tu:null, cpu:null },
@@ -831,9 +845,20 @@ function apriImpostazioni() {
       '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
       '<button onclick="apriEditorCampo()">🎯 Apri Editor Campo</button>' +
+      '<button onclick="apriSostituzioni()">🔄 Sostituzioni</button>' +
       '<button onclick="chiudiModale()">← Chiudi</button>' +
     '</div>' +
+    '<h3 style="color:#ffd700;margin:16px 0 8px;font-size:16px">🔊 Volume</h3>' +
+    '<div class="volume-control"><label>🎵 Musica</label><input type="range" min="0" max="100" value="' + Math.round(volumeMusica*100) + '" oninput="cambiaVolume(\'musica\',this.value)"><span class="vol-val" id="vol-musica-val">' + Math.round(volumeMusica*100) + '%</span></div>' +
+    '<div class="volume-control"><label>👥 Tifosi</label><input type="range" min="0" max="100" value="' + Math.round(volumeTifosi*100) + '" oninput="cambiaVolume(\'tifosi\',this.value)"><span class="vol-val" id="vol-tifosi-val">' + Math.round(volumeTifosi*100) + '%</span></div>' +
+    '<div class="volume-control"><label>🔔 Effetti</label><input type="range" min="0" max="100" value="' + Math.round(volumeEffetti*100) + '" oninput="cambiaVolume(\'effetti\',this.value)"><span class="vol-val" id="vol-effetti-val">' + Math.round(volumeEffetti*100) + '%</span></div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
+}
+function cambiaVolume(tipo, valore) {
+  var v = parseInt(valore) / 100;
+  if (tipo === 'musica') { volumeMusica = v; document.getElementById('vol-musica-val').textContent = valore + '%'; }
+  else if (tipo === 'tifosi') { volumeTifosi = v; document.getElementById('vol-tifosi-val').textContent = valore + '%'; aggiornaVolumeSottofondo(); }
+  else if (tipo === 'effetti') { volumeEffetti = v; document.getElementById('vol-effetti-val').textContent = valore + '%'; }
 }
 function apriEditorCampo() { window.open('editor-campo-px-v3.html', '_blank'); }
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
