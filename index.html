@@ -176,6 +176,8 @@
   button.primario:hover:not(:disabled) { background: #fff; }
   button.bonus-btn { background: linear-gradient(135deg, #ffd700, #f59f00); color: #16213e; border-color: #fff; box-shadow: 0 0 14px rgba(255,215,0,0.6); animation: pulseBonus 1.5s infinite; }
   @keyframes pulseBonus { 0%, 100% { box-shadow: 0 0 14px rgba(255,215,0,0.6); } 50% { box-shadow: 0 0 24px rgba(255,215,0,1); } }
+  button.pericolo { background: #8B2020; color: #fff; border-color: #ff6b6b; }
+  button.pericolo:hover:not(:disabled) { background: #ff6b6b; }
 
   .bonus-cpu-info { position: absolute; top: 60px; left: 20px; font-size: 12px; color: #ff6b6b; font-weight: bold; background: rgba(0,0,0,0.75); padding: 4px 10px; border-radius: 8px; border: 2px solid rgba(255,107,107,0.6); z-index: 20; display: flex; align-items: center; gap: 4px; text-shadow: 0 1px 2px #000; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
   .bonus-cpu-info .carte-bonus { letter-spacing: 1px; font-size: 14px; }
@@ -352,6 +354,7 @@
       Palla <span id="zona-palla">Z3</span> · <span id="attacco-lato">→</span>
     </div>
     <div class="topbar-buttons">
+      <button class="btn-icona" onclick="riavviaPartita()" title="Riavvia Partita">🔄</button>
       <button class="btn-icona" onclick="apriLog()">📋</button>
       <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
     </div>
@@ -554,39 +557,37 @@ var SCENA_H = 900;
 var scalaCorrente = 1;
 
 /* ============================================================
-   POSIZIONI IN PIXEL (1600x900) — dall'editor v4
-   Ogni coppia = 1 giocatore TU + 1 giocatore CPU nella stessa zona
+   POSIZIONI IN PIXEL (1600x900) — coordinate aggiornate
    ============================================================ */
 var POSIZIONI_COPPIE = [
-  { x: 630,  y: 630, angolo: 180 },  // #1  Z1 sup
-  { x: 600,  y: 760, angolo: 180 },  // #2  Z2 sup
-  { x: 760,  y: 575, angolo: 180 },  // #3  Z3 sup
-  { x: 720,  y: 835, angolo: 180 },  // #4  Z4 sup
-  { x: 880,  y: 620, angolo: 180 },  // #5  Z5 sup
-  { x: 880,  y: 760, angolo: 180 },  // #6  Z1 inf
-  { x: 1000, y: 575, angolo: 180 },  // #7  Z2 inf
-  { x: 1040, y: 835, angolo: 180 },  // #8  Z3 inf
-  { x: 1130, y: 630, angolo: 180 },  // #9  Z4 inf
-  { x: 1160, y: 760, angolo: 180 }   // #10 Z5 inf
+  { x: 520,  y: 570, angolo: 180 },
+  { x: 480,  y: 720, angolo: 180 },
+  { x: 670,  y: 500, angolo: 180 },
+  { x: 630,  y: 820, angolo: 180 },
+  { x: 820,  y: 570, angolo: 180 },
+  { x: 820,  y: 720, angolo: 180 },
+  { x: 972,  y: 509, angolo: 180 },
+  { x: 1000, y: 820, angolo: 180 },
+  { x: 1120, y: 570, angolo: 180 },
+  { x: 1150, y: 720, angolo: 180 }
 ];
 
-/* Mappa: indice coppia → { zona, meta } */
 var MAPPA_COPPIE = [
-  { zona: 1, meta: 'sup' },  // #1
-  { zona: 2, meta: 'sup' },  // #2
-  { zona: 3, meta: 'sup' },  // #3
-  { zona: 4, meta: 'sup' },  // #4
-  { zona: 5, meta: 'sup' },  // #5
-  { zona: 1, meta: 'inf' },  // #6
-  { zona: 2, meta: 'inf' },  // #7
-  { zona: 3, meta: 'inf' },  // #8
-  { zona: 4, meta: 'inf' },  // #9
-  { zona: 5, meta: 'inf' }   // #10
+  { zona: 1, meta: 'sup' },
+  { zona: 2, meta: 'sup' },
+  { zona: 3, meta: 'sup' },
+  { zona: 4, meta: 'sup' },
+  { zona: 5, meta: 'sup' },
+  { zona: 1, meta: 'inf' },
+  { zona: 2, meta: 'inf' },
+  { zona: 3, meta: 'inf' },
+  { zona: 4, meta: 'inf' },
+  { zona: 5, meta: 'inf' }
 ];
 
 var POSIZIONI_PORTIERI = [
-  { x: 470,  y: 640, squadra: 'tu'  },
-  { x: 1210, y: 640, squadra: 'cpu' }
+  { x: 370,  y: 640, squadra: 'tu'  },
+  { x: 1270, y: 640, squadra: 'cpu' }
 ];
 
 var DISTANZA_COPPIA_PX = 50;
@@ -862,7 +863,18 @@ function applicaSqualifiche(sq) {
   }
 }
 
+/* ============================================================
+   MENU PRINCIPALE
+   ============================================================ */
 function mostraMenuPrincipale() {
+  mostraVistaCampo();
+  nascondiBannerMano();
+  fermaSottofondo();
+  /* Ferma eventuali timer di tiro/bonus in corso */
+  if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
+  var ov = document.getElementById('tiro-overlay');
+  if (ov) ov.remove();
+  stato.partitaFinita = true;
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
     '<div class="menu-principale">' +
@@ -877,6 +889,10 @@ function mostraMenuPrincipale() {
       '<div style="margin-top:16px"><button onclick="apriImpostazioni()">⚙️ Impostazioni</button></div>' +
     '</div>';
 }
+
+/* ============================================================
+   IMPOSTAZIONI
+   ============================================================ */
 function apriImpostazioni() {
   document.getElementById('modale').classList.remove('nascosto');
   document.getElementById('modale-box').innerHTML =
@@ -887,13 +903,27 @@ function apriImpostazioni() {
       '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
       '<button onclick="apriEditorCampo()">🎯 Apri Editor Campo</button>' +
-      '<button onclick="chiudiModale()">← Chiudi</button>' +
+      '<button onclick="mostraMenuPrincipale()">← Torna al Menu</button>' +
     '</div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
 }
 function apriEditorCampo() {
   window.open('editor-campo-px-v3.html', '_blank');
 }
+
+/* ============================================================
+   RIAVVIA PARTITA
+   ============================================================ */
+function riavviaPartita() {
+  if (!confirm('Vuoi davvero riavviare la partita?\nTutti i progressi andranno persi.')) return;
+  fermaSottofondo();
+  if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
+  var ov = document.getElementById('tiro-overlay');
+  if (ov) ov.remove();
+  stato.partitaFinita = true;
+  setTimeout(function() { location.href = 'index.html'; }, 100);
+}
+
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
 function apriLog() {
@@ -1420,6 +1450,7 @@ function eseguiCalcioIniziale(squadra) {
 }
 
 function avviaContrasto() {
+  if (stato.partitaFinita) return;
   if (stato.mano > stato.maxMani) { fineTempoOPartita(); return; }
   mostraVistaCarte();
   document.getElementById('btn-sost').disabled = false;
@@ -1693,6 +1724,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
   var passaggioLungoValido = (zLungo >= 1 && zLungo <= 5);
 
   var procediConAvanzamento = function(zFinale) {
+    if (stato.partitaFinita) return;
     var comp = stato.giocatori[vincente].filter(function(g){ return g.zona === zFinale && !g.portiere && !g.espulso; });
     if (comp.length === 0) { setTimeout(function() { apriSchermataTiro(vincente); }, 500); return; }
 
@@ -1708,6 +1740,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
     setTimeout(function() {
       renderCampo(); renderHeader();
       setTimeout(function() {
+        if (stato.partitaFinita) return;
         if (!gVincitore) {
           stato.possessore = vincente; stato.giocatorePalla = sc.id;
           bloccaCoppiaContrasto();
@@ -1715,6 +1748,7 @@ function risolviContrastoLogica(vincente, c, motivoFallo) {
           return;
         }
         animaPallaInZona(gVincitore, sc, function() {
+          if (stato.partitaFinita) return;
           stato.possessore = vincente; stato.giocatorePalla = sc.id;
           bloccaCoppiaContrasto();
           setTimeout(avviaContrasto, 800);
@@ -1985,6 +2019,7 @@ function evidenziaCaselle(caselle) {
 }
 
 function eseguiTiroConGrafica(att, dif, isRigore) {
+  if (stato.partitaFinita) return;
   var dT = Math.floor(Math.random()*9) + 1;
   var pos = CASELLE_PERC[dT];
   var pa = document.getElementById('tiro-palla');
@@ -1994,6 +2029,7 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
   orientaPortiereVerso(dT);
 
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     var bonusAtt = stato.bonusUsatoQuestoTiro[att];
     var bonusDif = stato.bonusUsatoQuestoTiro[dif];
     var golSuperAtt = (bonusAtt === 'gol-super');
@@ -2083,6 +2119,7 @@ function fase3TiroConGrafica(dT, att, dif) {
   var dE = Math.floor(Math.random()*9) + 1;
   mostraDadoFase3(dE);
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     var esito, motivo;
     if (dE === cP) { esito = 'palo'; motivo = '🥅 PALO!'; suonaPalo(); }
     else if (dE === cA) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; }
@@ -2098,6 +2135,7 @@ function fase3RigoreConGrafica(dT, att, dif) {
   var dE = Math.floor(Math.random()*9) + 1;
   mostraDadoFase3(dE);
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     var esito, motivo;
     if (dE === cP) { esito = 'palo'; motivo = '🥅 PALO!'; suonaPalo(); }
     else if (dE === cA) { esito = 'angolo'; motivo = '🚩 ANGOLO!'; }
@@ -2114,6 +2152,7 @@ function mostraEsitoTiroConGrafica(esito, dT, att, dif, motivo) {
     var ov = document.getElementById('tiro-overlay');
     if (ov) { ov.classList.remove('attiva'); setTimeout(function() { ov.remove(); }, 400); }
     tiroInAttesa = null;
+    if (stato.partitaFinita) return;
     if (esito === 'goal') gestisciGoal(att);
     else if (esito === 'parata') { stato.statistiche[dif].parate++; gestisciParata(att, dif); }
     else if (esito === 'palo') { stato.statistiche[att].pali++; gestisciPalo(att, dif); }
@@ -2124,13 +2163,15 @@ function mostraEsitoTiroConGrafica(esito, dT, att, dif, motivo) {
 function mostraGoalBanner(v) { var b = document.getElementById('goal-banner'); b.classList.remove('tu', 'cpu', 'attivo'); void b.offsetWidth; b.classList.add(v, 'attivo'); setTimeout(function() { b.classList.remove('attivo'); }, 3200); }
 
 function gestisciGoal(att) {
+  if (stato.partitaFinita) return;
   stato.punteggio[att]++; stato.statistiche[att].gol++;
   log('⚽ GOAL!', 'goal');
   mostraGoalBanner(att); suonaEsultanza();
-  setTimeout(function() { var sub = att === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(sub); }, 3200);
+  setTimeout(function() { if (stato.partitaFinita) return; var sub = att === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(sub); }, 3200);
 }
 
 function gestisciParata(att, dif) {
+  if (stato.partitaFinita) return;
   log('🧤 Parata!');
   var por = null;
   for (var i=0;i<stato.giocatori[dif].length;i++) {
@@ -2139,6 +2180,7 @@ function gestisciParata(att, dif) {
   var compZ3 = stato.giocatori[dif].filter(function(g){ return g.zona === 3 && !g.portiere && !g.espulso; });
   if (compZ3.length === 0) {
     setTimeout(function() {
+      if (stato.partitaFinita) return;
       stato.zonaPalla = 3; stato.metaContesa = 'inf';
       stato.possessore = dif; stato.giocatorePalla = null;
       renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3);
@@ -2160,8 +2202,10 @@ function gestisciParata(att, dif) {
   log('🧤 ' + (dif === 'tu' ? 'TU' : 'CPU') + ' riparte: ' + por.nome + ' → ' + sc.nome + ' (Z3)');
 
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     if (por && sc) {
       animaPallaInZona(por, sc, function() {
+        if (stato.partitaFinita) return;
         stato.possessore = dif;
         stato.giocatorePalla = sc.id;
         stato.pallaInAnimazione = false;
@@ -2179,20 +2223,24 @@ function gestisciParata(att, dif) {
 }
 
 function gestisciPalo(att, dif) {
+  if (stato.partitaFinita) return;
   log('🥅 Palo!', 'highlight');
   var az = stato.azioneTiroDaPalo;
-  if (!az) { setTimeout(function() { stato.zonaPalla = 3; stato.possessore = att; stato.metaContesa = 'inf'; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 800); return; }
+  if (!az) { setTimeout(function() { if (stato.partitaFinita) return; stato.zonaPalla = 3; stato.possessore = att; stato.metaContesa = 'inf'; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 800); return; }
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     stato.zonaPalla = az.zona; stato.possessore = az.possessore; stato.metaContesa = az.meta;
     var id = az.possessore === az.attaccante ? az.giocatoreAtt : az.giocatoreDif;
     stato.giocatorePalla = id;
     renderCampo(); renderHeader(); aggiornaSottofondoPerZona(az.zona);
-    setTimeout(function() { bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 300);
+    setTimeout(function() { if (stato.partitaFinita) return; bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 300);
   }, 800);
 }
 function gestisciAngolo(att, dif) {
+  if (stato.partitaFinita) return;
   log('🚩 Angolo!');
   setTimeout(function() {
+    if (stato.partitaFinita) return;
     var zA = direzionePerSquadra(att) > 0 ? 5 : 1;
     stato.zonaPalla = zA; stato.metaContesa = Math.random() < 0.5 ? 'sup' : 'inf'; stato.possessore = att;
     var c = stato.giocatori[att].filter(function(g){ return g.zona === zA && !g.portiere && !g.espulso; });
@@ -2208,6 +2256,7 @@ function gestisciFuori(att, dif) {
 function flashVincitore(sq) { var f = document.getElementById('flash'); f.classList.remove('tu','cpu','attivo'); void f.offsetWidth; f.classList.add(sq, 'attivo'); setTimeout(function() { f.classList.remove('attivo'); }, 600); }
 
 function fineTempoOPartita() {
+  if (stato.partitaFinita) return;
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
@@ -2222,7 +2271,7 @@ function fineTempoOPartita() {
     ['tu','cpu'].forEach(function(sq) { for (var i=0;i<stato.giocatori[sq].length;i++) { stato.giocatori[sq][i].stamina = stato.giocatori[sq][i].staminaMax; stato.giocatori[sq][i].falli = 0; stato.giocatori[sq][i].ammonito = false; } });
     riempiMano('tu'); riempiMano('cpu');
     renderHeader();
-    mostraFinestraFineTempo(function() { var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(perdente); });
+    mostraFinestraFineTempo(function() { if (stato.partitaFinita) return; var perdente = stato.monetaVinta === 'tu' ? 'cpu' : 'tu'; eseguiCalcioIniziale(perdente); });
   } else { finePartita(); }
 }
 function mostraFinestraFineTempo(cb) {
@@ -2280,6 +2329,40 @@ function bloccaCoppiaContrasto() {
   var gA = poss === 'tu' ? c.cpu : c.tu;
   stato.contrastoCoppia = { zona:zona, meta:meta, giocatorePoss: gP ? gP.id : null, giocatoreAvv: gA ? gA.id : null, possessore: poss };
 }
+
+/* ============================================================
+   FESTA FINE CAMPIONATO
+   ============================================================ */
+function mostraFestaCampionato(sqVincitrice) {
+  var sq = SQUADRE[sqVincitrice];
+  if (!sq) { alert('Squadra non trovata: ' + sqVincitrice); return; }
+  var coloreM = sq.casa.maglia;
+  var colore2 = sq.casa.colore2 || '#ffffff';
+  var coloreP = sq.casa.pantaloncini;
+
+  var html = '<div style="text-align:center;padding:20px">' +
+    '<div style="font-size:80px;margin-bottom:10px;animation: saltaTrofeo 1s ease-in-out infinite">🏆</div>' +
+    '<h2 style="color:#ffd700;font-size:32px;letter-spacing:4px;margin-bottom:8px">CAMPIONI!</h2>' +
+    '<h3 style="color:#fff;font-size:24px;margin-bottom:20px">' + sq.nome + '</h3>' +
+    '<div style="display:flex;justify-content:center;gap:20px;margin:20px 0">' +
+      '<div style="width:100px;height:130px">' + creaGiocatoreSVG(sq.casa, 'fermo') + '</div>' +
+    '</div>' +
+    '<div style="background:linear-gradient(135deg, ' + coloreM + ', ' + coloreP + ');padding:16px 30px;border-radius:14px;border:3px solid #ffd700;display:inline-block;margin-bottom:16px">' +
+      '<div style="color:#fff;font-size:18px;font-weight:bold;text-shadow:0 2px 4px rgba(0,0,0,0.8)">SERIE A 2026/2027</div>' +
+    '</div>' +
+    '<p style="color:#ffd700;font-size:14px;margin:16px 0">🎉 La squadra ha vinto il campionato! 🎉</p>' +
+    '<div style="margin-top:20px">' +
+      '<button class="primario" onclick="location.href=\'index.html\'">🏠 Torna al Menu</button>' +
+    '</div>' +
+  '</div>' +
+  '<style>@keyframes saltaTrofeo { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-20px) scale(1.1); } }</style>';
+
+  document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale').classList.remove('nascosto');
+}
+
+/* Espone la funzione globalmente */
+window.mostraFestaCampionato = mostraFestaCampionato;
 
 try {
   inizializzaAmmonizioni();
