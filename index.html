@@ -43,12 +43,6 @@
   .coppia-render { position: absolute; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; }
   .pedina-wrapper { display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 
-  .campo-area { position: absolute; left: 18%; top: 46%; width: 64%; height: 42%; padding: 0 2%; pointer-events: none; }
-  .zone { display: flex; width: 100%; height: 100%; position: absolute; inset: 0; z-index: 5; }
-  .zona { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: stretch; padding: 0 1.5%; }
-  .meta-sup, .meta-inf { position: relative; flex: 1; min-height: 110px; padding: 2px 4px; }
-  .portiere-wrapper { position: absolute !important; top: 50%; transform: translate(-50%, calc(-50% - 20px)); z-index: 5; }
-
   .nome-giocatore { font-size: 10px; font-weight: 900; color: #fff; text-shadow: 0 1px 3px #000, 0 0 4px #000, 0 0 2px #000; background: rgba(0,0,0,0.8); padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.3); white-space: nowrap; text-align: center; font-family: 'Segoe UI', sans-serif; letter-spacing: 0.3px; pointer-events: none; }
   .pedina-wrapper.tu .nome-giocatore { color: #4dabf7; }
   .pedina-wrapper.cpu .nome-giocatore { color: #ff6b6b; }
@@ -473,7 +467,9 @@
 <script src="divise.js"></script>
 <script src="ammonizioni.js"></script>
 <script>
-/* CONFIGURAZIONE */
+/* ============================================================
+   CONFIGURAZIONE
+   ============================================================ */
 var STAMINA_MAX = 20;
 var CARTE_INIZIALI = 7;
 var MINUTI_PER_MANO = 2;
@@ -508,24 +504,35 @@ var SCENA_W = 1600;
 var SCENA_H = 900;
 var scalaCorrente = 1;
 
+/* ============================================================
+   POSIZIONI PIXEL DELLE COPPIE (1600x900)
+   Ogni coppia = TU a sinistra, CPU a destra
+   ============================================================ */
 var POSIZIONI_COPPIE = [
-  { x: 520,  y: 570, angolo: 180 },
-  { x: 480,  y: 720, angolo: 180 },
-  { x: 670,  y: 500, angolo: 180 },
-  { x: 630,  y: 820, angolo: 180 },
-  { x: 820,  y: 570, angolo: 180 },
-  { x: 820,  y: 720, angolo: 180 },
-  { x: 972,  y: 509, angolo: 180 },
-  { x: 1000, y: 820, angolo: 180 },
-  { x: 1120, y: 570, angolo: 180 },
-  { x: 1150, y: 720, angolo: 180 }
+  { x: 520,  y: 570, angolo: 180 },  // #1  Z1 sup
+  { x: 480,  y: 720, angolo: 180 },  // #2  Z1 inf
+  { x: 670,  y: 500, angolo: 180 },  // #3  Z2 sup
+  { x: 630,  y: 820, angolo: 180 },  // #4  Z2 inf
+  { x: 820,  y: 570, angolo: 180 },  // #5  Z3 sup
+  { x: 820,  y: 720, angolo: 180 },  // #6  Z3 inf
+  { x: 972,  y: 509, angolo: 180 },  // #7  Z4 sup
+  { x: 1000, y: 820, angolo: 180 },  // #8  Z4 inf
+  { x: 1120, y: 570, angolo: 180 },  // #9  Z5 sup
+  { x: 1150, y: 720, angolo: 180 }   // #10 Z5 inf
 ];
 
+/* Mappa corretta: ogni coppia associata alla zona/meta in base alla posizione visiva */
 var MAPPA_COPPIE = [
-  { zona: 1, meta: 'sup' }, { zona: 2, meta: 'sup' }, { zona: 3, meta: 'sup' },
-  { zona: 4, meta: 'sup' }, { zona: 5, meta: 'sup' }, { zona: 1, meta: 'inf' },
-  { zona: 2, meta: 'inf' }, { zona: 3, meta: 'inf' }, { zona: 4, meta: 'inf' },
-  { zona: 5, meta: 'inf' }
+  { zona: 1, meta: 'sup' },  // #1  (x=520,  y=570)
+  { zona: 1, meta: 'inf' },  // #2  (x=480,  y=720)
+  { zona: 2, meta: 'sup' },  // #3  (x=670,  y=500)
+  { zona: 2, meta: 'inf' },  // #4  (x=630,  y=820)
+  { zona: 3, meta: 'sup' },  // #5  (x=820,  y=570)
+  { zona: 3, meta: 'inf' },  // #6  (x=820,  y=720)
+  { zona: 4, meta: 'sup' },  // #7  (x=972,  y=509)
+  { zona: 4, meta: 'inf' },  // #8  (x=1000, y=820)
+  { zona: 5, meta: 'sup' },  // #9  (x=1120, y=570)
+  { zona: 5, meta: 'inf' }   // #10 (x=1150, y=720)
 ];
 
 var POSIZIONI_PORTIERI = [
@@ -536,15 +543,41 @@ var POSIZIONI_PORTIERI = [
 var DISTANZA_COPPIA_PX = 50;
 
 /* ============================================================
-   FUNZIONE DI SPECCHIATURA ZONE CPU
-   Le zone "logiche" del gioco sono quelle del TU (POR=0, DIF=1, CEN=2-3-4, DIFalti=5).
-   Per la CPU, la zona visiva/speculare è 6 - zonaLogica.
-   Questa funzione, dato un giocatore, restituisce la sua zona "logica" (dal punto di vista TU).
+   ROSE REALI (override per Juventus e Napoli)
+   Formato: 11 titolari (1 POR, 4 DIF, 3 CEN, 3 ATT) + 7 panchina
    ============================================================ */
-function zonaLogica(g) {
-  return g.squadra === 'tu' ? g.zona : (6 - g.zona);
-}
+var ROSE_REALI = {
+  juventus: {
+    nome: 'Juventus',
+    portiere: ['Vicario', 'Grabara'],
+    difensori: ['Kalulu', 'Bremer', 'Lucumì', 'Celik'],           // 2 terzini + 2 centrali
+    centrocampisti: ['Locatelli', 'Sarr', 'McKennie'],             // regista + 2 mezzali
+    attaccanti: ['Conceição', 'Yildiz', 'Kolo Muani'],             // ala dx + ala sx + centravanti
+    panchina: {
+      por: ['Grabara'],
+      dif: ['Gatti', 'Cambiaso'],
+      cen: ['Douglas Luiz', 'Thuram'],
+      att: ['Nico González', 'Woltemade']
+    }
+  },
+  napoli: {
+    nome: 'Napoli',
+    portiere: ['Meret', 'Milinković-Savić', 'Contini'],
+    difensori: ['Di Lorenzo', 'Rrahmani', 'Beukema', 'Spinazzola'],
+    centrocampisti: ['Lobotka', 'McTominay', 'De Bruyne'],
+    attaccanti: ['Politano', 'Alisson Santos', 'Højlund'],
+    panchina: {
+      por: ['Milinković-Savić'],
+      dif: ['Marianucci', 'Olivera'],
+      cen: ['Gilmour', 'Anguissa'],
+      att: ['Neres', 'Lucca']
+    }
+  }
+};
 
+/* ============================================================
+   ADATTA SCENA
+   ============================================================ */
 function adattaScena() {
   var scena = document.getElementById('scena');
   var wrapper = document.getElementById('scena-wrapper');
@@ -561,6 +594,9 @@ function mostraPannelloCarte() { var p = document.getElementById('carte-panel');
 function nascondiPannelloCarte() { var p = document.getElementById('carte-panel'); if (p) p.classList.add('nascosto'); }
 function togglePannelloCarte() { var p = document.getElementById('carte-panel'); if (!p) return; if (p.classList.contains('nascosto')) p.classList.remove('nascosto'); else p.classList.add('nascosto'); }
 
+/* ============================================================
+   AMMONIZIONI
+   ============================================================ */
 var ammonizioni = null;
 function caricaAmmonizioniDaLocalStorage() { try { var s = localStorage.getItem('campionato_ammonizioni'); if (s) return JSON.parse(s); } catch(e){} return null; }
 function salvaAmmonizioniInLocalStorage() { try { localStorage.setItem('campionato_ammonizioni', JSON.stringify(ammonizioni)); } catch(e){} }
@@ -607,6 +643,9 @@ function resetCampionatoSalvato() {
   alert('✅ Campionato azzerato');
 }
 
+/* ============================================================
+   AUDIO
+   ============================================================ */
 var audioCtx = null;
 function initAudio() { if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } } if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }
 function suonaFischietto(tipo) { tipo = tipo || 'fallo'; initAudio(); if (!audioCtx) return; var ora = audioCtx.currentTime, durata, fb, fm; if (tipo === 'fallo') { durata=0.4; fb=2200; fm=30; } else if (tipo === 'fine-tempo') { durata=1.2; fb=2400; fm=25; } else if (tipo === 'fine-partita') { durata=1.8; fb=2500; fm=20; } else { durata=0.3; fb=2200; fm=30; } var o = audioCtx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(fb, ora); var l = audioCtx.createOscillator(); l.frequency.setValueAtTime(fm, ora); var lg = audioCtx.createGain(); lg.gain.setValueAtTime(30, ora); l.connect(lg); lg.connect(o.frequency); var g = audioCtx.createGain(); g.gain.setValueAtTime(0, ora); g.gain.linearRampToValueAtTime(0.25, ora+0.05); g.gain.linearRampToValueAtTime(0.25, ora+durata-0.1); g.gain.linearRampToValueAtTime(0, ora+durata); o.connect(g); g.connect(audioCtx.destination); o.start(ora); l.start(ora); o.stop(ora+durata); l.stop(ora+durata); }
@@ -625,13 +664,16 @@ function avviaSottofondo() { initAudio(); if (!audioCtx || sottofondo.attivo) re
 function fermaSottofondo() { if (!sottofondo.attivo || !sottofondo.source) return; try { sottofondo.gain.gain.cancelScheduledValues(audioCtx.currentTime); sottofondo.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3); setTimeout(function() { if (sottofondo.source) { try { sottofondo.source.stop(); } catch(e){} sottofondo.source = null; } sottofondo.attivo = false; }, 400); } catch(e){} }
 function aggiornaSottofondoPerZona(zona) { if (!sottofondo.attivo || !sottofondo.gain || !audioCtx) return; var ora = audioCtx.currentTime, target; if (zona === 1 || zona === 5) { target = 0.14; sottofondo.filtro.frequency.linearRampToValueAtTime(700, ora+0.6); } else if (zona === 0 || zona === 6) { target = 0.05; sottofondo.filtro.frequency.linearRampToValueAtTime(400, ora+0.6); } else { target = 0.04; sottofondo.filtro.frequency.linearRampToValueAtTime(500, ora+0.6); } sottofondo.volumeTarget = target; sottofondo.gain.gain.cancelScheduledValues(ora); sottofondo.gain.gain.linearRampToValueAtTime(target, ora+0.6); }
 
+/* ============================================================
+   STATO
+   ============================================================ */
 var stato = {
-  tipoPartita:'1P', squadraTU:'inter', squadraCPU:'milan', divise:{ tu:null, cpu:null },
+  tipoPartita:'1P', squadraTU:'juventus', squadraCPU:'napoli', divise:{ tu:null, cpu:null },
   tempo:1, mano:1, maxMani:MANI_PER_TEMPO, punteggio:{ tu:0, cpu:0 },
   zonaPalla:3, possessore:null, giocatorePalla:null, metaContesa:'inf',
   pallaInAnimazione:false, azioneTiroDaPalo:null,
   mazzo:[], scarti:[], mazzoBonus:[],
-  mani:{ tu:[], cpu:[] }, giocatori:{ tu:[], cpu:[] },
+  mani:{ tu:[], cpu:[] }, giocatori:{ tu:[], cpu:[] }, panchina:{ tu:[], cpu:[] },
   monetaVinta:null, partitaFinita:false, sostBloccate:false,
   semeGuidaPrecedente:null, direzioneAttaccoTU:1, invertiCoppie:false,
   bonus: { tu: [], cpu: [] }, bonusUsatoQuestoTiro: { tu:null, cpu:null }, streak: { tu:0, cpu:0 },
@@ -657,6 +699,9 @@ var SEMI = { palla:{emoji:'⚽',nome:'Palla'}, coppa:{emoji:'🏆',nome:'Coppa'}
 var SEMI_KEYS = Object.keys(SEMI);
 var VALORI = [ {valore:14,label:'A'},{valore:13,label:'K'},{valore:12,label:'Q'},{valore:11,label:'J'},{valore:10,label:'10'},{valore:9,label:'9'},{valore:8,label:'8'},{valore:7,label:'7'},{valore:6,label:'6'},{valore:5,label:'5'},{valore:4,label:'4'},{valore:3,label:'3'},{valore:2,label:'2'} ];
 
+/* ============================================================
+   MAZZO
+   ============================================================ */
 function creaMazzoPoker() { var mazzo=[], id=0; for (var i=0;i<SEMI_KEYS.length;i++){ for (var j=0;j<VALORI.length;j++){ mazzo.push({id:'c'+(id++), seme:SEMI_KEYS[i], valore:VALORI[j].valore, label:VALORI[j].label}); } } return mescola(mazzo); }
 function mescola(arr) { var a=arr.slice(); for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function creaMazzoBonus() { var m = []; for (var i=0;i<3;i++) m.push('contrasto-sicuro'); for (var j=0;j<3;j++) m.push('parata-super'); for (var k=0;k<3;k++) m.push('gol-super'); for (var l=0;l<3;l++) m.push('passaggio-lungo'); return mescola(m); }
@@ -703,15 +748,18 @@ function creaPalloneSVG() {
     '<ellipse cx="13" cy="11" rx="5" ry="3.5" fill="#fff" opacity="0.55"/></svg>';
 }
 
-/* Restituisce i giocatori di una squadra in una zona LOGICA (dal punto di vista TU) */
+/* ============================================================
+   ZONE LOGICHE
+   zonaLogicaDi(g) = zona logica (dal punto di vista TU)
+   Per il TU: zona fisica == zona logica
+   Per la CPU: zona logica = 6 - zona fisica
+   ============================================================ */
+function zonaLogicaDi(g) { return g.squadra === 'tu' ? g.zona : (6 - g.zona); }
 function giocatoriInZona(sq, zonaLogica, escludiPortiere) {
   return stato.giocatori[sq].filter(function(g){
     if (escludiPortiere && g.portiere) return false;
     return zonaLogicaDi(g) === zonaLogica;
   });
-}
-function zonaLogicaDi(g) {
-  return g.squadra === 'tu' ? g.zona : (6 - g.zona);
 }
 
 function getCoppiaAttiva(zonaId, meta) {
@@ -743,14 +791,28 @@ function consumaBonus(sq, tipo) { var idx = stato.bonus[sq].indexOf(tipo); if (i
 function haBonus(sq, tipo) { return stato.bonus[sq].indexOf(tipo) > -1; }
 
 /* ============================================================
-   CREAZIONE GIOCATORI
-   Il TU ha zone "logiche": POR=0, DIF=1, CEN=2-3-4, DIFalti=5
-   La CPU ha zone SPECULARI: POR=6, DIF=5, CEN=4-3-2, DIFalti=1
+   CREAZIONE GIOCATORI E PANCHINA
+   Usa ROSE_REALI se disponibile per la squadra, altrimenti ROSE
    ============================================================ */
+function getRosa(sqId) {
+  if (ROSE_REALI[sqId]) {
+    var r = ROSE_REALI[sqId];
+    // Adatta al formato usato da creaGiocatori
+    return {
+      nome: r.nome,
+      portiere: r.portiere,
+      difensori: r.difensori.slice(0,2),          // 2 per Z1
+      difensori_alta: r.difensori.slice(2,4),     // 2 per Z5
+      centrocampisti: r.centrocampisti.concat(r.attaccanti.slice(0,3))  // 6 per Z2-Z3-Z4
+    };
+  }
+  return ROSE[sqId];
+}
+
 function creaGiocatori(sq) {
   var g = []; var id = 0;
   var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
-  var rosa = ROSE[sqId]; if (!rosa) return g;
+  var rosa = getRosa(sqId); if (!rosa) return g;
   function z(zonaLogica) { return sq === 'tu' ? zonaLogica : (6 - zonaLogica); }
 
   // Portiere
@@ -779,14 +841,30 @@ function creaGiocatori(sq) {
 
   return g;
 }
+
+function creaPanchina(sq) {
+  var p = []; var id = 0;
+  var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
+  var r = ROSE_REALI[sqId];
+  if (!r || !r.panchina) return p;
+  for (var i=0;i<r.panchina.por.length;i++) p.push({ id:sq+'_pan_'+(id++), squadra:sq, ruolo:'POR', portiere:true, stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false, entrato:false, nome:r.panchina.por[i] });
+  for (var j=0;j<r.panchina.dif.length;j++) p.push({ id:sq+'_pan_'+(id++), squadra:sq, ruolo:'DIF', portiere:false, stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false, entrato:false, nome:r.panchina.dif[j] });
+  for (var k=0;k<r.panchina.cen.length;k++) p.push({ id:sq+'_pan_'+(id++), squadra:sq, ruolo:'CEN', portiere:false, stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false, entrato:false, nome:r.panchina.cen[k] });
+  for (var m=0;m<r.panchina.att.length;m++) p.push({ id:sq+'_pan_'+(id++), squadra:sq, ruolo:'ATT', portiere:false, stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false, entrato:false, nome:r.panchina.att[m] });
+  return p;
+}
+
 function applicaSqualifiche(sq) {
   var sqId = sq === 'tu' ? stato.squadraTU : stato.squadraCPU;
   if (!ammonizioni || !ammonizioni.squadre[sqId]) return;
   var daSost = [];
   for (var i=0;i<stato.giocatori[sq].length;i++) { var g = stato.giocatori[sq][i]; if (èSqualificato(sqId, g.nome)) daSost.push(g); }
-  for (var d=0;d<daSost.length;d++) { log('⚠️ ' + daSost[d].nome + ' è squalificato ma gioca comunque (panchina rimossa).'); }
+  for (var d=0;d<daSost.length;d++) { log('⚠️ ' + daSost[d].nome + ' è squalificato ma gioca comunque.'); }
 }
 
+/* ============================================================
+   MENU
+   ============================================================ */
 function mostraMenuPrincipale() {
   mostraVistaCampo();
   nascondiBannerMano();
@@ -818,20 +896,9 @@ function apriImpostazioni() {
       '<button class="primario" onclick="esportaCampionato()">💾 Salva campionato su file</button>' +
       '<button onclick="document.getElementById(\'file-input-campionato\').click()">📂 Carica campionato da file</button>' +
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
-      '<button onclick="apriEditorCampo()">🎯 Apri Editor Campo</button>' +
-      '<button onclick="mostraMenuPrincipale()">← Torna al Menu</button>' +
+      '<button onclick="chiudiModale()">← Chiudi</button>' +
     '</div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
-}
-function apriEditorCampo() { window.open('editor-campo-px-v3.html', '_blank'); }
-function riavviaPartita() {
-  if (!confirm('Vuoi davvero riavviare la partita?\nTutti i progressi andranno persi.')) return;
-  fermaSottofondo();
-  if (tiroInAttesa) { clearTimeout(tiroInAttesa); tiroInAttesa = null; }
-  var ov = document.getElementById('tiro-overlay');
-  if (ov) ov.remove();
-  stato.partitaFinita = true;
-  setTimeout(function() { location.href = 'index.html'; }, 100);
 }
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
 function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
@@ -871,6 +938,10 @@ function renderHeader() {
   if (bc) bc.textContent = stato.bonus.cpu.length > 0 ? stato.bonus.cpu.map(function(){return '🎴';}).join(' ') : '—';
 }
 
+/* ============================================================
+   RENDER CAMPO
+   TU a sinistra, CPU a destra in ogni coppia
+   ============================================================ */
 function renderCampo() {
   if (renderingCampoInCorso) return;
   renderingCampoInCorso = true;
@@ -881,7 +952,7 @@ function renderCampo() {
   for (var idx = 0; idx < POSIZIONI_COPPIE.length; idx++) {
     var p = POSIZIONI_COPPIE[idx];
     var mappa = MAPPA_COPPIE[idx];
-    var zonaGioco = mappa.zona; // zona logica (dal punto di vista TU)
+    var zonaGioco = mappa.zona;
     var metaGioco = mappa.meta;
     var coppia = document.createElement('div');
     coppia.className = 'coppia-render';
@@ -898,6 +969,7 @@ function renderCampo() {
     var indice = (metaGioco === 'sup') ? 0 : 1;
     var gTU = tuG[indice] || tuG[0] || null;
     var gCPU = cpuG[indice] || cpuG[0] || null;
+    // TU a SINISTRA: usa -dx
     if (gTU) {
       var wrapTU = document.createElement('div');
       wrapTU.className = 'pedina-wrapper tu';
@@ -914,6 +986,7 @@ function renderCampo() {
       wrapTU.appendChild(creaInfoSotto(gTU));
       coppia.appendChild(wrapTU);
     }
+    // CPU a DESTRA: usa +dx
     if (gCPU) {
       var wrapCPU = document.createElement('div');
       wrapCPU.className = 'pedina-wrapper cpu';
@@ -1033,6 +1106,9 @@ function creaPedinaEl(g, anim) {
 }
 function nascondiEvidenzia() { var els = document.querySelectorAll('.evidenzia-coppia'); for (var i=0;i<els.length;i++) els[i].remove(); }
 
+/* ============================================================
+   SETUP PARTITA
+   ============================================================ */
 function avviaSetup1P() {
   stato.tipoPartita = '1P';
   var html = '<h2>⚽ Scegli la tua squadra</h2><div class="squadre-griglia">';
@@ -1066,6 +1142,8 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   stato.divise = scegliDivise(sqTU, sqCPU);
   stato.giocatori.tu = creaGiocatori('tu');
   stato.giocatori.cpu = creaGiocatori('cpu');
+  stato.panchina.tu = creaPanchina('tu');
+  stato.panchina.cpu = creaPanchina('cpu');
   inizializzaMazzi();
   pescaCarteMano('tu', CARTE_INIZIALI);
   pescaCarteMano('cpu', CARTE_INIZIALI);
@@ -1089,7 +1167,6 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
   if (casaSquadra && casaSquadra !== sqTU) {
     stato.direzioneAttaccoTU = -1;
     stato.invertiCoppie = true;
-    // Inversione zone (specchio completo, include la CPU)
     ['tu','cpu'].forEach(function(sq) {
       for (var i=0;i<stato.giocatori[sq].length;i++) {
         var g = stato.giocatori[sq][i];
@@ -1119,7 +1196,7 @@ function avviaPartita(sqTU, sqCPU, tipo, casaSquadra) {
     '<div><button class="primario" onclick="lanciaMoneta(\'testa\')">TESTA</button>' +
     '<button class="primario" onclick="lanciaMoneta(\'croce\')">CROCE</button></div>';
   document.getElementById('modale').classList.remove('nascosto');
-  log('🎮 ' + SQUADRE[sqTU].nome + ' vs ' + SQUADRE[sqCPU].nome);
+  log('🎮 ' + (SQUADRE[sqTU] ? SQUADRE[sqTU].nome : sqTU) + ' vs ' + (SQUADRE[sqCPU] ? SQUADRE[sqCPU].nome : sqCPU));
   log('📐 TU attacca verso ' + (stato.direzioneAttaccoTU > 0 ? 'DESTRA' : 'SINISTRA'));
 }
 
@@ -1849,7 +1926,6 @@ function gestisciParata(att, dif) {
   log('🧤 Parata!');
   var por = null;
   for (var i=0;i<stato.giocatori[dif].length;i++) { if (stato.giocatori[dif][i].portiere) { por = stato.giocatori[dif][i]; break; } }
-  // La zona "3 logica" per il dif: se dif è 'cpu', zona = 6 - 3 = 3; se 'tu', zona = 3. Coincidono.
   var compZ3 = giocatoriInZona(dif, 3, false).filter(function(g){ return !g.portiere && !g.espulso; });
   if (compZ3.length === 0) { setTimeout(function() { if (stato.partitaFinita) return; stato.zonaPalla = 3; stato.metaContesa = 'inf'; stato.possessore = dif; stato.giocatorePalla = null; renderCampo(); renderHeader(); aggiornaSottofondoPerZona(3); bloccaCoppiaContrasto(); setTimeout(avviaContrasto, 800); }, 600); return; }
   var sc = compZ3[Math.floor(Math.random()*compZ3.length)];
@@ -1880,7 +1956,6 @@ function fineTempoOPartita() {
   if (stato.tempo === 1) {
     suonaFischietto('fine-tempo');
     stato.tempo = 2; stato.mano = 1;
-    // Cambio campo: specchia TUTTE le zone di TUTTI i giocatori (TU e CPU)
     ['tu','cpu'].forEach(function(sq) { for (var i=0;i<stato.giocatori[sq].length;i++) { var g = stato.giocatori[sq][i]; g.zona = 6 - g.zona; } });
     var oldT = ZONE_CONFIG[0].proprietario;
     ZONE_CONFIG[0].proprietario = ZONE_CONFIG[6].proprietario;
@@ -1909,17 +1984,50 @@ function salvaRisultatoTorneo() {
   setTimeout(function() { location.href = 'seriea2027.html?risultato=' + encodeURIComponent(PARTITA_TORNEO); }, 1500);
 }
 
+/* ============================================================
+   SOSTITUZIONI (con panchina)
+   ============================================================ */
 function apriSostituzioni() {
+  if (stato.sostBloccate) { alert('Sostituzioni bloccate durante il contrasto.'); return; }
   if (stato.partitaFinita) return;
-  var h = '<h2>🔄 Sostituzioni</h2>';
-  h += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">In campo (TU)</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
-  var gs = stato.giocatori.tu.filter(function(g){ return !g.espulso; });
-  for (var i=0;i<gs.length;i++) { var g = gs[i]; h += '<div style="background:#0f3460;border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px">' + '<div>' + g.nome + '</div><div>⚡' + g.stamina + '/20</div></div>'; }
-  h += '</div></div>';
-  h += '<p style="color:#aaa;font-size:12px;margin-top:14px">Panchina non disponibile (rimossa).</p>';
-  h += '<div style="margin-top:14px"><button onclick="chiudiModale()">CHIUDI</button></div>';
-  document.getElementById('modale-box').innerHTML = h;
+  selezioneSost = { campo:null, panchina:null };
+  renderModaleSostituzioni();
   document.getElementById('modale').classList.remove('nascosto');
+}
+function renderModaleSostituzioni() {
+  var sq = 'tu'; var h = '<h2>🔄 Sostituzioni</h2>';
+  h += '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">In campo</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
+  var gs = stato.giocatori[sq].filter(function(g){ return !g.espulso; });
+  for (var i=0;i<gs.length;i++) {
+    var g = gs[i];
+    var sel = selezioneSost.campo === g.id ? 'background:#ffd700;color:#16213e;' : 'background:#0f3460;color:#fff;';
+    h += '<div style="' + sel + 'border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer" onclick="selezionaSostCampo(\'' + g.id + '\')">' + '<div>' + g.nome + '</div><div>⚡' + g.stamina + '/20</div></div>';
+  }
+  h += '</div></div><div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:10px;margin:12px 0"><h3 style="font-size:13px;color:#ffd700">Panchina</h3><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">';
+  for (var k=0;k<stato.panchina[sq].length;k++) {
+    var p = stato.panchina[sq][k];
+    var sel2 = selezioneSost.panchina === p.id ? 'background:#ffd700;color:#16213e;' : 'background:#0f3460;color:#fff;';
+    var dis = p.entrato ? 'opacity:0.35;cursor:not-allowed;' : 'cursor:pointer;';
+    h += '<div style="' + sel2 + dis + 'border:2px solid #4dabf7;border-radius:6px;padding:6px 10px;font-size:11px" onclick="selezionaSostPanchina(\'' + p.id + '\')">' + '<div>' + p.nome + ' <span style="color:#aaa;font-size:9px">(' + p.ruolo + ')</span></div><div>⚡' + p.stamina + '/20</div></div>';
+  }
+  h += '</div></div><div style="margin-top:14px">';
+  if (selezioneSost.campo && selezioneSost.panchina) h += '<button class="primario" onclick="confermaSostituzione()">CONFERMA</button>';
+  h += '<button onclick="chiudiModale()">CHIUDI</button></div>';
+  document.getElementById('modale-box').innerHTML = h;
+}
+function selezionaSostCampo(id) { selezioneSost.campo = id; renderModaleSostituzioni(); }
+function selezionaSostPanchina(id) { var p = null; for (var i=0;i<stato.panchina.tu.length;i++) if (stato.panchina.tu[i].id === id) { p = stato.panchina.tu[i]; break; } if (p && p.entrato) return; selezioneSost.panchina = id; renderModaleSostituzioni(); }
+function confermaSostituzione() {
+  var sq = 'tu'; var campo = null, pan = null;
+  for (var i=0;i<stato.giocatori[sq].length;i++) if (stato.giocatori[sq][i].id === selezioneSost.campo) { campo = stato.giocatori[sq][i]; break; }
+  for (var j=0;j<stato.panchina[sq].length;j++) if (stato.panchina[sq][j].id === selezioneSost.panchina) { pan = stato.panchina[sq][j]; break; }
+  if (!campo || !pan || pan.entrato) return;
+  var n = { id:pan.id+'_sost', squadra:sq, zona:campo.zona, ruolo:pan.ruolo, portiere:pan.portiere, stamina:STAMINA_MAX, staminaMax:STAMINA_MAX, falli:0, ammonito:false, espulso:false, nome:pan.nome };
+  var idx = stato.giocatori[sq].indexOf(campo);
+  stato.giocatori[sq][idx] = n; pan.entrato = true;
+  stato.statistiche[sq].sostituzioni++;
+  selezioneSost = { campo:null, panchina:null };
+  renderCampo(); renderModaleSostituzioni();
 }
 
 function bloccaCoppiaContrasto() {
@@ -1957,6 +2065,9 @@ function mostraFestaCampionato(sqVincitrice) {
 }
 window.mostraFestaCampionato = mostraFestaCampionato;
 
+/* ============================================================
+   AVVIO
+   ============================================================ */
 try {
   inizializzaAmmonizioni();
   adattaScena();
