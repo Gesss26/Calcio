@@ -12,8 +12,11 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
-  .stadio-sfondo { position: fixed; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
+  
+  /* === MODIFICA 1: position absolute invece di fixed === */
+  .stadio-sfondo { position: absolute; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
+  
   .avviso-ruota { display: none; position: fixed; inset: 0; background: linear-gradient(135deg, #0a0a15, #16213e); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: #fff; }
   .avviso-ruota .icona-ruota { font-size: 80px; margin-bottom: 20px; animation: ruotaAnim 2s infinite ease-in-out; }
   @keyframes ruotaAnim { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
@@ -355,7 +358,7 @@
   <p>Per giocare a Calcio a Carte, ruota il telefono in orizzontale (landscape).</p>
 </div>
 
-<div class="stadio-sfondo"></div>
+<!-- Rimosso da qui lo sfondo -->
 
 <div class="app" id="app">
   <div class="topbar">
@@ -426,7 +429,10 @@
 
   <div class="area-gioco">
     <div class="scena-wrapper" id="scena-wrapper">
+      <!-- === MODIFICA 2: Sfondo inserito DENTRO la scena === -->
       <div class="scena" id="scena">
+        <div class="stadio-sfondo"></div>
+        
         <div class="campo-area">
           <div class="zone" id="zone"></div>
         </div>
@@ -575,10 +581,12 @@ var MAPPA_COPPIE = [
   { zona: 5, meta: 'sup' }, { zona: 5, meta: 'inf' }
 ];
 
+// === COORDINATE PORTIERI AGGIORNATE ===
 var POSIZIONI_PORTIERI = [ 
-  { x: 320, y: 600 },   // Portiere a SINISTRA (davanti alla porta sinistra)
-  { x: 1025, y: 600 }   // Portiere a DESTRA (davanti alla porta destra)
+  { x: 235, y: 600 },   // Portiere a SINISTRA
+  { x: 1365, y: 600 }   // Portiere a DESTRA
 ];
+
 var DISTANZA_COPPIA_PX = 60;
 
 function adattaScena() {
