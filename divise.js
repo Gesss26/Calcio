@@ -1,6 +1,5 @@
 /* ============================================================
    DIVISE.JS - Database squadre, generatore SVG e rose 2026/27
-   Aggiornato a ottobre 2026 — formazioni tipo di ogni squadra
    ============================================================ */
 
 var SQUADRE = {
@@ -26,18 +25,6 @@ var SQUADRE = {
   venezia:     { nome: 'Venezia',     casa: { maglia: '#16a34a', pantaloncini: '#000000', calzettoni: '#16a34a' }, portiere: { maglia: '#f97316', pantaloncini: '#000000', calzettoni: '#f97316' } }
 };
 
-/* ============================================================
-   ROSE 2026/27 - aggiornate a ottobre 2026
-   
-   Struttura per ogni squadra:
-   - portiere[0]      = POR (Z0)
-   - difensori[0..1]  = 2 DIF in Z1
-   - centrocampisti[0..1] = 2 CEN in Z2
-   - centrocampisti[2..3] = 2 CEN in Z3
-   - centrocampisti[4..5] = 2 CEN in Z4
-   - difensori_alta[0..1] = 2 ATT in Z5
-   - panchina: 1 POR, 2 DIF, 2 CEN, 2 ATT
-   ============================================================ */
 var ROSE = {
   atalanta: {
     portiere: ['Carnesecchi'],
@@ -182,67 +169,87 @@ var ROSE = {
 };
 
 /* ============================================================
-   GENERA SVG GIOCATORE CON GRUPPI ANIMABILI
+   GENERA SVG GIOCATORE (STILE VETTORIALE PIATTO - VERSIONE SCELTA)
    ============================================================ */
 function creaGiocatoreSVG(divisa, animazione) {
   if (!divisa) divisa = { maglia: '#888888', pantaloncini: '#333333', calzettoni: '#888888' };
   
-  var animClass = animazione === 'fermo' ? 'anim-fermo' : '';
+  var animClass = '';
+  if (animazione === 'calcio') animClass = 'anim-calcio';
+  else if (animazione === 'scivolata') animClass = 'anim-scivolata';
+  else if (animazione === 'parata') animClass = 'anim-parata';
+  
   var idPattern = 'righe_' + Math.random().toString(36).substr(2, 9);
   
-  var svg = '<svg viewBox="0 0 40 60" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="' + animClass + '">';
+  var svg = '<svg viewBox="0 0 50 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="' + animClass + '">';
   
   if (divisa.righe && divisa.colore2) {
     svg += '<defs>';
-    svg += '<pattern id="' + idPattern + '" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">';
-    svg += '<rect x="0" y="0" width="4" height="8" fill="' + divisa.maglia + '"/>';
-    svg += '<rect x="4" y="0" width="4" height="8" fill="' + divisa.colore2 + '"/>';
+    svg += '<pattern id="' + idPattern + '" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">';
+    svg += '<rect x="0" y="0" width="5" height="10" fill="' + divisa.maglia + '"/>';
+    svg += '<rect x="5" y="0" width="5" height="10" fill="' + divisa.colore2 + '"/>';
     svg += '</pattern>';
     svg += '</defs>';
   }
   
+  var fillMaglia = (divisa.righe && divisa.colore2) ? 'url(#' + idPattern + ')' : divisa.maglia;
+  
+  var pelle = '#fcd7b6';
+  var pelleScura = '#e0b090';
+  var capelli = '#333333';
+  var scarpe = '#222222';
+
   // TESTA
-  svg += '<g class="pg-testa" style="transform-origin: 20px 17px;">';
-  svg += '<circle cx="20" cy="10" r="7" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
-  svg += '<path d="M 13 8 Q 20 2 27 8 Q 27 5 20 4 Q 13 5 13 8 Z" fill="#4a2e1b"/>';
-  svg += '<circle cx="17" cy="10" r="1" fill="#000"/>';
-  svg += '<circle cx="23" cy="10" r="1" fill="#000"/>';
+  svg += '<g class="pg-testa" style="transform-origin: 25px 20px;">';
+  svg += '<rect x="22" y="30" width="6" height="5" fill="' + pelleScura + '"/>';
+  svg += '<ellipse cx="25" cy="20" rx="9" ry="12" fill="' + pelle + '"/>';
+  svg += '<ellipse cx="15" cy="20" rx="2" ry="3" fill="' + pelle + '"/>';
+  svg += '<ellipse cx="35" cy="20" rx="2" ry="3" fill="' + pelle + '"/>';
+  svg += '<path d="M 15 18 Q 15 8 25 8 Q 35 8 35 18 Q 33 12 28 12 Q 23 12 21 15 Z" fill="' + capelli + '"/>';
+  svg += '<path d="M 22 10 L 28 6 L 30 12 Z" fill="' + capelli + '"/>';
+  svg += '<path d="M 18 16 Q 20 15 22 16" fill="none" stroke="' + capelli + '" stroke-width="1.5"/>';
+  svg += '<path d="M 28 16 Q 30 15 32 16" fill="none" stroke="' + capelli + '" stroke-width="1.5"/>';
+  svg += '<circle cx="21" cy="19" r="1.5" fill="#000"/>';
+  svg += '<circle cx="29" cy="19" r="1.5" fill="#000"/>';
+  svg += '<path d="M 25 20 L 24 23 L 26 23 Z" fill="' + pelleScura + '" opacity="0.6"/>';
+  svg += '<path d="M 21 26 Q 25 28 29 26" fill="none" stroke="#333" stroke-width="1.2" stroke-linecap="round"/>';
   svg += '</g>';
   
   // BUSTO
-  var fillMaglia = (divisa.righe && divisa.colore2) ? 'url(#' + idPattern + ')' : divisa.maglia;
   svg += '<g class="pg-busto">';
-  svg += '<path d="M 12 18 L 28 18 L 30 38 L 10 38 Z" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<path d="M 16 18 L 20 22 L 24 18" fill="none" stroke="#fff" stroke-width="1"/>';
+  svg += '<path d="M 15 35 L 25 40 L 35 35 L 33 60 L 17 60 Z" fill="' + fillMaglia + '"/>';
+  svg += '<path d="M 21 35 L 25 39 L 29 35" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>';
   svg += '</g>';
   
   // BRACCIO SINISTRO
-  svg += '<g class="pg-braccio-sx" style="transform-origin: 12px 20px;">';
-  svg += '<rect x="8" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<circle cx="11.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
+  svg += '<g class="pg-braccio-sx" style="transform-origin: 17px 38px;">';
+  svg += '<path d="M 15 35 L 11 45 L 15 47 L 17 38 Z" fill="' + fillMaglia + '"/>';
+  svg += '<path d="M 11 45 L 9 58 L 13 59 L 15 47 Z" fill="' + pelle + '"/>';
+  svg += '<circle cx="11" cy="60" r="3" fill="' + pelle + '"/>';
   svg += '</g>';
   
   // BRACCIO DESTRO
-  svg += '<g class="pg-braccio-dx" style="transform-origin: 28px 20px;">';
-  svg += '<rect x="25" y="20" width="7" height="14" rx="3" fill="' + fillMaglia + '" stroke="#222" stroke-width="1"/>';
-  svg += '<circle cx="28.5" cy="35" r="3.2" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
+  svg += '<g class="pg-braccio-dx" style="transform-origin: 33px 38px;">';
+  svg += '<path d="M 35 35 L 39 45 L 35 47 L 33 38 Z" fill="' + fillMaglia + '"/>';
+  svg += '<path d="M 39 45 L 41 58 L 37 59 L 35 47 Z" fill="' + pelle + '"/>';
+  svg += '<circle cx="39" cy="60" r="3" fill="' + pelle + '"/>';
   svg += '</g>';
   
   // PANTALONCINI
-  svg += '<path d="M 10 38 L 30 38 L 28 48 L 22 48 L 20 44 L 18 48 L 12 48 Z" fill="' + divisa.pantaloncini + '" stroke="#222" stroke-width="1"/>';
+  svg += '<path d="M 17 60 L 33 60 L 35 80 L 26 80 L 25 70 L 24 80 L 15 80 Z" fill="' + divisa.pantaloncini + '"/>';
   
   // GAMBA SINISTRA
-  svg += '<g class="pg-gamba-sx" style="transform-origin: 16px 48px;">';
-  svg += '<rect x="14" y="48" width="4" height="8" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
-  svg += '<rect x="13" y="54" width="6" height="5" fill="' + divisa.calzettoni + '" stroke="#222" stroke-width="1"/>';
-  svg += '<ellipse cx="16" cy="59" rx="4" ry="1.5" fill="#111"/>';
+  svg += '<g class="pg-gamba-sx" style="transform-origin: 20px 80px;">';
+  svg += '<rect x="17" y="78" width="6" height="12" fill="' + pelle + '"/>';
+  svg += '<rect x="16" y="86" width="8" height="10" fill="' + divisa.calzettoni + '"/>';
+  svg += '<path d="M 15 96 L 25 96 L 25 100 L 13 100 Z" fill="' + scarpe + '"/>';
   svg += '</g>';
   
-  // GAMBA DESTRA (quella che calcia)
-  svg += '<g class="pg-gamba-dx" style="transform-origin: 24px 48px;">';
-  svg += '<rect x="22" y="48" width="4" height="8" fill="#fcd7b6" stroke="#333" stroke-width="1"/>';
-  svg += '<rect x="21" y="54" width="6" height="5" fill="' + divisa.calzettoni + '" stroke="#222" stroke-width="1"/>';
-  svg += '<ellipse cx="24" cy="59" rx="4" ry="1.5" fill="#111"/>';
+  // GAMBA DESTRA
+  svg += '<g class="pg-gamba-dx" style="transform-origin: 30px 80px;">';
+  svg += '<rect x="27" y="78" width="6" height="12" fill="' + pelle + '"/>';
+  svg += '<rect x="26" y="86" width="8" height="10" fill="' + divisa.calzettoni + '"/>';
+  svg += '<path d="M 25 96 L 35 96 L 37 100 L 23 100 Z" fill="' + scarpe + '"/>';
   svg += '</g>';
   
   svg += '</svg>';
