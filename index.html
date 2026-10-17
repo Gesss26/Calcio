@@ -12,10 +12,10 @@
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
-  
+
   .stadio-sfondo { position: absolute; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
-  
+
   .avviso-ruota { display: none; position: fixed; inset: 0; background: linear-gradient(135deg, #0a0a15, #16213e); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; color: #fff; }
   .avviso-ruota .icona-ruota { font-size: 80px; margin-bottom: 20px; animation: ruotaAnim 2s infinite ease-in-out; }
   @keyframes ruotaAnim { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
@@ -217,6 +217,25 @@
   .tiro-casella.colpita { background: rgba(255,215,0,0.4); border-color: #ffd700; }
   .tiro-portiere { position: absolute; width: 22%; height: 44%; transition: all 0.6s cubic-bezier(0.34,1.56,0.64,1); z-index: 10; pointer-events: none; left: calc(var(--porta-left) + var(--porta-width) / 2 - 11%); top: calc(var(--porta-top) + var(--porta-height) / 2 - 22%); }
   .tiro-portiere svg { width: 100%; height: 100%; }
+
+  /* ===== PARATA PORTIERE: BRACCIA ALZATE (settori 1,2,3) ===== */
+  .tiro-portiere.pg-braccia-alte .pg-braccio-sx {
+    transform: rotate(80deg) translate(-3px, -7px);
+  }
+  .tiro-portiere.pg-braccia-alte .pg-braccio-dx {
+    transform: rotate(-80deg) translate(3px, -7px);
+  }
+
+  /* ===== SALTO PORTIERE ===== */
+  .tiro-portiere.pg-salta svg {
+    animation: saltoPortiere 0.7s ease-out;
+  }
+  @keyframes saltoPortiere {
+    0%   { transform: translateY(0) scale(1); }
+    40%  { transform: translateY(-12px) scale(1.06); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
   .tiro-palla { position: absolute; width: 26px; height: 26px; background: radial-gradient(circle at 30% 30%, #fff, #ddd); border-radius: 50%; border: 3px solid #222; z-index: 20; transition: all 0.8s cubic-bezier(0.34,1.56,0.64,1); transform: translate(-50%, -50%); }
   .tiro-palla.iniziale { left: 50%; bottom: 4%; top: auto; width: 44px; height: 44px; }
   .tiro-palla.rigore { left: 50%; bottom: 14%; top: auto; width: 30px; height: 30px; }
@@ -339,21 +358,98 @@
   .istruzioni-content .bonus-card .testo p { margin: 2px 0 0; font-size: 12px; color: #bbb; }
   .istruzioni-content .highlight-box { background: rgba(77,171,247,0.15); border-left: 4px solid #4dabf7; padding: 10px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 12px; }
 
-  /* Media query per schermi piccoli */
+  /* ===== RESPONSIVE: SCHERMI PICCOLI ===== */
   @media (orientation: landscape) and (max-height: 600px) {
     .tiro-layout { flex-direction: row; gap: 8px; }
-    .tiro-col-sx { width: 260px; padding: 8px; gap: 6px; }
-    .tiro-titolo { font-size: 15px; margin-bottom: 3px; }
+    .tiro-col-sx { width: 240px; padding: 8px; gap: 6px; }
+    .tiro-titolo { font-size: 15px; margin-bottom: 3px; letter-spacing: 2px; }
     .tiro-info { font-size: 12px; min-height: 28px; }
-    .tiro-dado { width: 34px; height: 34px; font-size: 18px; }
+    .tiro-dadi-info { min-height: 70px; gap: 5px; }
+    .tiro-dado { width: 34px; height: 34px; font-size: 18px; border-width: 2px; }
     .tiro-dado-label { font-size: 10px; min-width: 85px; }
     .tiro-bonus-container button { padding: 10px 12px; font-size: 13px; }
-    .tiro-esito { font-size: 32px; }
-    .bonus-choice-box { padding: 18px 22px; }
-    .bonus-choice-titolo { font-size: 18px; }
-    .bonus-choice-carta { width: 100px; height: 140px; font-size: 48px; }
+    .tiro-esito { font-size: 32px; min-height: 40px; }
+    .tiro-palla { width: 20px; height: 20px; border-width: 2px; }
+    .tiro-palla.iniziale { width: 32px; height: 32px; }
+    .tiro-palla.rigore { width: 24px; height: 24px; }
+    .bonus-choice-box { padding: 16px 20px; }
+    .bonus-choice-titolo { font-size: 18px; margin-bottom: 4px; }
+    .bonus-choice-sottotitolo { font-size: 12px; margin-bottom: 12px; }
+    .bonus-choice-carta { width: 100px; height: 140px; font-size: 48px; margin-bottom: 12px; }
     .bonus-choice-carta .icona-grande { font-size: 48px; }
+    .bonus-choice-carta .nome { font-size: 11px; }
     .bonus-choice-azioni button { padding: 12px 22px; font-size: 14px; }
+    .banner-top { top: 44px; padding: 4px 8px 10px; gap: 4px; }
+    .banner-top .riga-alta { gap: 12px; }
+    .pila, .pila-bonus { width: 68px; height: 98px; }
+    .pila-carta, .pila-bonus .pila-carta { width: 68px; height: 98px; }
+    .pila-carta.dietro::after { font-size: 42px; }
+    .pila-bonus .pila-carta.bonus::after { font-size: 42px; }
+    .pila-carta.scarto::after { font-size: 36px; }
+    .pila-titolo, .pila-bonus .pila-titolo { font-size: 9px; top: -14px; }
+    .pila-count, .pila-bonus .pila-count { font-size: 9px; bottom: -18px; padding: 1px 6px; }
+    .bonus-slot { width: 68px; height: 98px; }
+    .bonus-slot .bonus-carta { font-size: 34px; }
+    .bonus-slot .bonus-carta .ang { font-size: 12px; }
+    .bonus-slot .bonus-carta .nome-bonus { font-size: 7px; bottom: 6px; }
+    .bonus-tu-wrapper { padding: 4px 6px; }
+    .bonus-tu-wrapper .bonus-label { font-size: 8px; }
+    .bonus-slots { gap: 4px; }
+    .banner-mano-box { padding: 16px 22px; }
+    .banner-mano-vincitore { font-size: 24px; margin-bottom: 12px; }
+    .banner-mano-carta .carta { width: 64px; height: 90px; }
+    .banner-mano-carta .carta .seme-centro { font-size: 38px; }
+    .banner-mano-carta.seme-centrale .carta .seme-centro { font-size: 44px; }
+    .banner-mano-vs { font-size: 18px; }
+    .banner-mano-seme { font-size: 11px; margin-top: 10px; }
+    .banner-mano-motivo { font-size: 10px; margin-top: 6px; }
+    .menu-titolo { font-size: 26px; }
+    .menu-btn { min-width: 280px; padding: 14px 22px; }
+    .menu-btn .icona { font-size: 30px; }
+    .menu-btn .testo .titolo { font-size: 14px; }
+    .menu-btn .testo .descr { font-size: 10px; }
+    .squadre-griglia { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; margin: 10px 0; }
+    .squadra-btn { padding: 6px; }
+    .squadra-btn .nome { font-size: 9px; margin-bottom: 2px; }
+    .squadra-btn .maglia { width: 30px; height: 40px; }
+  }
+
+  /* Tablet in landscape (600-900px altezza) */
+  @media (orientation: landscape) and (min-height: 601px) and (max-height: 900px) {
+    .tiro-col-sx { width: 280px; padding: 10px; gap: 8px; }
+    .tiro-titolo { font-size: 18px; }
+    .tiro-info { font-size: 13px; min-height: 32px; }
+    .tiro-dado { width: 38px; height: 38px; font-size: 20px; }
+    .tiro-dado-label { font-size: 11px; min-width: 100px; }
+    .tiro-bonus-container button { padding: 12px 16px; font-size: 14px; }
+    .tiro-esito { font-size: 40px; }
+    .banner-top .riga-alta { gap: 18px; }
+    .pila, .pila-bonus { width: 82px; height: 118px; }
+    .pila-carta, .pila-bonus .pila-carta { width: 82px; height: 118px; }
+    .pila-carta.dietro::after { font-size: 50px; }
+    .pila-bonus .pila-carta.bonus::after { font-size: 50px; }
+    .pila-carta.scarto::after { font-size: 42px; }
+    .pila-titolo, .pila-bonus .pila-titolo { font-size: 9px; top: -16px; }
+    .pila-count, .pila-bonus .pila-count { font-size: 10px; bottom: -20px; }
+    .bonus-slot { width: 82px; height: 118px; }
+    .bonus-slot .bonus-carta { font-size: 40px; }
+    .bonus-slot .bonus-carta .nome-bonus { font-size: 8px; bottom: 8px; }
+    .bonus-choice-box { padding: 22px 26px; }
+    .bonus-choice-titolo { font-size: 20px; }
+    .bonus-choice-carta { width: 110px; height: 152px; font-size: 52px; }
+    .bonus-choice-carta .icona-grande { font-size: 52px; }
+    .bonus-choice-azioni button { padding: 14px 26px; font-size: 15px; }
+    .carta-overlay .carta, .carte-overlay .carta { width: 82px; height: 118px; }
+    .carte-overlay .carta .valore-alto { font-size: 20px; }
+    .carte-overlay .carta .seme-centro { font-size: 48px; }
+    .carte-overlay .carta .valore-basso { font-size: 20px; }
+    .seme-carta { width: 82px; height: 118px; }
+    .seme-carta .seme-emoji { font-size: 52px; }
+  }
+
+  /* Tablet in portrait (ma avviso ruota è mostrato se width<=900) */
+  @media (orientation: portrait) and (min-width: 901px) {
+    .avviso-ruota { display: flex; }
   }
 </style>
 </head>
@@ -560,16 +656,16 @@ var SCENA_H = 900;
 var scalaCorrente = 1;
 
 var POSIZIONI_COPPIE = [
-  { x: 550,  y: 560, angolo: 180 },
-  { x: 530,  y: 700, angolo: 180 },
-  { x: 675,  y: 480, angolo: 180 },
-  { x: 635,  y: 780, angolo: 180 },
+  { x: 500,  y: 560, angolo: 180 },
+  { x: 480,  y: 700, angolo: 180 },
+  { x: 650,  y: 480, angolo: 180 },
+  { x: 610,  y: 780, angolo: 180 },
   { x: 800,  y: 560, angolo: 180 },
   { x: 800,  y: 700, angolo: 180 },
-  { x: 925,  y: 480, angolo: 180 },
-  { x: 955,  y: 780, angolo: 180 },
-  { x: 1035, y: 560, angolo: 180 },
-  { x: 1055, y: 700, angolo: 180 }
+  { x: 950,  y: 480, angolo: 180 },
+  { x: 980,  y: 780, angolo: 180 },
+  { x: 1110, y: 560, angolo: 180 },
+  { x: 1130, y: 700, angolo: 180 }
 ];
 
 var MAPPA_COPPIE = [
