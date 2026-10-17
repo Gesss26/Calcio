@@ -106,7 +106,7 @@
   .pedina.pg-in-calcio .pg-busto { animation: calciaBusto 0.8s cubic-bezier(0.34,1.2,0.64,1) forwards; transform-origin: 25px 40px; }
   .pedina.pg-in-calcio .pg-braccio-sx { animation: calciaBraccio 0.8s ease-out forwards; transform-origin: 17px 38px; }
 
-  /* Scivolata: allungo gambe e abbassamento del busto */
+  /* Scivolata: allungo gambe e abbassamento del busto (Nessuna rotazione del wrapper) */
   @keyframes scivolaGambe {
     0%   { transform: rotate(0deg) translateY(0); }
     50%  { transform: rotate(-60deg) translateY(10px); }
@@ -959,12 +959,19 @@ function creaPalloneSVG() {
 }
 
 function tuASinistra() {
-  var casaASinistra = !stato.invertiCoppie;
-  return (stato.tuECasa === casaASinistra);
+  // Se TU è in casa, gioca a sinistra nel 1° tempo e a destra nel 2° tempo.
+  // Se TU è in trasferta, gioca a destra nel 1° tempo e a sinistra nel 2° tempo.
+  if (stato.tuECasa) {
+    return !stato.invertiCoppie;
+  } else {
+    return stato.invertiCoppie;
+  }
 }
 
 function zonaLogicaDi(g) {
   var tuSin = tuASinistra();
+  // Se g.squadra === 'tu', la sua zona logica dipende da tuSin.
+  // Se g.squadra === 'cpu', la sua zona logica è l'opposta.
   if (g.squadra === 'tu') { return tuSin ? g.zona : (6 - g.zona); }
   else { return tuSin ? (6 - g.zona) : g.zona; }
 }
@@ -1850,8 +1857,6 @@ function animaScivolata(gVincitore, gPerdente) {
   var mSp = SCIVOLATA_MAX_PX * scalaCorrente;
   var dXs = (dx/dist) * Math.min(mSp, dist);
   var dYs = (dy/dist) * Math.min(mSp, dist);
-  var angoloPiega = dx > 0 ? -22 : 22;
-  if (Math.abs(dy) > Math.abs(dx)) angoloPiega = dy > 0 ? -15 : 15;
   var w = document.createElement('div');
   w.className = 'pedina-scivola-wrapper scivolando';
   wrapperV.parentNode.insertBefore(w, wrapperV);
@@ -1859,12 +1864,10 @@ function animaScivolata(gVincitore, gPerdente) {
   requestAnimationFrame(function() {
     w.style.transform = 'translate(' + dXs + 'px, ' + dYs + 'px)';
     pedV.classList.add('pg-in-scivolata');
-    pedV.style.transform = 'rotate(' + angoloPiega + 'deg)';
   });
   setTimeout(function() {
     w.classList.remove('scivolando'); w.classList.add('ritorno');
     w.style.transform = 'translate(0, 0)';
-    pedV.style.transform = 'rotate(0deg)';
     setTimeout(function() {
       if (w.parentNode) { w.parentNode.insertBefore(wrapperV, w); w.remove(); }
       pedV.classList.remove('pg-in-scivolata');
