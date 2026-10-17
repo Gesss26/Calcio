@@ -13,7 +13,6 @@
   html, body { height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0a15; color: #eee; overflow: hidden; user-select: none; }
   .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; position: relative; }
   
-  /* === MODIFICA 1: position absolute invece di fixed === */
   .stadio-sfondo { position: absolute; inset: 0; background: url('Stadio.jpg') center/cover no-repeat; z-index: 0; pointer-events: none; }
   .stadio-sfondo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,10,21,0.55) 0%, rgba(10,10,21,0.15) 30%, rgba(10,10,21,0.15) 70%, rgba(10,10,21,0.75) 100%); }
   
@@ -192,14 +191,11 @@
   button.bonus-btn { background: linear-gradient(135deg, #ffd700, #f59f00); color: #16213e; border-color: #fff; box-shadow: 0 0 14px rgba(255,215,0,0.6); animation: pulseBonus 1.5s infinite; }
   @keyframes pulseBonus { 0%, 100% { box-shadow: 0 0 14px rgba(255,215,0,0.6); } 50% { box-shadow: 0 0 24px rgba(255,215,0,1); } }
 
-  /* ===== NUOVA SCHERMATA TIRO (2 colonne: dadi sinistra, porta destra) ===== */
+  /* ===== SCHERMATA TIRO ===== */
   .tiro-overlay { position: fixed; inset: 0; background: linear-gradient(180deg, #0a1a2e 0%, #0a0a15 100%); z-index: 700; display: flex; flex-direction: column; padding: 12px; opacity: 0; transition: opacity 0.4s ease; overflow: hidden; }
   .tiro-overlay.attiva { opacity: 1; }
   .tiro-titolo { color: #ffd700; font-size: 20px; font-weight: 900; letter-spacing: 3px; text-align: center; margin-bottom: 6px; flex-shrink: 0; }
-
   .tiro-layout { display: flex; flex: 1; gap: 16px; align-items: stretch; min-height: 0; }
-
-  /* Colonna sinistra: dadi, info, bonus */
   .tiro-col-sx { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 12px; overflow-y: auto; }
   .tiro-info { font-size: 14px; color: #ffd700; text-align: center; font-weight: bold; min-height: 36px; display: flex; align-items: center; justify-content: center; }
   .tiro-dadi-info { display: flex; flex-direction: column; align-items: center; gap: 8px; font-family: 'Courier New', monospace; font-size: 14px; color: #fff; min-height: 100px; justify-content: center; }
@@ -210,11 +206,8 @@
   .tiro-dado.match { background: #4ade80; color: #16213e; border-color: #4ade80; animation: matchPulse 0.5s ease-out; }
   @keyframes matchPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
   .tiro-dado-label { font-size: 12px; color: #aaa; text-transform: uppercase; min-width: 110px; text-align: right; font-weight: bold; }
-
   .tiro-bonus-container { display: flex; flex-direction: column; gap: 8px; justify-content: center; align-items: stretch; margin-top: auto; }
   .tiro-bonus-container button { padding: 14px 18px; font-size: 15px; width: 100%; }
-
-  /* Colonna destra: porta grande */
   .tiro-col-dx { flex: 1; display: flex; align-items: center; justify-content: center; min-width: 0; }
   .tiro-porta-wrapper { position: relative; width: 100%; max-height: 100%; aspect-ratio: 3 / 2; margin: 0 auto; --porta-left: 21%; --porta-top: 34%; --porta-width: 58%; --porta-height: 48%; }
   .tiro-porta-sfondo { position: absolute; inset: 0; width: 100%; height: 100%; background: url('Porta.png') center/cover no-repeat; border-radius: 12px; }
@@ -332,7 +325,21 @@
   .volume-control input[type=range]::-moz-range-thumb { width: 18px; height: 18px; background: #ffd700; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
   .volume-control .vol-val { font-size: 11px; color: #aaa; min-width: 35px; text-align: right; font-family: monospace; }
 
-  /* Media query per schermi piccoli (cellulare in landscape) */
+  /* ISTRUZIONI */
+  .istruzioni-content { text-align: left; font-size: 13px; line-height: 1.6; color: #ddd; }
+  .istruzioni-content h3 { color: #ffd700; font-size: 16px; margin: 18px 0 8px; border-bottom: 1px solid rgba(255,215,0,0.3); padding-bottom: 4px; }
+  .istruzioni-content h4 { color: #4dabf7; font-size: 14px; margin: 12px 0 4px; }
+  .istruzioni-content p { margin: 6px 0; }
+  .istruzioni-content ul { margin: 6px 0 12px 20px; }
+  .istruzioni-content li { margin: 4px 0; }
+  .istruzioni-content .bonus-card { display: flex; align-items: flex-start; gap: 12px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; margin: 8px 0; border: 1px solid rgba(255,215,0,0.2); }
+  .istruzioni-content .bonus-card .icona { font-size: 32px; flex-shrink: 0; width: 48px; text-align: center; }
+  .istruzioni-content .bonus-card .testo { flex: 1; }
+  .istruzioni-content .bonus-card .testo strong { color: #ffd700; font-size: 14px; }
+  .istruzioni-content .bonus-card .testo p { margin: 2px 0 0; font-size: 12px; color: #bbb; }
+  .istruzioni-content .highlight-box { background: rgba(77,171,247,0.15); border-left: 4px solid #4dabf7; padding: 10px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 12px; }
+
+  /* Media query per schermi piccoli */
   @media (orientation: landscape) and (max-height: 600px) {
     .tiro-layout { flex-direction: row; gap: 8px; }
     .tiro-col-sx { width: 260px; padding: 8px; gap: 6px; }
@@ -357,8 +364,6 @@
   <h2>RUOTA IL DISPOSITIVO</h2>
   <p>Per giocare a Calcio a Carte, ruota il telefono in orizzontale (landscape).</p>
 </div>
-
-<!-- Rimosso da qui lo sfondo -->
 
 <div class="app" id="app">
   <div class="topbar">
@@ -387,7 +392,6 @@
     <button class="btn-icona" onclick="apriImpostazioni()">⚙️</button>
   </div>
 
-  <!-- BANNER SUPERIORE -->
   <div class="banner-top" id="banner-top">
     <div class="info-mano">
       <div class="titolo" id="titolo-mano">Contrasto</div>
@@ -429,14 +433,11 @@
 
   <div class="area-gioco">
     <div class="scena-wrapper" id="scena-wrapper">
-      <!-- === MODIFICA 2: Sfondo inserito DENTRO la scena === -->
       <div class="scena" id="scena">
         <div class="stadio-sfondo"></div>
-        
         <div class="campo-area">
           <div class="zone" id="zone"></div>
         </div>
-
         <div class="palla-volante" id="palla-volante"></div>
         <div class="flash-vincitore" id="flash"></div>
       </div>
@@ -444,7 +445,6 @@
   </div>
 </div>
 
-<!-- OVERLAY CARTE CENTRALE -->
 <div class="carte-overlay" id="carte-overlay">
   <div class="carte-overlay-inner">
     <div class="carte-overlay-titolo" id="carte-overlay-titolo">SCEGLI UNA CARTA</div>
@@ -467,7 +467,6 @@
   </div>
 </div>
 
-<!-- BANNER SCELTA BONUS A METÀ SCHERMO -->
 <div class="bonus-choice-overlay" id="bonus-choice-overlay">
   <div class="bonus-choice-box">
     <div class="bonus-choice-titolo" id="bonus-choice-titolo">USA CARTA BONUS?</div>
@@ -581,10 +580,9 @@ var MAPPA_COPPIE = [
   { zona: 5, meta: 'sup' }, { zona: 5, meta: 'inf' }
 ];
 
-// === COORDINATE PORTIERI AGGIORNATE ===
 var POSIZIONI_PORTIERI = [ 
-  { x: 235, y: 600 },   // Portiere a SINISTRA
-  { x: 1365, y: 600 }   // Portiere a DESTRA
+  { x: 235, y: 600 },
+  { x: 1365, y: 600 }
 ];
 
 var DISTANZA_COPPIA_PX = 60;
@@ -606,7 +604,6 @@ function nascondiBannerTop() { var p = document.getElementById('banner-top'); if
 function mostraCarteOverlay() { var o = document.getElementById('carte-overlay'); if (o) o.classList.add('attivo'); }
 function nascondiCarteOverlay() { var o = document.getElementById('carte-overlay'); if (o) o.classList.remove('attivo'); }
 
-/* ===== BANNER SCELTA BONUS A METÀ SCHERMO ===== */
 function mostraBonusChoice(tipo, callback, isTimeout) {
   var ov = document.getElementById('bonus-choice-overlay');
   var info = NOMI_BONUS[tipo];
@@ -621,7 +618,6 @@ function mostraBonusChoice(tipo, callback, isTimeout) {
                      '<button id="bc-no" style="background:#8B2020;border-color:#ff6b6b">❌ NO, SALTA</button>';
   document.getElementById('bc-si').onclick = function() { clearTimeout(window._bonusChoiceTimer); chiudiBonusChoice(); callback(true); };
   document.getElementById('bc-no').onclick = function() { clearTimeout(window._bonusChoiceTimer); chiudiBonusChoice(); callback(false); };
-  // Timer visivo
   var timerEl = document.getElementById('bonus-choice-timer');
   var rimasti = Math.round(BONUS_SCELTA_TIMEOUT / 1000);
   timerEl.textContent = 'Scelta automatica tra ' + rimasti + 's';
@@ -912,6 +908,7 @@ function apriImpostazioni() {
       '<button style="background:#8B2020;border-color:#ff6b6b" onclick="resetCampionatoSalvato()">🗑 Azzera campionato salvato</button>' +
       '<button onclick="apriEditorCampo()">🎯 Apri Editor Campo</button>' +
       '<button onclick="apriSostituzioni()">🔄 Sostituzioni</button>' +
+      '<button class="primario" style="background:#4dabf7;border-color:#fff" onclick="apriIstruzioni()">📖 Istruzioni del Gioco</button>' +
       '<button onclick="chiudiModale()">← Chiudi</button>' +
     '</div>' +
     '<h3 style="color:#ffd700;margin:16px 0 8px;font-size:16px">🔊 Volume</h3>' +
@@ -920,6 +917,82 @@ function apriImpostazioni() {
     '<div class="volume-control"><label>🔔 Effetti</label><input type="range" min="0" max="100" value="' + Math.round(volumeEffetti*100) + '" oninput="cambiaVolume(\'effetti\',this.value)"><span class="vol-val" id="vol-effetti-val">' + Math.round(volumeEffetti*100) + '%</span></div>' +
     '<input type="file" id="file-input-campionato" accept=".json,application/json" style="display:none" onchange="gestisciFileCampionato(event)">';
 }
+
+/* ===== ISTRUZIONI DEL GIOCO ===== */
+function apriIstruzioni() {
+  document.getElementById('modale').classList.remove('nascosto');
+  var html =
+    '<h2>📖 Istruzioni del Gioco</h2>' +
+    '<div class="istruzioni-content">' +
+      '<h3>🎯 Obiettivo</h3>' +
+      '<p>Segna più gol della tua avversaria (CPU o altro giocatore) in <strong>46 mani</strong> totali, divise in due tempi da 23 mani ciascuno. Ogni mano equivale a 2 minuti di gioco.</p>' +
+      
+      '<h3>🃏 Come funziona una Mano</h3>' +
+      '<p>In ogni mano si disputa un <strong>contrasto</strong> in una zona del campo. Il gioco funziona così:</p>' +
+      '<ul>' +
+        '<li>Viene estratta una <strong>carta seme guida</strong> (Palla ⚽, Coppa 🏆, Guantone 🧤 o Bandierina 🚩).</li>' +
+        '<li>Entrambi i giocatori scelgono una carta dalla propria mano.</li>' +
+        '<li>Chi ha una carta dello <strong>stesso seme guida</strong> vince automaticamente (se l\'altro non ce l\'ha).</li>' +
+        '<li>Se entrambi hanno il seme, o nessuno dei due, vince chi ha il <strong>valore più alto</strong> (A > K > Q > J > 10 > 9 > ... > 2).</li>' +
+      '</ul>' +
+      '<div class="highlight-box">⚠️ <strong>Attenzione:</strong> se giochi una carta di seme diverso da quello guida, commetti un <strong>fallo</strong>: l\'avversaria vince il contrasto e tu accumuli un fallo. 3 falli = 🟨 ammonizione. 6 falli = 🟥 espulsione!</div>' +
+      
+      '<h3>⚽ Avanzamento e Tiro</h3>' +
+      '<p>Il campo è diviso in 5 zone di movimento (Z1, Z2, Z3, Z4, Z5) più le due zone portiere (Z0 e Z6).</p>' +
+      '<ul>' +
+        '<li>Chi vince il contrasto avanza di <strong>1 zona</strong> verso la porta avversaria.</li>' +
+        '<li>Se vinci un contrasto in <strong>Z1</strong> o <strong>Z5</strong> (la zona più vicina alla porta avversaria), scatta il <strong>tiro in porta</strong>!</li>' +
+        '<li>Dopo un gol, si riparte dal centrocampo con la squadra che ha subito il gol.</li>' +
+        '<li>Dopo un pareggio nel contrasto, si rigioca la stessa mano con un nuovo seme guida (ma la carta giocata resta negli scarti).</li>' +
+      '</ul>' +
+      
+      '<h3>🥅 Fase di Tiro</h3>' +
+      '<p>Quando si arriva al tiro, si apre una schermata dedicata con la porta divisa in 9 caselle (1-9):</p>' +
+      '<ul>' +
+        '<li><strong>Fase 1:</strong> l\'attaccante tira 1d9 e sceglie la casella.</li>' +
+        '<li><strong>Fase 2:</strong> il portiere tira 1d4 e si tuffa in una zona di 4 caselle.</li>' +
+        '<li><strong>Fase 3:</strong> si tira 1d9 per l\'esito: se esce il numero della casella colpita (fuori dalla zona del portiere) è <strong>GOAL</strong>! Altrimenti può essere palo, angolo o fuori.</li>' +
+      '</ul>' +
+      
+      '<h3>🎴 Le Carte BONUS</h3>' +
+      '<p>Ogni volta che vinci <strong>3 contrasti consecutivi</strong> (streak), guadagni una carta Bonus casuale (massimo 3 in mano). Le carte Bonus sono 4:</p>' +
+      
+      '<div class="bonus-card">' +
+        '<div class="icona">⭐</div>' +
+        '<div class="testo"><strong>Contrasto Sicuro</strong><p>Giocata durante un contrasto (solo se hai il possesso palla). Vinci automaticamente il contrasto senza giocare carte. Perfetta per superare un avversario ostico.</p></div>' +
+      '</div>' +
+      
+      '<div class="bonus-card">' +
+        '<div class="icona">⚽</div>' +
+        '<div class="testo"><strong>Gol Super</strong><p>Giocata durante la fase di tiro (solo se stai attaccando). Il portiere avversario tira 1d11 invece di 1d4: la porta è quasi tutta scoperta e il gol è quasi garantito!</p></div>' +
+      '</div>' +
+      
+      '<div class="bonus-card">' +
+        '<div class="icona">🧤</div>' +
+        '<div class="testo"><strong>Parata Super</strong><p>Giocata durante la fase di tiro (solo se stai difendendo). Il tuo portiere copre 7 caselle su 9 (tira 1d11). Solo 2 caselle restano scoperte: parata quasi sicura!</p></div>' +
+      '</div>' +
+      
+      '<div class="bonus-card">' +
+        '<div class="icona">🎯</div>' +
+        '<div class="testo"><strong>Passaggio Lungo</strong><p>Giocata dopo aver vinto un contrasto. Invece di avanzare di 1 zona, avanzi direttamente di <strong>2 zone</strong>. Ti permette di saltare un reparto avversario e arrivare prima al tiro!</p></div>' +
+      '</div>' +
+      
+      '<h3>🔄 Sostituzioni</h3>' +
+      '<p>Durante la partita puoi sostituire giocatori stanchi con quelli in panchina. Ogni sostituzione riporta la stamina del nuovo entrato a 20. Non puoi sostituire durante un contrasto in corso.</p>' +
+      
+      '<h3>⚡ Stamina e Falli</h3>' +
+      '<p>Ogni contrasto consuma 1 punto stamina ai due giocatori coinvolti. Se la stamina scende a 0, il giocatore diventa <strong>esaurito</strong> (grigio) e meno efficace. La stamina si rigenera a fine primo tempo.</p>' +
+      '<p>I falli si accumulano durante i contrasti. 3 falli = 🟨 ammonizione, 6 falli = 🟥 espulsione (il giocatore viene rimosso dal campo).</p>' +
+      
+      '<h3>🏆 Come si Vince</h3>' +
+      '<p>La partita dura 46 mani (2 tempi da 23). Vince chi segna più gol. In caso di parità, è pareggio.</p>' +
+      '<p style="margin-top:16px;color:#ffd700;text-align:center;font-size:14px">Buon divertimento! ⚽</p>' +
+    '</div>' +
+    '<button class="primario" onclick="apriImpostazioni()" style="margin-top:16px">← Torna alle Impostazioni</button>';
+  document.getElementById('modale-box').innerHTML = html;
+  document.getElementById('modale-box').scrollTop = 0;
+}
+
 function cambiaVolume(tipo, valore) {
   var v = parseInt(valore) / 100;
   if (tipo === 'musica') { volumeMusica = v; document.getElementById('vol-musica-val').textContent = valore + '%'; }
@@ -1558,9 +1631,7 @@ function apriSchermataTiro(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.s
 function apriSchermataRigore(att) { var dif = att === 'tu' ? 'cpu' : 'tu'; stato.statistiche[att].tiri++; log('🎯 RIGORE!', 'highlight'); apriOverlayTiro(att, dif, true); }
 var tiroInAttesa = null;
 
-/* ===== NUOVA SCHERMATA TIRO: 2 colonne (dadi sx, porta dx) ===== */
 function apriOverlayTiro(att, dif, isRigore) {
-  // Nasconde banner carte + banner top
   nascondiCarteOverlay();
   nascondiBannerTop();
   stato.bonusUsatoQuestoTiro = { tu:null, cpu:null };
@@ -1571,10 +1642,8 @@ function apriOverlayTiro(att, dif, isRigore) {
   tit.textContent = isRigore ? (att === 'tu' ? '🎯 IL TUO RIGORE' : '🎯 RIGORE DELLA CPU') : (att === 'tu' ? '🥅 IL TUO TIRO' : '🥅 TIRO DELLA CPU');
   ov.appendChild(tit);
 
-  // Layout 2 colonne
   var layout = document.createElement('div'); layout.className = 'tiro-layout';
 
-  // Colonna sinistra
   var colSx = document.createElement('div'); colSx.className = 'tiro-col-sx';
   var info = document.createElement('div'); info.className = 'tiro-info'; info.id = 'tiro-info'; info.textContent = 'FASE 1 — Tiro dell\'attaccante';
   colSx.appendChild(info);
@@ -1584,7 +1653,6 @@ function apriOverlayTiro(att, dif, isRigore) {
   colSx.appendChild(bc);
   layout.appendChild(colSx);
 
-  // Colonna destra
   var colDx = document.createElement('div'); colDx.className = 'tiro-col-dx';
   var pw = document.createElement('div'); pw.className = 'tiro-porta-wrapper';
   var sf = document.createElement('div'); sf.className = 'tiro-porta-sfondo'; pw.appendChild(sf);
@@ -1607,7 +1675,6 @@ function apriOverlayTiro(att, dif, isRigore) {
   setTimeout(function() { popolaBonusTiro(att, dif, isRigore); }, 500);
 }
 
-/* ===== POPOLA BONUS TIRO: usa il banner a metà schermo ===== */
 function popolaBonusTiro(att, dif, isRigore) {
   var bc = document.getElementById('tiro-bonus-container');
   if (!bc) return;
@@ -1622,7 +1689,6 @@ function popolaBonusTiro(att, dif, isRigore) {
   if (dif === 'cpu' && haBonus('cpu', 'parata-super') && cpuVuoleUsareBonusTiro('parata-super', isRigore)) { cpuVuole = true; cpuTipoBonus = 'parata-super'; }
 
   if (tuPuoAttivare) {
-    // Mostra banner a metà schermo per scelta
     setTimeout(function() {
       mostraBonusChoice(tuTipoBonus, function(usa) {
         if (usa) {
@@ -1633,7 +1699,6 @@ function popolaBonusTiro(att, dif, isRigore) {
         } else {
           bc.innerHTML = '<div style="color:#aaa;font-size:12px;text-align:center;padding:10px">Nessun bonus usato</div>';
         }
-        // Gestisci eventuale CPU
         if (cpuVuole) {
           setTimeout(function() {
             consumaBonus('cpu', cpuTipoBonus);
@@ -1766,14 +1831,12 @@ function orientaPortiereVerso(c) {
   t.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)';
 }
 
-/* ===== PARATA PORTIERE: alza braccia se para nelle caselle 1, 2, 3 ===== */
 function eseguiParataPortiereSettore(mX, mY) {
   var pt = document.getElementById('tiro-portiere');
   if (!pt) return;
   pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 11) + '%';
   pt.style.top = (PORTA_TOP + (mY/100)*PORTA_H - 22) + '%';
   pt.classList.add('pg-salta');
-  // Se la casella è nei settori ALTI (y < 40%) → braccia alzate
   if (mY < 40) {
     pt.classList.add('pg-braccia-alte');
   } else {
