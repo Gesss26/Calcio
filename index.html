@@ -1001,7 +1001,13 @@ function cambiaVolume(tipo, valore) {
 }
 function apriEditorCampo() { window.open('editor-campo-px-v3.html', '_blank'); }
 function gestisciFileCampionato(ev) { var f = ev.target.files[0]; if (!f) return; importaCampionato(f); ev.target.value = ''; }
-function chiudiModale() { document.getElementById('modale').classList.add('nascosto'); }
+function chiudiModale() { 
+  document.getElementById('modale').classList.add('nascosto'); 
+  // Se la partita non è ancora iniziata (siamo nel menu), torna al menu principale
+  if (!stato.giocatori || !stato.giocatori.tu || stato.giocatori.tu.length === 0 || stato.partitaFinita) {
+    mostraMenuPrincipale();
+  }
+}
 function apriLog() {
   var html = '<h2>📋 Cronaca</h2><div style="background:#0a0a15;border-radius:8px;padding:12px;max-height:60vh;overflow-y:auto;font-size:12px;text-align:left;font-family:monospace">';
   for (var i=0;i<stato.logCompleto.length;i++) { var l = stato.logCompleto[i]; html += '<p class="' + (l.classe||'') + '" style="margin:2px 0">' + l.msg + '</p>'; }
