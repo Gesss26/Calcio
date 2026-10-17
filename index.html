@@ -242,6 +242,29 @@
     transform: rotate(15deg) translate(-2px, -2px);
   }
 
+  /* ===== PORTIERE: INCLINAZIONE CORPO VERSO LA PALLA (durante volo) ===== */
+  .tiro-portiere.pg-tuffo-sx svg {
+    transform: rotate(-28deg) translateX(-6px);
+    transform-origin: 50% 85%;
+  }
+  .tiro-portiere.pg-tuffo-dx svg {
+    transform: rotate(28deg) translateX(6px);
+    transform-origin: 50% 85%;
+  }
+  .tiro-portiere.pg-tuffo-centro svg {
+    transform: rotate(0deg) translateY(-10px);
+    transform-origin: 50% 85%;
+  }
+
+  /* ===== PORTIERE: TRANSIZIONI VOLO ===== */
+  .tiro-portiere.pg-in-volo {
+    transition: left 0.55s cubic-bezier(0.34,1.2,0.64,1),
+                top 0.55s cubic-bezier(0.34,1.2,0.64,1);
+  }
+  .tiro-portiere.pg-in-volo svg {
+    transition: transform 0.55s cubic-bezier(0.34,1.2,0.64,1);
+  }
+
   /* Transizione fluida dei bracci del portiere in modalità tiro */
   .tiro-portiere .pg-braccio-sx,
   .tiro-portiere .pg-braccio-dx {
@@ -1899,14 +1922,22 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
     if (golSuperAtt) {
       var dP11 = Math.floor(Math.random()*11) + 1;
       var coppia = COPPIE_11[dP11];
+      var parata = coppia.indexOf(dT) > -1;
       document.getElementById('tiro-info').textContent = 'FASE 2 — Portiere (Gol Super) tira 1d11...';
       mostraDadiTiro(dT, dP11);
       evidenziaCaselle(coppia);
-      var settore = coppia[Math.floor(Math.random()*coppia.length)];
-      var pp = CASELLE_PERC[settore];
-      eseguiParataPortiereSettore(pp.x, pp.y, settore);
+      if (parata) {
+        // PARATA: vola verso la palla reale
+        var pp = CASELLE_PERC[dT];
+        eseguiParataPortiereSettore(pp.x, pp.y, dT, true);
+      } else {
+        // GOL: si tuffa verso un settore della coppia
+        var settoreTuffo = coppia[Math.floor(Math.random()*coppia.length)];
+        var ppT = CASELLE_PERC[settoreTuffo];
+        eseguiParataPortiereSettore(ppT.x, ppT.y, settoreTuffo, false);
+      }
       setTimeout(function() {
-        if (coppia.indexOf(dT) > -1) mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA (Gol Super)!');
+        if (parata) mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA (Gol Super)!');
         else mostraEsitoTiroConGrafica('goal', dT, att, dif, '⚽ GOAL SUPER!');
       }, 1800);
       return;
@@ -1914,33 +1945,47 @@ function eseguiTiroConGrafica(att, dif, isRigore) {
     if (parataSuperAtt) {
       var dP11b = Math.floor(Math.random()*11) + 1;
       var coppiaB = COPPIE_11[dP11b];
+      // Parata = palla NON nella coppia (i 2 settori non coperti)
+      var parataB = coppiaB.indexOf(dT) === -1;
       document.getElementById('tiro-info').textContent = 'FASE 2 — Portiere (Parata Super) tira 1d11...';
       mostraDadiTiro(dT, dP11b);
       var tutteLeCaselle = [1,2,3,4,5,6,7,8,9];
       var coperte = [];
       for (var k=0;k<tutteLeCaselle.length;k++) { if (coppiaB.indexOf(tutteLeCaselle[k]) === -1) coperte.push(tutteLeCaselle[k]); }
       evidenziaCaselle(coperte);
-      var ppB;
-      var settoreB;
-      if (coppiaB.indexOf(dT) > -1) { ppB = CASELLE_PERC[5]; settoreB = 5; } else { ppB = CASELLE_PERC[dT]; settoreB = dT; }
-      eseguiParataPortiereSettore(ppB.x, ppB.y, settoreB);
+      if (parataB) {
+        // PARATA: vola verso la palla reale
+        var ppB = CASELLE_PERC[dT];
+        eseguiParataPortiereSettore(ppB.x, ppB.y, dT, true);
+      } else {
+        // GOL: si tuffa verso un settore della coppia (quelli scoperti)
+        var settoreTuffoB = coppiaB[Math.floor(Math.random()*coppiaB.length)];
+        var ppBT = CASELLE_PERC[settoreTuffoB];
+        eseguiParataPortiereSettore(ppBT.x, ppBT.y, settoreTuffoB, false);
+      }
       setTimeout(function() {
-        if (coppiaB.indexOf(dT) > -1) mostraEsitoTiroConGrafica('goal', dT, att, dif, '⚽ GOAL (Parata Super "bucata")!');
-        else mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA SUPER!');
+        if (parataB) mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA SUPER!');
+        else mostraEsitoTiroConGrafica('goal', dT, att, dif, '⚽ GOAL (Parata Super "bucata")!');
       }, 1800);
       return;
     }
     var dP4 = Math.floor(Math.random()*4) + 1;
     var zona = ZONE_PORTIERE_4[dP4];
+    var parataNormale = zona.indexOf(dT) > -1;
     document.getElementById('tiro-info').textContent = 'FASE 2 — Il portiere si butta (1d4)...';
     mostraDadiTiro(dT, dP4);
     evidenziaCaselle(zona);
-    var centro = CENTRI_ZONE_4[dP4];
-    // Se la palla è nei settori alti (1,2,3), il portiere alza le braccia verso il settore reale
-    var settoreParata = (dT >= 1 && dT <= 3) ? dT : null;
-    eseguiParataPortiereSettore(centro.x, centro.y, settoreParata);
+    if (parataNormale && (dT >= 1 && dT <= 3)) {
+      // PARATA in settore alto: vola verso la palla reale
+      var ppN = CASELLE_PERC[dT];
+      eseguiParataPortiereSettore(ppN.x, ppN.y, dT, true);
+    } else {
+      // GOL (o parata in settori 4-9): tuffo normale verso il centro zona
+      var centro = CENTRI_ZONE_4[dP4];
+      eseguiParataPortiereSettore(centro.x, centro.y, null, false);
+    }
     setTimeout(function() {
-      if (zona.indexOf(dT) > -1) { mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA!'); }
+      if (parataNormale) { mostraEsitoTiroConGrafica('parata', dT, att, dif, '🧤 PARATA!'); }
       else { if (isRigore) fase3RigoreConGrafica(dT, att, dif); else fase3TiroConGrafica(dT, att, dif); }
     }, 1800);
   }, 1200);
@@ -1958,33 +2003,54 @@ function orientaPortiereVerso(c) {
   t.style.transform = 'rotate(' + dx + 'deg) translateY(' + dy + 'px)';
 }
 
-function eseguiParataPortiereSettore(mX, mY, settore) {
+/**
+ * Animazione parata/tuffo del portiere.
+ * @param {number} mX - X % del centro settore (relativo alla porta)
+ * @param {number} mY - Y % del centro settore (relativo alla porta)
+ * @param {number|null} settore - numero settore (1-9) verso cui volare, o null
+ * @param {boolean} parata - true = parata (vola verso la palla se settore alto),
+ *                           false = gol (tuffo normale verso il settore/zona scelto)
+ */
+function eseguiParataPortiereSettore(mX, mY, settore, parata) {
   var pt = document.getElementById('tiro-portiere');
   if (!pt) return;
-  pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 11) + '%';
-  pt.style.top = (PORTA_TOP + (mY/100)*PORTA_H - 22) + '%';
-  pt.classList.add('pg-salta');
 
-  // Rimuove sempre tutte le varianti braccia prima di applicare quella giusta
-  pt.classList.remove('pg-braccia-alte', 'pg-braccia-alte-sx', 'pg-braccia-alte-dx');
+  // Reset classi
+  pt.classList.remove(
+    'pg-braccia-alte', 'pg-braccia-alte-sx', 'pg-braccia-alte-dx',
+    'pg-tuffo-sx', 'pg-tuffo-dx', 'pg-tuffo-centro', 'pg-in-volo', 'pg-salta'
+  );
 
-  // Se il settore non è fornito, lo deduce dalle coordinate del centro settore
-  if (settore === undefined || settore === null) {
-    if (mY < 40) {
-      if (mX < 40) settore = 1;
-      else if (mX > 60) settore = 3;
-      else settore = 2;
+  var settoreAlto = (settore === 1 || settore === 2 || settore === 3);
+
+  if (parata && settoreAlto) {
+    // === PARATA VERSO SETTORE ALTO ===
+    // 1. Posiziona al settore 8 (basso centro) senza transizione
+    pt.style.transition = 'none';
+    pt.style.left = (PORTA_LEFT + (50/100)*PORTA_W - 11) + '%';
+    pt.style.top  = (PORTA_TOP  + (83.3/100)*PORTA_H - 22) + '%';
+    void pt.offsetWidth;
+
+    // 2. Vola verso il settore della palla
+    pt.classList.add('pg-in-volo');
+    pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 11) + '%';
+    pt.style.top  = (PORTA_TOP  + (mY/100)*PORTA_H - 22) + '%';
+
+    // 3. Inclina il corpo e alza le braccia verso il settore
+    if (settore === 1) {
+      pt.classList.add('pg-tuffo-sx', 'pg-braccia-alte-sx');
+    } else if (settore === 2) {
+      pt.classList.add('pg-tuffo-centro', 'pg-braccia-alte');
+    } else if (settore === 3) {
+      pt.classList.add('pg-tuffo-dx', 'pg-braccia-alte-dx');
     }
+    return;
   }
 
-  // Indirizza le braccia verso il settore colpito (solo per i settori alti 1-2-3)
-  if (settore === 1) {
-    pt.classList.add('pg-braccia-alte-sx');
-  } else if (settore === 2) {
-    pt.classList.add('pg-braccia-alte');
-  } else if (settore === 3) {
-    pt.classList.add('pg-braccia-alte-dx');
-  }
+  // === COMPORTAMENTO NORMALE (gol, o parata in settori 4-9) ===
+  pt.style.left = (PORTA_LEFT + (mX/100)*PORTA_W - 11) + '%';
+  pt.style.top  = (PORTA_TOP  + (mY/100)*PORTA_H - 22) + '%';
+  pt.classList.add('pg-salta');
 }
 
 function mostraDadoFase3(dE) { var c = document.getElementById('tiro-dadi-info'); if (!c) return; c.innerHTML = '<div class="tiro-dadi-riga"><span class="tiro-dado-label">🎲 Esito:</span><div class="tiro-dado">' + dE + '</div></div>'; }
